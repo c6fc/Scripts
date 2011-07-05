@@ -1,0 +1,26 @@
+This is a stash for some Travian scripts I have either written or modified:
+
+script.js
+----
+For Farming Oases.
+Use this script on the Gold Club raid tracker page. It's intended to be run from the FireBug console (not added as a script!), and it will mark all Occupied Oases that meet the following criteria:
+1) Is closest to this village (taking into account a 2-tile cluster)
+2) Does not have an attack on the way.
+
+Oases that meet these criteria are marked with two red exclaimation points.
+Oases that have a closer village (outside of the cluster radius) are appended with that Village's name.
+
+
+travian2_beyond_-_sse.user.js
+----
+For Farming Oases.
+This script affects attack report pages. Once you hover over the defending Oasis (the 'Unoccupied Oasis' link), the attack details header will be populated with the number of ClubSwingers to send (Hardcoded carrying capacity is 60, and movement speed is 7) to clear the Oasis.
+
+This number takes into account the following:
+1) When the Oasis was hit (based on the current attack report)
+2) How far the Oasis is from your village (Travel time)
+3) The type of Oasis it is (based on previous attack returns) This does not work properly on initial clears (1600 Resources taken) or 50% croppers.
+4) If the previous clear was 100% efficiency.
+
+The script calculates how many resources will be in the Oasis when your troops arrive. If it was not fully cleared by the previous raid, the number will be colored Red, as the script adds 20% more troops in an attempt to fully clear the Oasis.
+
