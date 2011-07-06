@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name 	Travian3 Beyond - SSE
-// @version 	3.9.1.7.0016
+// @version 	3.9.2.0.0020
 // @author	npocmu (Black_Cat, ms99, Nux, Lux, onetmt, Velonis Petros, Richard Laffers, Szabka, Victor Garcia-aka Croc-)
 // @namespace 	T3
 // @description	A lot of interface enhancements and tools for Travian 3.X 
@@ -92,7 +92,7 @@
    TB3O.TBStartTime = new Date().getTime();
    TB3O.TBEndTime = TB3O.TBStartTime;
 
-   TB3O.version = '3.9.1.7.0016';
+   TB3O.version = '3.9.2.0.0020';
    TB3O.url = 'http://userscripts.org/scripts/source/95439.user.js';
    TB3O.shN = 'TB3-SSE';
    TB3O.sn = 'welcome to final!';
@@ -160,6 +160,8 @@
       "ttf_update"   : 1000,   // update "time to fill" interval (1s)
       "min_res_freq" : 500,    // minimal interval to resources counters updates
       "resbar_update": 10000,  // resource bar widget update interval
+      "reports_delete": 500,   // pause when delete reports
+      "reports_search": 200,   // pause when search reports
 
    };
 
@@ -222,6 +224,7 @@
    var defaultMF = [5, 5, 4, 2, 4];
    var marketFilters;
    var wsSName;
+
    var wsAnalysers =	
    [
       ["World Analyser", "http://www.travian.ws/analyser.pl", getUrlWorldAnalyser], 
@@ -230,11 +233,13 @@
       ["Travian Box",    "http://travianbox.com",             getUrlTravianBox ], 
       ["GetterTools",    "http://www.gettertools.com",        getUrlGetterTools],
    ];
+
    var mapAnalysers =	
    [
       ["Travmap",        "http://travmap.shishnet.org/",      getUrlTravmap], 
 //      ["Flash map",      "http://travian.org.ua/",            getUrlFlashmap],
    ];
+
    var repSites =		
    [
       ["Travilog",       "http://travilog.org.ua",          function (site) { return site + "/" + TB3O.lng; } ], 
@@ -242,7 +247,9 @@
       ["Travian Worlds", "http://report.travianworlds.com", function (site) { return site + "/intl/" + TB3O.lng; }],
       ["4Travian",       "http://4travian.org",             function (site) { return site; } ],
       ["Travianas.lt",   "http://log.travianas.lt",         function (site) { return site + "/" + normalizeLangCode(arAvLang[TB3O.O[0]]) + "/"; } ],
+      ["t4log",          "http://www.t4log.com",            function (site) { return site; } ],
    ];
+
    var warsimLinks = 	
       ["warsim.php", 
        "http://travian.kirilloid.ru/warsim.php"];
@@ -1368,6 +1375,7 @@ var image = {
 'bMin':	imPNG + 'iVBORw0KGgoAAAANSUhEUgAAABkAAAATCAYAAABlcqYFAAAABGdBTUEAALGPC/xhBQAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAABHtJREFUSEu1lXlQlGUcxx+PGM0jO8WybMILddnFpnTAtDSnpqZj0tGZnI6xEq0YrzxQIWkByxQQMQSVAIHFRUUOFS8OWUDQRZCFZV1CXOISnClvOfbT82zWTH/pH/nOfPd53t/z+32+7/udnXn7zI7Kwm3wY8Jt8FDhNmiw6DdgoOjTt7/o26+/kD/igS5nr3A6ewS9PcJ5947ounlDdN24Jq63NAq3IcOEmDXnE7q7u+np6XkoUnwx/cMFlF7qYG/5ZVLPOkg1N2OsaMVY1cbBqg4OVXeQWd1JtkWq9io5NZ3kqPWesuV9luUqmRc6XP3pF9rYd74VQ0ULRfUdKL6Y9v7H/5vJgcor/zE5bb+C4guf9+Y/NBP1JoovprwzD9PFdnad/o09RQ0kljaSVOYg5VyLjK4FY2WbjO4KRhmHUUaXLqMzSqXL+FQtXdWr2jFUtpMiY04pb2bvGYeLc6quHcUXk2d/RL61le35dewosBFTYCdOmu0ubiShtImk8haSpWGKuZXUirZ7anetKWalVtd5Ylkz8aUO15ya31lYT66lDcUXk974gKMXmvnxcDWbj1jYkltL+HErkXl2ovLr2VHYQEzRJWKLL0s5iFMqaSK2xOG6jzU18os8j5Z9qn/bKRsRJ+rYeqyWjIomFF+Mfu1djGUNrEwtY5WhnDX7zKzbX8H6jCqCsqoJzrEQcqSGsFwrYcfq2HTMxqbjNsKk1Loptw790VqCD9cQlG0hMKNSzp9nrdFMosmO4ouBnjNYlWJixOIERvon8sKyZDy+S2Ps2nTe9Atlzny/B9LsJaFoAjMZJ+c8VqYxankyX+4qQPHFI+Om821CIY9+FsuQhbsY5hfP098k4b7MwJx5i+jt7cXpdN5Xc+XDPB9wkBHLUnlGzj++OJ4F0SdRfOE2fgZLk0wMXbiHJ7/6leFfJ8rGNJ5bf9BlYrfXU19/f82dv4iRodmMDJRGK9Jwl0afxuSh+GKA5+usNpQw3C8B9yUqLgOj1h7gxZAcl0ltrRWr9f5SJi9FnMQjNIdRAQdkXAa+2JmP4ouh2rcIkiZjlhvxWJ7GGPnK46XBBDkwc+XPqOEH0cw14XjuKWJi5Ek89YcZuy6DJfHFKL4Y4TOPrfuL8QnOQRNwCK/gI3hvPYV3XAneqefQZZ1He7waTb6VicU2JpTa8DwrVWZjYpHNVdedsOCdWYl3mpmXd5vQReSh0x9l6d4yFF9MX7jhb5OIQt6OKMA3Uir2DD7JZnzl33dK3kVeNTXwirkRncWBrqYJL+vv6Gqb0FU7XHV1PjXfztScaqbJB/ONk/OSt3pfJYrvMomt6SDmUidRzX+QXNdGvNzHyv22zpvo/7yN763bjO7qwr2ni6d6uxnk7MZNapDcPyFrz969w2jZ43vtFj90XndxFE9xXSaen2/gH032j0Djp0frH4Z2xWa8A8LRbYhEG7QN3cYoNPrtaEKkQqOZFBKNlz4K7feReAWG4xWwBe2qn9D4hzLJb+O/TMV2ffiW5lrlZ/DhXX8BmUnqCVosKVcAAAAASUVORK5CYII=',
 'bOK':	imPNG + 'iVBORw0KGgoAAAANSUhEUgAAAC8AAAAWCAYAAABQUsXJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAAAgVJREFUWEfdl0urQVEUx93Bnd4PcL/lnXlMFMmAiZGUx4SBlDLwKJFHXhERoSiSkMhAKWld/1Vnd06329U+k3PuqT/rbNZev7VaZ7WPxfKfrq+BhYyqX+usAJOBLxXjm0gEi4/HwzQCrwb+fr+TWSTgYdxuN9OJE8DH9XrVrcvlQtvtls7ns+69XuER8Agsq8PhQLFYjGw2G1mtVlY4HKbNZsN7DodDXut0Ony/2+3I5/ORw+GgwWAgHVfAn04nkpUCns/naTabUbPZJJfLRX6/n47HIwMCvtVq0X6/p0AgwIkiGdmY8BPwqJ6MVqsVgyUSCY1/vV4XwL1ej22sBYNBYcvEU/sIePSqjLrdLsOUy2WN/3w+5/VMJsMVhu3xePjb6XTScrmUiqdmFPDr9Zpk1G63GahYLGr8J5MJr6fTaW4j5VmIx+Nso9Vk4ql9BPxisSAZjcdj7t9oNKrxLxQKDFkqlahWq7GdSqX4P6FQiO8rlYpUTIVTwE+nU5JVJBJhmGQyyVXO5XLcGl6vl5AcWgq/IyHEQKth0rjdbhqNRtJxBTw2kRWmCRKw2+2iPTBRMF2wJ1oK8NlsVsRQt49sXAHf7/dJr1BRTBQ8oHr3esVfwCOg2cTwzxPwO4xGo2Ea/ThVVqtVMos08M/qfygHfUwHo0ph/PONyoivgs8if/6bV+5vVrsE+rT9pU4AAAAASUVORK5CYII=',
 'bSave':	imPNG + 'iVBORw0KGgoAAAANSUhEUgAAAC4AAAAUCAMAAADFhv/OAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAwBQTFRFAAAAIDBAMDBgMDhwMEBAQDhwUFBQUFhwUGBwEDigMDigIECgIEiwMECgMEiwMFCwQDiAQECAQEiQUEiQQECgQEiwUFCgUFCwUFiwYFiwYGiAaWqOYHiAcHiQQFDAUFjAUGDAYGDAYGjAYGDQYGjQcGjQcHDQcHjQcHjgcdAAcICQgHjQgHjggIDggIjwkIjgkIjwkJDgkJDwkJD/oJjgoJj/sLjAoKDwoKD/oKjwsKjwsKj/sLDwsLD/sLjwsLj/wLj/ysrKzMzMz8/PwMDQwMjQ0tLS2NjY2tra3NzcwMjgwMD/wNDg0Njw0ODw4ODg4uLi5OTk5ebk5ubm5+fn6Ojo6enp6+vr7Ozs7e3t7u/t7+/v4ODw4Ojw8PDw8fHx8/Pz9PT09fX19vb29/f38Pj/+Pj4+fn5+vr6/Pz8/f39/v7+////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfr7zJgAAAQB0Uk5T////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////AFP3ByUAAAAYdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My4zNqnn4iUAAAFpSURBVDhPlZNrUwFRGIBVJGldFosuNsVqY4mEaimUS5uE3JLWPbb+/1e9i+qcaZrR8+3M88x75sycVzEF2KWQS4UcfywFy8r5kjFMlNjfeSLB8xfRcDAY4LweBrt2ADn7jsMLp4tmSNvtqJP6TRZyCYMXTub58NWxasNU7wlyaYJxLnCLuq33UZjqliCfTMYoUeFoPrtd0DEUpsRHyMdvI5SwIL9Pru+1LgpTrSLkb6MBSlBwLeo7jdOEqVk+6vdQAtdXh/u0Q6/Tapw0iamGnA+6HRQuHo+F/JyPcTtpK4mpeh7yXkdE8V7GQmpgY5u2WoyYquUg74otFA/MViuUhYddi8VsxFQ1C7n43EBhzvycWrn30j4mzIQBNfVSBvJmvYbiDnFbK5HIze06QWyqUFPKQj5lq5Vy5YedAxtFUSaSNBoMqrXKtysXc+nZjyzm/wI12UwqJeewHpl0CgE/fYlkcr4e/1q+T12HLuCJR4bvAAAAAElFTkSuQmCC',
+'cp':	imPNG + 'iVBORw0KGgoAAAANSUhEUgAAABIAAAAMCAYAAABvEu28AAAAUUlEQVR42mNgIBKoqv7/z8BwB4rJADADIDQIkGzQHTQDkMVJNogU8ZFtUHb2f3CgI5IAmQZBDNgJxMXEGYLLZgi/GEtSwJv4SLAZv0Ek2IwEAD1eUhIkoQjAAAAAAElFTkSuQmCC',
 'cw':	imPNG + 'iVBORw0KGgoAAAANSUhEUgAAAEsAAABkCAMAAAD5aj07AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURQAAAAkFBA8OAxkIDBoZCBwZFhQxACYTAyofAC4lGSspFCkpGiwyETEpDT0hACgnITsoKzg1JjI3MDs0MSRQBDRdEzxTGjdCKCtsBjltCjl/CUYoAEEzBUA2GFw9H00+LFtKFUdEKENJO0hFMUhFOkdUKlJLJ1RUIFVSPVtTOkJvH0x6GUZrK0x8KlZ8OlpyOGBBD21KCHxTDXZeInFfL2lmL0NESFxLTVNSRVZUT1xlRFlnVGBeTmliR2JhXmpnV213VHRoQX1gWndwVWp0YW9xbH1tY3JxYHtxZXt+a0aAF0SUBU2SG1WNJVaLLVCmDli5E1+hMWSNQGuJTnqKUnGeTX6WTXmbXWiIc3eHYX6BeHysVnu9SnXCOn6DgoRXCYZpC4BoH4plH5NmEp57E4BvPIxwNJV8Kox/ToB9YZiFFK6DAK6NKLGbIoeEX4iDWIuEaoaBcoSIdYmbaoeWcZeRbJyRZ5SSdZKSfZaseZCydJ6xd62bWaWWf6ekd6akfbWteY/CbpjQcIOahI6UhYmTlJmNgJWShZSpg52khZqljpamlp+npKCfkaekhqWjjqyihamnmqG5haO6kK62l6u2nrCyibu2iLe0lraznruylKa2paKyu6i1s7Ozpa/ckrzEjLDImLTemL/GrLzJornJrbzFtLjHvbzbqLXGybrR3ci+i8S2mMnKi8DHls3El8jDntHDntLOmcPAqcXIo8XEvcnFs8fXucrXsMjVv8rZvdnEs9PUrdjSrNnbq9DTu9vUvuDRrujivPLqu/r1vcvYzsPY2s3T19fTxNbVzdDdwdjcw8Pb+dfnzdrnx93lzdvsw93k0t3m3M/k6Mvm+c3q9NPn9NHj/NXu8tzs8dTx/Njz/t74++Hvzunpz+Hm0uPj3eLu1Obu3Ozm0+rq3Oj22fLrxP3nxvfzzPz0xf3wzfnz3P781fj43uXt4uzt6eLu8eHu/+fw4erx4+vx6ePy+O/09/Xz4/Hz6v397fX38/X6/fn79/3//AAAAAAAAK5rAZkAAAEAdFJOU////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wBT9wclAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQBQYWludC5ORVQgdjMuNS4xTuc4+QAAEg9JREFUWEftmXtU09eWx+8vBCtSqwGtj6sXeUgTFIU+LGBC9EIIKIpWLeID66uWtmoS0KBWsCUQHoYkkgghkKkTAdGphgZ+4Y7yCogxNA/KQ5SQMWaCCb/EmU7HG3JrF/f84oNotdO71l1r/un5wS+PlXzWd++zz9ln7/xh4p83/vDPQ038zpqYuGc03vutLn21v8bHzRMT/2Ey6Uy6iYl/bz53JjN1U+qvYl/FuufsNZp0uhGNxqRWN5+7cPz48Q+WhYcvSz1eVvYq4MtY/wlMA2p0JpNGq9VqAOr49u0b168PDw8LX78lNTXzbPNLcS9hIffu9ep0Oo1Gq1aDm1bdjKI2Jq8PX7p03vzkjes+OHZNaX0J7Res/9WYdBoA0mnUarVCrdZr9RfObd+YsjZ5/bKti8PWpqSkbPzwcuvoaOcvaC+yfjTptFqdpqdH3aNRK5oVgKZoPvMlkLUufPPWOeFrUzakbNzy9bVrra3XXoS9wPpRZ+oFDIBQqN2sZrVG0Vx2fMsH4eFL0+K3LluzJjl5zYfHMlNPfP3t+bPP015g9QLTFG21UqEQVYQCweuyM8dTly1fFYf3T+zZPGX2kuWZ7y0NX775RE5WfJwn7XnWj/d6ND2KGnFJMau4BrhKq9foFOeAqvVrluKptACSHf5TB680JmzevCVhy5bH4KkZHrDnWOO9Go2iVsw5zT/Niheq1SAgwBvHtqxLTlkbFj9t0+vLU9+Ks24OmzVr3pK5s2cvnpPBpHko82Q9Gtehok5XV9+oSk/fVosGhFZfkzo/ZcOGlDWbZq1bsmb+mtnLlqSkzF+7IWxeGPbQpYYC3+xnyiZZP/9tvBegJCVN9Tdu3KjaFluiUJu0I4oz65PB3G1ImQviAjCTUfKGnSlvvjnlUIfsyGt8sNKejGesn38e1ygUNYK8x6x6CmVlrcY0MqI5tj4lJXltysZZyYCxYcNcN2tDypRppR0NNCyTksj4BWv8XnNZWVlhMYtVUl2dn09ZuW1lsVqrGdGUAUEpa9fO2hSWvG7j/LCwuTtBuK6ZEkov4NG8JXYzkf0ia9wElu+xM4LCPFY2gxG/cmVJSaFmZMSksSiWzp2/LmzWm9y0WW/OnoLBQFOmLJ2CiZHxOPipEqdJlZT91GNPbBw3/ctX2zemHisTCgRCoRBElVqt049YLHmicfWJ5YvniK7cdZ2YgpnzfsIKfywExV5t/DrUt6lUZo4Xsen0x8qe+uvCVzt3bNx+rKwGjXmNemREr9dadBxKSAdizFyeRfpzx33zzOCsUt6ps5JoCMr9Vj4NxyHi6GRxBpe+7XnWVzt27tix/XhZswI4yWTRmSwaizqeJnUg9s1h65ZcToj45M8Qnsbjnc3AesdCFbm+uF6Ew5GYRUVcVnrBc7q+2rlz547t249dANGp0VjumeqKjcZmq92GtC5Zu2HuLNLH7wZgcVOxr+GhxJsqbz8syexEiFQ83N7DzaaffoG1A+jacrwGLENdb2+eurTUYR+1dXU5OpeA4Fq6atSKx1UUxQVD/k7EDPnEuhAVHifhZPPZLAZL4sn6V7eNO7aknpe2SaUCAlNnB6PT2mmzd344b83c2UeQdpwvL7ecR8QZrfC0u9ESLgM2q+jA8fRsPuzBuvDlV4CE7pjnhQKpvLTI4eiyddns4AJj87LZi5Vy8oyQ0pyccirB5SiarqLK2bBKDkD8JAb4impyHs+BzQ6M9R+caZQ39Iw67MA8m60TZXXZx+7bOpupDHUStrQ8N5dKVLG9o7bRaWR6CJ1NbmMn8YXSNrUHK3XLunXr1iz58LJSaVRaUTGjY7bOzq5O4LH79iu5RlhvaoJCD/FEeAiM05xtKi6cbSaqOEligVRa46Gr7IPwJfOXhK//sNU6dt8MXA60jI6NIYBktyNGfLHFYtH8LQoTSCB6+VLhaH8VgjCQNlUSO6hI3tgor7s+qatwWdi88PBNX57Rj3Za7491AQQ6h+DBais/YjQ5NCa9qdcvroIWAPFdLom/E86mwXiiBEuT18iFtZ6srGVLw8I2nWltPMWzgrnr6uoEFICy2Sutq5gOE1jieosam1FayvOWIwg/pI3G5FJdfEySTtYoFNfduP1M11+yls9euizzGkza/S6YPpRhlh0JxvjT+YwRPcjdFpNFb7r3OjMnt9KXbkQ4CU5mm/zR91G+GmWjsKS6u6/vGas2bfnypZvKW68GHNwP3G4d4ya8jw2kR3tDIeQay4hlRDsCbFRjmeU5R3wYDgeRIppe6lDh4hGdtIJ7fahvaFJXbdrixYszG5UdPgcPAJb9KsbLK5sna5QJEjHYWotWOzKi1Y/0zsnKyeVh2I5enwKViGPGxut6aori64aGBoaGnulqO/zOotDDDZ0tAQcjlSCoeD54HwjCEkrj5kCYEgvQpdaOaNSkopwcnjfHlYhpGk/y880waq8JYuoNBsOQB6v2iwMfLVotU7biPj8gt3bZmQRjTiIOxFEQXOMd69To9WAnqmkKWn22nOc/M8QXSr+JhTia1lZBsfiOewxPxsQXBw98fOTbUeXUA5/x7FZrRpzsyhUZEctpMzv9oSTAEQrKCoVBkA8twwuKd7Ihv9eL269dk5bUDw+7dXmyPv/046MyZRdu0WcnraN2EqHxUnlLIs5lQmCIlbGqRigsLhQmYSBMUDREdSBNkF9ehaCiVGowDA8Po7Im/TXxxef7dq8+2qKMXfh5Adgd8HGNly7JiHjEiMihNntrTVFWVl7xHL8mPjEKA1sRiXd2cZEgg/XAMHwHsIaG7kzO48QXB/bt3r17Pz126qe0UZvdJwG+dKkhgORQjl59rcHWeTimuLAkCBty9xF/xowe5agZk5Sbm1XSB0QBGhiDdzz8deCjj/bt2xe5wOvzT2xdVpxPoqhFRqQ5jA4YarF3ni/KisnD+PoSKVEYr7uIo3JaVmaaeMjQPzw8NGwArP7+SdbR3Sjrs88+9Tq46D1Z6VQc5rUjcirf4eBEY3u6OpUtjZmMaaUZBK5R4k83twfi09KqDUNAlttbA2B4sPbvfsx6bd970yHfuBa5vxfOlyMmQhBdbrPdv69slU/jtfAINERFx02LF1dfNwwAzvCdh+B/oN9TV9GqtwDss08PzgRmvp+Q8035TJAEMVB0OhREWK0cU47ZHKG5DVdkNLzcIY8KOm0YAvY9HqiFnizWqphF70R+9OlHWGghrV3kEzAjFvbzwwiQcYjjIh2y20bvj4Xyco6e+vYUKU71KH1F/g+o3w2GASAPkAY9/FWyNSbmrUUL3vBa+F5LRylhWpTExQ+g+zocsDdFRQu0j9lsZgKPFkdjyhpoAdmPbsRS6t0zaAAmoiyPmBBv3RofE7pweoI8I4OMDW5HEKcvLjHKiEgwEI5KzlDaR6O9/H18cD50WYtsNQF2wZT0PuCxIQPq+aFhT1be1pV4YsY331ylQHg+yKJGGtk/muhAVN40csI4i8yc478tOkQiYUeFEnjtvIU0+wNWUHo3WD4DA4PDD28/nJzHvK1bV5KZMhnT14fvNJMdcnyRCLcixIHQZ6L+bgK7Hp8cIkmUsKkh5GA89yqJIHep4/2qqmPzL96+/dAzVvNWkqlxdMZML5rjKuxKCqb+xSXBxZJdcgx06koDD0+/y/dlcJJYvhxJ9M2bfHKwqJJAUrmq/Wbkx/pV9/UNDk7qYjBO0kn+/hQV4qDjneZ2M1fOx/rjerhR0FGZTNZBwsvNSXg+lePirFjhX8CH8bQOGoHm2hY17oRjq55j0Y4cIuLiYIfdgZBETnMvWfKADk5teMTsTWsov1TecCSA7uSQ+duiAYgdQkS4Mas7KolUUYAIMUflXxzwWI9UKp4uMYq4IMPQEbOTykQQCpGObXO0eed8e6UBXJcCCL3fExlwZTQM4zhRUU4WsaIjjpAYEu3nB1geew6ZyocRJxNPpjYhiBnhtZtdCcQMstPYjokjEOMSabyWloxAuYtBYRN9vKPu9iZyblJDeR2VpAB6kDflYp8Hq6C9l0N1mbmwcxxpRxw0ktKVQA8ku8xyCKyjdEps0MoM+dnQOMfN9xMkBUSiZFswkSMPqKxsYfpSKIClmPR9k6qdTefCRrNZIjeCOxM2hvACE/7LpfJmXW+qrq4W51OCTrasDpD8lZ7IJzaxqdelTKQioEF2Kepeenq3pmaS1Qtz6HQGtwfm0ulmY7vD4TAG0IITxtvxMyqkFRIJKEWqTwfFddCm4p1wVAE5pICiSqJKgjNkp4LHKfnXawonWSIOm82B1e3yOLoITiKJ2swOXHYwJR+LZZ3LLRLWVZ8+XQXikiw/uxCnMvvGUjAUBpkMqxfKjhBdQXl5We4a/PE5ms3hcyQw3NNeKuLTWYzsJKfTD4uB/LLOCvLEJfn1dUBXVVU9JUgmI+K4wZJHEkjyiCFxEWk06gO/+KxCD39JJBI+nwub1T1wNqziSPhmhjcjyK9Jkbl4AN03L3ZXicVVVVXpwZVXRURvLD3du0DFCGIUhCRQ72Ljz2u1k7pgEVAll4vgNrmovb1SzpjhXWO51tIhLCkBrEGw4V2sA8KqqvJXXL7UEOflv2IGTA+G4cToaO49LMuhtUyybsIwfFXOPcmF+RIVzAnB5X/f09ImK6oF+QFkLTD6u+tRVlV6YENDA3tFNERu4ojkWJwPuwkT9QB0IZ756yYqiisSccCNQ4mlq5StcAc3vgTsnCjo4U/DwwMX6+tRaUG0qw2VIOfG8tXTpvLg6T4ECi7es+4ww7CIWyGXcPl8KpUub5NeK28QM6oHBsC+6c6B4H6xux6Vlh9c2ZCBH99WcJcQ2Gi3y0iVbYK8Wg9dd1WwSA5LRVxWfFKx+nxOZnNPW143mvjuABI6wP4+VF9Xf7GqKvrklUPBTnZCMEFpB0d2a6dS2eip66ZKIpLIRZx4EkfafPnEiTLF0HXDMJqr0BwBSG6ndV+sB1c6QZYR44qFSGDjRs+QnZ2drZ6su7BExOcyMhgC6fnzmZvz6sDu6057zzIXSBQg4QCfVVUHVpDILn8mYgcHW/T03vm0g/K05hNxWNlMbqP02tfHskrq0ET13TPS45lE7wMX66rqiEwc2xzQ4S4numygGfMii8VliWRysIeWFdWBLPXdd9/1AyXPjTv9A0N93aymYEawSOV7Hz21gwuY+NjCyVqUwxcIai43FmeXoKhb/YAEUp97Gp+IAk8HB7uv55ND6DgVjAOpvBPYB5z/FPWsrhWJhXKhtJhV190HWG6Dntj19Cl47Lt9o4mVFETG9WYTRoGJXVZwR37BEotgobS2rht1uDumHkepxwBJ+vb3En6aaStIBCQEdfoY8NboM9Rkf7VWLK67Dk54bjeBPwB7Qnvy0D/8oC5vVZFFqxHi8OC07R5W2yTKo1dbV9/djR6p7qDfNQw/Mjzsv4U+efxy+IeH3eLCsrN6DSizagQO4xgIiTHbmAfKk9XdNzCAagKhfsfw0PDDrVu3+tH1A0CAOK4WphXq9XoT6Mvo9c2riqzWych6fh7Bq4EBFIaaaDD89OiH/luoLEBBYUMDhWlZZ86NaB6YTAClb64RSM+26j1VTcYE+i56YkFVAZRh+Duwen56bN1f70ovf11YqAAFiOUB2mID3Quj9nzh5edRL/S2h0FlMzRkeDiMRhg4ErkLgb6mRHwgIU1h0ei1JtBwADBQBGrV7tzzcn+53x0Ep3UQk4DUD0xDRV44U7Z4ARhTXwcVm9JiGjGaNHoj6PS8YKBH3D/lD94eHBxEFzV6Ruurrxcz01ZNX/DHiDfegEosWosJtLG0RlCaatw7/K/qmpjoH0Bhg/2A1F3NohICAqcviIyMjIj4EwfthoGeMijZQL/ul6iX/BbwsL+/bxBMaV9fPScudFHEHxdERO7duysilNkDCkkT2kPUanQvQb30d4XBvotAVHe3OHt/BFC0IOJtlEVgShWAAjT1uLsRv8FG90f+G5Dq6jhH9+/ZtevtyMhde/e+HbH6kEABYEDT/7wc9crfO+rqasUnD3+8Z++uXZERgLU3cnWGoEahUet+fAXp+Vh9/kPiUtonHwPIrojId/bs2fPu/izAUve8kvRrLPClyn/bs3fPnncWvbN///7Dh4sENb2/Qvo/WL/6zd/q+38Q8uTjv//W9I/57Xd//f/56++xnVoVrt6RBwAAAABJRU5ErkJggg==',
 'ew':	imPNG + 'iVBORw0KGgoAAAANSUhEUgAAAEYAAABkCAMAAAAMlLaLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURQAAABUKBR0TAi8TIiggACE3HzEmDTAuGT0rHz86HS0vNTY2KitGFjVNDzlCGTZaFD1cKTBkDj1xFUUnAEQ0CWM9B0xFGFJHAVhFGk5HKkdGM1dVNlBbMkl5Ek9/JUl8LlxuLVN3Mll0P2FECGpMH3RaCn9TCnFZG2RYIGNbLW1aK31xLnxwPEtPS1hIT1hVQUxgR1x1ZWhURmZkSml0TWR1W3RvTHxmXnhwRHFxWWhtYWtxcECAEEqPFkqaDFiQLlqtHVGzAGKHOGSpM2q+KmmNSW2XRXGJWX6QUXidV2iRfHyGbXWOcH+DfW+nSHOpTX+2o4xsGZlnEolsLY9/KoJwN618EbN1Cqd8J4t/XJJ+S4mBGImiMqeFDaGLEr6eG4uDSoKDXomBUZmORp2TWYSCb4OeZYaZbo6YfpOUbZmSYZ2RbZaTfoOrWIO8WpmoWJSqeJCybpq4e6efbaWTeKugTayhWrWoR72rVLyxX6+nbKezcbuvZ7CjfbG+ary0doHJTZ7KfpLVZZ7Zd6XCVqnCX6PCabfDY9i3ZNG/debSFMrBbcfCdsTYasfVetLEYt7ReoKPgpOVlIe3mZumiJimkJ69h52oq5u0pa2ag6OlgKWlkKe7j662nKq5mbq0gLSznbi1kaKooKS6oq23tJvOo6jPiq7Glazfi7PJmLvLpbvKrLXIur7Jt7nYoYvXwLbLx7zO1MrFic7IntTTgtjWl8HFrMjGpMrcq8LQs8fctM7cvN7WrtLYv9rXtePOgujciPbXjOLOqufVv+jWt+bpu/XqvPvyu8DHw8PSyczdwsPa1M/Z2NHayN7Yytba0MXb48be9dbnzNnnx97ly9npwt7l1Mvl/tju7NLr99n0/fHc3uroxeDl2+ft0+Xu2+nu1uDw0Oj32vLpwfzmwfnsy/Xr1PDs3f3wxfz3zf/6yvT81vr31vjz3ebq4+Ht7enu4+jr6Or04+v26uX39/Tz6vjz5PT28vH2+fT4+vr8+QAAAAAAAAAAAAAAAAAAAFb4MNMAAAEAdFJOU////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wBT9wclAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQBQYWludC5ORVQgdjMuNS4xTuc4+QAAD8pJREFUWEftmG1YU2eax0dGQYwSUFAJCKLyDgKCGN4UoYqCMKIVC7MC4UUQUXBZMoIIbLcGWWgILAgDiIKOuxIZDSB0TAIpDYGN0GIIIWFC2CSESUJ2VYjS+qV7n5MEwbZz9ZqrH3tHDpJczy//+/U85/nN97+I/eYXoXz/K+an4/h3YrP05ueH/ycxr19NT08LBMgP2Ci9/cGDKw9y793+cfSPY5beoAyBgMkFY/JHue23rhy/dPT8iSi/I0d/90PUDzHv3r1+82r6m9HRHiaXDsZFUO3NV44fdziyy29/xJGwQ2FHPwR9gPnu3bu/vnkzLRjt6Lh3uwfWA4bH5FKbzx8/au+wy8/WNyriWFhY2JEPOKswS+/evFn82ysBv6Pj/t22ujoqd3x8nMfnccGjmEP2DuZ+trYREcccHMLswlZzVmJGBdNvpmdgVUdHXVtbW3X17R4eiqHfOhoScjDEfpf5rp07jxwJC7MDW8VZgflLS3s7ly/gcjvu3kesJrq6g8+TSqXj7ecPHQwNDQ+2x9rtCNmxw27HjpDgkODgFaBlzF+ac69caabSmXRqQ9v9YRqNVh/t2cDnAYefax8SGnr4YPiOYBB1MAQMua7kGDD/efz48aOXrtyiUqm11W3DI7Rh2v3ooMAOiUQ6vng++HDoQVi5A5aHhsJ6lBMcvHlZjx7zrzExhw7FxFy60tzckuEDHHApyKfau25iXCqV/ckCgQRbONgBIHizxWb4BRR7e3sDR4f5r9LQ8JDw8PCYo+ebWzIz9/sEBgb6eLdl1tGlMt6CjGu+Gb7aYuf1DAfsZotNtpsc0L8ddpmvxpSGgoWXAuf4LWpPSy+4xpTQmdxx6bhMmtn0ln5lpxmuqfVr9rVdmzYR9nllmNvbQS36+UXoOaiafysN/SgU/n0UHn70oYw5QQVX6FLpxMSEhN8U5PnVnPjCrlzfA1/NvZ1XbcMPrK/xj8iora2N8os4vgLz51IgAOaj0tJS+yNU2YR0nCeTSngymYwZQOjRKDTH7A7ZtR+wTEtIyEuwXJ8+YJOZkXskwivlWo6eg6ghgRidlX4aYx8h48lmJHyJZKGjTiLpm1eq335hd/CwBdb3jLOTyx6nPcbOO82wEGNz27zKnJwrqB4EczkcCQ1K+fTTy+bSBd4Mb2EmitnUpAGIckgzuCP0cKiFn0o50Lsn7uwpp/wIu8OHg9edrySV3SCRVmAOohQEE+MgnVnoGL1t0yRRgclVHKWSk7M5eDP2wpveu8OAObvnrzRzC7t1B7q7y8rIZPIyJiYcygqhlB4MwZ4fTw/IvpvZOKcZUivVapVaNaQaPOaAtWXc9a/TXgc1e/d6rcOZbOgtL6+oqCR3GzAxUEshIeGhh0rDQw5hu8SNvRqNSgNCQIdKqVIOKRUKzmBfQNTDicXrnzjtxfgXUzrj3YqIxKKCivJ+PeafY4JRC7EIh9LEMiAzDCVqcuAoleoh5axmIG9uWCuVCe44bttw5/PuYharquoqEUCV5QY19pvBLLAboWs3hjiI1RpYjtiQ7jqkVs/N+WbKxP8jm5A1bMCVkS9fvvyAzLoJlPyigmWMgwV0iYUFNjjYIuLyLZVKqVBCWAAghzxBcOZbL8wIZmTSGenEQtDavP4bl4+G5ZDJZanJqSCnqFOfcHNzCzAsdrP9pr55cd51hUoFFJUcGHLNvKZXTIiSSGS8cd68rG19Hqv/wWV77LEHJFJ/airCMWC8zbFYC+ymjcHYCA1/n6M1GlUwjlqtFl+sCxifkKA1PSEbxsWzWKxrpEv29jmk7vK0NOAUlujVeJuZb8Ru2tVssbFL9dX6P5zRKEENR6maV3cxeqNmXkmk8zADedIJgadNZzeZnEO6TM7p7maVuyeDEQv1GF9v243Yjba4Tc2qIcb6pI81qkFdjNVdg13M7NEF3rh0AibGfI1xYVnZjc9IJIgvhcLqLklOwadkZekxXq62trY7txmv8ZtTqoyTnPogymq1Uq7QqNWDE7hvmDNIt3J5HTh/Yj6Z9BmrjMz68ksWhVKUhQe7oMe4ubniXd2Tkowtv1LNYxJP96ogKNAICoVcrab7VeMyJbJn48zRetNkIrGM/ODLp2QKQCgsYrK/r69/uh5zxtnZ2T02KWl71pBGvD7xbJOGA1UnVw8NQbCV7IttRtU9TGpLS9C6QuLVq1WUfgoUH4vV31+Ugvf1Dah+j3F0jI1L2h39Vj2EcYlrUsF6hYqDZF2lmlfys6Oibt+urfU0zYOCK66goCAKqzMtGe8fGFijxyQ4gn2S9ImzaTZ7Psgy8aICLWM1NLcadCH+9dHrMk8E4tKgbInlN6tQlyglLniCf0BNmwHj5Axqkv59t6Pj9ui9xonxGmhIlRzxCOmIIWgHOcE7sy7Q+HpRKrzKi8vL+4Fz2i2FEFBdf9+AcXZycnR0srJKTIxztlyTGD+rUTBQBhJrCNHQ0GBrY51vjZdb4c0/XM3PvwoNWXCVUphF8I1GKej0O4M45RgbG3cuLu5c4m8Tt8e3alAIaAHHgMJRyvtaCekB+1IK8wvyoSWJ7kRiZR7BK7DmPs2ASTjt4uLq6vL7pHNxZ88lGp1zMzadg7pB1qPTgiNXyuUM+UBTejrONiX5TiExPz+15E48DodQxsb0avBnXG399tusczyXiKhxdDEyZmuAADEZAkUKjVguV85yGIy7NUHpXtZeZ1Jz8lPdtxt7BtU/oY2JRHqMh4fffm8f73XbrKxi4xIttzvt3TA4O4tomVXMwtRCGkw5xBniMLpas+uiArxwGIwnxjOo5v6T50AxYPD4E5E+Pj6RZi7btjntXrP9XLbnF8B4q9QoZ2d1QQKOkjM4yGC0NjVlZ6dHR0fXtD2hgUOisUkDxtbvxMmTkZGPg5rSXCyNbEwT/aslPeymNqYCMo9GGooH7bJBcW/r3dr0mrb6+nra8NgL0djU5NSk3ilXv8iTjx+ffHwymvdsnwnVJMn1UdAGjC00bKtYoVLouh3KUcnhcOTgWNswsv0ZG3vxYlIEFKEeY+uNYMB8GqQXzLjrktwxJudJn117cMw2e25OP5JB0ixCYbD7nj8fo72AoEwCRTgpmtJjrL0jUcqfvBu4BDM65vR210KYBzmfXyuxiddAwtBSRDgMsK6u+yMQVxGsn5oSgRgDxtvbJ/Lkyf94bL7/Ht3fhhv9W0wnK+8amUIu6+5MyEKGO1SPXA4ZHxhgMOSMJ8+F2iktUBDQ1HJs/Lz3R/pERppH1rX27Fsf6LUmsNOdCC0Md1ZWt0frWwV0GFKAiJS+PrF8SSsSaVGCzvRORUXs3x914kRmbkvNhr2+CcmYfdb+F9OQkVJWXFnpwYc5yFYwup4OgDHE4gmtcOSJTghiy3WTmXmiNrO2toVebYLrZHU//SLNY7uRjQsMFTIM7uRstVLBHmCzu7q6GH1iiUyzqNWKtCBH75MhUzDYmlta2uk0jNk10j/dIH1GzjM1MXLtLGd1w+2kE6+YY7MHutjgk3jubzOLi0Kt9pVW+FIIUrQgxlB+VDrs9ahU6V4bCCvpxuc3iouuG23NdS+GGddfxXJtBY8GGH1sMeydXoEUnS0hCMSnF/rYMKk9XCq1Y781fHdlJ+nzSxRK6hn8WkJ/OTLjOgmE1i5OV1efmCeZebUoRE27tKhdhEiLRO9bs6flNli2ZxWFlZxa2d1Nht1C5VZTXEJ5OaX/ZonXiZbGdrGYr1lcWFpaQoS8RC7AQiHLTrU05jY2Zgaks0rcEp5SWE9ZlKoq4h1XS7fOgqKrBVm4yIaGtunXi4vgB/LS2f9BnF8DB0zvVGNubsaxC362eFd8WhEM66csVnllakFBytZNxCKiGUYI/sOXvtS+1i4tLS4uaL/Vvpx6KRSKhMLpkZFvRvSYaznIi1jg7nvAGu9RDAHph3JJJn78MTHN39SnQQQc+P4pRApkSfvtt9opofDlNJ/PH+XzmUw9prO4OCeHVEyp9F9jYoRH9LAo3SWuWXcSfI03BNHQvCJVsiR8jbjz+iWYEB5G+XyxWKyQs/WYYjBS8Q0WxXXNGhubwgpKP8T46VZTaxNMUP0kykDDIRwR6uTA5ZVA8DWbrRDLOUrDSO+sLK64UUyiVJXYeHrFuxDL+/urqu7gAtIDomljhppHsgt5gaYUaoWCmRk+G4Qgbb+MqaysrKgoK6NQKvGY9K0ed8qLbxZUEjxHHjWgrYN2IVJpQKLREDUigaBPzp5FR6tyGVNSCbcviAil32OfdUphQoKle0GySQ06TSBH71tZNAXpheAKmWIGR84BDtybEZ/Q211hUVFFBex6WKwSy/gSy+3EhLwMjCcymcBgTOoM6UXRlGiMJhpl8tkIANTIBznLmKxCYjlsE6CBSkyzCtzjU1O2rg1E5qwILu8Hgs430fOx+zBzQIpSxZGrVP+7jElJIxZVlLPyU59eN9nniTPBbPCsB8jkSohhtoBfI01fp7MRKSoVaEIpqFN4ZH9bUHidWOKKw3h6wc3wBeLPiqCAQ7rSmRJpR0ayfQl8DdxxkMmqo+gOpfDJacTk5GuErdZ3R6t9niBDH6pft84QGkPGXo4MpwdIWrvESJ44qzAesC9N89iKi6qN6ngunIKgoOthLq0YuUis4b2Ru02Z/Fozs3a4q8uVusjo1QAlC3+g5lGHTy20ju7Woa/c92kC5KRW25Hp1yiQcSf8GhWweTGI0Z+07UwhZLYdoAmfrxz4UGhTWgRpeFOrfd5wr7l5UCCVSZ+dmJ9gDIr1YvQYv6jaew31sAKZr1Ack0hEvgPIC11L6eS9Hr0XkYE8U/OAM/Gssb3PQDGc+/33I4iJLhX6UkM6UIfTixGJGgkZzQ+lUgFPxpWOS59RqcuU98eHuvVofuD28e4dUCYhFjqMVvt178OHuZHPQAVvAQ6HuPCYT6f/CAYpdEOpaLXfoZHW9RP8d2Q42svU5iIXKGKeAM6GuHR4yn5PWXGYiWYZCYkOgm46dP580dxsZgm21qRDNi6FhyLJOJ0nXQHRJ1z3DvgC6qe038FKpClRH7VTY08yMghrLbdYbdliBM/3UjjRgTMdySrK6qNV+Ha0bl4st4KWFohZa2xiZLnbCsw6mw9ipDw4M1hN+eCEFk0OQETItgONS6CRpZXVFiPL2Li42D2WTUw46wLHxj+gfHjQCxCkFdAMIUX0Mt0Fdu9We7Y4nTrrZGmZyeUhh2YfQlbFRvchTBQkQOiGQTj2TfzpU2fPOjlbIZg9buktcAz4AymGnlpNRyigRCgafU5tio+FQ4lTVoA5dWq3G6GWSl+Z5w+r+EMQDDnBo0e3bxM8TiNHJH/8/l9Ox8aewV9oWVG5K9f8egj+w0Svnjc//fnP/OTXEP8a4p9ZKj81i/+R5b9wFf8/1uZYltXu0zEAAAAASUVORK5CYII=',
 'help':	imPNG + 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAAAhVJREFUKFM1kU9Ik3Ecxl/pIBTR3XvX2sECL7mo8GAoRgw6SP8OHSSbRFb0B8WyjGpumi3N0LRZ6bSotkBFZzp1M3NaTVD36sRaDf9Mo6nv7/19GpofeG7f53n48iQp/5kILxhGp2LGnTuSLdFlTZEkKbu2b1OWVtYLdqckd6ftSRnZulV6h2eNbZ6wanf/oqY7zushQZNPYO1Yo6QlSq07rDrc48YNw+TsoqGpY1q99zbKw06Bf1onEpP8TMgbEhS7dPIbYpS3qmrH4LRBsTUHzedrZrjQImn0CxbjEs+UwDcj0HRwBjROv5CYrD8ofDJmVmpdITLL5zHV61xzC2yfNPLadOz9GnFN4h4XnGiU5FSvcrMuiFLwaIR02xqpFZKj9ZKTzYLWb4LIimRpVVLWI8hpgKxnkuO3hlHyrJ9JtcTZWwn7ayC3TTCxIJmN6TzoT6Q7JRnPJYee6mQX+1BsziD77kZIrZYcTFTnt0s6E493hXXKBiRnXXCgTpJWsczFx4mGG/Z+85GSAMY6jcwWKPJK/BGdQFRS/x3MXXDYoZN+O8iZUo9Z8Y/NGa7bB9Ws8nFyP6xT6tcJzutMLuk4JiRXejWO2UPkWbzqS9dXw8YWjnejxsJKr5pxZ4hTr+Yo7ftD5Ze/XHb/JtsS4Nz9PrW4qmdzuC26fSHDR6/K1eoBTEXtG7pU5eWNZxLH+7HN5AT/AFV8jI8kgcGCAAAAAElFTkSuQmCC',
@@ -1391,162 +1399,154 @@ var image = {
 'usethempr':	imPNG + 'iVBORw0KGgoAAAANSUhEUgAAABwAAAAUCAYAAACeXl35AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAOwwAADsMBx2+oZAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAAAntJREFUSEuVlU1ME1EQx1dOHD169OjRo0eP3rTGLV5Mjdui3lCaQEy01bAtfiDRlIgEwbYkxBAwVVGCgZqI8WsNcjBNlYMJoYRaWNq1ZVtWVv6bvGa7fbv7mOSlzb7Z/29m3szbA5yLtQnR43DZbeGMXztr2eXeYa9VUz/F4zdVN92G/ZO+0MGuWyNjiYm5yvLvnIyluxjxm3z1Yfua+HSa9905xAQ9I0ROTL5YyGvav5obxGn/9ZxUuHClP+AI7RZHn6ys5l2zYQ2kIJe2eu6Pp6jQQOeDc+t5eZNVjNWvXFH/Xu4aCDdAUe+Xs1/W7ERyuZwuSZKezWapLtjDsrOPUmbjdLt4pA4N3x2b0TSNemapVEoXBMEQFEVRDwaDTboej0dHUE52e2Bi0QD6fKFWdJadM8TMZhUnwbiVeGZeUtH9HObMqe2tQGRJyheLxXQsFgPDmGneHz1fLJUVpwwJQFEUnQSAZ7Ty2umo1Zrq9Uc69oCRS3udVHaKEsJYKB8axwzGe25NA58dTdvhBbGbw6Dvd/aQJcBoFPxPp9N6MpmsZ08Lfm1d3vK2i6c4jMT8+++OGZoFkCnEYcjY3J14TvasUDDq113f4FSG5eDJiBBfa0OR0aFpDSXe/KnPIe/vOfpt6VfBCQoxKwDZmLvUmjHRw5Hh6Bpum6uh4XuVbZXarTgvwGjlAhAgLFTAavgI3OhNTDXdp7gA+oeeL1WrNdtLgKXsZh/A4s/eZoyBpxmgndcfP8z8XJH3K271RxmRmS3MHIDX33vs0ej06sLnHwramRW+sVkqfl3MFkfGZ4tNZ8byNW67GD2M2eED0TDL8gbEsw1fBQrkP6+jTExmIuLUAAAAAElFTkSuQmCC',
 'vmkls':	imPNG + 'iVBORw0KGgoAAAANSUhEUgAAABkAAAASCAYAAACuLnWgAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAABgVJREFUSEttlH1Q0/cdx4MPc3rXUdvN824PnvWUdVdr27U3b7t1s7Wdc7uOdpvebcOW02NroYKgCJTTIYLIg4MgmAeeE0JCEiEQnpKQBAh5MiEQngkYIvKgdczt7G69tr72k//m/P7zvfvcfd7v+3ze7887SvTYC9/17Zuasb3w+fLW+C+2fGfr8y+urwwbXV89Ha5K/PZLz756f3ei6Ist20SidRu++lK0Wf35uujuO6vmry9FFhb3v/RT80++f/TLsqF1UQJsVPIrDx8+ji+aXnasn1keKHZr3yVcuwO/4iA9pmuoLr3P2KWniNTvQFmegEpVRJu+GLWmmDxNPKcb95Le8NpCje3SIcvc7DODEf/2t4vEG/6P4FFhKNyyz3OzHXHJRzhaL+KzVOCxV1NZX0peXioFmXFkZCeh0JUxMt+FOSglS7WfU4U7SRbvRaZKx2W9zJT3XGA40rflf0gGpzTr7eN1P3DPWzX2GR/SSx/gaLlIf/7PWbBfwN5dSX3TFWSNYoqK0zHJf0N7zTH08uOIK1K5durHyKoykF49yaR4G8uNOx84dAmZo6u39oRW+p9ZI/POtnx3cM6IfdJFdUMRVzLe4bo4AXXSy0RsV1mdbWXSp6TflEvP5Z9xt/5pVms3MZDzTQpTDyMtP0P/VD0SeQbGqhS8PWU0q4vwLMwwfS/QLXLP6Lf7wt2a/pvjVBcdx54fgz3vBbrtlRia85nvy2bE8Css5kScmhS6S97CJfkR1rydSDMP0pjwKv01p7kbMdGpzKZH9jEaYaKmnHdQdypwr4QeijoD4j/5l3yojE2UF3yIPu8XVJ94GZMuH3PxEUbEO7nX8BSh8misVe8T9tXToi5AI0lGWhiPSXGWaXcVbr+SdkUOhqz9aAsPYy55HZ2+HM9SBJHamZ0/sHCDtp5aBlxKWuUp1FUkM9AqaFFwgEHpAYYrdlF/+hU0Z97mtqeG+7N6VsbVrM61MedXUKPOEoxxRNDxHC0fRuM/t5nelO3omq/QHfQgauhP/6x90oqmtZiOy7+k5Q8bUcc/S13yPqbHDLi8DUhKT9EqTWLMWoZVl8UDWyyzzgoe3OrCbixFpaukoPgonaVv0ZD+Bl1Ju9Ed3o78SjIGjx2RxPwR1vAgTdevUZ79eyo/iKE+/ntUph1EpzjP3TseVlYGmXZJ0SVE4z27AUfC14g4S5l1XcNtKud8wVnSk2LxlcYQFO+mWVPAddUFzANqbDMjiDoCZf+2Rdw0GWoRF33MlQtxlKW9Sc7JQ4R60vjM/lvu+IqJBBQYBVFNZ36ILnaHMPHzGI7GCEInYjOWUSa9jEXxF8wnn0NXEoc/aMQZMuP5dAlRe6A4rWuiEfvNKeTV59FbBbGsEuZHtQQqYtasulQdTbD2MGO6HJbGNFi0uShT3qD59W/QUngMl7GAIZsE/dUTdB3fSMeJaCSFf8Y0Mogl1I6od1z2nEAU7L3ZQ+dgO12GAkI36nF2FKJIexFj0lY8Jbvo+d0mqmJ3MeGsorMmlaJTh2hIeRPVe8L+hdXeDqoJ36hlvC0DcdqvUWqlOG4PCffTxNoxji30dA1PyJnx19ClzUNSnk5VdS6qukwufnIMZeVpGmO/xV+PvoZMdoHMM38kNTWOnKx4as4foVryCf7hZrzmcob7ZMwG1PjnB7BN1OCdtfvXSBwTowdWFi2+oEMWerRHy6hXsLQSuSQbcWEihrYi6grjaNKUYLEpBSfKaDbI0WjLuK77GwajHK1WsGufHueojRF31X/CI6qx8Iy2ZSjs3btGUtEVihIifpN9dHZP36QyzbnoaXYsDNMfCtLltaBtr0MtJK9aiAqNtoQWVS5Gk5IOm54Oux7TqAfPyiLd0x34FiyYAwaZTlG0Lbhg3fjEJFbZH0R55/RbrRM1Fw3B2jHfvRkhGoL47kwzubrA7X99yq1/LBL4e0Soj+JYDt4f+udKv9qVZ+kdbdR2+Cb2d/pDm58I/njxEZkn1LYnEO7wukPNDEyq6BVE7BZ+tVcIQK9wvIFimp256d0jpdHGG8FNQs/6J4H/F4ERbS6V4kpRAAAAAElFTkSuQmCC',
 };
-function setDefLang() 
+function setDefLang()
 {
 //default = English
-//setup
-t['0'] = "Script language"; //please, do not translate !!! translation will never be included into the script !
+t['0'] = "Script language"
 t['1'] = "Travian v2.x server";
-t['2'] = 'Remove ad banners';
-t['3'] = 'Force T3.1 Legionnaire & Phalanx capacity calculation<br>(for mixed T3.1 & T3.5 servers)';
-t['4'] = 'Market';
-t['5'] = 'Rally point/Barracks/Workshop/Stable';
+t['2'] = "Remove ad banners";
+t['3'] = "Force T3.1 Legionnaire & Phalanx capacity calculation<br>(for mixed T3.1 & T3.5 servers)";
+t['4'] = "Market";
+t['5'] = "Rally point/Barracks/Workshop/Stable";
 t['6'] = "Town hall/Hero's mansion/Armoury/Blacksmith";
 t['7'] = "Palace/Residence/Academy/Treasury";
-t['8'] = 'Alliance';
+t['8'] = "Alliance";
 t['9'] = "Show additional links in left menu<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['10'] = "Combat simulator link to use:"; //menu left"
+t['10'] = "Combat simulator link to use:";
 t['11'] = "Link to use for posting reports site";
 t['12'] = "Show 'dorf1.php' and 'dorf2.php' links";
-t['13'] = 'Show "Center map on this village" icon';
+t['13'] = "Show \"Center map on this village\" icon";
 t['14'] = "Show 'Send troops/Send resources' icons in village list";
 t['15'] = "Show lumber, clay, iron production per hour in village list";
 t['16'] = "Show effective crop production in village list";
 t['17'] = "Show population in village list";
-t['18'] = 'Show additional (2 columns) village list as floating window';
-t['19'] = 'Show information about buildings in progress and troop movements<br>in village list';
-t['20'] = 'Show bookmarks';
+t['18'] = "Show additional (2 columns) village list as floating window";
+t['19'] = "Show information about buildings in progress and troop movements<br>in village list";
+t['20'] = "Show bookmarks";
 t['21'] = "Show 'User Bookmarks' as floating window";
-t['22'] = 'Show note block';
+t['22'] = "Show note block";
 t['23'] = "Show 'NoteBlock' as floating window";
-t['24'] = 'Note block size';
-t['25'] = 'Note block height';
-t['26'] = 'Show NPC Assistant calculations/links';
+t['24'] = "Note block size";
+t['25'] = "Note block height";
+t['26'] = "Show NPC Assistant calculations/links";
 t['27'] = "World Analyser to use";
 t['28'] = "Show analyser statistic links";
-t['29'] = 'Map Analyser to use';
-t['30'] = 'Show links to map for users';
-t['31'] = 'Show links to map for alliances';
+t['29'] = "Map Analyser to use";
+t['30'] = "Show links to map for users";
+t['31'] = "Show links to map for alliances";
 t['32'] = "Show 'Search Bar'";
 t['33'] = "Show 'Search Bar' as floating window";
 t['34'] = "Show CP/day information in upgrade tables";
 t['35'] = "Show crop consumption in upgrade tables";
 t['36'] = "Show 'Until then/Residue' calculation in upgrade/training tables";
 t['37'] = "Show resource fields upgrade table";
-t['38'] = 'Show resource level colours';
+t['38'] = "Show resource level colours";
 t['39'] = "Show 'Resource Bar' table";
 t['40'] = "Show 'Resource Bar' table as floating window";
 t['41'] = "Show buildings upgrade table";
-t['42'] = 'Sort buildings by name in upgrade table';
-t['43'] = 'Show center numbers';
-t['44'] = 'Show building level colours';
+t['42'] = "Sort buildings by name in upgrade table";
+t['43'] = "Show center numbers";
+t['44'] = "Show building level colours";
 t['45'] = "Show blinking levels for buildings being upgraded";
 t['46'] = "Show additional information for every merchant arrival";
 t['47'] = "Show last market transport";
 t['48'] = "Number of offer pages to preload<br>while on the 'Market => Buy' page<br>(Default = 1)";
-t['49'] = 'Rally point default action';
-t['50'] = 'No. of scouts for the "Select scout" function';
+t['49'] = "Rally point default action";
+t['50'] = "No. of scouts for the \"Select scout\" function";
 t['51'] = "Show last attack";
 t['52'] = "Show/use coordinates for last attack";
-t['53'] = 'Show troops information in tooltips';
-t['54'] = 'Show distance and times to villages in tooltips'; 
+t['53'] = "Show troops information in tooltips";
+t['54'] = "Show distance and times to villages in tooltips";
 t['55'] = "Auto fill in available troops for the internal war simulator";
 t['56'] = "Show cell type/oasis info<br>while mousing over the map";
-t['57'] = 'Show distances & times';
-t['58'] = 'Show table of players/villages/occupied oasis';
-t['59'] = 'Number of message/report pages to preload<br>(Default = 1)';
-t['60'] = 'Show links to open messages/reports in a pop-up';
-t['61'] = 'Show "Delete all" table on the Reports page';
-t['62'] = 'Show the "Send IGM" icon for me, too';
-t['63'] = 'Show  enhanced Battle Reports';
-t['64'] = 'Show details in Report Statistics';
-t['65'] = 'Color upgrade available<br>(Default = Empty)';
-t['66'] = 'Color max level<br>(Default = Empty)';
-t['67'] = 'Color upgrade not possible (not enough resources)<br>(Default = Empty)';
-t['68'] = 'Color upgrade via NPC<br>(Default = Empty)';
+t['57'] = "Show distances & times";
+t['58'] = "Show table of players/villages/occupied oasis";
+t['59'] = "Number of message/report pages to preload<br>(Default = 1)";
+t['60'] = "Show links to open messages/reports in a pop-up";
+t['61'] = "Show \"Delete all\" table on the Reports page";
+t['62'] = "Show the \"Send IGM\" icon for me, too";
+t['63'] = "Show  enhanced Battle Reports";
+t['64'] = "Show details in Report Statistics";
+t['65'] = "Color upgrade available<br>(Default = Empty)";
+t['66'] = "Color max level<br>(Default = Empty)";
+t['67'] = "Color upgrade not possible (not enough resources)<br>(Default = Empty)";
+t['68'] = "Color upgrade via NPC<br>(Default = Empty)";
 t['69'] = "Console Log Level<br>ONLY FOR PROGRAMMERS OR DEBUGGING (Default = 0)";
-//no t items [70..79] & [80..83]
-//t['80'] = t['53'] and t['81'] = t['54'], t['99'] = t['85']
-//t['86'] = t['28'] + " &" + t['30']  - all will be set after switchlanguage()
-t['82.L'] = 'Lock bookmarks (Hide delete, move up, move down icons)';
-t['82.U'] = 'Unlock bookmarks (Show delete, move up, move down icons)';
+t['82.L'] = "Lock bookmarks (Hide delete, move up, move down icons)";
+t['82.U'] = "Unlock bookmarks (Show delete, move up, move down icons)";
 t['85'] = "Show 'Send troops/Send resources' icons";
 t['87'] = "Remember last 1x/2x/3x market send option (if available)";
-t['91'] = 'Customize village list';
-t['92.L'] = 'Lock list of villages (Hide move up, move down icons)';
-t['92.U'] = 'Unlock lis of villages (Show move up, move down icons)';
-//setup end
-//user info
-t['U.2'] = 'Race';
-t['U.3'] = 'Name of your capital<br><b>Visit your Profile for an update</b>';
-t['U.6'] = 'Coordinates of your capital<br><b>Visit your Profile for an update</b>';
-//user info end
-// t['RES1'] - t['RES5'] sets automatically 
-t['SIM'] = 'Combat simulator';
-t['QSURE'] = 'Are you sure?';
-t['LOSS'] = 'Loss';
-t['PROFIT'] = 'Profit';
-t['EXTAV'] = 'Extension available';
-t['PLAYER'] = 'Player';
-t['VILLAGE'] = 'Village';
-t['POPULATION'] = 'Population';
-t['COORDS'] = 'Coordinates';
-t['MAPTBACTS'] = 'Actions';
-t['SAVED'] = 'Saved';
-t['YOUNEED'] = 'You need';
-t['TODAY'] = 'today';
-t['TOMORROW'] = 'tomorrow';
-t['DAYAFTERTOM'] = 'day after tomorrow';
-t['MARKET'] = 'Marketplace';
-t['BARRACKS'] = 'Barracks';
-t['RAP'] = 'Rally point';
-t['STABLE'] = 'Stable';
-t['WORKSHOP'] = 'Workshop';
-t['SENDRES'] = 'Send resources';
-t['BUY'] = 'Buy';
-t['SELL'] = 'Sell';
-t['SENDIGM'] = 'Send IGM';
-t['LISTO'] = 'Available';
-t['ON'] = 'on';
-t['AT'] = 'at';
-t['EFICIENCIA'] = 'Efficiency';
-t['NEVER'] = 'Never';
-t['ALDEAS'] = 'Village(s)';
-t['TIEMPO'] = 'Time';
-t['OFREZCO'] = 'Offering';
-t['BUSCO'] = 'Searching';
-t['TIPO'] = 'Type';
-t['DISPONIBLE'] = 'Only available';
-t['CUALQUIERA'] = 'Any';
-t['YES'] = 'Yes';
-t['NO'] = 'No';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Bookmarks';
-t['ANYADIR'] = 'Add';
-t['UBU'] = 'New Bookmark URL';
-t['UBT'] = 'New Bookmark Text';
-t['DEL'] = 'Delete';
-t['MAPA'] = 'Map';
-t['MAXTIME'] = 'Maximum time';
-t['ARCHIVE'] = 'Archive';
-t['SUMMARY'] = 'Summary';
-t['TROPAS'] = 'Troops';
-t['CHKSCRV'] = 'Update TBeyond';
-t['ACTUALIZAR'] = 'Update village information';
-t['VENTAS'] = 'Saved Offers';
-t['MAPSCAN']  = 'Scan the Map';
-t['BIC'] = 'Show extended icons';
-t['SAVE'] = 'Save';
-t['AT2'] = 'Reinforcement';
-t['AT3'] = 'Attack: Normal';
-t['AT4'] = 'Attack: Raid';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normal (small)';
-t['NBSB'] = 'Large screen (large)';
-t['NBHAX'] = 'Automatic expand height';
-t['NBHK'] = 'Default height';
-t['NPCSAVETIME'] = 'Save: ';
-t['TOTALTROOPS'] = 'Total village troops';
+t['91'] = "Customize village list";
+t['92.L'] = "Lock list of villages (Hide move up, move down icons)";
+t['92.U'] = "Unlock lis of villages (Show move up, move down icons)";
+t['U.2'] = "Race";
+t['U.3'] = "Name of your capital<br><b>Visit your Profile for an update</b>";
+t['U.6'] = "Coordinates of your capital<br><b>Visit your Profile for an update</b>";
+t['SIM'] = "Combat simulator";
+t['QSURE'] = "Are you sure?";
+t['LOSS'] = "Loss";
+t['PROFIT'] = "Profit";
+t['EXTAV'] = "Extension available";
+t['PLAYER'] = "Player";
+t['VILLAGE'] = "Village";
+t['POPULATION'] = "Population";
+t['COORDS'] = "Coordinates";
+t['MAPTBACTS'] = "Actions";
+t['SAVED'] = "Saved";
+t['YOUNEED'] = "You need";
+t['TODAY'] = "today";
+t['TOMORROW'] = "tomorrow";
+t['DAYAFTERTOM'] = "day after tomorrow";
+t['MARKET'] = "Marketplace";
+t['BARRACKS'] = "Barracks";
+t['RAP'] = "Rally point";
+t['STABLE'] = "Stable";
+t['WORKSHOP'] = "Workshop";
+t['SENDRES'] = "Send resources";
+t['BUY'] = "Buy";
+t['SELL'] = "Sell";
+t['SENDIGM'] = "Send IGM";
+t['LISTO'] = "Available";
+t['ON'] = "on";
+t['AT'] = "at";
+t['EFICIENCIA'] = "Efficiency";
+t['NEVER'] = "Never";
+t['ALDEAS'] = "Village(s)";
+t['TIEMPO'] = "Time";
+t['OFREZCO'] = "Offering";
+t['BUSCO'] = "Searching";
+t['TIPO'] = "Type";
+t['DISPONIBLE'] = "Only available";
+t['CUALQUIERA'] = "Any";
+t['YES'] = "Yes";
+t['NO'] = "No";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Bookmarks";
+t['ANYADIR'] = "Add";
+t['UBU'] = "New Bookmark URL";
+t['UBT'] = "New Bookmark Text";
+t['DEL'] = "Delete";
+t['MAPA'] = "Map";
+t['MAXTIME'] = "Maximum time";
+t['ARCHIVE'] = "Archive";
+t['SUMMARY'] = "Summary";
+t['TROPAS'] = "Troops";
+t['CHKSCRV'] = "Update TBeyond";
+t['ACTUALIZAR'] = "Update village information";
+t['VENTAS'] = "Saved Offers";
+t['MAPSCAN'] = "Scan the Map";
+t['BIC'] = "Show extended icons";
+t['SAVE'] = "Save";
+t['AT2'] = "Reinforcement";
+t['AT3'] = "Attack: Normal";
+t['AT4'] = "Attack: Raid";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normal (small)";
+t['NBSB'] = "Large screen (large)";
+t['NBHAX'] = "Automatic expand height";
+t['NBHK'] = "Default height";
+t['NPCSAVETIME'] = "Save: ";
+t['TOTALTROOPS'] = "Total village troops";
 t['SELECTALLTROOPS'] = "Select all troops";
 t['PARTY'] = "Festivities";
 t['CPPERDAY'] = "CP/day";
@@ -1554,10 +1554,6 @@ t['SLOT'] = "Slot";
 t['TOTAL'] = "Total";
 t['SELECTSCOUT'] = "Select scout";
 t['SELECTFAKE'] = "Select fake";
-t['NOSCOUT2FAKE'] = "It's impossible to use scouts for a fake attack !";
-t['NOTROOP2FAKE'] = "There aren't troops for a fake attack!";
-t['NOTROOP2SCOUT'] = "There aren't troops to scout !";
-t['NOTROOPS'] = "There aren't troops in the village !";
 t['ALL'] = "All";
 t['SH2'] = "In color fields you may enter:<br>- <b>green</b> or <b>red</b> or  <b>orange</b>, etc.<br>- the HEX color code like <b>#004523</b><br>- leave empty for the default color";
 t['SOREP'] = "Show original report (for posting)";
@@ -1570,60 +1566,55 @@ t['UPDSCR'] = "Update script now ?";
 t['CHECKUPDATE'] = "Checking for script update.<br>Please wait...";
 t['AVPPV'] = "Average population per village";
 t['AVPPP'] = "Average population per player";
-t['MAX'] = 'Max';
-//version 3.0.7
-t['TOTTRTR'] = 'Total troops training';
-//version 3.1.3
-t['TB3SL'] = TB3O.shN + ' Setup';
-t['UPDALLV'] = 'Update all villages.  USE WITH MAXIMUM CARE AS THIS CAN LEAD TO A BANNED ACCOUNT !';
-//version 3.1.7
-t['LARGEMAP'] = 'Large map';
-//version 3.1.9
-t['USETHEMPR'] = 'Use them (proportional)';
-t['USETHEMEQ'] = 'Use them (equal)';
-//version 3.2
-t['TOWNHALL'] = 'Town Hall';
-t['GSRVT'] = 'Game server';
-t['ACCINFO'] = 'Account Information';
-t['NBO'] = 'Noteblock';
-t['MNUL'] = 'Menu on the left side';
-t['STAT'] = 'Statistics';
-t['RESF'] = 'Resource fields';
-t['VLC'] = 'Village center';
-t['MAPO'] = 'Map options';
-t['COLO'] = 'Color options';
-t['DBGO'] = 'Debug options';
+t['MAX'] = "Max";
+t['TOTTRTR'] = "Total troops training";
+t['TB3SL'] = "$1 Setup";
+t['UPDALLV'] = "Update all villages.  USE WITH MAXIMUM CARE AS THIS CAN LEAD TO A BANNED ACCOUNT !";
+t['LARGEMAP'] = "Large map";
+t['USETHEMPR'] = "Use them (proportional)";
+t['USETHEMEQ'] = "Use them (equal)";
+t['TOWNHALL'] = "Town Hall";
+t['GSRVT'] = "Game server";
+t['ACCINFO'] = "Account Information";
+t['NBO'] = "Noteblock";
+t['MNUL'] = "Menu on the left side";
+t['STAT'] = "Statistics";
+t['RESF'] = "Resource fields";
+t['VLC'] = "Village center";
+t['MAPO'] = "Map options";
+t['COLO'] = "Color options";
+t['DBGO'] = "Debug options";
 t['HEROSMANSION'] = "Hero's mansion";
-t['BLACKSMITH'] = 'Blacksmith';
-t['ARMOURY'] = 'Armoury';
-t['NOW'] = 'Now';
-t['CLOSE'] = 'Close';
-t['USETHEM1H'] = 'Use them (1 hour production)';
-t['OVERVIEW'] = 'Overview';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Attacks';
-t['NEWS'] = 'News';
-t['ADDCRTPAGE'] = 'Add current';
-t['SCRPURL'] = 'TBeyond page';
-t['SPACER'] = 'Spacer';
-t['MEREO'] = 'Messages & Reports';
-t['ATTABLES'] = 'Troop tables';
-t['MTW'] = 'Wasted';
-t['MTX'] = 'Exceeding';
-t['MTC'] = 'Current load';
-t['ALFL'] = 'Link to external forum<br>(Leave empty for internal forum)';
-t['MTCL'] = 'Clear all';
-t['CKSORT'] = 'Click to sort';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Shared among villages';
-t['VGL'] = 'Village List';
-t['UPDATEPOP'] = 'Update population';
-t['EDIT'] = 'Edit';
-t['NPCO'] = 'NPC Assistant options';
-t['NEWVILLAGEAV'] = 'Date/Time';
-t['TIMEUNTIL'] = 'Time to wait';
-t['CENTERMAP'] = 'Center map on this village';
-t['SENDTROOPS'] = 'Send troops';
+t['BLACKSMITH'] = "Blacksmith";
+t['ARMOURY'] = "Armoury";
+t['NOW'] = "Now";
+t['CLOSE'] = "Close";
+t['USETHEM1H'] = "Use them (1 hour production)";
+t['OVERVIEW'] = "Overview";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Attacks";
+t['NEWS'] = "News";
+t['ADDCRTPAGE'] = "Add current";
+t['SCRPURL'] = "TBeyond page";
+t['SPACER'] = "Spacer";
+t['MEREO'] = "Messages & Reports";
+t['ATTABLES'] = "Troop tables";
+t['MTW'] = "Wasted";
+t['MTX'] = "Exceeding";
+t['MTC'] = "Current load";
+t['ALFL'] = "Link to external forum<br>(Leave empty for internal forum)";
+t['MTCL'] = "Clear all";
+t['CKSORT'] = "Click to sort";
+t['MIN'] = "Min";
+t['SVGL'] = "Shared among villages";
+t['VGL'] = "Village List";
+t['UPDATEPOP'] = "Update population";
+t['EDIT'] = "Edit";
+t['NPCO'] = "NPC Assistant options";
+t['NEWVILLAGEAV'] = "Date/Time";
+t['TIMEUNTIL'] = "Time to wait";
+t['CENTERMAP'] = "Center map on this village";
+t['SENDTROOPS'] = "Send troops";
 t['PALACE'] = "Palace";
 t['RESIDENCE'] = "Residence";
 t['ACADEMY'] = "Academy";
@@ -1631,19 +1622,14 @@ t['TREASURY'] = "Treasury";
 t['UPGTB'] = "Resource fields/buildings upgrade tables";
 t['RBTT'] = "Resource Bar";
 t['USE'] = "Use";
-//3.8.7.5
-t['RESIDUE'] = 'The residue if you build it ';
-t['RESOURCES'] = 'Resources';
-//3.8.7.6.3
+t['RESIDUE'] = "The residue if you build it ";
+t['RESOURCES'] = "Resources";
 t['SH1'] = "Open your Profile for automatic capital/coordinates detection<br>Build the barracks for automatic race detection and then open the village center";
 t['RESEND'] = "Send again ?";
-//3.8.8.8.9
 t['WSI'] = "War simulator provided by the game";
 t['TTT'] = "General troops/distance tooltips";
-//3.8.8.9.6.2
 t['MTR'] = "Ratio";
 t['MTRMIN'] = "(must be 0.50 minimum)";
-//3.8.8.9.7.3
 t['FINDREP'] = "Search the last of";
 t['IREPORT1'] = "Won as attacker without losses";
 t['IREPORT2'] = "Won as attacker with losses";
@@ -1652,7 +1638,6 @@ t['IREPORT4'] = "Won as defender without losses";
 t['IREPORT5'] = "Won as defender with losses";
 t['IREPORT6'] = "Lost as defender with losses";
 t['IREPORT7'] = "Lost as defender without losses";
-//3.9.1.0.1
 t['VLISTUP'] = "Move up";
 t['VLISTDOWN'] = "Move down";
 t['VLISTSEP'] = "Insert/remove horizontal separator";
@@ -1661,37 +1646,30 @@ t['VLISTOPTIONS'] = "Village list options";
 t['REPTT'] = "Show this report in separate window";
 t['WMIN'] = "Minimize window";
 t['WMAX'] = "Maximize window";
-t['REFRESHP'] = 'Update page';
+t['REFRESHP'] = "Update page";
 t['1H'] = "1h";
 t['GENLNK'] = "General links enhancements";
-//3.9.1.1.4
 t['11.TT'] = "Posting reports site";
 t['27.TT'] = "World Analyser";
 t['29.TT'] = "Map Analyser";
 t['WSS'] = "Server statistics";
 t['WSP'] = "Player statistics";
 t['WSA'] = "Alliance statistics";
-t['WSS'] = "Server statistics";
-t['TRAVIANDOPE']    = "Traviandope";
+t['TRAVIANDOPE'] = "Traviandope";
 t['TRAVIANDOPE.TT'] = "World Map, Player, and Alliance Analysis Tool";
-t['TOOLBOX']        = "Toolbox";
-t['TOOLBOX.TT']     = "Units Comparison, Combat Simulator, Calculators, Users and Allies Signature";
-t['CRYTOOLS']       = "Cry's Tools";
-t['CRYTOOLS.TT']    = "Cry's Travian Tools & News";
-t['KIRILLOID']      = "Kirilloid";
-t['KIRILLOID.TT']   = "Lot of useful tables & calculators";
-t['CROPFINDER']     = "Crop finder";
-t['CROPFINDER.TT']  = "Search for crop";
-//3.9.1.1.5
+t['TOOLBOX'] = "Toolbox";
+t['TOOLBOX.TT'] = "Units Comparison, Combat Simulator, Calculators, Users and Allies Signature";
+t['CRYTOOLS'] = "Cry's Tools";
+t['CRYTOOLS.TT'] = "Cry's Travian Tools & News";
+t['KIRILLOID'] = "Kirilloid";
+t['KIRILLOID.TT'] = "Lot of useful tables & calculators";
+t['CROPFINDER'] = "Crop finder";
+t['CROPFINDER.TT'] = "Search for crop";
 t['ERRUPDATE'] = "Script update failed!";
-//3.9.1.2.7
 t['TRADEBAL.TT'] = "Get a trade balance for this player";
-t['100'] = 'Show links to get trade balance for players';
-//3.9.1.3.8
-t['101'] = 'Color upgrade not possible (not enough capacity of granaries/warehouses)<br>(Default = Empty)';
-//3.9.1.4.11
+t['100'] = "Show links to get trade balance for players";
+t['101'] = "Color upgrade not possible (not enough capacity of granaries/warehouses)<br>(Default = Empty)";
 t['102'] = "Show number of resource fields in 'Resource Bar'";
-//r0012
 t['RESNEED'] = "Need for normal extension:";
 t['NPCNEED'] = "Need for extension via NPC:";
 t['RESREQ_TT'] = "Need for extension: $1";
@@ -1701,3804 +1679,37 @@ t['USETRADERS_TT'] = "Use not more then this traders number when distributing re
 t['USEUNIRES_TT'] = "Use not more then this resources quantity when distributing resources.";
 t['USEPPH_TT'] = "Use the 1h production of this village as the maximum transfer quantity.";
 t['USEPPHALL_TT'] = "Use the 1h production of all villages as the maximum transfer quantity.";
-//3.9.1.7.15
-t['STAT_DISMISS'] = 'Statistics for dismiss troops';
-t['STAT_REMAINS'] = 'Statistics for remains troops';
+t['STAT_DISMISS'] = "Statistics for dismiss troops";
+t['STAT_REMAINS'] = "Statistics for remains troops";
+t['SELECTALL'] = "Select all";
 };
-
-function switchLanguage() 
-{
-if ( arAvLang[TB3O.O[0]] !== 'en' ) 
-{
-switch (arAvLang[TB3O.O[0]]) 
-{
-case "it"://IcEye, rosfe y Danielle, Lello, Zippo, Nux, ns65, Acr111, onetmt, matteo466
-t['8'] = 'Alleanza';
-t['SIM'] = 'Simulatore di combattimento';
-t['QSURE'] = 'Sei sicuro?';
-t['LOSS'] = 'Perdita in materiale';
-t['PROFIT'] = 'Guadagno';
-t['EXTAV'] = 'Ampliamento disponibile';
-t['PLAYER'] = 'Proprietario';
-t['VILLAGE'] = 'Villaggio';
-t['POPULATION'] = 'Popolazione';
-t['COORDS'] = 'Coordinate';
-t['MAPTBACTS'] = 'Azioni';
-t['SAVED'] = 'Salvato';
-t['YOUNEED'] = 'Mancano';
-t['TODAY'] = 'oggi';
-t['TOMORROW'] = 'domani';
-t['DAYAFTERTOM'] = 'dopodomani';
-t['MARKET'] = 'Mercato';
-t['BARRACKS'] = "Campo d'addestramento";
-t['RAP'] = 'Caserma';
-t['STABLE'] = 'Scuderia';
-t['WORKSHOP'] = 'Officina';
-t['SENDRES'] = 'Invia risorse';
-t['BUY'] = 'Compra risorse';
-t['SELL'] = 'Vendi risorse';
-t['SENDIGM'] = 'Invia messaggio';
-t['LISTO'] = 'Disponibile';
-t['ON'] = 'il';
-t['AT'] = 'alle';
-t['EFICIENCIA'] = 'Efficienza';
-t['NEVER'] = 'Mai';
-t['ALDEAS'] = 'Villaggi';
-t['TIEMPO'] = 'Tempo';
-t['OFREZCO'] = 'Offerta';
-t['BUSCO'] = 'Richiesta';
-t['TIPO'] = 'Percentuale di scambio';
-t['DISPONIBLE'] = 'Disponibile';
-t['CUALQUIERA'] = 'Tutti';
-t['YES'] = 'Si';
-t['NO'] = 'No';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Segnalibri';
-t['ANYADIR'] = 'Aggiungi';
-t['UBU'] = 'URL segnalibro';
-t['UBT'] = 'Nome segnalibro';
-t['DEL'] = 'Eliminare';
-t['MAPA'] = 'Mappa';
-t['MAXTIME'] = 'Tempo massimo';
-t['ARCHIVE'] = 'Archivio';
-t['SUMMARY'] = "Riepilogo";
-t['TROPAS'] = 'Truppe';
-t['CHKSCRV'] = 'Verifica Aggiornamenti';
-t['ACTUALIZAR'] = 'Aggiorna le informazioni sul villaggio';
-t['VENTAS'] = 'Offerte salvate';
-t['MAPSCAN'] = "Scansiona la mappa";
-t['BIC'] = 'Icone aggiuntive per accesso rapido';
-t['22'] = 'Mostra blocco note';
-t['SAVE'] = 'Salva';
-t['49'] = "Azione predefinita per 'Invia truppe'";
-t['AT2'] = 'Rinforzo';
-t['AT3'] = 'Attacco: Normale';
-t['AT4'] = 'Attacco: Raid';
-t['24'] = 'Larghezza blocco note';
-t['NBSA'] = 'Automatica';
-t['NBSN'] = 'Normale (Piccolo)';
-t['NBSB'] = 'Schermi grandi (Grande)';
-t['25'] = 'Altezza blocco note';
-t['NBHAX'] = "Adatta l'altezza automaticamente";
-t['NBHK'] = "Altezza predefinita";
-t['43'] = 'Mostra livelli edifici';
-t['NPCSAVETIME'] = 'Tempo guadagnato: ';
-t['38'] = 'Mostra colori livelli campi';
-t['44'] = 'Mostra colori livelli edifici';
-t['65'] = 'Colore ampliamento disponibile <br>(Vuoto = default)';
-t['66'] = 'Colore livello massimo raggiunto <br>(Vuoto = default)';
-t['67'] = 'Colore ampliamento non disponibile <br>(Vuoto = default)';
-t['68'] = 'Colore ampliamento col mercato nero <br> (Vuoto = default)';
-t['TOTALTROOPS'] = "Truppe del villaggio complessive";
-t['20'] = 'Mostra segnalibri';
-t['U.2'] = 'Popolo';
-t['1'] = "Server Travian v2.x";
-t['SELECTALLTROOPS'] = "Seleziona tutte le truppe";
-t['PARTY'] = "Party";
-t['CPPERDAY'] = "PC/giorno";
-t['TOTAL'] = "Totale";
-t['SELECTSCOUT'] = "Spiata";
-t['SELECTFAKE'] = "Fake";
-t['NOSCOUT2FAKE'] = "Non si possono usare le spie per mandare un fake!";
-t['NOTROOP2FAKE'] = "Non ci sono truppe per mandare un fake!";
-t['NOTROOP2SCOUT'] = "Non ci sono truppe per fare la spiata!";
-t['NOTROOPS'] = "Non ci sono truppe nel villaggio!";
-t['ALL'] = "Tutto";
-t['SH2'] = "Nei campi dei colori puoi inserire:<br>- il nome (in inglese) <b>green</b> o <b>red</b> o <b>orange</b>, etc.<br>- il codice esadecimale del colore <b>#004523</b><br>- lasciare vuoto per usare i colori predefiniti";
-t['SOREP'] = "Mostra report originale (per postare sul forum)";
-t['56'] = "Mostra informazioni sul tipo di terreno/oasi<br>mentre il mouse passa sulla mappa";
-t['10'] = "Simulatore di combattimento da usare:<br>(nel menu a sinistra)";
-t['WSIMO1'] = "Interno (quello presente nel gioco)";
-t['WSIMO2'] = "Esterno (fornito da kirilloid.ru)";
-t['27'] = "World Analyser da utilizzare";
-t['28'] = "Mostra link statistiche World Analyser";
-t['NONEWVER'] = "Ã‰ giÃ  installata l'ultima versione disponibile";
-t['BVER'] = "Potresti avere una versione Beta";
-t['NVERAV'] = "Ã‰ disponibile una nuova versione";
-t['UPDSCR'] = "Aggiornare ora lo script?";
-t['CHECKUPDATE'] = "Controllo dell'ultima versione disponibile.<br>Attendere prego...";
-t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "Popolazione media villaggi";
-t['AVPPP'] = "Popolazione media giocatori";
-t['37'] = 'Mostra tabella ampliamento campi';
-t['41'] = 'Mostra tabella ampliamento edifici';
-t['69'] = "Livello di logging della console<br>SOLO PER SVILUPPATORI O PER DEBUGGING<br>(Default = 0)";
-t['48'] = "Numero di pagine di offerte da precaricare<br>nella pagina 'Mercato => Visualizza offerte'<br>(Default = 1)";
-t['U.3'] = 'Nome del villaggio capitale<br><b>Vai alla pagina del tuo Profilo per aggiornare i dati</b>';
-t['U.6'] = 'Coordinate del villaggio capitale<br><b>Vai alla pagina del tuo Profilo per aggiornare i dati</b>';
-t['TOTTRTR'] = 'Totale truppe in addestramento';
-t['57'] = 'Mostra distanze e tempi';
-t['TB3SL'] = 'Impostazioni ' + TB3O.shN;
-t['UPDALLV'] = "Aggiorna tutti i villaggi.  USARE CON CAUTELA, potrebbe comportare il BAN dell`account!";
-t['9'] = "Mostra links aggiuntivi nel menu di sinistra<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Mappa estesa';
-t['USETHEMPR'] = 'Completa proporzionalmente';
-t['USETHEMEQ'] = 'Completa equamente';
-t['TOWNHALL'] = 'Municipio';
-t['GSRVT'] = 'Server di gioco';
-t['ACCINFO'] = 'Informazioni Account';
-t['NBO'] = 'Blocco note';
-t['MNUL'] = 'Menu di sinistra';
-t['STAT'] = 'Statistiche';
-t['RESF'] = 'Campi di risorse';
-t['VLC'] = 'Centro del villaggio';
-t['MAPO'] = 'Opzioni mappa';
-t['COLO'] = 'Opzioni colori';
-t['DBGO'] = 'Opzioni di debug';
-t['4'] = 'Mercato';
-t['5'] = "Caserma/Campo d'addestramento/Officina/Scuderia";
-t['6'] = "Municipio/Circolo degli eroi/Armeria/Fabbro";
-t['HEROSMANSION'] = "Circolo degli eroi";
-t['BLACKSMITH'] = 'Fabbro';
-t['ARMOURY'] = 'Armeria';
-t['NOW'] = 'Adesso';
-t['CLOSE'] = 'Chiudi';
-t['USE'] = 'Usa';
-t['USETHEM1H'] = 'Completa con la produzione oraria';
-t['OVERVIEW'] = 'Riepilogo';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Attacchi';
-t['NEWS'] = 'News';
-t['ADDCRTPAGE'] = 'Aggiungi pagina corrente';
-t['SCRPURL'] = TB3O.shN;
-t['50'] = "Numero di spie per l'invio di spiate";
-t['SPACER'] = 'Separatore';
-t['53'] = 'Mostra i tooltip con le informazioni sulle truppe';
-t['MEREO'] = 'Messaggi e Report';
-t['59'] = 'Numero di pagine di messaggi/report da precaricare<br>(Default = 1)';
-t['ATTABLES'] = 'Tabella truppe';
-t['MTW'] = 'Sprecate';
-t['MTX'] = 'In eccesso';
-t['MTC'] = 'Carico corrente';
-t['ALFL'] = 'Link al forum esterno<br>(Lasciare vuoto per il forum interno)';
-t['82.L'] = 'Blocca segnalibri (Nasconde le icone cancella, sposta in alto e sposta in basso)';
-t['MTCL'] = 'Cancella tutto';
-t['82.U'] = 'Sblocca segnalibri (Mostra le icone cancella, sposta in alto e sposta in basso)';
-t['CKSORT'] = 'Clicca per ordinare';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Condivisa tra i villaggi';
-t['VGL'] = 'Elenco villaggi';
-t['12'] = "Mostra i collegamenti a 'dorf1.php' e 'dorf2.php'";
-t['UPDATEPOP'] = 'Aggiorna popolazione';
-t['54'] = 'Mostra tooltip con tempi e distanza dai villaggi';
-t['EDIT'] = 'Modifica';
-t['NPCO'] = 'Opzioni Mercato Nero';
-t['26'] = 'Mostra calcoli/links per il Mercato Nero';
-t['58'] = 'Mostra tabella dei giocatori/villaggi/oasi occupate';
-t['NEWVILLAGEAV'] = 'Data/Ora';
-t['TIMEUNTIL'] = 'Tempo di attesa';
-t['61'] = 'Mostra tabella "Eliminare" nella pagina dei report';
-t['62'] = "Mostra l'icona 'Invia messaggio' anche per me";
-t['CENTERMAP'] = 'Centra la mappa su questo villaggio';
-t['13'] = "Mostra l'icona 'Centra la mappa su questo villaggio'";
-t['SENDTROOPS'] = 'Invia truppe';
-t['64'] = 'Mostra dettagli nelle statistiche dei Reports';
-t['7'] = "Castello/Residence/Accademia/Camera del tesoro";
-t['PALACE'] = "Castello";
-t['RESIDENCE'] = "Residence";
-t['ACADEMY'] = "Accademia";
-t['TREASURY'] = "Camera del tesoro";
-t['45'] = "Mostra il livello delle strutture in costruzione lampeggiante";
-t['14']= "Mostra le icone 'Invia truppe/Invia risorse'";
-t['34'] = "Mostra PC/giorno nelle tabelle";
-t['UPGTB'] = "Tabella risorse/costruzioni";
-t['35'] = "Mostra consumo di grano nelle tabelle";
-t['16'] = "Mostra la produzione di grano netta";
-t['39'] = "Mostra grafici a barre delle risorse";
-t['RBTT'] = "Grafici a barre delle risorse";
-t['40'] = "Mastra i grafici a barre delle risorse in una finestra";
-t['21'] = "Mostra i segnalibri in una finestra";
-t['23'] = "Mostra il blocco note in una finestra";
-t['17'] = "Mostra la popolazione";
-t['29'] = 'Map Analyser da usare';
-t['30'] = 'Mostra il link alla mappa per gli utenti';
-t['31'] = 'Mostra il link alla mappa per le alleanze';
-t['3'] = 'Forza il calcolo della capacitÃ  di legionari e lancieri gallici<br>come nella versione 3.1<br>(per server con versione mista 3.1 & 3.5 - per adesso solo per server .de)';
-t['63'] = 'Mostra report avanzati di ';
-t['18'] = 'Mostra una lista dei villaggi aggiuntiva (su 2 colonne) in una finestra';
-t['60'] = 'Mostra links per aprire i messaggi in un pop-up';
-t['2'] = "Rimuovi banner pubblicitari";
-t['19'] = 'Mostra informazioni su ampliamenti di costruzioni e movimenti di truppe';
-t['32'] = "Mostra la 'barra di ricerca'";
-t['33'] = "Mostra la 'barra di ricerca' in una finestra";
-t['36'] = "Mostra i calcoli 'Risorse il/Residue' nelle tabelle di ampliamento/addestramento";
-t['RESIDUE'] = 'Risorse residue se costruisci';
-t['RESOURCES'] = 'Risorse';
-t['SH1'] = "Apri il Profilo per il riconoscimento automatico delle informazioni sulla capitale<br>Costruisci il Campo di addestramento per il riconoscimento automatico del popolo e dopo apri il centro del villaggio";
-t['46'] = "Mostra informazioni aggiuntive sui mercanti in arrivo";
-t['42'] = 'Ordina le strutture per nome nella tabella di ampliamento';
-t['15'] = "Mostra la produzione oraria di legno, argilla e ferro";
-break;
-case "de"://by ms99
-t['8'] = 'Allianz';
-t['SIM'] = 'Kampfsimulator';
-t['QSURE'] = 'Sind Sie sicher?';
-t['LOSS'] = 'Rohstoff-Verluste';
-t['PROFIT'] = 'Rentabilit&auml;t';
-t['EXTAV'] = 'Ausbau m&ouml;glich';
-t['PLAYER'] = 'Spieler';
-t['VILLAGE'] = 'Dorf';
-t['POPULATION'] = 'Einwohner';
-t['COORDS'] = 'Koordinaten';
-t['MAPTBACTS'] = 'Aktion';
-t['SENDRES'] = 'H&auml;ndler schicken';
-t['SAVED'] = 'Gespeichert';
-t['YOUNEED'] = 'Ben&ouml;tige';
-t['TODAY'] = 'heute';
-t['TOMORROW'] = 'morgen';
-t['DAYAFTERTOM'] = '&uuml;bermorgen';
-t['MARKET'] = 'Marktplatz';
-t['BARRACKS'] = 'Kaserne';
-t['RAP'] = 'Versammlungsplatz';
-t['STABLE'] = 'Stall';
-t['WORKSHOP'] = 'Werkstatt';
-t['BUY'] = 'Kaufen';
-t['SELL'] = 'Verkaufen';
-t['SENDIGM'] = 'IGM schreiben';
-t['LISTO'] = 'Genug';
-t['ON'] = '';
-t['AT'] = 'um';
-t['EFICIENCIA'] = 'Effektivität';
-t['NEVER'] = 'Nie';
-t['ALDEAS'] = 'Dörfer';
-t['MAXTIME'] = 'Maximale Dauer';
-t['TIEMPO'] = 'Zeit';
-t['MAPA'] = 'Karte';
-t['OFREZCO'] = 'Biete';
-t['BUSCO'] = 'Suche';
-t['TIPO'] = 'Tauschverhältnis';
-t['DISPONIBLE'] = 'Nur annehmbare Angebote';
-t['CUALQUIERA'] = 'Beliebig';
-t['YES'] = 'Ja';
-t['NO'] = 'Nein';
-t['MARCADORES'] = 'Lesezeichen';
-t['ANYADIR'] = 'Hinzuf&uuml;gen';
-t['UBU'] = 'Lesezeichen URL';
-t['UBT'] = 'Lesezeichen Text';
-t['DEL'] = 'Entfernen';
-t['CHKSCRV'] = 'Update TBeyond';
-t['ACTUALIZAR'] = 'Update Dorf Info';
-t['ARCHIVE'] = 'Archiv';
-t['VENTAS'] = 'Gespeicherte Angebote';
-t['SUMMARY'] = 'Zusammenfassung';
-t['BIC'] = 'Zusätzliche Icons';
-t['22'] = 'Notizblock anzeigen';
-t['SAVE'] = 'Speichern';
-t['49'] = 'Standard Aktion Versammlungsplatz';
-t['AT2'] = 'Unterstützung';
-t['AT3'] = 'Angriff: Normal';
-t['AT4'] = 'Angriff: Raubzug';
-t['24'] = 'Grösse Notizblock';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normal (klein)';
-t['NBSB'] = 'Breiter Monitor (breit)';
-t['25'] = 'Notizblock: Höhe';
-t['NBHAX'] = 'Höhe automatisch anpassen';
-t['NBHK'] = 'Standard Höhe';
-t['43'] = 'Levels im Dorfzentrum anzeigen';
-t['NPCSAVETIME'] = 'Zeitgewinn';
-t['38'] = 'Ressilevel Farbcode anzeigen';
-t['44'] = 'Gebäudelevel Farbcode anzeigen';
-t['TOTALTROOPS'] = 'Truppen dieses Dorfes';
-t['20'] = 'Lesezeichen anzeigen';
-t['U.2'] = 'Volk';
-t['1'] = "Travian v2.x Server";
-t['28'] = "Analyser Statistiklinks anzeigen";
-t['SELECTALLTROOPS'] = "Alle Truppen ausw&auml;hlen";
-t['PARTY'] = "Feste";
-t['CPPERDAY'] = "KPs/Tag";
-t['SLOT'] = "Slots";
-t['SELECTSCOUT'] = "Späher auswählen";
-t['SELECTFAKE'] = "Fake Truppen auswählen";
-t['NOSCOUT2FAKE'] = "Es ist unmöglich Späher für einen Fake zu benutzen!";
-t['NOTROOP2FAKE'] = "Keine Truppen vorhanden um einen Fake Angriff zu starten!";
-t['NOTROOP2SCOUT'] = "Keine Truppen vorhanden um einen Spähangriff zu starten!";
-t['NOTROOPS'] = "Keine Truppen im Dorf!";
-t['ALL'] = "Alles";
-t['SH1'] = "Öffne Dein Profil für die automatische Erkennung des Hauptdorfs/Koordinaten<br>Kaserne bauen und dann Dorfzentrum öffnen für automatische Erkennung des Volkes";
-t['SH2'] = "Was man in Farbfelder eintragen kann:<br>- (Englisch) <b>green</b> oder <b>red</b> oder <b>orange</b>, etc.<br>- HEX Farbkod, z.B. <b>#004523</b><br>- leer für Standardfarbe";
-t['56'] = "Zelltyp auf der Karte anzeigen wenn Mauszeiger &uuml;ber Zelle";
-t['WSIMO1'] = "Intern (vom Spiel zur Verfügung gestellt)";
-t['WSIMO2'] = "Extern (von der kirilloid.ru Seite)";
-t['27'] = "Benutze World Analyser";
-t['28'] = "World Analyser Statistiklinks anzeigen";
-t['NONEWVER'] = "Sie haben die letzte Version installiert";
-t['BVER'] = "Sie haben vielleicht eine Beta Version installiert";
-t['NVERAV'] = "Eine neue Version des Scripts steht zur Verfügung";
-t['UPDSCR'] = "Script jetzt aktualisieren ?";
-t['CHECKUPDATE'] = "Es wird nach einer neuen Scriptversion gesucht.<br>Bitte warten...";
-t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "Durchschnitt: Bewohner/Dorf";
-t['AVPPP'] = "Durchschnitt: Bewohner/Spieler";
-t['41'] = "Upgradetabelle f&uuml;r Gebäude anzeigen";
-t['69'] = "Log Level Konsole - Nur f&uuml;r Programmierer (Standard = 0)";
-t['48'] = "Anzahl der Angebotsseiten auf der 'Markt => Kaufen' Seite,<br />die vom Server automatisch runtergeladen werden sollen (Standard = 1)";
-t['TOTTRTR'] = 'Total Truppen in Ausbildung';
-t['57'] = 'Entfernungen & Zeiten anzeigen';
-t['TB3SL'] = TB3O.shN + ' Einstellungen';
-t['SOREP'] = "Original Bericht anzeigen";
-t['10'] = "Option Kampfsimulatorlink";
-t['37'] = "Upgradetabelle f&uuml;r Resifelder anzeigen";
-t['U.3'] = 'Name des Hauptdorfs';
-t['U.6'] = 'Koordinaten des Hauptdorfs';
-t['UPDALLV'] = 'Alle Dörfer aktualisieren. BITTE MIT VORSICHT BENUTZEN, DIES KÖNNTE ZUR SPERRUNG DES ACCOUNTS FÜHREN !';
-t['9'] = "Zusätzliche Links im linken Menü anzeigen<br />(Traviantoolbox, World Analyser, Travilog, Map, usw.)";
-t['LARGEMAP'] = 'Große Karte';
-t['USETHEMPR'] = 'Rohstoffe proportional verteilen';
-t['USETHEMEQ'] = 'Rohstoffe gleichmäßig verteilen';
-t['TOWNHALL'] = 'Rathaus';
-t['GSRVT'] = 'Server';
-t['ACCINFO'] = 'Account Info';
-t['NBO'] = 'Notizblock';
-t['MNUL'] = 'Menü links';
-t['STAT'] = 'Statistiken';
-t['RESF'] = 'Rohstofffelder';
-t['VLC'] = 'Dorfzentrum';
-t['MAPO'] = 'Karten Einstellung';
-t['COLO'] = 'Farbeinstellungen  (Standard = Leer)';
-t['65'] = 'Farbe "Upgrade möglich"';
-t['66'] = 'Farbe "Max Level"';
-t['67'] = 'Farbe "Upgrade nicht möglich"';
-t['68'] = 'Farbe "Upgrade via NPC"';
-t['DBGO'] = 'Fehlersuche';
-t['4'] = 'Marktplatz';
-t['5'] = 'Versammlungsplatz/Kaserne/Stall/Werkstatt';
-t['6'] = "Rathaus/Heldenhof/Rüstungs-/Waffenschmiede";
-t['HEROSMANSION'] = "Heldenhof";
-t['BLACKSMITH'] = 'Waffenschmiede';
-t['ARMOURY'] = 'Rüstungsschmiede';
-t['NOW'] = 'Jetzt';
-t['CLOSE'] = 'Schließen';
-t['USE'] = 'Benutze';
-t['USETHEM1H'] = '1 Stundenproduktion schicken';
-t['OVERVIEW'] = 'Übersicht';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Angriffe';
-t['NEWS'] = 'News';
-t['ADDCRTPAGE'] = 'Aktuelle Seite hinzufügen';
-t['SCRPURL'] = 'TB-Homepage';
-t['50'] = 'Anzahl der Späher für die "Späher auswählen" Funktion';
-t['SPACER'] = 'Abstandshalter';
-t['53'] = 'Truppeninformationen anzeigen (in Informations-Boxen)';
-t['MEREO'] = 'Nachrichten & Berichte';
-t['59'] = 'Anzahl der "Nachrichten & Berichte" Seiten<br />die vom Server automatisch runtergeladen werden sollen (Standard = 1)';
-t['ATTABLES'] = 'Truppenübersicht';
-t['MTW'] = 'Noch verfügbaren Platz verschwendet';
-t['MTX'] = 'Zuviel';
-t['MTC'] = 'Aktuell verwendet';
-t['ALFL'] = 'Link externes Forum (Für internes Forum leer lassen)';
-t['MTCL'] = 'Alle entfernen';
-t['82.L'] = 'Lesezeichen sperren (Die Icons werden ausgeblendet)';
-t['82.U'] = 'Lesezeichen entsperren (Die Icons fürs Löschen und sortieren werden wieder angezeigt)';
-t['CKSORT'] = 'Zum Sortieren klicken';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Für alle Dörfer verfügbar';
-t['VGL'] = 'Dorfübersicht';
-t['12'] = "Zeige die Links 'dorf1.php' und 'dorf2.php' an";
-t['UPDATEPOP'] = 'Einwohnerzahl aktualisieren';
-t['54'] = 'Zeige Entfernung & Zeiten zu den Dörfern in ToolTips an';
-t['EDIT'] = 'Bearbeiten';
-t['60']= 'Links um IGMs/KB in Pop-ups zu öffnen anzeigen';
-t['NPCO'] = 'Optionen NPC Assistent';
-t['26'] = 'NPC Assistent Kalkulation/Links anzeigen';
-t['58'] = 'Tabelle der Spieler/Dörfer/besetzte Oasen anzeigen';
-t['NEWVILLAGEAV'] = 'Datum/Uhrzeit';
-t['TIMEUNTIL'] = 'Wartezeit';
-t['61'] = '"Alle löschen" Tabelle auf Berichte Seite anzeigen';
-t['62'] = 'Zeige das "Sende IGM" Icon auch f&uuml;r mich an';
-t['CENTERMAP'] = 'Zentriere Karte auf dieses Dorf';
-t['13'] = 'Zeige "Zentriere Karte auf dieses Dorf" Icon an';
-t['SENDTROOPS'] = 'Truppen schicken';
-t['64'] = 'Details in Berichte Statistiken anzeigen';
-t['7'] = "Palast/Residenz/Akademie/Schatzkammer";
-t['PALACE'] = "Palast";
-t['RESIDENCE'] = "Residenz";
-t['ACADEMY'] = "Akademie";
-t['TREASURY'] = "Schatzkammer";
-t['45'] = "Blinkende Levels für Gebäude die gerade ausgebaut werden";
-t['14']= "Zeige 'Truppen schicken/Rohstoffe verschicken' Icons in der Liste der D&ouml;rfer an";
-t['34'] = "Zeige KP/Tag Info in den Upgradetabellen an";
-t['UPGTB'] = "Ressifelder/Gebäude Upgradetabellen";
-t['35'] = "Zeige Getreide-Verbrauch in Upgradetabellen an";
-t['16'] = "Zeige effektive Getreide-Produktion in the Liste der D&ouml;fer an";
-t['39'] = "Zeige die Ressi-Bar an";
-t['RBTT'] = "Ressi-Bar";
-t['30'] = 'Links zur Karte anzeigen - Spieler';
-t['31'] = 'Links zur Karte anzeigen - Allianzen';
-t['40'] = "Zeige 'Ressi-Bar' als Floating-Fenster an";
-t['21'] = "Zeige 'User Bookmarks' als Floating-Fenster an";
-t['23'] = "Zeige 'NoteBlock' als Floating-Fenster an";
-t['17'] = "Zeige Anzahl der Einwohner in der Liste der D&ouml;rfer an";
-t['29'] = 'Option Karten-Analyser';
-t['63'] = 'Zeige  erweiterte Kampfreports';
-t['3'] = 'T3.1 Tragekapazität für Legionär & Phalanx erzwingen<br>(für T3.1 & T3.5 Spieleserver)';
-t['18'] = 'Zeige eine zusätzliche Dörferliste (2 Spalten) als Floating-Fenster an';
-t['42'] = 'Sortiere Gebäude nach Name in der Upgradetabelle';
-t['19'] = 'Zeige Informationen über Gebäude die ausgebaut werden und<br>Truppenbewegungen in der Liste der Dörfer';
-t['32'] = "Zeige 'Suche-Bar' an";
-t['33'] = "Zeige 'Suche-Bar' als Floating-Fenster an";
-t['36'] = "Zeige 'Am/Rest' Kalkulation in Upgrade/Ausbildungstabellen an";
-t['RESIDUE'] = 'Rest wenn gebaut ';
-t['RESOURCES'] = 'Rohstoffe';
-t['2'] = 'Banners entfernen';
-t['SH1'] = "Öffne Dein Profil für automatische Erkennung des Hauptdorfs und Koordinated<br>Baue eine Kaserne f&uuml;r die automatische Volkserkennung und öffne dann das Dorfzentrum";
-t['46'] = "Zeige zus&auml;tzliche Infos für jede Händlerankunft";
-t['15'] = "Zeige Produktion von Holz, Lehm, Eisen pro Stunde in der Liste der Dörfer an";
-t['11'] = "Option Sitelink für das Hochladen der Reports";
-break;
-case "ro"://by ms99
-t['8'] = 'Alianţă';
-t['SIM'] = 'Simulator luptă';
-t['QSURE'] = 'Eşti sigur?';
-t['LOSS'] = 'Pierderi';
-t['PROFIT'] = 'Profit';
-t['EXTAV'] = 'Upgrade posibil acum';
-t['PLAYER'] = 'Jucător';
-t['VILLAGE'] = 'Sat';
-t['POPULATION'] = 'Populaţie';
-t['COORDS'] = 'Coordonate';
-t['MAPTBACTS'] = 'Acţiuni';
-t['SAVED'] = 'Salvat';
-t['YOUNEED'] = 'Ai nevoie de';
-t['TODAY'] = 'azi';
-t['TOMORROW'] = 'mâine';
-t['DAYAFTERTOM'] = 'poimâine';
-t['MARKET'] = 'Târg';
-t['BARRACKS'] = 'Cazarmă';
-t['RAP'] = 'Adunare';
-t['STABLE'] = 'Grajd';
-t['WORKSHOP'] = 'Atelier';
-t['SENDRES'] = 'Trimite resurse';
-t['BUY'] = 'Cumpară';
-t['SELL'] = 'Vinde';
-t['SENDIGM'] = 'Trimite mesaj';
-t['LISTO'] = 'Upgrade posibil';
-t['ON'] = 'în';
-t['AT'] = 'la';
-t['EFICIENCIA'] = 'Eficienţă';
-t['NEVER'] = 'Niciodată';
-t['ALDEAS'] = 'Sat(e)';
-t['TROPAS'] = 'Adunare';
-t['TIEMPO'] = 'Timp';
-t['OFREZCO'] = 'Oferă';
-t['BUSCO'] = 'Caută';
-t['TIPO'] = 'Tip';
-t['DISPONIBLE'] = 'Doar cele disponibile';
-t['CUALQUIERA'] = 'Oricare';
-t['YES'] = 'Da';
-t['NO'] = 'Nu';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Link-uri';
-t['ANYADIR'] = 'Adaugă';
-t['UBU'] = 'URL';
-t['UBT'] = 'Text';
-t['DEL'] = 'Şterge';
-t['MAPA'] = 'Hartă';
-t['MAXTIME'] = 'Timp maxim';
-t['ARCHIVE'] = 'Arhivă';
-t['SUMMARY'] = 'Rezumat';
-t['TROPAS'] = 'Trupe';
-t['CHKSCRV'] = 'Update TBeyond';
-t['ACTUALIZAR'] = 'Actualizează informaţie sat';
-t['VENTAS'] = 'Oferte salvate';
-t['MAPSCAN'] = 'Scanează harta';
-t['BIC'] = 'Afişează icoane suplimentare';
-t['22'] = 'Afişează bloc-notes';
-t['SAVE'] = 'Salvează';
-t['49'] = 'Acţiune standard adunare';
-t['AT2'] = 'Întăriri';
-t['AT3'] = 'Atac: Normal';
-t['AT4'] = 'Atac: Raid';
-t['24'] = 'Lăţime bloc-notes';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normal (ingust)';
-t['NBSB'] = 'Ecran lat (lat)';
-t['25'] = 'Înălţime bloc-notes';
-t['NBHAX'] = "Măreşte inălţimea automat";
-t['NBHK'] = "Înălţime normală";
-t['43'] = 'Afişează nivel clădiri';
-t['NPCSAVETIME'] = 'Timp economisit';
-t['38'] = 'Afişează culori nivel câmpuri resurse';
-t['44'] = 'Afişează culori nivel clădiri';
-t['65'] = 'Culoare upgrade posibil (Nimic = standard)';
-t['66'] = 'Culoare nivel maxim (Nimic = standard)';
-t['67'] = 'Culoare upgrade imposibil (Nimic = standard)';
-t['68'] = 'Culoare upgrade posibil via NPC (Nimic = standard)';
-t['TOTALTROOPS'] = 'Total trupe sat';
-t['20'] = 'Afişează link-uri';
-t['U.2'] = 'Rasă';
-t['1'] = "Server Travian v2.x";
-t['SELECTALLTROOPS'] = "Selectează toate trupele";
-t['PARTY'] = "Festivităţi";
-t['CPPERDAY'] = "PC/zi";
-t['SLOT'] = "Slot";
-t['TOTAL'] = "Total";
-t['SELECTSCOUT'] = "Selectează spioni";
-t['SELECTFAKE'] = "Selectează trupe fake";
-t['NOSCOUT2FAKE'] = "Nu puteţi selecta spioni pentru un fake !";
-t['NOTROOP2FAKE'] = "Nu există trupe pentru un fake !";
-t['NOTROOP2SCOUT'] = "Nu există trupe pentru un atac de spionaj !";
-t['NOTROOPS'] = "Nu există trupe in sat !";
-t['ALL'] = "Tot";
-t['SH1'] = "Deschide pagina Profil pentru detectarea automată a capitalei/coordonate<br>Contruieşte cazarma şi deschide pagina 'Centrul satului' pentru detectarea automată a rasei";
-t['SH2'] = "În câmpurile de culori puteţi introduce:<br>- <b>green</b> sau <b>red</b> sau <b>orange</b>, etc.<br>- codul HEX al culorii, ex. <b>#004523</b><br>- loc liber = culoare standard";
-t['SOREP'] = "Afişează raport original (pentru forumuri)";
-t['56'] = "Afişează tip celula/info vale părăsită (mousing over)";
-t['10'] = "Link către simulator luptă<br>";
-t['WSIMO1'] = "Intern (inclus in joc)";
-t['WSIMO2'] = "Extern (pus la dispoziţie de către kirilloid.ru)";
-t['27'] = "Utilizează World Analyser";
-t['28'] = "Afişează link-uri către World Anlyser";
-t['NONEWVER'] = "Ultima versiune disponibilă este instalată";
-t['BVER'] = "Se poate să aveţi o versiune beta instalată";
-t['NVERAV'] = "O versiune nouă a scriptului este disponibilă";
-t['UPDSCR'] = "Doriţi să actualizaţi acum ?";
-t['CHECKUPDATE'] = "Verific existenţa unei versiuni noi a scriptului...";
-t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "Populaţie medie/sat";
-t['AVPPP'] = "Populaţie medie/jucător";
-t['37'] = "Afişează tabel upgrade câmpuri de resurse";
-t['41'] = "Afişează tabel upgrade clădiri";
-t['69'] = "Log level consolă (DOAR PENTRU PROGRAMATORI)<br>(Standard = 0)";
-t['48'] = "Numărul paginilor de oferte pre-încărcate pe pagina 'Târg => Cumpără'<br>(Standard = 1)";
-t['U.3'] = 'Numele capitalei<br><b>Deschide Profilul pentru actualizare automată</b>';
-t['U.6'] = 'Coordonatele capitalei<br><b>Deschide Profilul pentru actualizare automată</b>';
-t['TOTTRTR'] = 'Total trupe antrenate';
-t['57'] = 'Afişează distanţe şi timpi de deplasare';
-t['TB3SL'] = 'Opţiuni ' + TB3O.shN;
-t['UPDALLV'] = 'Actualizează toate satele.  Utilizează cu maximă atenţie.  Urmarea ar putea fi un cont banat !';
-t['9'] = "Afişează link-uri adiţionale în meniul din stânga<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Harta mare';
-t['USETHEMPR'] = 'Use them (proportional)';
-t['USETHEMEQ'] = 'Use them (egal)';
-t['TOWNHALL'] = 'Casa de cultură';
-t['ACCINFO'] = 'Informaţii cont';
-t['NBO'] = 'Bloc-notes';
-t['MNUL'] = 'Meniu stânga';
-t['STAT'] = 'Statistică';
-t['RESF'] = 'Câmpuri resurse';
-t['VLC'] = 'Centrul satului';
-t['MAPO'] = 'Opţiuni hartă';
-t['COLO'] = 'Opţiuni culori';
-t['DBGO'] = 'Opţiuni Debug';
-t['4'] = 'Târg';
-t['5'] = 'Adunare/Cazarmă/Atelier/Grajd';
-t['6'] = "Casa de cultură/Reşedinţa eroului/Armurărie/Fierărie";
-t['HEROSMANSION'] = "Reşedinţa eroului";
-t['BLACKSMITH'] = 'Fierărie';
-t['ARMOURY'] = 'Armurărie';
-t['NOW'] = 'Acum';
-t['CLOSE'] = 'Inchide';
-t['USE'] = 'Use';
-t['USETHEM1H'] = 'Use them (producţia/ora)';
-t['OVERVIEW'] = 'Perspectivă';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Atacuri';
-t['NEWS'] = 'Stiri';
-t['ADDCRTPAGE'] = 'Pagina curentă';
-t['SCRPURL'] = 'Pagina TBeyond';
-t['50'] = 'Număr de spioni pentru funcţia "Selectează spioni"';
-t['SPACER'] = 'Delimitator';
-t['53'] = 'Afişează informaţii despre trupe în tooltips';
-t['MEREO'] = 'Mesaje & Rapoarte';
-t['59'] = 'Numărul paginilor de mesaje/rapoarte pre-încărcate<br>(Standard = 1)';
-t['ATTABLES'] = 'Tabele trupe';
-t['MTW'] = 'Risipă';
-t['MTX'] = 'Excedent';
-t['MTC'] = 'Transport actual';
-t['ALFL'] = 'Link către forum extern (Forum intern = loc liber)';
-t['MTCL'] = 'Sterge tot';
-t['82.L'] = 'Ascunde icoanele "Sterge", "în sus", "în jos"';
-t['82.U'] = 'Afişează icoanele "Sterge", "în sus", "în jos"';
-t['CKSORT'] = 'Click pentru sortare';
-t['SVGL'] = 'Valabilă în toate satele';
-t['VGL'] = 'Lista satelor';
-t['12'] = "Afişează icoanele pentru 'dorf1.php' şi 'dorf2.php'";
-t['UPDATEPOP'] = 'Actualizează populaţia satelor';
-t['54'] = 'Afişează distanţe/timpi către sate în tooltips';
-t['EDIT'] = 'Modifică';
-t['60'] = 'Afişează icoane pentru a deschide mesajele/rapoartele într-un pop-up';
-t['NPCO'] = 'Opţiuni NPC Assistant';
-t['26'] = 'Afişează calcule/link-uri NPC Assistant';
-t['58'] = 'Afişează tabel jucători/sate/oaze ocupate';
-t['NEWVILLAGEAV'] = 'Data/Ora';
-t['TIMEUNTIL'] = 'Timp de aşteptare';
-t['61'] = 'Afişează tabela "Sterge toate" pe pagina de rapoarte';
-t['62'] = 'Afişează icon-ul "Trimite IGM" şi pentru mine';
-t['CENTERMAP'] = 'Centrează harta pe acest sat';
-t['13'] = 'Afişează icon-ul "Centrează harta pe acest sat"';
-t['SENDTROOPS'] = 'Trimite trupe';
-t['64'] = 'Afişează detalii in statistica raport';
-t['7'] = "Palat/Vilă/Academie/Trezorerie";
-t['PALACE'] = "Palat";
-t['RESIDENCE'] = "Vilă";
-t['ACADEMY'] = "Academie";
-t['TREASURY'] = "Trezorerie";
-t['45'] = "Nivelul clădirilor aflate în construcţie clipeşte";
-t['14']= "Afişează icoanele 'Trimite trupe' si 'Trimite resurse'<br>în lista satelor";
-t['34'] = "Afişează PC/zi în tabelele de upgrade";
-t['UPGTB'] = "Tabele Upgrade campuri de resurse/clădiri";
-t['35'] = "Afişează consumul de hrană în tabelele de upgrade";
-t['16'] = "Afişează producţia efectivă de hrană în lista satelor";
-t['39'] = "Afişează tabela 'Bară resurse'";
-t['RBTT'] = "Bară resurse";
-t['30'] = 'Afişează link-uri către hartă - jucători';
-t['31'] = 'Afişează link-uri către hartă - alianţe';
-t['40'] = "Afişează 'Bară resurse' ca fereastră separată (floating)";
-t['21'] = "Afişează 'Link-uri' ca fereastră separată (floating)";
-t['23'] = "Afişează 'Bloc-notes' ca fereastră separată (floating)";
-t['17'] = "Afişează populaţia în lista satelor";
-t['29'] = 'Utilizează "Map Analyser"';
-t['63'] = 'Afişează rapoarte extinse ';
-t['3'] = 'Utilizează capacitatea de transport din T3.1 (legionari & scutieri)<br>(servere mixte T3.1 & T3.5)';
-t['18'] = 'Afişează o listă adiţională a satelor (2 coloane)<br> ca fereastră separată (floating)';
-t['42'] = 'Sortează după nume clădirile în tabelul upgrade clădiri';
-t['19'] = 'Afişează informaţii despre clădirile în extindere şi<br>mişcarile de trupe în lista satelor';
-t['32'] = "Afişează 'Bară căutare'";
-t['33'] = "Afişează 'Bară căutare' ca fereastră separată (floating)";
-t['36'] = "Afişează calcule 'Resurse la/Rest' în tabelele de <br>upgrade/instruire trupe";
-t['RESIDUE'] = 'Rest în cazul construcţiei ';
-t['RESOURCES'] = 'Resurse';
-t['2'] = 'Elimină banere reclame';
-t['SH1'] = "Deschide Profilul pentru recunoaşterea automată a capitalei/coordonatelor<br>Construieşte cazarma şi deschide centrul satului pentru recunoaşterea automată a rasei";
-t['46'] = "Afişează informaţii suplimentare pentru fiecare negustor care soseşte";
-t['15'] = "Afişează producţia de lemn, lut, fier pe oră în lista satelor";
-t['11'] = "Link către site-ul pentru postat rapoarte";
-break;
-case "ar":
-case "cl":
-case "mx"://by Leonel (aka Phob0z) & Gabraham
-t['8'] = 'Alianza';
-t['SIM'] = 'Simulador de combate';
-t['QSURE'] = "\u00bfEst\u00e1s seguro?";
-t['LOSS'] = 'P&eacute;rdidas';
-t['PROFIT'] = 'Ganancias';
-t['EXTAV'] = 'Subir nivel';
-t['PLAYER'] = 'Jugador';
-t['VILLAGE'] = 'Aldea';
-t['POPULATION'] = 'Poblaci&oacute;n';
-t['COORDS'] = 'Coordenadas';
-t['MAPTBACTS'] = 'Acciones';
-t['SAVED'] = 'Guardado';
-t['YOUNEED'] = 'Te falta';
-t['TODAY'] = 'hoy';
-t['TOMORROW'] = 'ma&ntilde;ana';
-t['DAYAFTERTOM'] = 'pasado ma&ntilde;ana';
-t['MARKET'] = 'Mercado';
-t['BARRACKS'] = 'Cuartel';
-t['RAP'] = 'Plaza de reuniones';
-t['STABLE'] = 'Establo';
-t['WORKSHOP'] = 'Taller';
-t['SENDRES'] = 'Enviar recursos';
-t['BUY'] = 'Comprar';
-t['SELL'] = 'Vender';
-t['SENDIGM'] = 'Enviar IGM';
-t['LISTO'] = 'Listo';
-t['ON'] = 'el';
-t['AT'] = 'a las';
-t['EFICIENCIA'] = 'Eficiencia';
-t['NEVER'] = 'Nunca';
-t['ALDEAS'] = 'Aldea(s)';
-t['TIEMPO'] = 'Tiempo';
-t['OFREZCO'] = 'Ofrezco';
-t['BUSCO'] = 'Busco';
-t['TIPO'] = 'Tipo';
-t['DISPONIBLE'] = 'Solo disponible';
-t['CUALQUIERA'] = 'Cualquiera';
-t['YES'] = 'Si';
-t['NO'] = 'No';
-t['LOGIN'] = 'Ingresar';
-t['MARCADORES'] = 'Marcadores';
-t['ANYADIR'] = 'A\u00f1adir';
-t['UBU'] = 'URL del nuevo Marcador';
-t['UBT'] = 'Nombre del nuevo Marcador';
-t['DEL'] = 'Eliminar';
-t['MAPA'] = 'Mapa';
-t['MAXTIME'] = 'Tiempo m&aacute;ximo';
-t['ARCHIVE'] = 'Archivar';
-t['SUMMARY'] = 'Resumen';
-t['TROPAS'] = 'Tropas';
-t['CHKSCRV']  = 'Actualice TBeyond';
-t['ACTUALIZAR'] = 'Actualizar informaci&oacute;n de aldea';
-t['VENTAS'] = 'Guardar ofertas';
-t['MAPSCAN'] = 'Escanear el Mapa';
-t['BIC'] = 'Mostrar iconos de acceso r&aacute;pido';
-t['22'] = 'Mostrar hoja de notas';
-t['SAVE'] = 'Guardar';
-t['49'] = 'Opci&oacute;n por defecto cuando se mandan tropas';
-t['AT2'] = 'Refuerzos';
-t['AT3'] = 'Ataque: Normal';
-t['AT4'] = 'Ataque: Asalto';
-t['24'] = 'Tama&ntilde;o de la hoja de notas';
-t['NBSA'] = 'Autom\u00e1tico';
-t['NBSN'] = 'Normal';
-t['NBSB'] = 'Grande';
-t['25'] = 'Altura de la hoja de notas';
-t['NBHAX'] = 'Expandir altura autom\u00e1ticamente';
-t['NBHK'] = 'Altura por defecto';
-t['43'] = 'Mostrar el nivel de las construcciones en el centro de la aldea';
-t['NPCSAVETIME'] = 'Tiempo ahorrado: ';
-t['38'] = 'Mostrar colores en el nivel de los recursos';
-t['44'] = 'Mostrar colores en el nivel de las construcciones';
-t['65'] = 'Color para las actualizaciones disponibles';
-t['66'] = 'Color para los niveles m&aacute;ximos';
-t['67'] = 'Color para las actualizaciones no disponibles';
-t['68'] = 'Color para actualizar por medio de NPC';
-t['TOTALTROOPS'] = 'Tropas totales de la aldea';
-t['20'] = 'Mostrar marcadores';
-t['U.2'] = 'Raza';
-t['1'] = "Servidor Travian v2.x?";
-t['SELECTALLTROOPS'] = "Seleccionar todas las tropas";
-t['PARTY'] = "Fiesta";
-t['CPPERDAY'] = "PC/d\u00eda";
-t['SLOT'] = "Espacios disp.";
-t['TOTAL'] = "Total";
-t['SELECTSCOUT'] = "Seleccionar esp&iacute;as";
-t['SELECTFAKE'] = "Seleccionar unidad para fake";
-t['NOSCOUT2FAKE'] = "No es posible usar esp\u00edas para un fake!";
-t['NOTROOP2FAKE'] = "No hay tropas para usar como fake!";
-t['NOTROOP2SCOUT'] = "No hay esp\u00edas!";
-t['NOTROOPS'] = "No hay tropas en la aldea!";
-t['ALL'] = "Todo";
-t['SH2'] = "En los campos para escribir en el color, puedes poner:<br>- <b>green</b> o <b>red</b> o <b>orange</b>, etc.<br>- El c&oacute;digo Hexadecimal del color.<br>- D&eacute;jalo vac&iacute;o para usar el color por defecto";
-t['SOREP'] = "Mostrar reporte original (para poner en foros)";
-t['56'] = "Mostrar el tipo de casilla al ponerle el cursor encima";
-t['10'] = "&iquest;Qu&eacute; simulador de combate usar?:<br>(men&uacute; izquierdo)";
-t['WSIMO1'] = "Interno (el que trae travian por defecto)";
-t['WSIMO2'] = "Externo (kirilloid.ru)";
-t['27'] = "&iquest;Qu&eacute; analizador usar para las estad&iacute;sticas?";
-t['28'] = "Mostrar enlaces del analizador de estadisticas<br>(icono del mundo al lado de usuarios/alianzas)";
-t['NONEWVER'] = "Tiene la \u00faltima versi\u00f3n disponible";
-t['BVER'] = "Tal ves tengas una versi\u00f3n beta";
-t['NVERAV'] = "Hay una nueva versi\u00f3n del script disponible";
-t['UPDSCR'] = "Actualizar el script?";
-t['CHECKUPDATE'] = "Buscando nuevas versiones del script.<br>Por favor espera...";
-t['CROPFINDER'] = 'Buscar Cultivos';
-t['AVPPV'] = "Poblaci&oacute;n promedio por aldea";
-t['AVPPP'] = "Poblaci&oacute;n promedio por jugador";
-t['37'] = "Mostrar la tabla de actualizaci&oacute;n de los recursos";
-t['41'] = "Mostrar la tabla de actualizaci&oacute;n de las construcciones";
-t['69'] = "Nivel de Registro de la Consola<br>SOLO PARA PROGRAMADORES O DEPURACI&Oacute;N<br>(Valor por defecto = 0)";
-t['48'] = "P&aacute;ginas mostradas en la secci&oacute;n 'Comprar' del mercado<br>(Valor por defecto = 1)";
-t['U.3'] = 'Nombre de tu capital<br><b>Revisa tu perfil para actualizarla</b>';
-t['U.6'] = 'Coordenadas de tu capital<br><b>Revisa tu perfil para actualizarla</b>';
-t['MAX'] = 'Max.';
-t['TOTTRTR'] = 'Tropas totales que se estan creando';
-t['57'] = 'Mostrar distancias y tiempos en tooltips';
-t['TB3SL'] = 'Config. de TBeyond';
-t['UPDALLV'] = 'Actualizar todas las aldeas. USAR CON MUCHO CUIDADO, PUEDE LLEVAR A QUE BORREN TU CUENTA!';
-t['9'] = "Mostrar enlaces adicionales en el menu de la izquierda<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Mapa grande';
-t['USETHEMPR'] = 'Llenar proporcionalmente a la cantidad de cada recurso que hay en los almacenes';
-t['USETHEMEQ'] = 'Llenar con la misma cantidad de cada recurso';
-t['TOWNHALL'] = 'Ayuntamiento';
-t['GSRVT'] = 'Versi&oacute;n del servidor';
-t['ACCINFO'] = 'Informaci\u00f3n de la Cuenta';
-t['NBO'] = 'Hoja de notas';
-t['MNUL'] = 'Men&uacute; en el lado izquierdo';
-t['STAT'] = 'Estad&iacute;sticas';
-t['RESF'] = 'Campos de recursos';
-t['VLC'] = 'Centro de la aldea';
-t['MAPO'] = 'Opciones del Mapa';
-t['COLO'] = 'Opciones de color';
-t['DBGO'] = 'Opciones de depuraci&oacute;n (DEBUG)';
-t['4'] = 'Mercado';
-t['5'] = 'Plaza de reuniones/Cuartel/Taller/Establo';
-t['6'] = "Ayuntamiento/Hogar del H&eacute;roe/Armer&iacute;a/Herrer&iacute;a";
-t['HEROSMANSION'] = "Hogar del H&eacute;roe";
-t['BLACKSMITH'] = 'Armer&iacute;a';
-t['ARMOURY'] = 'Herrer&iacute;a';
-t['NOW'] = 'Ahora';
-t['CLOSE'] = 'Cerrar';
-t['USE'] = 'Usar';
-t['USETHEM1H'] = 'Llenar con 1 hora de producci&oacute;n de esta aldea';
-t['OVERVIEW'] = 'Resumen';
-t['FORUM'] = 'Foro';
-t['ATTACKS'] = 'Ataques';
-t['NEWS'] = 'Noticias';
-t['ADDCRTPAGE'] = 'A\u00F1adir P\u00E1gina Actual';
-t['SCRPURL'] = 'P\u00E1g. de TBeyond';
-t['50'] = 'N° de esp&iacute;as para selecionar por defecto en "Seleccionar espías"';
-t['SPACER'] = 'Separador';
-t['53'] = 'Mostrar informaci&oacute;n de tropas en tooltips';
-t['MEREO'] = 'Mensajes y Reportes';
-t['59'] = 'N&uacute;mero de pag&iacute;nas de mensajes/reportes precargadas<br>(Valor por defecto = 1)';
-t['ATTABLES'] = 'Tabla de tropas';
-t['MTW'] = 'Disponible';
-t['MTX'] = 'Excedido';
-t['MTC'] = 'Carga actual';
-t['ALFL'] = 'V&iacute;nculo a foro externo<br>(Dejar en blanco para foro interno)';
-t['82.L'] = 'Bloquear marcadores (Ocultar iconos de eliminar, subir, bajar)';
-t['MTCL'] = 'Limpiar todo';
-t['82.U'] = 'Desbloquear marcadores (Mostrar iconos de eliminar, subir, bajar)';
-t['CKSORT'] = 'Haga clic para ordenar';
-t['MIN'] = 'Min';
-t['SVGL'] = "Compartir entre las aldeas";
-t['VGL'] = 'Lista de Aldeas';
-t['12'] = "Mostrar enlaces 'dorf1.php' y 'dorf2.php'";
-t['UPDATEPOP'] = 'Actualizar habitantes';
-t['54'] = 'Mostrar tiempos y distancias a aldeas en tooltips';
-t['EDIT'] = 'Editar';
-t['58'] = 'Mostrar tabla de Jugadores/Aldeas/Oasis ocupados';
-t['NEWVILLAGEAV'] = 'Fecha/Hora';
-t['TIMEUNTIL'] = 'Tiempo a esperar';
-t['61'] = 'Mostrar la tabla "Borrar todo" en la p\u00e1gina de Informes';
-t['62'] = 'Mostrar \u00edcono "Enviar IGM" tambi\u00e9n para mi';
-t['CENTERMAP'] = 'Centrar mapa sobre esta aldea';
-t['13'] = 'Mostrar \u00edcono "Centrar mapa sobre esta aldea"';
-t['SENDTROOPS'] = 'Enviar tropas';
-t['64'] = 'Mostrar detalles en Inf\u00f3rmes Estad\u00edsticos';
-t['7'] = "Palacio/Residencia/Academia/Tesoro";
-t['PALACE'] = "Palacio";
-t['RESIDENCE'] = "Residencia";
-t['ACADEMY'] = "Academia";
-t['TREASURY'] = "Tesoro";
-t['45'] = "Mostrar nivel parpadeando en los edificios que est\u00e1n siendo ampliados";
-t['14'] = "Mostrar \u00edcono 'Enviar tropas/Enviar recursos' en lista de aldeas";
-t['36'] = "Mostrar los cálculos de 'Hasta entonces/Excedentes'<br>en las tablas de entrenamiento/mejora";
-t['RESIDUE'] = 'Excedentes si construyes ';
-t['RESOURCES'] = 'Recursos';
-t['34'] = 'Mostrar PC/d\u00EDa en tablas de actualizaci\u00F3n';
-t['UPGTB'] = 'Tablas de actualizaci\u00F3n de Recursos y Edificios';
-t['35'] = 'Mostrar consumo de cereales en tablas de actualizaci\u00F3n';
-t['16'] = 'Mostrar producci\u00F3n efectiva de cereales en lista de aldeas';
-t['RBTT'] = 'Barras de Recursos';
-t['39'] = "Mostrar tabla 'Barras de Recursos'";
-t['40'] = "Mostrar tabla 'Barras de Recursos' como ventana flotante";
-t['21'] = "Mostrar 'marcadores' como ventana flotante";
-t['23'] = "Mostrar 'hoja de notas' como ventana flotante";
-t['17'] = 'Mostrar cantidad de habitantes en lista de aldeas';
-t['29'] = 'Analizador de Mapas a ser usado';
-t['30'] = 'Mostrar v\u00EDnculo a mapa, para un usuario';
-t['31'] = 'Mostrar v\u00EDnculo a mapa, para una alianza';
-t['63'] = 'Mostrar Reportes de Batalla mejorados de ';
-t['18'] = 'Mostrar lista de aldeas adicional (2 columnas) como ventana flotante';
-t['60'] = 'Mostrar v\u00EDnculos para abrir mensajes/informes como ventanas emergentes';
-t['42'] = 'Ordenar edificios por su nombre en tablas de actualizaci\u00F3n';
-t['19'] = 'Mostrar informaci\u00F3n acerca de edificios en construcci\u00F3n y movimiento de tropas<br>en lista de aldeas';
-t['32'] = "Mostrar 'Buscador'";
-t['3'] = 'Forzar el c\u00E1lculo de capacidad de Legionarios y Falanges seg\u00FAn T3.1<br>(para servidores mixtos T3.1 & T3.5)';
-t['33'] = "Mostrar 'Buscador' como ventana flotante";
-t['2'] = 'Quitar banners publicitarios';
-t['SH1'] = "Abra su Perfil para detectar autom\u00E1ticamente la capital/coordenadas<br>Construya el cuartel para la detecci\u00F3n autom\u00E1tica de la raza y<br>abra entonces el centro de la aldea";
-t['46'] = "Mostrar informaci\u00F3n adicional para cada mercader en camino";
-break;
-case "es"://by Psicothika
-t['8'] = 'Alianza';
-t['SIM'] = 'Simulador de combate';
-t['QSURE'] = '¿Estás seguro?';
-t['LOSS'] = 'Pérdidas';
-t['PROFIT'] = 'Ganancias';
-t['EXTAV'] = 'Subir nivel';
-t['PLAYER'] = 'Jugador';
-t['VILLAGE'] = 'Aldea';
-t['POPULATION'] = 'Población';
-t['COORDS'] = 'Coordenadas';
-t['MAPTBACTS'] = 'Acciones';
-t['SAVED'] = 'Guardado';
-t['YOUNEED'] = 'Te falta';
-t['TODAY'] = 'hoy';
-t['TOMORROW'] = 'mañana';
-t['DAYAFTERTOM'] = 'pasado mañana';
-t['MARKET'] = 'Mercado';
-t['BARRACKS'] = 'Cuartel';
-t['RAP'] = 'Plaza de reuniones';
-t['STABLE'] = 'Establo';
-t['WORKSHOP'] = 'Taller';
-t['SENDRES'] = 'Enviar recursos';
-t['BUY'] = 'Comprar';
-t['SELL'] = 'Vender';
-t['SENDIGM'] = 'Enviar IGM';
-t['LISTO'] = 'Disponible';
-t['ON'] = 'el';
-t['AT'] = 'a las';
-t['EFICIENCIA'] = 'Eficacia';
-t['NEVER'] = 'Nunca';
-t['ALDEAS'] = 'Aldea(s)';
-t['TIEMPO'] = 'Tiempo';
-t['OFREZCO'] = 'Ofrezco';
-t['BUSCO'] = 'Busco';
-t['TIPO'] = 'Tipo';
-t['DISPONIBLE'] = 'Solo disponible';
-t['CUALQUIERA'] = 'Cualquiera';
-t['YES'] = 'Si';
-t['NO'] = 'No';
-t['LOGIN'] = 'Identificarse';
-t['MARCADORES'] = 'Marcadores';
-t['ANYADIR'] = 'Añadir';
-t['UBU'] = 'URL del nuevo Marcador';
-t['UBT'] = 'Nombre del nuevo Marcador';
-t['DEL'] = 'Eliminar';
-t['MAPA'] = 'Mapa';
-t['MAXTIME'] = 'Tiempo máximo';
-t['ARCHIVE'] = 'Archivar';
-t['SUMMARY'] = 'Resumen';
-t['TROPAS'] = 'Tropas';
-t['CHKSCRV'] = 'Actualizar TBeyond';
-t['ACTUALIZAR'] = 'Actualizar información sobre la aldea';
-t['VENTAS'] = 'Guardar ofertas';
-t['MAPSCAN'] = 'Escanear el Mapa';
-t['BIC'] = 'Mostrar iconos de acceso rápido';
-t['22'] = 'Mostrar block de notas';
-t['SAVE'] = 'Guardar';
-t['49'] = 'Opción por defecto para el envió de tropas';
-t['AT2'] = 'Refuerzos';
-t['AT3'] = 'Ataque: Normal';
-t['AT4'] = 'Ataque: Atraco';
-t['24'] = 'Tamaño del block de notas';
-t['NBSA'] = 'Automático';
-t['NBSN'] = 'Normal (pequeño)';
-t['NBSB'] = 'Grande (alargado)';
-t['25'] = 'Altura del block de notas';
-t['NBHAX'] = 'Expandir altura automáticamente';
-t['NBHK'] = 'Altura por defecto';
-t['43'] = 'Mostrar el nivel de las construcciones en el centro de la aldea';
-t['NPCSAVETIME'] = 'Tiempo ahorrado: ';
-t['38'] = 'Mostrar colores en el nivel de los recursos';
-t['44'] = 'Mostrar colores en el nivel de las construcciones';
-t['65'] = 'Color para las actualizaciones disponibles <br>(Defecto = En blanco)';
-t['66'] = 'Color para los niveles máximos<br>(Defecto = En blanco)';
-t['67'] = 'Color para las actualizaciones no disponibles<br>(Defecto = En blanco)';
-t['68'] = 'Color para actualizar por medio de NPC<br>(Defecto = En blanco)';
-t['TOTALTROOPS'] = 'Total de tropas de la aldea';
-t['20'] = 'Mostrar marcadores';
-t['U.2'] = 'Raza';
-t['1'] = "Servidor de Travian v2.x?";
-t['SELECTALLTROOPS'] = "Seleccionar todas las tropas";
-t['PARTY'] = "Fiesta";
-t['CPPERDAY'] = "PC por día";
-t['SLOT'] = "Espacio disponible";
-t['TOTAL'] = "Total";
-t['SELECTSCOUT'] = "Seleccionar espías";
-t['SELECTFAKE'] = "Seleccionar unidad para fake (Engaño)";
-t['NOSCOUT2FAKE'] = "No es posible usar espías para hacer un fake!";
-t['NOTROOP2FAKE'] = "No hay tropas para usar como fake!";
-t['NOTROOP2SCOUT'] = "No hay espías!";
-t['NOTROOPS'] = "No hay tropas en la aldea!";
-t['ALL'] = "Todo";
-t['NORACE'] = "Construir el cuartel para determinar automáticamente la raza y / o abrir el centro de la aldea ...";
-t['SH2'] = "Puedes modificar o personalizar los colores, escribiendo en los campos destinados al color:<br>- Green, Red, orange, etc.<br>- El código Hexadecimal del color como por ejemplo #004523.<br>- Dejar en blanco para usar el color por defecto.";
-t['SOREP'] = "Mostrar el reporte original (para poner en foros)";
-t['56'] = "Mostar la descripción del tipo de casilla/oasis<br>al pasar el mouse por encima de la casilla.";
-t['10'] = "¿Qué simulador de ataque deseas usar?:<br>(menú izquierdo)";
-t['WSIMO1'] = "Interno (el que trae travian por defecto)";
-t['WSIMO2'] = "Externo (promovido por kirilloid.ru)";
-t['27'] = "¿Qué Analizador de estadísticas deseas usar?";
-t['28'] = "Mostrar enlaces del analizador de estadísticas<br>(icono de la bola del mundo al lado de usuarios/alianzas)";
-t['NONEWVER'] = "Usted tiene la última versión disponible";
-t['BVER'] = "Usted dispone de una versión de prueba";
-t['NVERAV'] = "Una nueva versión del script está disponible";
-t['UPDSCR'] = "¿Actualizar el script?";
-t['CHECKUPDATE'] = "Buscando una nueva versión del script.<br>Por favor espere...";
-t['CROPFINDER'] = "Búsqueda 9c / 15c";
-t['AVPPV'] = "Promedio de población por aldea";
-t['AVPPP'] = "Promedio de población por jugador";
-t['37'] = "Mostrar la tabla de actualización de recursos";
-t['41'] = "Mostrar la tabla de actualización de las construcciones";
-t['69'] = "Nivel de Registro de la Consola<br>SOLO PARA PROGRAMADORES O DEPURACIÓN<br>(Valor por defecto = 0)";
-t['48'] = "Páginas mostradas en la sección 'Comprar' del mercado<br>(Valor por defecto = 1)";
-t['U.3'] = 'Nombre de tu capital<br>Entra en tu perfil para actualizarla';
-t['U.6'] = 'Coordenadas de tu capital<br>Entra en tu perfil para actualizarlas';
-t['MAX'] = 'Máximo.';
-t['TOTTRTR'] = 'Tropas totales que se están creando';
-t['57'] = 'Mostrar distancias y tiempos en un mensaje emergente';
-t['TB3SL'] = 'Configurar TBeyond';
-t['UPDALLV'] = 'Actualizar todas las aldeas. USAR CON MUCHO CUIDADO, PUEDE LLEVAR A QUE BORREN TU CUENTA!';
-t['9'] = "Mostrar enlaces adicionales en el menú de la izquierda<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Mapa grande';
-t['USETHEMPR'] = 'Repartir la cantidad de recursos de los almacenes (de manera proporcional)';
-t['USETHEMEQ'] = 'Repartir la cantidad de recursos de los almacenes (equitativa=misma cantidad)';
-t['TOWNHALL'] = 'Ayuntamiento';
-t['GSRVT'] = 'Versión del servidor';
-t['ACCINFO'] = 'Información de la Cuenta';
-t['BOOKMARKOPTIONS'] = 'Marcadores';
-t['NBO'] = 'Block de notas';
-t['MNUL'] = 'Menú en el lado izquierdo';
-t['STAT'] = 'Estadísticas';
-t['RESF'] = 'Campos de recursos';
-t['VLC'] = 'Centro de la aldea';
-t['MAPO'] = 'Opciones del mapa';
-t['COLO'] = 'Opciones de color';
-t['DBGO'] = 'Opciones de depuración (DEBUG MODE)';
-t['4'] = 'Mercado';
-t['5'] = 'Plaza de reuniones/Cuartel/Taller/Establo';
-t['6'] = "Ayuntamiento/Hogar del Héroe/Armería/Herrería";
-t['HEROSMANSION'] = "Hogar del Héroe";
-t['BLACKSMITH'] = 'Herrería';
-t['ARMOURY'] = 'Armería';
-t['NOW'] = 'Ahora';
-t['CLOSE'] = 'Cerrar';
-t['USE'] = 'Usar';
-t['USETHEM1H'] = 'Repartir materias primas de esta aldea (1 hora de producción)';
-t['OVERVIEW'] = 'Resumen';
-t['FORUM'] = 'Foro';
-t['ATTACKS'] = 'Ataques';
-t['NEWS'] = 'Noticias';
-t['ADDCRTPAGE'] = 'Añadir página actual';
-t['SCRPURL'] = 'Página de TBeyond';
-t['50'] = 'N° de espías para seleccionar por defecto en<br>"Seleccionar espías"';
-t['SPACER'] = 'Espacio';
-t['53'] = 'Mostrar información de las tropas en mensajes emergentes';
-t['MEREO'] = 'Mensajes y Reportes';
-t['59'] = 'Número de páginas de mensajes/reportes precargados<br>(Valor por defecto = 1)';
-t['ATTABLES'] = 'Tabla de tropas';
-t['MTW'] = 'Disponible';
-t['MTX'] = 'Excedido';
-t['MTC'] = 'Carga actual';
-t['ALFL'] = 'Vínculo a foro externo<br>(Dejar en blanco para foro interno)';
-t['82.L'] = 'Bloquear marcadores (Ocultar iconos de eliminar, subir, bajar)';
-t['MTCL'] = 'Limpiar todo';
-t['82.U'] = 'Desbloquear marcadores (Mostrar iconos de eliminar, subir, bajar)';
-t['CKSORT'] = 'Haga clic aquí para ordenar';
-t['MIN'] = 'Mínimo';
-t['SVGL'] = 'Repartir entre las aldeas';
-t['VGL'] = 'Lista de Aldeas';
-t['12'] = "Mostrar enlaces 'dorf1.php' y 'dorf2.php'";
-t['UPDATEPOP'] = 'Actualizar habitantes';
-t['54'] = 'Mostrar tiempos y distancias a aldeas en mensajes emergentes';
-t['EDIT'] = 'Editar';
-t['NPCO'] = 'Asistente de opciones del NPC';
-t['26'] = 'Mostrar Asistente de NPC para calculadora/enlaces';
-t['58'] = 'Mostrar tabla de Jugadores/Aldeas/Oasis ocupados';
-t['NEWVILLAGEAV'] = 'Fecha/Hora';
-t['TIMEUNTIL'] = 'Tiempo de espera';
-t['61'] = 'Mostar "Borrar todo" en la página de informes';
-t['62'] = 'Mostrar icono "Enviar IGM" para mitambién';
-t['CENTERMAP'] = 'Centrar mapa sobre esta aldea';
-t['13'] = 'Mostrar icono "Centrar mapa sobre esta aldea"';
-t['SENDTROOPS'] = 'Enviar tropas';
-t['64'] = 'Mostrar detalles estadísticos en los reportes';
-t['7'] = "Palacio/Residencia/Academia/Tesoro";
-t['PALACE'] = "Palacio";
-t['RESIDENCE'] = "Residencia";
-t['ACADEMY'] = "Academia";
-t['TREASURY'] = "Tesoro";
-t['45'] = "Mostrar nivel parpadeando en los edificios que están siendo ampliados";
-t['14'] = "Mostrar icono 'Enviar tropas/Enviar recursos' en lista de aldeas";
-t['34'] = "Ver información de CP por día en la actualización de las tablas";
-t['UPGTB'] = "Mostrar actualizaciones en las tablas de  recursos y edificios.";
-t['35'] = "Mostrar actualizaciones en las tablas de consumo de cereal.";
-t['16'] = "Mostrar eficacia de producción de cereal en el listado de aldeas";
-t['RBTT'] = "Recursos";
-t['39'] = "Ver tabla de 'Recursos'";
-t['40'] = "Ver tabla de 'Recursos' en una ventana flotante";
-t['21'] = "Ver tabla de 'Enlaces' en una ventana flotante";
-t['23'] = "Ver 'Block de notas' en una ventana flotante";
-t['17'] = "Mostrar población en el listado de aldeas";
-t['29'] = 'Usar el analizador del mapa';
-t['30'] = 'Mostrar mapa de enlaces para usuarios';
-t['31'] = 'Mostrar mapa de enlaces para alianzas';
-t['63'] = 'Mostar  en los informes de batalla';
-t['18'] = 'Muestra en 2 columnas una lista de aldeas en una ventana flotante';
-t['60'] = 'Mostrar vínculos para abrir los mensajes e informes en ventanas emergentes';
-t['42'] = 'Ordenar edificios por su nombre en la tabla de actualizaciones';
-t['19'] = 'Mostrar información sobre los avances en los edificios y los movimientos de tropas en el listado de aldeas';
-t['32'] = "Mostrar 'Barra de Búsqueda'";
-t['3'] = 'Forzar T3.1 Legionnaire & Phalanx capacity calculation<br>(para servidores mixtos T3.1 & T3.5)';
-t['33'] = "Ver 'Barra de Búsqueda' en una ventana flotante";
-t['36'] = "Mostrar los cálculos de 'Hasta entonces/Excedentes'<br>en las tablas de entrenamiento/mejora";
-t['RESIDUE'] = 'Excedentes si construyes ';
-t['RESOURCES'] = 'Recursos';
-t['2'] = 'Eliminar anuncios';
-t['15'] = "Mostrar la produccion por hora de madera, barro, hierro y cereal en el listado de aldeas";
-t['11'] = "Enlace para la publicación de informes";
-break;
-case "fr"://by fr3nchlover & britch & sp4m4me
-t['SIM'] = 'Simulateur';
-t['QSURE'] = 'Es-tu certain ?';
-t['LOSS'] = 'Pertes en matériels';
-t['PROFIT'] = 'Rentabilité';
-t['EXTAV'] = 'Tu peux déjà augmenter son niveau';
-t['PLAYER'] = 'Joueur';
-t['POPULATION'] = 'Population';
-t['COORDS'] = 'Coordonnées';
-t['SAVED'] = 'Sauvegarde';
-t['YOUNEED'] = 'Il manque';
-t['TODAY'] = 'aujourd\'hui';
-t['TOMORROW'] = 'demain';
-t['DAYAFTERTOM'] = 'après-demain';
-t['MARKET'] = 'Place du marché';
-t['BARRACKS'] = 'Caserne';
-t['RAP'] = 'Place de rassemblement';
-t['STABLE'] = 'Ecurie';
-t['WORKSHOP'] = 'Atelier';
-t['SENDRES'] = 'Envoyer des ressources';
-t['BUY'] = 'Acheter des ressources';
-t['SELL'] = 'Vendre des ressources';
-t['SENDIGM'] = 'Envoyer MSG';
-t['LISTO'] = 'Prêt';
-t['ON'] = 'le';
-t['AT'] = 'à';
-t['EFICIENCIA'] = 'Efficacité';
-t['NEVER'] = 'Jamais';
-t['TIEMPO'] = 'Temps';
-t['OFREZCO'] = 'Offre';
-t['BUSCO'] = 'Recherche';
-t['DISPONIBLE'] = 'Disponible';
-t['CUALQUIERA'] = 'Toutes';
-t['YES'] = 'Oui';
-t['NO'] = 'Non';
-t['MARCADORES'] = 'Liens';
-t['ANYADIR'] = 'Ajouter';
-t['UBU'] = 'URL du nouveau lien';
-t['UBT'] = 'Texte du nouveau lien';
-t['DEL'] = 'Supprimer';
-t['MAPA'] = 'Carte';
-t['MAXTIME'] = 'Temps maximum';
-t['SUMMARY'] = 'Résumé';
-t['TROPAS'] = 'Troupes';
-t['CHKSCRV'] = 'MàJ TBeyond';
-t['ACTUALIZAR'] = 'Mise a jour informations village';
-t['VENTAS'] = 'Paramètres Vente';
-t['MAPSCAN'] = 'Analyse de la carte - ATTENTION NE PAS UTILISER- RISQUE BLOCAGE OP !';
-t['BIC'] = 'Afficher les icones étendues';
-t['22'] = 'Afficher le bloc-notes';
-t['SAVE'] = 'Sauver';
-t['49'] = 'Action par défaut sur place de rassemblement';
-t['AT2'] = 'Assistance';
-t['AT3'] = 'Attaque: Normal';
-t['AT4'] = 'Attaque: Pillage';
-t['24'] = 'Taille Bloc-notes';
-t['NBSN'] = 'Normal';
-t['NBSB'] = 'Large';
-t['25'] = 'Hauteur Bloc-notes';
-t['NBHAX'] = 'Hauteur Auto';
-t['NBHK'] = 'Hauteur par défaut';
-t['43'] = 'Afficher nombres';
-t['NPCSAVETIME'] = 'Sauver : ';
-t['38'] = 'Afficher les ressources en couleur';
-t['44'] = 'Afficher les batiments en couleur';
-t['65'] = 'Couleur pour Construction possible<br>(Vide = couleur par défaut)';
-t['66'] = "Couleur pour 'Niveau max'<br>(Vide = couleur par défaut)";
-t['67'] = "Couleur pour 'Construction impossible'<br>(Vide = couleur par défaut)";
-t['68'] = "Couleur pour 'Construction avec NPC'<br>(Vide = défaut)";
-t['TOTALTROOPS'] = 'Troupes totales du village';
-t['20'] = 'Afficher les liens favoris';
-t['U.2'] = 'Peuple';
-t['1'] = "Serveur Travian v2.x";
-t['SELECTALLTROOPS'] = "Tout sélectionner";
-t['PARTY'] = "Festivités";
-t['CPPERDAY'] = "PC/jour";
-t['SELECTSCOUT'] = "Eclaireur";
-t['SELECTFAKE'] = "Diversion";
-t['NOSCOUT2FAKE'] = "Un Eclaireur ne peut pas faire diversion !";
-t['NOTROOP2FAKE'] = "Pas de troupes pour une diversion !";
-t['NOTROOP2SCOUT'] = "Pas de troupes pour partir en reconnaissance !";
-t['NOTROOPS'] = "Pas de troupes dans le village !";
-t['ALL'] = "Tout";
-t['SH2'] = "Dans case 'Couleur' vous pouvez saisir :<br>-red ou orange, etc.<br>- ou une couleur HEX exemple :#004523<br>- Laisser vide pour couleur par défaut";
-t['SOREP'] = "Rapport original (A cocher obligatoirement avant diffusion du RC)";
-t['56'] = "Affiche le type de case (sur carte)<br>lorsdu survol du curseur";
-t['10'] = "Simulateur de combat à utiliser :<br>(menu gauche)";
-t['WSIMO1'] = "Interne (celui du jeu)";
-t['WSIMO2'] = "Externe (fourni par kirilloid.ru)";
-t['27'] = "Analyseur à utiliser ";
-t['28'] = "Afficher liens Analyseur";
-t['NONEWVER'] = "Pas de mise à jour disponible";
-t['BVER'] = "Tu as une version Beta du script (supérieure à version officielle) - Mise à jour impossible";
-t['NVERAV'] = "Une nouvelle version du script est disponible";
-t['UPDSCR'] = "Mettre à jour le script ?";
-t['CHECKUPDATE'] = "Recherche de nouvelle version du script.<br>Veuillez patienter...";
-t['CROPFINDER'] = "Recherche 15C";
-t['AVPPV'] = "Population moyenne par village";
-t['AVPPP'] = "Population moyenne par joueur";
-t['37'] = "Afficher tableau sur page ressources";
-t['41'] = "Afficher tableau sur page batiments";
-t['69'] = "Console Log - RÉSERVÉ aux DEVELOPPEURS et DEBUGGEURS<br>(Défaut = 0)";
-t['48'] = "Nombre de pages des offres marché ('Marché => Offre')<br>à charger/consulter (Défaut = 1)";
-t['U.3'] = 'Nom de la Capitale';
-t['U.6'] ='Coordonnées de la Capitale';
-t['TOTTRTR'] = 'Total troupes en fabrication ';
-t['57'] = 'Afficher distance & temps';
-t['UPDALLV'] = 'Actualiser tous les villages. ATTENTION : NE PAS UTILISER - RISQUE BLOCAGE OP. !';
-t['9'] = "Ajouter liens dans menu gauche<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Carte étendue';
-t['USETHEMPR'] = 'Calculer (proportionnel)';
-t['USETHEMEQ'] = 'Calculer (égalité)';
-t['TOWNHALL'] = 'Hotel de ville';
-t['GSRVT'] = 'Type de serveur';
-t['ACCINFO'] = 'Données personnelles';
-t['NBO'] = 'Bloc-notes';
-t['MNUL'] = 'Menu à gauche';
-t['STAT'] = 'Statistiques';
-t['RESF'] = 'Vue globale';
-t['VLC'] = 'Centre village';
-t['MAPO'] = 'options Carte';
-t['COLO'] = 'options Couleur';
-t['DBGO'] = 'options Debug';
-t['4'] = 'Marché';
-t['5'] = 'Rassemblement/Caserne/Atelier/Etable';
-t['6'] = "Hotel de ville/Manoir héros/Armurerie/Usine";
-t['HEROSMANSION'] = "Manoir Héros";
-t['BLACKSMITH'] = "Armurerie";
-t['ARMOURY'] = "Usine armure";
-t['NOW'] = 'Maintenant';
-t['CLOSE'] = 'Fermer';
-t['USE'] = 'Utiliser';
-t['USETHEM1H'] = 'Calculer 1h de Prod.';
-t['OVERVIEW'] = 'Vue globale';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Attaques';
-t['NEWS'] = 'Nouvelles';
-t['ADDCRTPAGE'] = 'Marquer cette page';
-t['SCRPURL'] = 'Page TBeyond';
-t['50'] = 'Nb. d\'éclaireurs lors du clic sur "Eclaireur"';
-t['SPACER'] = 'Séparateur';
-t['53'] = 'Afficher info troupes dans info-bulle';
-t['MEREO'] = 'Messages & Rapports';
-t['59'] = 'Nb. de pages message/rapport à charger<br>(Défaut = 1)';
-t['ATTABLES'] = 'Liste troupes';
-t['MTW'] = 'Non utilisé';
-t['MTX'] = 'En trop';
-t['MTC'] = 'Transporté';
-t['ALFL'] = 'Lien vers forum externe<br>(Laisser vide pour forum interne)';
-t['82.L'] = 'Verrouiller (Cache icones pour gérer les liens)';
-t['MTCL'] = 'Tout effacer';
-t['82.U'] = 'Déverrouiller (Affiche icones pour gérer les liens)';
-t['CKSORT'] = 'Cliquer pour trier';
-t['SVGL'] = 'Sauver pour tous';
-t['VGL'] = 'Liste des Villages';
-t['12'] = "Afficher liens 'Global' et 'Centre' sur liste des Villages";
-t['UPDATEPOP'] = 'MaJ pop.';
-t['54'] = 'Afficher distance temps dans info bulle';
-t['EDIT'] = 'Editer';
-t['NPCO'] = 'Options assistant NPC';
-t['26'] = 'Afficher options NPC Assistant';
-t['58'] = 'Afficher tableau joueurs/villages/oasis';
-t['NEWVILLAGEAV'] = 'Date/Heure';
-t['TIMEUNTIL'] = 'Temps d attente';
-t['61'] = 'Afficher "Tout supprimer" dans page de rapports';
-t['62'] = 'Afficher icone "Envoi message" pour moi aussi';
-t['CENTERMAP'] = 'Centrer la carte sur ce village';
-t['13'] = 'Afficher l icone "Centrer sur ce village"';
-t['ALLOWINETGP'] = 'Permettre packs graphiques Internet';
-t['SENDTROOPS'] = 'Envoyer troupes';
-t['64'] = 'Afficher detail Statistiques dans rapport';
-t['7'] = "Palais/Residence/Academie/Tresor";
-t['PALACE'] = "Palais";
-t['RESIDENCE'] = "Résidence";
-t['ACADEMY'] = "Académie";
-t['TREASURY'] = "Trésor";
-t['45'] = "Afficher niveau clignotant sur batiment constructible";
-t['14'] = "Afficher icones 'Envoyer troupes/Envoyer ressources' dans la liste des villages";
-t['34'] = "Afficher PC/jour dans le tableau";
-t['UPGTB'] = "Tableau de mise a jour des batiments/champs";
-t['35'] = "Afficher la consommation de cereales dans le tableau";
-t['16'] = "Afficher la production de cereales dans la liste des villages";
-t['RBTT'] = "Barre de ressource";
-t['39'] = "Afficher le tableau de 'Barre de ressource'";
-t['40'] = "Afficher le tableau de 'Barre de ressource' comme une fenetre flotante";
-t['21'] = "Afficher 'Liens favoris' comme une fenetre flotante";
-t['23'] = "Afficher 'Bloc note' comme une fenetre flotante";
-t['17'] = "Afficher la population dans la liste des villages";
-t['29'] = 'Analyser de carte a utiliser';
-t['30'] = 'Afficher un lien vers la carte pour les joueurs';
-t['31'] = 'Afficher un lien vers la carte pour les alliances';
-t['63'] = 'Montrer les RC ameliores ';
-t['3'] = 'Forcer le calcul des Légionnaires & Phalanges T3.1<br>(pour les serveurs mixtes 3.1 et 3.5)';
-t['18'] = 'Afficher en plus une liste des villages (2 colonnes) en fenêtre flottante';
-t['60'] = 'Montrer liens pour ouvrir les messages/rapports dans une popup';
-t['42'] = 'Classer les batiments par nom dans le tableau';
-t['19'] = 'Afficher les informations sur les constructions et les mouvements de troupes<br>dans la liste de villages';
-t['32'] = "Afficher 'Rechercher'";
-t['33'] = "Afficher 'Rechercher' dans fenêtre flottante";
-break;
-case "nl"://by anonymous author & Boeruh & TforAgree & Dakkie
-t['8'] = 'Alliantie';
-t['SIM'] = 'Gevecht simulator';
-t['QSURE'] = 'Weet je het zeker?';
-t['LOSS'] = 'Verlies';
-t['PROFIT'] = 'Winst';
-t['EXTAV'] = 'Uitbreiding beschikbaar';
-t['PLAYER'] = 'Speler';
-t['VILLAGE'] = 'Dorp';
-t['POPULATION'] = 'Populatie';
-t['COORDS'] = 'Co&ouml;rd';
-t['MAPTBACTS'] = 'Acties';
-t['SAVED'] = 'Bewaard';
-t['YOUNEED'] = 'Nog nodig';
-t['TODAY'] = 'vandaag';
-t['TOMORROW'] = 'morgen';
-t['DAYAFTERTOM'] = 'overmorgen';
-t['MARKET'] = 'Marktplaats';
-t['BARRACKS'] = 'Barakken';
-t['RAP'] = 'Verzamelpunt';
-t['STABLE'] = 'Stal';
-t['WORKSHOP'] = 'Werkplaats';
-t['SENDRES'] = 'Stuur grondstoffen';
-t['BUY'] = 'Koop';
-t['SELL'] = 'Verkoop';
-t['SENDIGM'] = 'Stuur IGM';
-t['LISTO'] = 'Uitbreiding beschikbaar';
-t['ON'] = 'om';
-t['AT'] = 'om';
-t['EFICIENCIA'] = 'Effici&euml;ntie';
-t['NEVER'] = 'Nooit';
-t['ALDEAS'] = 'Dorp(en)';
-t['TIEMPO'] = 'Tijd';
-t['OFREZCO'] = 'Bieden';
-t['BUSCO'] = 'Zoeken';
-t['TIPO'] = 'Type';
-t['DISPONIBLE'] = 'Alleen beschikbaar';
-t['CUALQUIERA'] = 'Elke';
-t['YES'] = 'Ja';
-t['NO'] = 'Nee';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Links';
-t['ANYADIR'] = 'Toevoegen';
-t['UBU'] = 'Nieuwe link URL';
-t['UBT'] = 'Nieuwe link Text';
-t['DEL'] = 'Verwijder';
-t['MAPA'] = 'Map';
-t['MAXTIME'] = 'Max. tijd';
-t['ARCHIVE'] = 'Archiveer';
-t['SUMMARY'] = 'Samenvatting';
-t['TROPAS'] = 'Troepen';
-t['CHKSCRV'] = 'Update TBeyond';
-t['ACTUALIZAR'] = 'Update dorp informatie';
-t['VENTAS'] = 'Opgeslagen verkopen';
-t['MAPSCAN'] = 'Scan de map';
-t['BIC'] = 'Uitgebreide iconen zichtbaar';
-t['SAVE'] = 'Opslaan';
-t['49'] = 'Verzamelplaats standaard aktie';
-t['AT2'] = 'Versterking';
-t['AT3'] = 'Aanval';
-t['AT4'] = 'Overval';
-t['22'] = 'Kladblok zichtbaar';
-t['24'] = 'Kladblok grote';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normaal (klein)';
-t['NBSB'] = 'Groot';
-t['25'] = 'Kladblok hoogte';
-t['NBHAX'] = 'Automatisch groter maken';
-t['NBHK'] = 'Standaard hoogte';
-t['43'] = 'Dorp nummers weergeven';
-t['NPCSAVETIME'] = 'Bespaar: ';
-t['38'] = 'Grondstof kleur niveau weergeven';
-t['44'] = 'Gebouwen kleur niveau weergeven';
-t['65'] = 'Kleur voor uitbreidbaar<br>(Standaard leeg)';
-t['66'] = 'Kleur max level<br>(Standaard leeg)';
-t['67'] = 'Kleur niet uitbreidbaar<br>(Standaard leeg)';
-t['68'] = 'Kleur uitbreidbaar via NPC<br>(Standaard leeg)';
-t['TOTALTROOPS'] = 'Totaal dorp troepen';
-t['SHOWDISTANCES'] = 'Afstand weergeven';
-t['20'] = 'Links laten zien';
-t['U.2'] = 'Ras';
-t['1'] = "Travian v2.x server";
-t['SELECTALLTROOPS'] = "Selecteer alle troepen";
-t['PARTY'] = "Feest";
-t['CPPERDAY'] = "CP/dag";
-t['SLOT'] = "Slot";
-t['TOTAL'] = "Totaal";
-t['SELECTSCOUT'] = "Selecteer verkenners";
-t['SELECTFAKE'] = "Selecteer fake";
-t['NOSCOUT2FAKE'] = "Je kunt geen verkenners gebruiken voor een nep aanval";
-t['NOTROOP2FAKE'] = "Er zijn geen troepen voor een nep aanval";
-t['NOTROOP2SCOUT'] = "Er zijn geen troepen om te verkennen";
-t['NOTROOPS'] = "Geen troepen in dit dorp";
-t['ALL'] = "Alles";
-t['SH2'] = "In de kleur velen mag je invullen:<br>- <b>green</b>, <b>red</b> or <b>orange</b>, etc.<br>- de HEX kleur code zoals <b>#004523</b><br>- leeg laten voor standaard kleur";
-t['SOREP'] = "Laat orgineel bericht zien (voor verzenden)";
-t['56'] = "Laat veld type/oase info zien<br>bij muisover het veld";
-t['10'] = "Veldslagsimulator link gebruiken:<br>(in menu links)";
-t['WSIMO1'] = "Die van het spel";
-t['WSIMO2'] = "Externe (door kirilloid.ru)";
-t['27'] = "World Analyser gebruiken";
-t['28'] = "Show analyser statistic links";
-t['NONEWVER'] = "Je hebt de laatste versie";
-t['BVER'] = "Je hebt waarschijnlijk een beta versie";
-t['NVERAV'] = "Er is een nieuwe versie beschikbaar";
-t['UPDSCR'] = "Update script nu ?";
-t['CHECKUPDATE'] = "Voor updates controleren... Een moment.";
-t['CROPFINDER'] = "Graanvelden zoeker";
-t['AVPPV'] = "Gemiddelde populatie per dorp";
-t['AVPPP'] = "Gemiddelde populatie per speler";
-t['37'] = "Grondstofvelden uitbreidings tabel weergeven";
-t['41'] = "Gebouwen uitbereidings tabel weergeven";
-t['69'] = "Console Log Niveau (Standaard = 0)<br>(alleen voor programeurs of debugging)";
-t['48'] = "Aantal pagina's voorladen<br>bij 'Marktplaats => kopen'<br>(Standaard = 1)";
-t['U.3'] = 'Naam van hoofddorp<br><b>Niet bewerken, ga hiervoor naar je profiel</b>';
-t['U.6'] = 'Coordinaten van hoofddorp<br><b>Niet bewerken, ga hiervoor naar je profiel</b>';
-t['TOTTRTR'] = 'Totaal aantal troepen';
-t['57'] = 'Afstanden en tijden laten zien';
-t['UPDALLV'] = 'Update alle dorpen. LETOP: Bij vaak gebruik kan dit lijden tot een ban van travain!';
-t['LARGEMAP'] = 'Grote map';
-t['9'] = 'Extra link laten zien in linker menu<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)';
-t['USETHEMPR'] = 'Verdeel (procentueel)';
-t['USETHEMEQ'] = 'Verdeel (Gelijkmatig)';
-t['TOWNHALL'] = 'Raadhuis';
-t['GSRVT'] = 'Server versie';
-t['NBO'] = 'Kladblok';
-t['MNUL'] = 'Linker menu';
-t['STAT'] = 'Statistieken';
-t['RESF'] = 'Grondstof velden';
-t['VLC'] = 'Dorp centrum';
-t['MAPO'] = 'Map opties';
-t['COLO'] = 'Kleur opties';
-t['DBGO'] = 'Debug opties';
-t['4'] = 'Marktplaats';
-t['5'] = 'Verzamelplaats/Barakken/Werkplaatsen/Stal';
-t['6'] = "Raadhuis/Heldenhof/Uitrustingssmederij/Wapensmid";
-t['HEROSMANSION'] = "Heldenhof";
-t['BLACKSMITH'] = "Wapensmid";
-t['ARMOURY'] = "Uitrustingssmederij";
-t['NOW'] = 'Nu';
-t['CLOSE'] = 'Sluit';
-t['USE'] = 'Verdeel het';
-t['USETHEM1H'] = 'Verdeel (1 uur productie)';
-t['OVERVIEW'] = 'Overzicht';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Aanvallen';
-t['NEWS'] = 'Nieuws';
-t['ADDCRTPAGE'] = 'Huidige pagina';
-t['SCRPURL'] = 'TBeyond pagina';
-t['50'] = 'Aantal scouts voor de<br>"Selecteer verkenners" functie';
-t['SPACER'] = 'Scheidingsteken';
-t['53'] = 'Troepen info laten zien bij muis op plaatjes.';
-t['MEREO'] = 'Berichten & Raportages';
-t['59'] = 'Aantal paginas voorladen<br>(Standaard = 1)';
-t['ATTABLES'] = 'Troepen tabellen';
-t['MTW'] = 'Ruimte over';
-t['MTX'] = 'Te veel';
-t['MTC'] = 'Huidige lading';
-t['ALFL'] = 'Link naar extern forum<br>(Leeg laten voor intern forum)';
-t['82.L'] = 'Bladwijzers vast zetten (Verberg de verwijder en verplaats iconen)';
-t['MTCL'] = 'Leeg alle velden';
-t['SVGL'] = 'Beschikbaar voor alle dorpen';
-t['CKSORT'] = 'Klik voor sorteren';
-t['SVGL'] = 'Voor elk dorp gebruiken';
-t['VGL'] = 'Dorpen lijst';
-t['12'] = "Laat de 'dorf1.php' en 'dorf2.php' links zien";
-t['54'] = 'Afstand en tijd laten zien naar dorp in tooltip';
-t['ACCINFO'] = 'Account info';
-t['EDIT'] = 'Bewerk';
-t['NPCO'] = 'NPC Handel opties';
-t['26'] = 'NPC Handelaar links en info laten zien';
-t['NEWVILLAGEAV'] = 'Datum/Tijd';
-t['TIMEUNTIL'] = 'Wacht tijd';
-t['61'] = 'Tabel met "Verwijder" laten zien op raporten pagina';
-t['62'] = 'Ook mijn "Stuur IGM" icoon laten zien';
-t['CENTERMAP'] = 'Centreer map op dit dorp';
-t['13'] = 'Icoon voor "Centreer map op dit dorp" laten zien';
-t['45'] = "Laat knipperend icoon zien voor gebouwen die worden gebouwd";
-t['3'] = 'Forceer T3.1 Phalanx en Legionair Capaciteits berekening.<br>(Voor gemixte T3.1 & T3.5 servers - meestal .de servers)';
-t['7'] = 'Paleis/Residentie/Academie/Schatkamer';
-t['14'] = 'Laat "Stuur troepen/Stuur Handelaren" Icoon zien in de dorpen lijst';
-t['16'] = 'Laat netto graanproductie zien in de dorpen lijst zien';
-t['17'] = 'Laat de Populatie zien in de dorpen lijst zien';
-t['18'] = 'Laat extra (2 Kolommen) dorpenlijst zien als zwevend venster';
-t['21'] = 'Laat "Gebruikers Links" als zwevend venster zien';
-t['23'] = 'Laat "Kladblok" als zwevend venster zien';
-t['28'] = 'Laat Analyser statistieken links zien';
-t['29'] = 'Welke map analyser te gebruiken:';
-t['30'] = 'Laat links naar de kaart zien voor spelers';
-t['31'] = 'Laat links naar de kaart zien voor allianties';
-t['34'] = 'Laat CP/dag zien in de uitbreidingstabel';
-t['35'] = 'Laat graanverbruik zien in de uitbreidingstabel';
-t['39'] = 'Laat het "Grondstof productie venster" zien';
-t['40'] = 'Laat het "Grondstof productie venster" als zwevend venster zien';
-t['55'] = "Automatisch aanwezige troepen invullen";
-t['58'] = 'Laat de tabel zien van Spelers/Dorpen/Oases';
-t['63'] = 'Laat .5 Uitgebreide Aanvalsrapporten zien';
-t['64'] = 'Laat uitgebreide details zien in de statistieken';
-t['WSI'] = "In-game gevechts simulator";
-break;
-case "pt"://by sepacavi & Fujis & VicSilveira
-t['1'] = "Travian v2.x server";
-t['2'] = 'Remover ad banners';
-t['3'] = 'Forçar cálculo da capacidade Legionário & Falange T3.1 <br>(para servers mistos T3.1 & T3.5)';
-t['4'] = 'Mercado';
-t['5'] = 'Ponto de Reunião Militar/Quartel/Oficina/Cavalariça';
-t['6'] = "Casa do Povo/Mansão do Herói/Fábrica de Armaduras/Ferreiro";
-t['7'] = "Palácio/Residência/Academia/Tesouraria";
-t['8'] = 'Aliança';
-t['9'] = "Mostrar links adicionais no Menu à Esquerda<br>(Traviantoolbox, World Analyser, Travilog, Mapa, etc.)";
-t['10']= "Link para Simulador de Combates<br>(Menu Esquerdo)";
-t['11'] = "Link para o site indicado para postar relatórios";
-t['12'] = "Mostrar links 'dorf1.php' e 'dorf2.php'";
-t['13'] = 'Mostrar icon "Centralizar Mapa nesta Aldeia"';
-t['14'] = "Mostrar icons 'Envio de Tropas' e 'Envio de Recursos' na Lista de Aldeias";
-t['15'] = "Mostrar a produção por hora de madeira, de barro e de ferro na Lista de Aldeias";
-t['16'] = "Mostrar Produção de Cereais na Lista de Aldeias";
-t['20'] = 'Mostrar Favoritos';
-t['39'] = "Mostrar 'Barra de Recursos'";
-t['40'] = "Mostrar 'Barra de Recursos' como janela flutuante";
-t['17'] = "Mostrar População na Lista de Aldeias";
-t['18'] = 'Mostrar adicional (2 colunas) na Lista de Aldeias como janela flutuante';
-t['19'] = 'Mostrar informação sobre Edifícios a Evoluir e Movimentos de Tropas na Lista de Aldeias';
-t['21'] = "Mostrar 'Favoritos' como janela flutuante";
-t['22'] = 'Mostrar Bloco de Notas';
-t['23'] = "Mostrar 'Bloco de Notas' como janela flutuante";
-t['24'] = 'Tamanho do Bloco de Notas';
-t['25'] = 'Altura do Bloco de Notas';
-t['26'] = 'Mostrar Assistente de Cálculos/Links do NPC';
-t['27'] = "World Analyser";
-t['28'] = "Mostrar links para Analisador de Estatísticas";
-t['29'] = 'Analisador de Mapa';
-t['30'] = 'Mostrar links para Mapa para Jogadores';
-t['31'] = 'Mostrar links para Mapa para Alianças';
-t['32'] = "Mostrar 'Barra de Pesquisas (Estatísticas)'";
-t['33'] = "Mostrar 'Barra de Pesquisas (Estatísticas)' como janela flutuante";
-t['34'] = "Mostrar informação PsC/dia nas tabelas de evolução";
-t['35'] = "Mostrar Consumo de Cereais na Tabela de Evolução de Edifícios";
-t['36'] = "Mostrar o cálculo 'Até então/Excedente' nas Tabelas de Evolução/Treino";
-t['37'] = "Mostrar Tabela de Evolução de Campos de Recursos";
-t['38'] = 'Mostrar Cores dos Níveis de Recursos';
-t['41'] = "Mostrar Tabela de Evolução de Edifícios";
-t['42'] = 'Ordenar Edifícios por nome na Tabela de Evolução de Edifícios';
-t['43'] = 'Mostrar Números no centro';
-t['44'] = 'Mostrar Cores dos Níveis dos Edifícios';
-t['45'] = "Mostrar os níveis a piscar quando os Edifícios estão a evoluir";
-t['46'] = "Mostrar informação adicional para cada chegada de mercadores";
-t['47'] = "Mostrar o último transporte de Mercado";
-t['48'] = "N.º de Páginas de Ofertas para Pré-Carregar enquanto 'Mercado => Comprar'<br>(Defeito = 1)";
-t['49'] = 'Acção por Defeito no Ponto de Reunião Militar';
-t['50'] = 'N.º de Espiões para a Função<br>"Seleccionar Espiões"';
-t['51'] = "Mostrar o último ataque";
-t['52'] = "Mostrar/usar as coordenadas do último ataque";
-t['53'] = 'Mostrar Informação de Tropas em Tooltips';
-t['54'] = 'Mostrar Distâncias e Tempos entre as Aldeias';
-t['55'] = "Auto-preencher com as Tropas disponíveis para o Simulador de Combates interno";
-t['56'] = "Mostrar Informação do Tipo de Vale/Oásis<br>quando o Rato passar por cima";
-t['57'] = 'Mostrar Distâncias e Tempos';
-t['58'] = 'Mostrar Tabela de Jogadores/Aldeias/Oásis ocupados';
-t['59'] = 'N.º Páginas de Relatórios/Mensagens para Pré-Carregar<br>(Defeito = 1)';
-t['60'] = 'Mostrar links para abrir as Mensagens e Relatórios numa janela pop-up';
-t['61'] = 'Mostrar "Excluir tudo" na Tabela da página Relatórios';
-t['62'] = 'Mostrar icon "Enviar IGM", também para mim';
-t['63'] = 'Mostrar Relatório de Batalhas  desenvolvido';
-t['64'] = 'Mostrar detalhes no Relatório Estatísticas';
-t['65'] = 'Cor de Elevação de Nível Disponível<br>(Defeito = Vazio)';
-t['66'] = 'Cor do Nível Máximo<br>(Defeito = Vazio)';
-t['67'] = 'Cor de Elevação de Nível Impossível<br>(Defeito = Vazio)';
-t['68'] = 'Cor de Elevação de Nível via NPC<br>(Defeito = Vazio)';
-t['69'] = "Console Log Level<br>APENAS PARA PROGRAMADORES OU DEBBUGING<br>(Defeito = 1)";
-t['85'] = "Mostrar icons 'Enviar Tropas/Enviar Recursos'";
-t['87'] = "Lembrar a última opção 1x/2x/3x de envio de Mercado (se disponível)";
-t['TOTALTROOPS'] = 'Total de Tropas da Aldeia';
-t['U.2'] = 'Tribo';
-t['SIM'] = 'Simulador de Combates';
-t['QSURE']= 'Tens a Certeza?';
-t['LOSS'] = 'Perdas';
-t['PROFIT']= 'Lucro';
-t['EXTAV'] = 'Podes subir de nível';
-t['PLAYER']= 'Jogador';
-t['VILLAGE'] = 'Aldeia';
-t['POPULATION']= 'População';
-t['COORDS']= 'Coordenadas';
-t['MAPTBACTS'] = 'Acções';
-t['SAVED'] = 'Guardado';
-t['YOUNEED'] = 'Precisa de';
-t['TODAY'] = 'Hoje';
-t['TOMORROW'] = 'Amanhã';
-t['DAYAFTERTOM'] = 'Depois de Amanhã';
-t['MARKET']= 'Mercado';
-t['BARRACKS'] = 'Quartel';
-t['RAP']= 'Ponto de Reunião Militar';
-t['STABLE']= 'Cavalariça';
-t['WORKSHOP'] = 'Oficina';
-t['SENDRES'] = 'Enviar Recursos';
-t['BUY'] = 'Comprar';
-t['SELL'] = 'Vender';
-t['SENDIGM'] = 'Enviar IGM';
-t['LISTO'] = 'Disponível';
-t['ON']= 'em';
-t['AT'] = 'às';
-t['EFICIENCIA']= 'Eficiência';
-t['NEVER'] = 'Nunca';
-t['ALDEAS']= 'Aldeia(s)';
-t['TIEMPO']= 'Tempo';
-t['OFREZCO'] = 'Ofereço';
-t['BUSCO'] = 'Procuro';
-t['TIPO'] = 'Tipo';
-t['DISPONIBLE']= 'Apenas Disponíveis';
-t['CUALQUIERA']= 'Qualquer';
-t['YES'] = 'Sim';
-t['NO']= 'Não';
-t['LOGIN'] = 'Login';
-t['MARCADORES']= 'Favoritos';
-t['ANYADIR'] = 'Adicionar';
-t['UBU']= 'URL de Novo Marcador';
-t['UBT'] = 'Novo Marcador de Texto';
-t['DEL'] = 'Apagar';
-t['MAPA'] = 'Mapa';
-t['MAXTIME'] = 'Tempo Máximo';
-t['ARCHIVE'] = 'Arquivo';
-t['SUMMARY'] = 'Resumo';
-t['TROPAS'] = 'Tropas';
-t['CHKSCRV'] = 'Actualizar TBeyond';
-t['ACTUALIZAR']= 'Actualizar Informação da Aldeia';
-t['VENTAS']= 'Ofertas Guardadas';
-t['MAPSCAN'] = 'Procurar no Mapa';
-t['BIC'] = 'Mostrar Icons Avançados';
-t['SAVE'] = 'Guardar';
-t['AT2'] = 'Reforços';
-t['AT3'] = 'Ataque: Normal';
-t['AT4'] = 'Ataque: Assalto';
-t['NBSA']= 'Automático';
-t['NBSN'] = 'Normal (pequeno)';
-t['NBSB'] = 'Ecrã Grande (largo)';
-t['NBHAX'] = 'Expandir Altura automaticamente';
-t['NBHK'] = 'Altura por defeito';
-t['NPCSAVETIME'] = 'Guardar: ';
-t['SELECTALLTROOPS'] = "Seleccionar Todas as Tropas";
-t['PARTY'] = "Celebrações";
-t['CPPERDAY'] = "PsC/Dia";
-t['SLOT'] = "Slot";
-t['TOTAL'] = "Total";
-t['SELECTSCOUT'] = "Seleccionar Espião";
-t['SELECTFAKE']= "Seleccionar Fake";
-t['NOSCOUT2FAKE'] = "Impossível Utilizar Espiões para Ataque Fake!";
-t['NOTROOP2FAKE'] = "Não há Tropas para Ataque Fake!";
-t['NOTROOP2SCOUT'] = "Não há Tropas para Espiar!";
-t['NOTROOPS'] = "Não há Tropas na Aldeia!";
-t['ALL'] = "Todas";
-t['SH2'] = "Nas Cores de Campos pode utilizar:<br>- green or red or orange, etc.<br>- Código de Cor HEX#004523<br>- deixar Vazio para cor por defeito";
-t['SOREP']= "Mostrar Relatório Original (para postar)";
-t['WSIMO1'] = "Interno (fornecido pelo Jogo)";
-t['WSIMO2'] = "Externo (fornecido por kirilloid.ru)";
-t['NONEWVER'] = "Tens a última Versão disponível";
-t['BVER'] = "Talvez tenhas uma versão Beta";
-t['NVERAV'] = "Uma Nova Versão do Script Está Disponível";
-t['UPDSCR'] = "Actualizar Script Agora?";
-t['CHECKUPDATE'] = "A procurar actualização para o Script.<br>Por Favor Esperar...";
-t['CROPFINDER']= "Crop Finder";
-t['AVPPV'] = "População Média por Aldeia";
-t['AVPPP']= "População Média por Jogador";
-t['U.3'] = 'Nome da tua Capital<br><b>Acede ao teu Perfil para actualizar</b>';
-t['U.6'] = 'Coordenadas da tua Capital<br><b>Acede ao teu Perfil para actualizar</b>';
-t['MAX'] = 'Máx';
-t['TOTTRTR'] = 'Total de Tropas em Treino';
-t['UPDALLV'] = 'Actualizar todas as Aldeias. MUITA ATENÇÃO: UTILIZAR COM A MÁXIMA PRECAUÇÃO. PODE LEVAR AO BAN DA CONTA!';
-t['LARGEMAP'] = 'Mapa Grande';
-t['USETHEMPR'] = 'Usar (Proporcional)';
-t['USETHEMEQ'] = 'Usar (Igual)';
-t['TOWNHALL'] = 'Casa do Povo';
-t['GSRVT'] = 'Servidor do Jogo';
-t['ACCINFO'] = 'Informação da Conta';
-t['NBO'] = 'Bloco de Notas';
-t['MNUL'] = 'Menu Esquerdo';
-t['STAT'] = 'Estatísticas';
-t['RESF'] = 'Campos de Recursos';
-t['VLC'] = 'Centro da Aldeia';
-t['MAPO'] = 'Opções do Mapa';
-t['COLO'] = 'Opções de Cores';
-t['DBGO'] = 'Opções de Debug';
-t['HEROSMANSION'] = "Mansão do Herói";
-t['BLACKSMITH'] = 'Ferreiro';
-t['ARMOURY'] = 'Fábrica de Armaduras';
-t['NOW'] = 'Agora';
-t['CLOSE'] = 'Fechar';
-t['USE'] = 'Usar';
-t['USETHEM1H'] = 'Usar (1 Hora de Produção)';
-t['OVERVIEW'] = 'Vista Geral';
-t['FORUM'] = 'Fórum';
-t['ATTACKS'] = 'Ataques';
-t['NEWS'] = 'Notícias';
-t['ADDCRTPAGE'] = 'Adicionar Página Actual';
-t['SCRPURL'] = 'Página TBeyond';
-t['SPACER'] = 'Spacer';
-t['MEREO'] = 'Mensagens e Relatórios';
-t['ATTABLES'] = 'Tabelas de Tropas';
-t['MTW'] = 'Carga desperdiçada';
-t['MTX'] = 'Carga em excesso';
-t['MTC'] = 'Carga Actual';
-t['ALFL'] = 'Link para Fórum Externo<br>(Deixar vazio para Fórum Interno)';
-t['82.L'] = 'Bloquear Favoritos (Mostrar icons: Esconder, Apagar, Mover Acima, Mover Abaixo)';
-t['MTCL'] = 'Limpar Tudo';
-t['82.U'] = 'Desbloquear Favoritos (Mostrar icons: Apagar, Mover Acima, Mover Abaixo)';
-t['CKSORT'] = 'Clique para Ordenar';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Partilhar Entre Aldeias';
-t['VGL'] = 'Lista de Aldeias';
-t['UPDATEPOP'] = 'Actualizar População';
-t['EDIT'] = 'Editar';
-t['NPCO'] = 'Assistente de Opções do NPC';
-t['NEWVILLAGEAV'] = 'Data/Hora';
-t['TIMEUNTIL'] = 'Tempo de Espera';
-t['CENTERMAP'] = 'Centralizar Mapa nesta Aldeia';
-t['SENDTROOPS'] = 'Enviar Tropas';
-t['PALACE'] = "Palácio";
-t['RESIDENCE'] = "Residência";
-t['ACADEMY'] = "Academia";
-t['TREASURY'] = "Tesouraria";
-t['RBTT'] = "Barra de Recursos";
-t['UPGTB'] = "Tabelas de Evolução de Campos de Recursos/Edifícios";
-t['RESIDUE'] = 'O Excedente se o construíres ';
-t['RESOURCES'] = 'Recursos';
-t['SH1'] = "Abrir o Perfil para detectar automaticamente as coordenadas da Capital<br>Construir o Quartel para detectar a Tribo automaticamente e então abrir o Centro da Aldeia";
-t['RESEND'] = "Enviar outra vez ?";
-t['WSI'] = "Simulador de Combates fornecido pelo jogo";
-t['TTT'] = "Tooltips geral para Tropas/Distância";
-break;
-case "br"://by Bruno Guerreiro - brunogc@limao.com.br
-t['8'] = 'Aliança';
-t['SIM'] = 'Simulador de Combate';
-t['QSURE'] = 'Tem certeza?';
-t['LOSS'] = 'Perdas';
-t['PROFIT'] = 'Lucro';
-t['EXTAV'] = 'Recursos suficientes';
-t['PLAYER'] = 'Jogador';
-t['VILLAGE'] = 'Aldeia';
-t['POPULATION'] = 'População';
-t['COORDS'] = 'Coords';
-t['MAPTBACTS'] = 'Ações';
-t['SAVED'] = 'Configurações salvas';
-t['YOUNEED'] = 'Você precisa';
-t['TODAY'] = 'hoje';
-t['TOMORROW'] = 'amanhã';
-t['DAYAFTERTOM'] = 'depois de amanhã';
-t['MARKET'] = 'Mercado';
-t['BARRACKS'] = 'Quartel';
-t['RAP'] = 'Enviar tropas';
-t['STABLE'] = 'Cavalaria';
-t['WORKSHOP'] = 'Oficina';
-t['SENDRES'] = 'Enviar recursos';
-t['BUY'] = 'Comprar';
-t['SELL'] = 'Vender';
-t['SENDIGM'] = 'Enviar IGM';
-t['LISTO'] = 'Disponível';
-t['ON'] = 'em';
-t['AT'] = 'as';
-t['EFICIENCIA'] = 'Eficiência';
-t['NEVER'] = 'Nunca';
-t['ALDEAS'] = 'Aldeias';
-t['TIEMPO'] = 'Tempo';
-t['OFREZCO'] = 'Oferecendo';
-t['BUSCO'] = 'Procurando';
-t['TIPO'] = 'Tipo';
-t['DISPONIBLE'] = 'Somente disponível?';
-t['CUALQUIERA'] = 'Qualquer';
-t['YES'] = 'Sim';
-t['NO'] = 'Não';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Favoritos';
-t['ANYADIR'] = 'Adicionar';
-t['UBU'] = 'URL do novo favorito';
-t['UBT'] = 'Texto do novo favorito';
-t['DEL'] = 'Deletar';
-t['MAPA'] = 'Mapa';
-t['MAXTIME'] = 'Tempo máximo';
-t['ARCHIVE'] = 'Arquivo';
-t['SUMMARY'] = 'Sumário';
-t['TROPAS'] = 'Tropas';
-t['CHKSCRV'] = 'Atualizar TBeyond';
-t['ACTUALIZAR'] = 'Atualizar informação da aldeia';
-t['VENTAS'] = 'Ofertas salvas';
-t['MAPSCAN'] = 'Analisar mapa';
-t['BIC'] = 'Exibir ícones adicionais';
-t['22'] = 'Exibir bloco de anotações';
-t['SAVE'] = 'Salvo';
-t['49'] = 'Ação padrão do Ponto de Encontro';
-t['AT2'] = 'Reforço';
-t['AT3'] = 'Ataque: Normal';
-t['AT4'] = 'Ataque: Assalto';
-t['24'] = 'Tamanho do bloco de anotações';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normal (pequeno)';
-t['NBSB'] = 'Grande';
-t['25'] = 'Altura do bloco de anotações';
-t['NBHAX'] = 'Altura automática';
-t['NBHK'] = 'Altura padrão';
-t['43'] = 'Exibir níveis de construção';
-t['NPCSAVETIME'] = 'Salvo: ';
-t['38'] = 'Exibir cores nos recursos';
-t['44'] = 'Exibir cores nos edifícios';
-t['65'] = 'Cores disponíveis<br>(Default = Empty)';
-t['66'] = 'Cor de nível máximo<br>(Default = Empty)';
-t['67'] = 'Cor de não disponível<br>(Default = Empty)';
-t['68'] = 'Cor de atualização via NPC<br>(Default = Empty)';
-t['TOTALTROOPS'] = 'Total de tropas da aldeia';
-t['20'] = 'Exibir favoritos';
-t['U.2'] = 'Raça';
-t['1'] = "Travian v2.x server";
-t['SELECTALLTROOPS'] = "Selecionar todas as tropas";
-t['PARTY'] = "Festividades";
-t['CPPERDAY'] = "CP/dia";
-t['SLOT'] = "Slot";
-t['TOTAL'] = "Total";
-t['SELECTSCOUT'] = "Enviar espiões";
-t['SELECTFAKE'] = "Enviar fakes";
-t['NOSCOUT2FAKE'] = "É impossível enviar ataques fakes !";
-t['NOTROOP2FAKE'] = "Não existem tropas para ser usadas como fake!";
-t['NOTROOP2SCOUT'] = "Não existe tropas/unidade de espionagem !";
-t['NOTROOPS'] = "Não há tropas nesta aldeia !";
-t['ALL'] = "Todos";
-t['SOREP'] = "Exibir relatório original";
-t['WSIMO1'] = "Interno (provided by the game)";
-t['WSIMO2'] = "Externo (provided by kirilloid.ru)";
-t['NONEWVER'] = "Você tem a última versão instalada.";
-t['BVER'] = "VOcê tem uma versão beta.";
-t['NVERAV'] = "Uma nova versão do script foi encontrada";
-t['UPDSCR'] = "Atualizar script agora ?";
-t['CHECKUPDATE'] = "Checando novas atualizações.<br>Aguarde...";
-t['CROPFINDER'] = "Localizador de CROPs";
-t['AVPPV'] = "Média de população por aldeia";
-t['AVPPP'] = "Média de população por jogadores";
-t['37'] = "Exibir recursos disponíveis para elevar";
-t['41'] = "Exibir construções disponíveis para elevar";
-t['69'] = "Console Log Level<br>ONLY FOR PROGRAMMERS OR DEBUGGING<br>(Default = 0)";
-t['48'] = "Number of offer pages to preload<br>while on the 'Market => Buy' page<br>(Default = 1)";
-t['U.3'] = 'Nome da sua capital<br>Visite seu perfil';
-t['U.6'] = 'Coordenadas da sua capital<br>Visite seu perfil';
-t['MAX'] = 'Máximo';
-t['TOTTRTR'] = 'Total de tropas sendo treinadas';
-t['57'] = 'Exibir distâncias e tempos';
-t['TB3SL'] = 'Configurações do Script';
-t['UPDALLV'] = 'Atualizar todas as aldeias.  UTILIZAR COM O MÁXIMO DE CAUTELA, ESSA FUNÇÃO PODE FAZER SUA CONTA SER BANIDA DO JOGO !';
-t['9'] = "Exibir links adicionais no menu esquerdo?<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Mapa maior';
-t['USETHEMPR'] = 'Usar tudo (proporcional)';
-t['USETHEMEQ'] = 'Usar tudo (equilibrar)';
-t['TOWNHALL'] = 'Edifício Principal';
-t['NBO'] = 'Bloco de anotações';
-t['MNUL'] = 'Menu on the left side';
-t['STAT'] = 'Statistics';
-t['RESF'] = 'Resource fields';
-t['VLC'] = 'Centro da Aldeia';
-t['MAPO'] = 'Opções de Mapa';
-t['COLO'] = 'Opções de Cor';
-t['DBGO'] = 'Opções de DEBUG';
-t['4'] = 'Mercado';
-t['5'] = 'Ponto de encontro/Quartel/Oficina/Cavalaria';
-t['6'] = "Edifício Principaç/Mansão do Herói/Fábrica de Armaduras/Ferreiro";
-t['HEROSMANSION'] = "Mansão do Herói";
-t['BLACKSMITH'] = 'Ferreiro';
-t['ARMOURY'] = 'Fábrica de Armaduras';
-t['NOW'] = 'Agora';
-t['CLOSE'] = 'Fechar';
-t['USE'] = 'Usar';
-t['USETHEM1H'] = 'Usar tudo (1 hora de produção)';
-t['OVERVIEW'] = 'Visão geral';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'LOG de ataques';
-t['NEWS'] = 'Notícias';
-t['ADDCRTPAGE'] = 'Adicionar atual';
-t['SCRPURL'] = 'TBeyond page';
-t['50'] = 'Nº de tropas espiãs<br>"Select scout" fuction';
-t['SPACER'] = 'Separador';
-t['53'] = 'Mostrar informações de tropas';
-t['MEREO'] = 'Mensagens e Relatórios';
-t['59'] = 'Número de mensagens/relatórios por página<br>(Default = 1)';
-t['ATTABLES'] = 'Tabela de tropas';
-t['MTW'] = 'Capacidade desperdiçada';
-t['MTX'] = 'Capacidade excedida';
-t['MTC'] = 'Capacidade utilizada';
-t['ALFL'] = 'Link para fórum externo<br>(deixe vazio o fórum interno)';
-t['82.L'] = 'Fechar favoritos (ocultar ícones de edição)';
-t['MTCL'] = 'Apagar tudo';
-t['82.U'] = 'Abrir Favoritos (Mostrar ícones de edição)';
-t['CKSORT'] = 'Click to sort';
-t['MIN'] = 'Mínimo';
-t['SVGL'] = 'Shared among villages';
-t['VGL'] = 'Lista de Aldeias';
-t['12'] = "Mostrar 'dorf1.php' and 'dorf2.php' links";
-t['UPDATEPOP'] = 'Atualizar habitantes';
-t['RESIDUE'] = 'Se construir, sobra';
-t['RESOURCES'] = 'Recursos';
-break;
-case "cz"://by Rypi
-t['8'] = 'Aliance';
-t['SIM'] = 'Bitevní simulátor';
-t['QSURE'] = 'Jsi si jistý?';
-t['LOSS'] = 'Materiální ztráta';
-t['PROFIT'] = 'Výnos';
-t['EXTAV'] = 'Rozšířit';
-t['PLAYER'] = 'Hráč';
-t['VILLAGE'] = 'Vesnice';
-t['POPULATION'] = 'Populace';
-t['COORDS'] = 'Souřadnice';
-t['MAPTBACTS'] = 'Akce';
-t['SAVED'] = 'Uloženo';
-t['YOUNEED'] = 'Potřebuješ:';
-t['TODAY'] = 'dnes';
-t['TOMORROW'] = 'zítra';
-t['DAYAFTERTOM'] = 'pozítří';
-t['MARKET'] = 'Tržiště';
-t['BARRACKS'] = 'Kasárny';
-t['RAP'] = 'Shromaždiště';
-t['STABLE'] = 'Stáje';
-t['WORKSHOP'] = 'Dílna';
-t['SENDRES'] = 'Poslat suroviny';
-t['BUY'] = 'Koupit';
-t['SELL'] = 'Prodat';
-t['SENDIGM'] = 'Poslat zprávu';
-t['LISTO'] = 'Dostupné';
-t['ON'] = 'v';
-t['AT'] = 'v';
-t['EFICIENCIA'] = 'Efektivita';
-t['NEVER'] = 'Nikdy';
-t['ALDEAS'] = 'Vesnic';
-t['TIEMPO'] = 'Čas';
-t['OFREZCO'] = 'Nabízí';
-t['BUSCO'] = 'Hledá';
-t['TIPO'] = 'Poměr';
-t['DISPONIBLE'] = 'Pouze dostupné';
-t['CUALQUIERA'] = 'Cokoli';
-t['YES'] = 'Ano';
-t['NO'] = 'Ne';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Záložky';
-t['ANYADIR'] = 'Přidat';
-t['UBU'] = 'URL odkazu';
-t['UBT'] = 'Název záložky';
-t['DEL'] = 'Odstranit';
-t['MAPA'] = 'Mapa';
-t['MAXTIME'] = 'Maximální čas';
-t['ARCHIVE'] = 'Archiv';
-t['SUMMARY'] = 'Souhrn';
-t['TROPAS'] = 'Vojsko';
-t['CHKSCRV'] = 'Aktualizuj T3Beyond';
-t['ACTUALIZAR'] = 'Aktualizovat informace o vesnici';
-t['VENTAS'] = 'Nabídky tržiště (neměnit)';
-t['MAPSCAN'] = 'Prohledat mapu';
-t['BIC'] = 'Nastavení rozšiřujících ikon';
-t['22'] = 'Zobrazit poznámkový blok';
-t['SAVE'] = 'Uložit';
-t['49'] = 'Výchozí vojenská akce';
-t['AT2'] = 'Podpora';
-t['AT3'] = 'Normální';
-t['AT4'] = 'Loupež';
-t['24'] = 'Velikost poznámkového bloku';
-t['NBSA'] = 'Automatická';
-t['NBSN'] = 'Malý';
-t['NBSB'] = 'Velký';
-t['25'] = 'Výška poznámkového bloku';
-t['NBHAX'] = 'Automatická výška';
-t['NBHK'] = 'Výchozí výška';
-t['43'] = 'Zobrazit úrovně budov';
-t['NPCSAVETIME'] = 'Ušetříš: ';
-t['38'] = 'Obarvit úrovně polí';
-t['44'] = 'Obarvit úrovně budov';
-t['65'] = 'Možnost vylepšení (barva)<br>(Nezadáno = Výchozí)';
-t['66'] = 'Maximální úroveň (barva)<br>(Nezadáno = Výchozí)';
-t['67'] = 'Vylepšení nemožné (barva)<br>(Nezadáno = Výchozí)';
-t['68'] = 'Vylepšení pomocí NPC (barva)<br>(Nezadáno = Výchozí)';
-t['TOTALTROOPS'] = 'Všechny jednotky vyrobené ve vesnici';
-t['20'] = 'Zobrazit záložky';
-t['U.2'] = 'Národ';
-t['1'] = "Travian verze 2.x";
-t['SELECTALLTROOPS'] = "Všechny jednotky";
-t['PARTY'] = "Slavnosti";
-t['CPPERDAY'] = "KB/den";
-t['SLOT'] = "Sloty";
-t['TOTAL'] = "Celkem";
-t['SELECTSCOUT'] = "Špehy";
-t['SELECTFAKE'] = "Fake";
-t['NOSCOUT2FAKE'] = "Špehy nelze použít jako fake!";
-t['NOTROOP2FAKE'] = "Žádné jednotky pro fake!";
-t['NOTROOP2SCOUT'] = "Žádní špehové!";
-t['NOTROOPS'] = "Žádné jednotky ve vesnici!";
-t['ALL'] = "Vše";
-t['SH2'] = "Barvy můžeš zadat jako:<br>- <b>green</b> , <b>red</b> nebo <b>orange</b> atd.<br>- HEX kód barvy např. <b>#004523</b><br>- nechat prázdné pro výchozí barvu";
-t['SOREP'] = "Zobrazit originální report";
-t['56'] = "Zobrazit typ vesnic<br>při najetí myší na mapu";
-t['10'] = "Bitevní simulátor:<br>(levé menu)";
-t['WSIMO1'] = "Interní (travian.cz)";
-t['WSIMO2'] = "Externí (kirilloid.ru)";
-t['27'] = "Analyser:";
-t['28'] = "Zobrazit odkaz na analyser";
-t['NONEWVER'] = "Máš poslední verzi";
-t['BVER'] = "Máš betaverzi";
-t['NVERAV'] = "Je dostupná nová verze";
-t['UPDSCR'] = "Aktualizovat nyní?";
-t['CHECKUPDATE'] = "Kontroluji novou verzi.<br>Prosím čekej...";
-t['CROPFINDER'] = "Vyhledávač MC";
-t['AVPPV'] = "Průměrná populace vesnic";
-t['AVPPP'] = "Průměrná populace hráčů";
-t['37'] = "Zobrazit tabulku rozšíření polí";
-t['41'] = "Zobrazit tabulku rozšíření budov";
-t['69'] = "Console Log Level<br>ONLY FOR PROGRAMMERS OR DEBUGGING<br>(Výchozí= 0)";
-t['48'] = "Počet kontrolovaných stránek<br>na 'Tržiště => Koupit'<br>(Výchozí= 1)";
-t['U.3'] = 'Jméno hlavní vesnice<br><b>Pro aktualizaci navštiv svůj profil</b>';
-t['U.6'] = 'Souřadnice hlavní vesnice<br><b>Pro aktualizaci navštiv svůj profil</b>';
-t['TOTTRTR'] = 'Celkem jednotek ve výuce';
-t['57'] = 'Zobrazit vzdálenosti a časy';
-t['TB3SL'] = 'Nastavení T3Beyond';
-t['UPDALLV'] = 'Aktualizovat všechny vesnice. POZOR! MŮŽE VÉST K ZABLOKOVÁNÍ ÚČTU';
-t['9'] = "Zobrazit odkazy v levém menu<br>(Traviantoolbox, World Analyser, Travilog, Mapa)";
-t['LARGEMAP'] = 'Velká mapa';
-t['USETHEMPR'] = 'Rozdělit (proportional)';
-t['USETHEMEQ'] = 'Rozdělit (equal)';
-t['TOWNHALL'] = 'Radnice';
-t['GSRVT'] = 'Nastavení serveru';
-t['ACCINFO'] = 'Nastavení hráče <b>Čeština: <a href="http://www.rypi.cz">Rypi</a></b>';
-t['NBO'] = 'Nastavení poznámkového bloku';
-t['MNUL'] = 'Nastavení levého menu';
-t['STAT'] = 'Nastavení statistik';
-t['RESF'] = 'Nastavení surovinových polí';
-t['VLC'] = 'Nastavení centra vesnice';
-t['MAPO'] = 'Nastavení mapy';
-t['COLO'] = 'Nastavení barev';
-t['DBGO'] = 'Nastavení ladění (pouze pro programátory)';
-t['4'] = 'Tržiště';
-t['5'] = 'Shromaždiště/Kasárny/Dílny/Stáje';
-t['6'] = "Radnice/Hrdinský dvůr/Zbrojnice/Kovárna";
-t['HEROSMANSION'] = "Hrdinský dvůr";
-t['BLACKSMITH'] = "Kovárna";
-t['ARMOURY'] = "Zbrojnice";
-t['NOW'] = 'Teď';
-t['CLOSE'] = 'Zavřít';
-t['USE'] = 'Použít';
-t['USETHEM1H'] = 'Rozdělit (1 hodinová produkce)';
-t['OVERVIEW'] = 'Přehled';
-t['FORUM'] = 'Fórum';
-t['ATTACKS'] = 'Útoky';
-t['NEWS'] = 'Novinky';
-t['ADDCRTPAGE'] = 'Přidat aktuální stránku';
-t['SCRPURL'] = 'Stránka TBeyond';
-t['50'] = 'Počet špehů při použití<br>funkce poslat špehy';
-t['SPACER'] = 'Oddělovač';
-t['53'] = 'Informace o jednotkách při najetí myší';
-t['MEREO'] = 'Zprávy & Reporty';
-t['59'] = 'Počet stránek zpráv/reportů k načtení<br>(Výchozí= 1)';
-t['ATTABLES'] = 'Přehled jednotek';
-t['MTW'] = 'Zbývá';
-t['MTX'] = 'Přebývá';
-t['MTC'] = 'Současný náklad';
-t['ALFL'] = 'Odkaz na externí fórum<br>(nevyplněno = interní fórum)';
-t['82.L'] = 'Uzamknout záložky (skryje ikony smazat a přesunout)';
-t['MTCL'] = 'Vyčistit vše';
-t['82.U'] = 'Odemknout záložky (zobrazí ikony smazat a přesunout)';
-t['CKSORT'] = 'Klikni pro seřazení';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Pro všechny vesnice';
-t['VGL'] = 'Seznam vesnic';
-t['12'] = "Zobrazit odkazy 'dorf1.php' a 'dorf2.php'";
-t['UPDATEPOP'] = 'Aktualizovat populaci';
-t['54'] = 'Zobrazit vzdálenosti a časy při najetí myší';
-t['EDIT'] = 'Upravit';
-t['NPCO'] = 'Nastavení NPC pomocníka';
-t['26'] = 'Zobrazit NPC pomocníky (výpočty a odkazy)';
-t['58'] = 'Zobrazit tabulku hráčů/vesnic/oáz';
-t['NEWVILLAGEAV'] = 'Datum/čas';
-t['TIMEUNTIL'] = 'Čas čekání';
-t['61'] = 'Zobrazit tabulku "Smazat vše" na stránce s reporty';
-t['62'] = 'Zobrazit "Poslat zprávu" i pro mě';
-t['CENTERMAP'] = 'Vycentruj mapu kolem této vesnice';
-t['13'] = 'Zobrazit ikonu centra vesnice';
-//t['64'] = 'Zobrazit detaily ve statistikách reportu';
-t['SENDTROOPS'] = 'Poslat jednotky';
-t['64'] = 'Zobrazit detaily ve statistice reportu';
-t['7'] = "Palác/Rezidence/Akademie/Pokladnice";
-t['PALACE'] = "Palác";
-t['RESIDENCE'] = "Rezidence";
-t['ACADEMY'] = "Akademie";
-t['TREASURY'] = "Pokladnice";
-t['45'] = "Zobrazit blikající levely pro budovy, které se staví";
-t['14'] = "Zobrazit ikony 'poslat jednotky/suroviny' v seznamu vesnic";
-t['34'] = "Zobrazit KB/den v tabulce staveb";
-t['UPGTB'] = "Tabulka vylepšení surovinových polí/budov";
-t['35'] = "Zobrazit spotřebu obilí v tabulce staveb";
-t['16'] = "Zobrazit produkci obilí v seznamu vesnic";
-t['RBTT'] = "Tabulka surovin";
-t['39'] = "Zobrazit tabulku 'suroviny'";
-t['40'] = "Zobrazit tabulku 'suroviny' jako okno";
-t['21'] = "Zobrazit 'záložky' jako okno";
-t['23'] = "Zobrazit 'poznámkový blok' jako okno";
-t['17'] = "Zobrazit populaci v seznamu vesnic";
-t['29'] = 'Mapy k použití';
-t['30'] = 'Zobrazit odkazy na mapu pro hráče';
-t['31'] = 'Zobrazit odkazy na mapu pro aliance';
-t['60'] = 'Zobrazit odkaz pro otevření zprávy v novém okně.';
-break;
-case "ru": //by millioner & MMIROSLAV & EXEMOK & AHTOH & d00mw01f & limit
-t['1'] = "Travian сервер версии v2.x";
-t['2'] = 'Убрать рекламу';
-t['3'] = 'Заменить расчеты грузоподьемности Легионера и Фаланги T3.1<br>(Для T3.1 и T3.5 серверов)';
-t['4'] = 'Рынок';
-t['5'] = 'Пункт сбора/Казарма/Мастерская/Конюшня';
-t['6'] = "Ратуша/Таверна/Кузница доспехов/Кузница оружия";
-t['7'] = "Дворец/Резиденция/Академия/Сокровищница";
-t['8'] = 'Альянс';
-t['9'] = "Показывать дополнительные ссылки в левом меню<br>(Traviantoolbox, World Analyser, Travilog, Map и т.д.)";
-t['10'] = "Использовать симулятор боя:<br>(левое меню)";
-t['11'] = "Сайт для отправки отчётов";
-t['12'] = "Показывать ссылки на 'dorf1.php' и 'dorf2.php'";
-t['13'] = 'Показывать иконку "Центрировать деревню на карте"';
-t['14'] = "Показывать иконки 'Отправить войска', 'Отправить ресурсы' в списке деревень";
-t['15'] = "Показывать производство дерева, глины и железа в час в списке деревень";
-t['16'] = "Показывать прибыль зерна в списке деревень";
-t['17'] = "Показывать население в списке деревень";
-t['18'] = 'Показывать дополнительно список деревень (2 колонки) в плавающем окне';
-t['19'] = 'Показывать информацию о зданиях, которые развиваются в данный момент<br>и войска, которые сейчас в походе в списке деревень';
-t['20'] = 'Показывать закладки';
-t['21'] = "Показывать закладки в плавающем окне";
-t['22'] = 'Показывать блок заметок';
-t['23'] = "Показывать заметки в плавающем окне";
-t['24'] = 'Размер поля заметок';
-t['25'] = 'Высота поля заметок';
-t['26'] = 'Показывать расчёты для NPC помощника / ссылки на NPC помощника';
-t['27'] = "Какой анализатор мира использовать";
-t['28'] = "Показывать ссылки на статистику анализатора";
-t['29'] = 'Используемый анализатор карты';
-t['30'] = 'Показывать ссылку на карту для игроков';
-t['31'] = 'Показывать ссылку на карту для альянсов';
-t['32'] = "Показывать 'Поиск'";
-t['33'] = "Показывать 'Поиск' в плавающем окне";
-t['34'] = "Показывать Единиц Культуры(ЕК)/день в таблицах развития";
-t['35'] = "Показывать потребление зерна в таблицах развития";
-t['36'] = "Показывать расчёты 'К тому времени/Остатки' в таблице развития построек";
-t['37'] = "Показыть таблицу развития ресурсных полей";
-t['38'] = 'Показывать уровни ресурсных полей цветами';
-t['39'] = "Показывать таблицу ресурсов";
-t['40'] = "Показывать таблицу ресурсов в плавающем окне";
-t['41'] = "Показывать таблицу развития зданий";
-t['42'] = 'Упорядочить здания по названию в таблицах развития';
-t['43'] = 'Показывать уровни зданий в центре';
-t['44'] = 'Показывать уровни зданий цветами';
-t['45'] = "Уровень строящегося здания будет мигать";
-t['46'] = "Показывать дополнительную информацию для каждого прибывающего торговца";
-t['47'] = "Показывать последний маршрут";
-t['48'] = "количество страниц отображаемых в разделе<br>'Рынок => Покупка' страниц<br>(по умолчанию =1)";
-t['49'] = 'Действие пункта сбора, по умолчанию:';
-t['50'] = 'Количество разведчиков для функции<br>"Разведать"';
-t['51'] = "Показывать последнюю атаку";
-t['52'] = "Показывать/использовать координаты для последней атаки";
-t['53'] = 'Показывать информацию о войсках в подсказках';
-t['54'] = 'Показывать расстояние и время до поселения в подсказках';
-t['55'] = "Автоподстановка имеющихся войск для встроенного симулятора сражений";
-t['56'] = "Показывать тип клетки<br>во время передвижения мышки над картой ";
-t['57'] = 'Показывать расстояния и время';
-t['58'] = 'Показать таблицу игроков / деревень / захваченых оазисов';
-t['59'] = 'Количество страниц для презагрузки<br>(Стандартно = 1)';
-t['60'] = 'Показывать ссылки для открытия в новом окне';
-t['61'] = 'Показывать "Удалить все" на странице отчётов';
-t['62'] = 'Для меня также показывать иконку "Отправить сообщение"';
-t['63'] = 'Показывать расширенные отчеты боев ()';
-t['64'] = 'Показывать подробности в статистике отчетов';
-t['65'] = 'Цвет, если развитие возможно<br>(по умолчанию = пусто)';
-t['66'] = 'Цвет максимального уровня развития<br>(по умолчанию = пусто)';
-t['67'] = 'Цвет, если развитие невозможно из-за нехватки ресурсов<br>(по умолчанию = пусто)';
-t['68'] = 'Цвет, когда доступно развитие посредством NPC помощника<br>(по умолчанию = пусто)';
-t['69'] = "Console Log Level<br>ТОЛЬКО ДЛЯ ПРОГРАММИСТОВ И ОТЛАДЧИКОВ<br>(по умолчанию = 0)";
-t['82.L'] = "Заблокировать закладки (спрятать иконки 'Удалить', 'Переместить вверх', 'Переместить вниз)'";
-t['82.U'] = "Разблокировать закладки (показать иконки 'Удалить', 'Переместить вверх', 'Переместить вниз)'";
-t['85'] = "Показывать иконки 'Послать войска/Послать торговцев'";
-t['87'] = "Запоминать последний выбор 1x/2x/3x (если доступно)";
-t['91'] = "Разрешить менять порядок деревень в списке и свойства их отображения";
-t['92.L'] = "Заблокировать список деревень (спрятать иконки 'Переместить вверх', 'Переместить вниз)'";
-t['92.U'] = "Разблокировать список деревень (показать иконки 'Переместить вверх', 'Переместить вниз)'";
-t['ACADEMY'] = "Академия";
-t['ACCINFO'] = 'Информация аккаунта';
-t['ACTUALIZAR'] = 'Обновить информацию о деревне';
-t['ADDCRTPAGE'] = 'Добавить текущее';
-t['ALDEAS'] = 'Деревни';
-t['ALFL'] = 'Ссылка на внешний форум<br>(Оставить пустым для внутренне-игрового форума)';
-t['ALL'] = "Все";
-t['ANYADIR'] = 'Добавить';
-t['ARCHIVE'] = 'Архив';
-t['ARMOURY'] = 'Кузница доспехов';
-t['AT'] = 'в';
-t['AT2'] = 'Подкрепление';
-t['AT3'] = 'Нападение: обычное';
-t['AT4'] = 'Нападение: набег';
-t['ATTABLES'] = 'Таблица войск';
-t['ATTACKS'] = 'Нападения';
-t['AVPPP'] = "Среденее население среди игроков";
-t['AVPPV'] = "Среднее население среди деревень";
-t['BARRACKS'] = 'Казарма';
-t['BIC'] = 'Отображение дополнительных иконок';
-t['BLACKSMITH'] = 'Кузница оружия';
-t['BUSCO'] = 'Покупка';
-t['BUY'] = 'Купить';
-t['BVER'] = "Вероятно у Вас установлена бета версия";
-t['CENTERMAP'] = 'Центрировать деревню на карте';
-t['CHECKUPDATE'] = "Поиск обновлений скрипта.<br>Пожалуйста, подождите...";
-t['CHKSCRV'] = 'Проверить, не появилась ли новая версия TBeyond';
-t['CKSORT'] = 'Кликните для сортировки';
-t['CLOSE'] = 'Закрыть';
-t['COLO'] = 'Цветовые настройки';
-t['COORDS'] = 'Координаты';
-t['CPPERDAY'] = "ЕК/день";
-t['CUALQUIERA'] = 'Все';
-t['DAYAFTERTOM'] = 'Послезавтра';
-t['DBGO'] = 'Опции отладки скрипта';
-t['DEL'] = 'Удалить';
-t['DISPONIBLE'] = 'Только доступные для покупки';
-t['EDIT'] = 'Редактировать';
-t['EFICIENCIA'] = 'Эффективность';
-t['EXTAV'] = 'Возможно развитие';
-t['FORUM'] = 'Форум';
-t['GSRVT'] = 'Игровой сервер';
-t['HEROSMANSION'] = "Таверна";
-t['LARGEMAP'] = 'Большая карта';
-t['LISTO'] = 'Развитие будет возможно';
-t['LOGIN'] = 'Логин';
-t['LOSS'] = 'Потери';
-t['MAPA'] = 'Карта';
-t['MAPO'] = 'Настройки карты';
-t['MAPSCAN']  = 'Сканировать карту';
-t['MAPTBACTS'] = 'Действия';
-t['MARCADORES'] = 'Закладки';
-t['MARKET'] = 'Рынок';
-t['MAX'] = 'Максимум';
-t['MAXTIME'] = 'Макс. время';
-t['MEREO'] = 'Сообщения и Отчеты';
-t['MIN'] = 'Минимум';
-t['MNUL'] = 'Меню с левой стороны';
-t['MTC'] = 'Нагружено';
-t['MTCL'] = 'Очистить все';
-t['MTR'] = "Отношение";
-t['MTRMIN'] = "(не должно быть меньше 0.50)";
-t['MTW'] = 'Свободно';
-t['MTX'] = 'Перебор';
-t['NBHAX'] = 'Автоподбор высоты';
-t['NBHK'] = 'По умолчанию';
-t['NBO'] = 'Блок заметок';
-t['NBSA'] = 'Автоматически';
-t['NBSB'] = 'Во весь экран (большой)';
-t['NBSN'] = 'Нормальный (маленький)';
-t['NEVER'] = 'Никогда';
-t['NEWS'] = 'Новости';
-t['NEWVILLAGEAV'] = 'Дата/Время';
-t['NO'] = 'Нет';
-t['NONEWVER'] = "У вас последняя версия";
-t['NOSCOUT2FAKE'] = "Невозможно использовать разведчика для спама !";
-t['NOTROOP2FAKE'] = "Недостаточно войск для спама !";
-t['NOTROOP2SCOUT'] = "Недостаточно войск для разведки !";
-t['NOTROOPS'] = "Недостаточно войск в деревне !";
-t['NOW'] = 'Сейчас';
-t['NPCO'] = 'Опции NPC помощника';
-t['NPCSAVETIME'] = 'Время: ';
-t['NVERAV'] = "Доступна новая версия скрипта";
-t['OFREZCO'] = 'Продажа';
-t['ON'] = 'на';
-t['OVERVIEW'] = 'Обзор';
-t['PALACE'] = "Дворец";
-t['PARTY'] = "Праздники";
-t['PLAYER'] = 'Игрок';
-t['POPULATION'] = 'Население';
-t['PROFIT'] = 'Прибыль';
-t['QSURE'] = 'Вы уверены?';
-t['RAP'] = 'Пункт сбора';
-t['RBTT'] = "Таблица ресурсов";
-t['RESEND'] = "Послать";
-t['RESF'] = 'Ресурсные поля';
-t['RESIDENCE'] = "Резиденция";
-t['RESIDUE'] = 'Остатки ресурсов, когда построите это';
-t['RESOURCES'] = 'Ресурсы';
-t['SAVE'] = 'Сохранить';
-t['SAVED'] = 'Сохранено';
-t['SCRPURL'] = 'Страница TBeyond';
-t['SELECTALLTROOPS'] = "Выбрать все войска";
-t['SELECTFAKE'] = "Выбрать спам";
-t['SELECTSCOUT'] = "Выбрать разведку";
-t['SELL'] = 'Продать';
-t['SENDIGM'] = 'Послать сообщение';
-t['SENDRES'] = 'Послать ресурсы';
-t['SENDTROOPS'] = 'Отправка войск';
-t['SH1'] = "Откройте ваш профиль для автоматического определения столицы и ее координат<br>Постройте казарму для автоматического определения расы, а потом откройте центр деревни";
-t['SH2'] = "В полях ввода цветов можно ввести одно значение:<br>- green (зеленый), red (красный) или orange (оранжевый), и т.д.<br> - HEX-код цвета #004523<br>- оставить пустым для значения по умолчанию";
-t['SIM'] = 'Симулятор боя';
-t['SLOT'] = "Слот";
-t['SOREP'] = "Убрать описание (для отправки)";
-t['SPACER'] = 'Разделитель';
-t['STABLE'] = 'Конюшня';
-t['STAT'] = 'Статистика';
-t['SUMMARY'] = 'Суммарно';
-t['SVGL'] = 'Общее для всех деревень';
-t['TB3SL'] =  'Настройка ' + TB3O.shN;
-t['TIEMPO'] = 'Время';
-t['TIMEUNTIL'] = 'Осталось времени';
-t['TIPO'] = 'Соотношение';
-t['TODAY'] = 'Сегодня';
-t['TOMORROW'] = 'Завтра';
-t['TOTAL'] = "Всего";
-t['TOTALTROOPS'] = 'Собственные войска в деревне';
-t['TOTTRTR'] = 'Общее число обучаемых войск';
-t['TOWNHALL'] = 'Ратуша';
-t['TREASURY'] = "Сокровищница";
-t['TROPAS'] = 'Войска';
-t['U.2'] = 'Раса';
-t['U.3'] = 'Название вашей Столицы<br>Посетите свой профиль для обновления';
-t['U.6'] = 'Координаты вашей Столицы<br>Посетите свой профиль для обновления';
-t['UBT'] = 'Название закладки';
-t['UBU'] = 'Добавить адрес (Http://***) в закладки';
-t['UPDALLV'] = 'Обновить все деревни. ИСПОЛЬЗУЙТЕ С КРАЙНЕЙ ОСТОРОЖНОСТЬЮ. ПОТОМУ ЧТО ЭТО МОЖЕТ ПРИВЕСТИ К БАНУ АККАУНТА !';
-t['UPDATEPOP'] = 'Обновить население';
-t['UPDSCR'] = "Вы хотите обновить скрипт сейчас ?";
-t['UPGTB'] = "Возможности ресурсов/зданий в таблицах развития";
-t['USETHEM1H'] = 'Загрузить ресурсы пропорционально их часовой прибыли';
-t['USETHEMEQ'] = 'Загрузить ресурсы равномерно';
-t['USETHEMPR'] = 'Загрузить ресурсы пропорционально их количеству на складах/амбарах';
-t['VENTAS'] = 'Сохраненные предложения';
-t['VGL'] = 'Список деревень';
-t['VILLAGE'] = 'Деревня';
-t['VLC'] = 'Центр деревни';
-t['WORKSHOP'] = 'Мастерская';
-t['WSIMO1'] = "Внутренний (предлагаемый игрой)";
-t['WSIMO2'] = "Внешний (предлагаемый kirilloid.ru)";
-t['WSI'] = "Симулятор сражения предлагаемый игрой";
-t['TTT'] = "Подсказки о войсках/расстоянии";
-t['YES'] = 'Да';
-t['YOUNEED'] = 'Не хватает';
-t['USE'] = "Использовать";
-t['FINDREP'] = "Найти последние";
-t['IREPORT1'] = "Победы при атаке, без потерь";
-t['IREPORT2'] = "Победы при атаке, с потерями";
-t['IREPORT3'] = "Проигрыши при атаке";
-t['IREPORT4'] = "Победы при защите, без потерь";
-t['IREPORT5'] = "Победы при защите, с потерями";
-t['IREPORT6'] = "Проигрыши при защите, с потерями";
-t['VLISTUP'] = "Передвинуть деревню выше в списке";
-t['VLISTDOWN'] = "Передвинуть деревню ниже в списке";
-t['VLISTSEP'] = "Вставить/удалить горизонтальный разделитель над текущей деревней";
-t['VLISTEDIT'] = "Настройки отображения деревни";
-t['VLISTOPTIONS'] = "Настройки показа списка деревень";
-t['REPTT'] = "Показать отчёт в отдельном окне";
-t['WMIN'] = "Минимизировать окно";
-t['WMAX'] = "Восстановить размеры окна";
-t['REFRESHP'] = "Обновить страницу";
-t['1H'] = "час";
-t['GENLNK'] = "Улучшения ссылок";
-//3.9.1.1.4
-t['11.TT'] = "Сайт для отправки отчётов";
-t['27.TT'] = "анализатор мира";
-t['29.TT'] = "Анализатор карты";
-t['WSS'] = "Статистика по серверу";
-t['WSP'] = "Информация по игроку";
-t['WSA'] = "Информация по альянсу";
-t['TRAVIANDOPE']    = "Traviandope";
-t['TRAVIANDOPE.TT'] = "Набор инструментов, нет поддержки ру-зоны";
-t['TOOLBOX']        = "Toolbox";
-t['TOOLBOX.TT']     = "Сравнение юнитов, симулятор боя, калькуляторы, генератор подписей для игроков и альянсов";
-t['CRYTOOLS']       = "Cry's Tools";
-t['CRYTOOLS.TT']    = "Аналитика по серверам, альянсам и игрокам. Есть статистика по фарму для закончившихся серверов!";
-t['KIRILLOID']      = "Кириллоид";
-t['KIRILLOID.TT']   = "Куча полезных таблиц и калькуляторов, самый лучший симулятор боя";
-t['CROPFINDER']     = "Поиск зерна";
-t['CROPFINDER.TT']  = "Инструмент для поиска зерновых клеток";
-//3.9.1.1.5
-t['ERRUPDATE'] = "Ошибка при поиске новой версии скрипта!";
-//3.9.1.2.7
-t['100'] = 'Показывать ссылки на статистику баланса торговли для игроков';
-t['TRADEBAL.TT'] = "Узнать баланс торговли с этим игроком";
-//3.9.1.3.8
-t['101'] = 'Цвет, если развитие невозможно из-за недостаточной вместимости амбаров и/или складов<br>(по умолчанию = пусто)';
-//3.9.1.4.11
-t['102'] = "Показывать количество ресурсных полей в таблице ресурсов";
-//r0012
-t['RESNEED'] = "Для нормального развития не хватает:";
-t['NPCNEED'] = "Для развития через NPC не хватает:";
-t['RESREQ_TT'] = "Для развития требуется: $1";
-t['NPCLNK'] = "&raquo; К NPC-торговцу";
-t['USERES_TT'] = "Разрешить/запретить изменение ресурса '$1' при операциях над всеми ресурсами одновременно";
-t['USETRADERS_TT'] = "При автоматическом распределении ресурсов будет использоваться не более указанного количества торговцев. По умолчанию используются все доступные торговцы.";
-t['USEUNIRES_TT'] = "При автоматическом распределении ресурсов будет загружено не более указанного количества ресурсов. По умолчанию используются все доступные ресурсы.";
-t['USEPPH_TT'] = "Использовать ЧВР этой деревни в качестве максимального количества ресурсов.";
-t['USEPPHALL_TT'] = "Использовать ЧВР всех деревень в качестве максимального количества ресурсов.";
-//3.9.1.7.15
-t['STAT_DISMISS'] = 'Статистика по отпускаемым войскам';
-t['STAT_REMAINS'] = 'Статистика по остающимся войскам';
-break;
-case "ua"://by jin
-t['8'] = 'Альянс';
-t['LOGIN'] = 'Логін';
-t['SIM'] = 'Симулятор бою';
-t['QSURE'] = 'Ви впевнені?';
-t['LOSS'] = 'Втрати';
-t['PROFIT'] = 'Прибуток';
-t['EXTAV'] = 'Розвиток доступний';
-t['PLAYER'] = 'Гравець';
-t['VILLAGE'] = 'Поселення';
-t['POPULATION'] = 'Населення';
-t['COORDS'] = 'Координати';
-t['MAPTBACTS'] = 'Дії';
-t['SAVED'] = 'Збережено';
-t['YOUNEED'] = 'Не вистачає';
-t['TODAY'] = 'сьогодні';
-t['TOMORROW'] = 'завтра';
-t['DAYAFTERTOM'] = 'післязавтра';
-t['MARKET'] = 'Ринок';
-t['BARRACKS'] = 'Казарма';
-t['RAP'] = 'Пункт збору';
-t['STABLE'] = 'Стайня';
-t['WORKSHOP'] = 'Майстерня';
-t['ENVIAR'] = 'Відправити ресурси';
-t['BUY'] = 'Купити';
-t['SELL'] = 'Продати';
-t['SENDIGM'] = 'Відправити повідомлення';
-t['LISTO'] = 'Доступний';
-t['ON'] = 'на';
-t['AT'] = 'о';
-t['EFICIENCIA'] = 'Ефективність';
-t['NEVER'] = 'Ніколи';
-t['ALDEAS'] = 'Поселення';
-t['TROPAS'] = 'Відправити  військо';
-t['TIEMPO'] = 'Час';
-t['OFREZCO'] = 'Продаж';
-t['BUSCO'] = 'Купівля';
-t['TIPO'] = 'Співвідношення';
-t['CUALQUIERA'] = 'Всі';
-t['YES'] = 'Так';
-t['NO'] = 'Ні';
-t['ANYADIR'] = 'Додати';
-t['UBU'] = 'Додати адресу (http://***) в закладки';
-t['UBT'] = 'Назва закладки';
-t['DEL'] = 'Видалити';
-t['MAPA'] = 'Карта';
-t['DISPONIBLE'] = 'Лише доступні';
-t['TOTTRTR'] = 'Загальна кількість військ для навчання';
-t['TOTAL'] = "Загалом";
-t['NPCSAVETIME'] = 'Час: ';
-t['NONEWVER'] = "В тебе остання версія";
-t['NVERAV'] = "Доступна нова версія скрипта";
-t['UPDSCR'] = "Ви хочече обновити скрипт зараз?";
-t['CHECKUPDATE'] = "Пошук обновлень скрипта.<br>Будь ласка, зачекайте...";
-t['TOTALTROOPS'] = 'Власні війська в поселенні';
-t['CHKSCRV'] = 'Оновити TBeyond';
-t['ACTUALIZAR'] = 'Оновити інформацію про поселення';
-t['ARCHIVE'] = 'Архів';
-t['UPDALLV'] = 'Оновити всі поселення';
-t['SOREP'] = 'Прибрати опис(для відправлення)';
-t['SCRPURL'] = 'Сторінка TBeyond';
-t['CPPERDAY'] = "Од.культ./день";
-t['PARTY'] = "Свята";
-t['SLOT'] = "Комірка";
-t['USETHEMPR'] = 'Використовувати (пропорційно). ';
-t['USETHEMEQ'] = 'Використовувати (рівномірно).';
-t['USETHEM1H'] = 'Використовувати (годинний видобуток).';
-t['MTCL'] = 'Очистити все';
-t['MAXTIME'] = 'Максимальний час';
-t['SAVE'] = 'Зберегти';
-t['MAPSCAN'] = 'Сканувати карту';
-t['U.2'] = 'Раса';
-t['MARCADORES'] = 'Закладки';
-t['20'] = 'Показувати закладки';
-t['GSRVT'] = 'Ігровий сервер';
-t['ACCINFO'] = 'Інформація про акаунт';
-t['U.3'] = 'Назва твоєї столиці<br>Відвідай свій профіль для обновлення';
-t['U.6'] = 'Координати твоєї столиці<br>Відвідай свій профіль для обновлення';
-t['48'] = "Кількість сторінок, які відображатимуться в розділі<br>'Ринок => Купівля' сторінок<br>(за замовчуванням =1)";
-t['BIC'] = 'Відображення іконок';
-t['1'] = "Сервер Travian 2.x версії";
-t['4'] = 'Ринок';
-t['5'] = 'Пункт збору/Казарма/Майстерня/Стайня';
-t['6'] = "Ратуша/Таверна/Кузня обладунків/Кузня зброї";
-t['TOWNHALL'] = 'Ратуша';
-t['HEROSMANSION'] = "Таверна";
-t['BLACKSMITH'] = 'Кузня зброї';
-t['ARMOURY'] = 'Кузня обладунків';
-t['PROFILE'] = 'Профіль';
-t['MNUL'] = 'Меню з лівого боку';
-t['9'] = "Показувати додаткові посилання в лівому меню<br>(Traviantoolbox, World Analyser, Travilog, Map і т.д.)";
-t['10'] = "Використовувати симулятор бою:<br>(ліве меню)";
-t['WSIMO1'] = "Внутрішній (travian.com.ua)";
-t['WSIMO2'] = "Зовнішній (kirilloid.ru)";
-t['VGL'] = 'Список поселень';
-t['12'] = "Показувати посилання на 'dorf1.php' и 'dorf2.php'";
-t['22'] = 'Показувати поле заміток';
-t['NBO'] = 'Поле заміток';
-t['NPCO'] = 'Опції NPC-асистента';
-t['26'] = 'Показувати розрахунки NPC-асистента/ посилання';
-t['STAT'] = 'Статистика';
-t['27'] = "Який аналізатор світу використовувати?";
-t['28'] = "Показувати посилання на статистику аналізатора";
-t['37'] = "Показувати таблицю розвитку ресурсних полів";
-t['41'] = "Показувати таблицю развитку споруд";
-t['RESF'] = 'Ресурсні поля';
-t['38'] = 'Показувати рівні ресурсних полів кольорами';
-t['VLC'] = 'Центр поселення';
-t['44'] = 'Показувати рівні споруд кольорами';
-t['43'] = 'Показувати рівні споруд в центрі';
-t['CROPFINDER'] = 'Пошук зерна';
-t['SENDTROOPS'] = 'Відправлення війск';
-t['7'] = "Палац/Резиденція/Академія/Скарбниця";
-t['ALFL'] = 'Посилання на зновнішній форум<br>(Залишити порожнім для внутрішнього форуму)';
-t['13'] = 'Показувати іконку "Центрувати поселення на карті"';
-t['14'] = "Показувати іконку 'Відправити війська/Відправити ресурси' в списку поселень";
-t['16'] = "Показувати прибуток зерна у списку поселень";
-t['39'] = 'Показувати таблицю "Ресурси"';
-t['RBTT'] = 'Таблиця "Ресурси"';
-t['45'] = "Блимання рівня споруди, що будується";
-t['VENTAS'] = 'Збережені пропозиції';
-t['49'] = 'Дії пункту збору за замовчуванням:';
-t['AT2'] = 'Підкріплення';
-t['AT3'] = 'Напад: звичайний';
-t['AT4'] = 'Напад: розбійницький набіг';
-t['50'] = 'Кількість розвідників для функції<br>"Розвідка"';
-t['53'] = 'Показувати інформацію про війска в підказках';
-t['56'] = "Показувати тип клітинки <br>під час пересування мишки над картою ";
-t['57'] = 'Показувати відстань і час';
-t['58'] = 'Показати таблицю гравців / поселень / захоплених оазисів';
-t['59'] = 'Кількість сторінок для перезавантаження <br>(за замовчуванням = 1)';
-t['61'] = 'Показувати "Видалити всі" на сторінці звітів';
-t['64'] = 'Показувати подробиці в статистиці звітів';
-t['MEREO'] = 'Повідомлення і Звіти';
-t['MAPO'] = 'Налаштування карти';
-t['60'] = 'Показувати посилання для відкриття в новому вікні';
-t['24'] = 'Розмір поля заміток';
-t['SUMMARY'] = 'Сумарно';
-t['NBSA'] = 'Автоматично';
-t['NBSN'] = 'Нормальний (маленький)';
-t['NBSB'] = 'Великий екран (великий)';
-t['25'] = 'Висота поля заміток';
-t['NBHAX'] = 'Автоматичне збільшення висоти';
-t['NBHK'] = 'Висота за замовчуванням';
-t['65'] = 'Колір, коли доступний розвиток<br>(за замовчуванням = порожнє)';
-t['66'] = 'Колір максимального рівня<br>(за замовчуванням = порожнє)';
-t['67'] = 'Колір, коли розвиток не доступний<br>(за замовчуванням = порожнє)';
-t['68'] = 'Колір, коли доступний розвиток за допомогою NPC-асистента<br>(за замовчуванням = порожнє)';
-t['SELECTALLTROOPS'] = "Вибрати все військо";
-t['SELECTSCOUT'] = "Відправити розвідника";
-t['SELECTFAKE'] = "Відправити спам";
-t['NOSCOUT2FAKE'] = "Використовувати розвідників, як спам неможливо!";
-t['NOTROOP2FAKE'] = "Немає воїнів для спаму!";
-t['NOTROOP2SCOUT'] = "Немає воїнів для розвідки !";
-t['NOTROOPS'] = "В поселенні немає військ!";
-t['ALL'] = "Всі";
-t['SH2'] = "В полях введення кольорів можна ввести:<br>- green(зелений) чи red(червоний) чи  orange(оранжевий), і т.д.<br>- HEX-код кольору #004523<br>- залишити порожнім для значення за замовчуванням";
-t['BVER'] = "Ви можете мати бета-версію";
-t['AVPPV'] = "Середня кількість населення на поселення";
-t['AVPPP'] = "Середня кількість населення на гравця";
-t['69'] = "Console Log Level<br>ТІЛЬКИ ДЛЯ ПРОГРАМІСТІВ ЧИ ВІДЛАДЧИКІВ<br>(за замовчуванням = 0)";
-t['MAX'] = 'Максимум';
-t['TB3SL'] = 'Налаштування ' + TB3O.shN;
-t['LARGEMAP'] = 'Велика карта';
-t['COLO'] = 'Опції кольорів';
-t['DBGO'] = 'Опції відладки';
-t['NOW'] = 'Вже';
-t['CLOSE'] = 'Закрити';
-t['USE'] = 'Використати';
-t['OVERVIEW'] = 'Огляд';
-t['FORUM'] = 'Форум';
-t['ATTACKS'] = 'Напади';
-t['NEWS'] = 'Новини';
-t['ADDCRTPAGE'] = 'Додати поточну';
-t['SPACER'] = 'Spacer';
-t['ATTABLES'] = 'Таблиці військ';
-t['MTW'] = 'Марнування';
-t['MTX'] = 'Перевищення';
-t['MTC'] = 'Завантажено';
-t['82.L'] = 'Заблокувати закладки (Приховати видалити, рухати вверх, рухати вниз іконки)';
-t['82.U'] = 'Розблокувати закладки (Приховати видалити, рухати вверх, рухати вниз іконки)';
-t['CKSORT'] = 'Сортування';
-t['MIN'] = 'Мінімум';
-t['SVGL'] = 'Розподілити між поселеннями';
-t['UPDATEPOP'] = 'Оновити населення';
-t['54'] = 'Показувати відстань і час до поселення у підказках';
-t['EDIT'] = 'Редагувати';
-t['NEWVILLAGEAV'] = 'Дата/Час';
-t['TIMEUNTIL'] = 'Час очікування';
-t['62'] = 'Для мене також показувати іконку "Відправити повідомлення"';
-t['CENTERMAP'] = 'Центрувати карту на цьому поселенні';
-t['ACADEMY'] = "Академія";
-t['TREASURY'] = "Скарбниця";
-t['34'] = "Показувати одиниці культури/день в таблиці модернізації";
-t['UPGTB'] = "Можливості полів/будівель в таблицях модернізації";
-t['35'] = "Показувати споживання зерна у таблиці модернізації";
-t['40'] = 'Показувати таблицю "Ресурси" у плаваючому вікні';
-t['21'] = 'Показувати "Закладки" в плаваючому вікні';
-t['23'] = 'Показувати "Замітки" в плаваючому вікні';
-t['17'] = "Показувати населення в списку поселень";
-t['29'] = 'Використати аналізатор карти';
-t['30'] = 'Показувати посилання на карту для користувачів';
-t['31'] = 'Показувати посилання до карти для альянсів';
-t['63'] = 'Показувати розширені звіти боїв ()';
-t['18'] = 'Показати додатковий (2 колонки) список поселень у плаваючому вікні';
-t['42'] = 'Сортувати за назвою будівлі у таблиці модернізації';
-t['19'] = 'Показувати інформацію про будівлі, що розвиваються в даний час<br> і війська, які зараз у поході в списку поселень';
-t['32'] = 'Показати "Пошук"';
-t['33'] = 'Показувати "Пошук" в плаваючому вікні';
-t['36'] = 'Показувати "До тих пір/Залишок" підрахунок в таблицях модернізації';
-t['RESIDUE'] = 'Залишок після розвитку ';
-t['RESOURCES'] = 'Ресурси';
-break;
-case "hu"://by geo
-t['8'] = 'Klán';
-t['SIM'] = 'Harc szimulátor';
-t['QSURE'] = 'Biztos vagy benne?';
-t['LOSS'] = 'Veszteség';
-t['PROFIT'] = 'Nyereség';
-t['EXTAV'] = 'Fejlesztés elérhetõ';
-t['PLAYER'] = 'Játékos';
-t['VILLAGE'] = 'Falu';
-t['POPULATION'] = 'Népesség';
-t['COORDS'] = 'Koordináták';
-t['MAPTBACTS'] = 'Mozgás:';
-t['SAVED'] = 'Mentve';
-t['YOUNEED'] = 'Kell';
-t['TODAY'] = 'ma';
-t['TOMORROW'] = 'holnap';
-t['DAYAFTERTOM'] = 'holnapután';
-t['MARKET'] = 'Piac';
-t['BARRACKS'] = 'Kaszárnya';
-t['RAP'] = 'Gyülekezõtér';
-t['STABLE'] = 'Istálló';
-t['WORKSHOP'] = 'Mûhely';
-t['SENDRES'] = 'Nyersanyag küldése';
-t['BUY'] = 'Vétel';
-t['SELL'] = 'Eladás';
-t['SENDIGM'] = 'Üzenet küldése';
-t['LISTO'] = 'Elérhetõ';
-t['ON'] = 'ezen a napon:';
-t['AT'] = 'ekkor:';
-t['EFICIENCIA'] = 'Hatékonyság';
-t['NEVER'] = 'Soha';
-t['ALDEAS'] = 'Falvak';
-t['TIEMPO'] = 'Idõ';
-t['OFREZCO'] = 'Felajánlás';
-t['BUSCO'] = 'Keresés';
-t['TIPO'] = 'Típus';
-t['DISPONIBLE'] = 'Csak elfogadhatót';
-t['CUALQUIERA'] = 'Mind';
-t['YES'] = 'Igen';
-t['NO'] = 'Nem';
-t['LOGIN'] = 'Bejelentkezés';
-t['MARCADORES'] = 'Könyvjelzõk';
-t['ANYADIR'] = 'Hozzáad';
-t['UBU'] = 'Könyvjelzõ URL';
-t['UBT'] = 'Könyvjelzõ szövege';
-t['DEL'] = 'Törlés';
-t['MAPA'] = 'Térkép';
-t['MAXTIME'] = 'Maximum idõ';
-t['ARCHIVE'] = 'Archívum';
-t['SUMMARY'] = 'Összefoglalás';
-t['TROPAS'] = 'Egységek';
-t['CHKSCRV'] = 'TBeyond frissítése';
-t['ACTUALIZAR'] = 'Falu információ frissítése';
-t['VENTAS'] = 'Mentett ajánlatok';
-t['MAPSCAN'] = 'Térkép vizsgálata';
-t['BIC'] = 'Bõvített ikonok';
-t['22'] = 'Jegyzettömb mutatása';
-t['SAVE'] = 'Mentés';
-t['49'] = 'Gyülekezõtér alapmûvelet';
-t['AT2'] = 'Támogatás';
-t['AT3'] = 'Normál támadás';
-t['AT4'] = 'Rablótámadás';
-t['24'] = 'Jegyzettömb mérete';
-t['NBSA'] = 'Automatikus';
-t['NBSN'] = 'Normál (kicsi)';
-t['NBSB'] = 'Nagy képernyõ (nagy)';
-t['25'] = 'Jegyzettömb magassága';
-t['NBHAX'] = 'Magasság automatikus bõvítése';
-t['NBHK'] = 'Alap magasság';
-t['43'] = 'Épület szintek mutatása';
-t['NPCSAVETIME'] = 'Spórolsz: ';
-t['38'] = 'Külterület színjelzése';
-t['44'] = 'Épületek színjelzése';
-t['65'] = 'Szín, ha fejleszthetõ<br>(az alaphoz hagyd üresen)';
-t['66'] = 'Szín, ha teljesen ki van építve<br>(az alaphoz hagyd üresen)';
-t['67'] = 'Szín, ha nem elérhetõ a fejlesztés<br>(az alaphoz hagyd üresen)';
-t['68'] = 'Szín, ha NPC-vel fejleszthetõ<br>(az alaphoz hagyd üresen)';
-t['TOTALTROOPS'] = 'A faluban képzett egységek';
-t['20'] = 'Könyvjelzõk mutatása';
-t['U.2'] = 'Nép';
-t['1'] = "Travian v2.x kiszolgáló";
-t['SELECTALLTROOPS'] = "Minden egység kiválasztása";
-t['PARTY'] = "Ünnepségek";
-t['CPPERDAY'] = "KP/nap";
-t['SLOT'] = "Hely";
-t['TOTAL'] = "Teljes";
-t['SELECTSCOUT'] = "Kémek kiválasztása";
-t['SELECTFAKE'] = "Fake kiválasztása";
-t['NOSCOUT2FAKE'] = "Nem használhatsz kémeket fake támadásra!";
-t['NOTROOP2FAKE'] = "Nincsenek egységek fake támadáshoz!";
-t['NOTROOP2SCOUT'] = "Nincsenek egységek kémleléshez!";
-t['NOTROOPS'] = "Nincsenek egységek a faluban!";
-t['ALL'] = "Mind";
-t['SH2'] = "A színeket így add meg:<br>- green vagy red vagy  orange stb.<br>- vagy HEX színkóddal #004523<br>- hagyd üresen az alapértelmezett színhez";
-t['SOREP'] = "Eredeti jelentés (küldéshez)";
-t['56'] = "Mezõ-típus, oázis infó mutatása<br>az egérmutató alatt";
-t['10'] = "Harcszimulátor link:<br>(bal oldali menü)";
-t['WSIMO1'] = "Beépített";
-t['WSIMO2'] = "Külsõ (kirilloid.ru által)";
-t['27'] = "World Analyser választása";
-t['28'] = "Linkek a statisztika elemzõhöz";
-t['NONEWVER'] = "A legújabb verziót használod";
-t['BVER'] = "Lehet hogy BETA verziód van";
-t['NVERAV'] = "A szkript új verziója elérhetõ";
-t['UPDSCR'] = "Frissíted most?";
-t['CHECKUPDATE'] = "Szkript-frissítés keresése.<br>Kérlek várj...";
-t['CROPFINDER'] = "Búzakeresõ";
-t['AVPPV'] = "Falunkénti átlag népesség";
-t['AVPPP'] = "Játékosonkénti átlag népesség";
-t['37'] = "Külterület fejlesztési táblája";
-t['41'] = "Épületek fejlesztési táblája";
-t['69'] = "Konzol naplózási szint<br>CSAK PROGRAMOZÓKNAK VAGY HIBAKERESÉSHEZ<br>(Alap = 0)";
-t['48'] = "Piaci ajánlatoknál több oldal elõre betöltése<br>A Piac -Vásárlás- oldalán<br>(Alap = 1)";
-t['U.3'] = 'Fõfalud neve<br><a href="spieler.php">Nézd meg a profilodat a frissítéshez</a>';
-t['U.6'] = 'Fõfalud koordinátái<br><a href="spieler.php">Nézd meg a profilodat a frissítéshez</a>';
-t['TOTTRTR'] = 'Összes kiképzés alatt álló egység';
-t['57'] = 'Távolság/idõ mutatása';
-t['TB3SL'] = TB3O.shN + ' Beállítások';
-t['UPDALLV'] = 'Minden falu frissítése. HASZNÁLD ÓVATOSAN, TILTÁS JÁRHAT ÉRTE!';
-t['9'] = "További linkek bal oldalon<br>(Traviantoolbox, World Analyser, Travilog, Térkép, stb.)";
-t['LARGEMAP'] = 'Nagy térkép';
-t['USETHEMPR'] = 'Arányos elosztás';
-t['USETHEMEQ'] = 'Egyenlõ elosztás';
-t['TOWNHALL'] = 'Tanácsháza';
-t['GSRVT'] = 'Játék kiszolgáló';
-t['ACCINFO'] = 'Felhasználó információ';
-t['NBO'] = 'Jegyzettömb';
-t['MNUL'] = 'Baloldali menü';
-t['STAT'] = 'Statisztikák';
-t['RESF'] = 'Külterület';
-t['VLC'] = 'Faluközpont';
-t['MAPO'] = 'Térkép beállítások';
-t['COLO'] = 'Szín beállítások';
-t['DBGO'] = 'Hibakeresési beállítások';
-t['4'] = 'Piac';
-t['5'] = 'Gyülekezõtér/Kaszárnya/Mûhely/Istálló';
-t['6'] = "Tanácsháza/Hõsök háza/Páncélkovács/Fegyverkovács";
-t['HEROSMANSION'] = "Hõsök háza";
-t['BLACKSMITH'] = 'Fegyverkovács';
-t['ARMOURY'] = 'Páncélkovács';
-t['NOW'] = 'Most';
-t['CLOSE'] = 'Bezárás';
-t['USE'] = 'Használat';
-t['USETHEM1H'] = 'Egy órai termelés';
-t['OVERVIEW'] = 'Áttekintés';
-t['FORUM'] = 'Fórum';
-t['ATTACKS'] = 'Támadások';
-t['NEWS'] = 'Hírek';
-t['ADDCRTPAGE'] = 'Jelenlegi hozzáadása';
-t['SCRPURL'] = 'TBeyond oldal';
-t['50'] = 'Kémek száma a<br>"Kémek választása" funkcióhoz';
-t['SPACER'] = 'Elválasztó';
-t['53'] = 'Egység információ mutatása gyorstippben';
-t['MEREO'] = 'Üzenetek & Jelentések';
-t['59'] = 'Üzenetek/jelentések elõre betöltött oldalainak száma<br>(Default = 1)';
-t['ATTABLES'] = 'Egység tábla';
-t['MTW'] = 'Elpazarolva';
-t['MTX'] = 'Meghaladja';
-t['MTC'] = 'Jelenlegi rakomány';
-t['ALFL'] = 'Link külsõ fórumhoz<br>(belsõhöz hagyd üresen)';
-t['82.L'] = 'Könyvjelzõk lezárása (Törlés és mozgatás ikonok eltüntetése)';
-t['MTCL'] = 'Mindet törölni';
-t['82.U'] = 'Könyvjelzõk feloldása (Törlés és mozgatás ikonok mutatása)';
-t['CKSORT'] = 'Rendezéshez kattints';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Minden faluhoz menteni';
-t['VGL'] = 'Falu lista';
-t['12'] = "'dorf1.php' és 'dorf2.php' linkek mutatása";
-t['UPDATEPOP'] = 'Népesség frissítése';
-t['54'] = 'Távolság és idõ mutatása falvakhoz';
-t['EDIT'] = 'Szerkesztés';
-t['NPCO'] = 'NPC segítõ beállításai';
-t['26'] = 'NPC segítõ számítások és linkek mutatása';
-t['58'] = 'Játékosok/falvak/oázisok mutatása a térképnél';
-t['NEWVILLAGEAV'] = 'Dátum/Idõ';
-t['TIMEUNTIL'] = 'Várakozás';
-t['61'] = '"Mindet törölni" mutatása a jelentésekhez';
-t['62'] = '"Üzenet küldése" mutatása magam részére is';
-t['CENTERMAP'] = 'Térkép középpontjába ezt a falut';
-t['13'] = 'Mutasd a "Térkép központosítása" ikont';
-t['SENDTROOPS'] = 'Egységek kiküldése';
-t['64'] = 'Jelentés statisztika részletezése';
-t['7'] = "Palota/Rezidencia/Akadémia/Kincstár";
-t['PALACE'] = "Palota";
-t['RESIDENCE'] = "Rezidencia";
-t['ACADEMY'] = "Akadémia";
-t['TREASURY'] = "Kincstár";
-t['45'] = "Villogó szintjelzés az éppen fejlesztett épületekhez";
-t['60'] = 'Linkek az üzenetek felugró ablakban mutatásához';
-break;
-case "no"://by ThePirate
-t['8'] = 'Allianse';
-t['SIM'] = 'Kamp-simulator';
-t['QSURE'] = 'Er du sikker?';
-t['LOSS'] = 'Tap';
-t['PROFIT'] = 'Profit';
-t['EXTAV'] = 'Utvidelse tilgjengelig';
-t['PLAYER'] = 'Spiller';
-t['VILLAGE'] = 'By';
-t['POPULATION'] = 'Befolknong';
-t['COORDS'] = 'Koordinater';
-t['MAPTBACTS'] = 'Handlinger';
-t['SAVED'] = 'Lagret';
-t['YOUNEED'] = 'Du trenger';
-t['TODAY'] = 'idag';
-t['TOMORROW'] = 'imorgen';
-t['DAYAFTERTOM'] = 'dagen etter imorgen';
-t['MARKET'] = 'Markedsplass';
-t['BARRACKS'] = 'Kaserne';
-t['RAP'] = 'Møteplass';
-t['STABLE'] = 'Stall';
-t['WORKSHOP'] = 'Verksted';
-t['SENDRES'] = 'Send ressurser';
-t['BUY'] = 'Kjøp';
-t['SELL'] = 'Selg';
-t['SENDIGM'] = 'Send IGM';
-t['LISTO'] = 'Kan bygges';
-t['ON'] = 'den';
-t['AT'] = 'klokken';
-t['EFICIENCIA'] = 'Effektivitet';
-t['NEVER'] = 'Aldri';
-t['ALDEAS'] = 'By(er)';
-t['TIEMPO'] = 'Tid';
-t['OFREZCO'] = 'Tilbyr';
-t['BUSCO'] = 'Leter etter';
-t['TIPO'] = 'Type';
-t['DISPONIBLE'] = 'Kun tigjengelig';
-t['CUALQUIERA'] = 'Alle';
-t['YES'] = 'Ja';
-t['NO'] = 'Nei';
-t['LOGIN'] = 'Logg inn';
-t['MARCADORES'] = 'Bokmerker';
-t['ANYADIR'] = 'Legg til';
-t['UBU'] = 'Nytt bokmerke URL';
-t['UBT'] = 'Nytt nokmerke Text';
-t['DEL'] = 'Slett';
-t['MAPA'] = 'Kart';
-t['MAXTIME'] = 'Maximum tid';
-t['ARCHIVE'] = 'Arkiv';
-t['SUMMARY'] = 'Resume';
-t['TROPAS'] = 'Tropper';
-t['CHKSCRV'] = 'Oppdater TBeyond';
-t['ACTUALIZAR'] = 'Oppdater by-informasjon';
-t['VENTAS'] = 'Lagrede tilbud';
-t['MAPSCAN'] = 'Scan Kartet';
-t['BIC'] = 'Vis utvidede iconer';
-t['22'] = 'Vis notatblokk';
-t['SAVE'] = 'Lagre';
-t['49'] = 'Møteplass standard handling ';
-t['AT2'] = 'Forsterkninger';
-t['AT3'] = 'Angrep: Normalt';
-t['AT4'] = 'Angrep: Plyndringstokt';
-t['24'] = 'Notisblokk størrelse';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normal (Liten)';
-t['NBSB'] = 'Større';
-t['25'] = 'Notisblokk høyde';
-t['NBHAX'] = 'Automatisk utvid høyde';
-t['NBHK'] = 'Standard høyde';
-t['43'] = 'Vis bygnings nivå';
-t['NPCSAVETIME'] = 'Lagre: ';
-t['38'] = 'Vi farge på ressurs nivået';
-t['44'] = 'Vis bygnings nivå farger';
-t['65'] = 'Farge utvidelse tilgjengelig<br>(Standard = Tom)';
-t['66'] = 'Farge maksimalt nivål<br>(Standard = Tom)';
-t['67'] = 'Farge utvidelse ikke tilgjengelig<br>(Standard = Tom)';
-t['68'] = 'Farge utvidelse via NPC<br>(Standard = Tom)';
-t['TOTALTROOPS'] = 'Totale tropper i byen';
-t['20'] = 'Vis bokmerker';
-t['U.2'] = 'Stamme';
-t['1'] = "Travian v2.x server";
-t['SELECTALLTROOPS'] = "Velg alle tropper";
-t['PARTY'] = "Fester";
-t['CPPERDAY'] = "KP/dag";
-t['SLOT'] = "Utvidelse";
-t['TOTAL'] = "Totalt";
-t['SELECTSCOUT'] = "Velg scout";
-t['SELECTFAKE'] = "Velg fake";
-t['NOSCOUT2FAKE'] = "Det er umulig å bruke scouts til et fake angrep !";
-t['NOTROOP2FAKE'] = "Det er ikke nok tropper til et fake angrep !";
-t['NOTROOP2SCOUT'] = "Det er ikke nok tropper til å scoute med !";
-t['NOTROOPS'] = "Det er ikke noen tropper i byen !";
-t['ALL'] = "Alle";
-t['SH2'] = "I farge-felt kan du skrive:<br>- <b>green</b> eller <b>red</b> eller  <b>orange</b>, etc.<br>- the HEX color code like <b>#004523</b><br>- leave empty for the default color";
-t['SOREP'] = "Vis orginal rapport (for posting)";
-t['56'] = "Vis rute/oase type<br>ved musepekeren over kartet";
-t['10'] = "Kampsimulator link:<br>(menyen til venstre)";
-t['28'] = "Show analyser statistic links";
-t['NONEWVER'] = "Du har den siste versjonen tilgjengelig";
-t['BVER'] = "Du har kansje en beta versjon";
-t['NVERAV'] = "En ny versjon er tilgjengelig";
-t['UPDSCR'] = "Oppdatere nå ?";
-t['CHECKUPDATE'] = "Leter etter script oppdatering.<br>Venligst vent...";
-t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "Gjennomsnittlig befolkning per by";
-t['AVPPP'] = "Gjennomsnittlig befolkning per spiller";
-t['37'] = "Vis utvidelseshjelp for ressursfelt";
-t['41'] = "Vis utvidelseshjelp for bygninger";
-t['69'] = "Console Log Level<br>ONLY FOR PROGRAMMERS OR DEBUGGING<br>(Default = 0)";
-t['48'] = "Mengde av 'tilbyr' sider som skal lastes<br>i 'Marked => Kjøp' side<br>(Standard = 1)";
-t['U.3'] = 'Navn på din hovedby<br><b>Ikke endre på dette, besøk profilen din!</b>';
-t['U.6'] = 'Koordinater til hovedbyen din<br><b>Ikke endre på dette, besøk profilen din!</b>';
-t['TOTTRTR'] = 'Total troppe utviklings tid';
-t['57'] = 'Vis avstand og tid';
-t['UPDALLV'] = 'Oppdater alle byer.  USE WITH MAXIMUM CARE AS THIS CAN LEAD TO A BANNED ACCOUNT !';
-t['9'] = 'Vis flere lenker i menyen til venstre<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)';
-t['LARGEMAP'] = 'Stort kart';
-break;
-case "si"://by BmW
-t['8'] = 'Aliansa';
-t['SIM'] = 'Simulator bitk';
-t['QSURE'] = 'Ali ste prepričani?';
-t['LOSS'] = 'Izguba';
-t['PROFIT'] = 'Profit';
-t['EXTAV'] = 'Nadgradnja možna';
-t['PLAYER'] = 'Igralec';
-t['VILLAGE'] = 'Naselbine';
-t['POPULATION'] = 'Populacija';
-t['COORDS'] = 'Koordinate';
-t['MAPTBACTS'] = 'Možnosti';
-t['SAVED'] = 'Shranjeno';
-t['YOUNEED'] = 'Manjka';
-t['TODAY'] = 'Danes';
-t['TOMORROW'] = 'Jutri';
-t['DAYAFTERTOM'] = 'Pojutrišnjem';
-t['MARKET'] = 'Tržnica';
-t['BARRACKS'] = 'Barake';
-t['RAP'] = 'Zbirališče';
-t['STABLE'] = 'Konjušnica';
-t['WORKSHOP'] = 'Izdelovalec oblegovalnih naprav';
-t['SENDRES'] = 'Pošlji surovine';
-t['BUY'] = 'Kupi';
-t['SELL'] = 'Ponudi';
-t['SENDIGM'] = 'Pošlji sporočilo';
-t['LISTO'] = 'Dovolj';
-t['ON'] = '';
-t['AT'] = 'ob';
-t['EFICIENCIA'] = 'Izkoristek';
-t['NEVER'] = 'Nikoli';
-t['ALDEAS'] = 'Vas(i)';
-t['TIEMPO'] = 'Čas';
-t['OFREZCO'] = 'Ponuja';
-t['BUSCO'] = 'Išče';
-t['TIPO'] = 'Tip';
-t['DISPONIBLE'] = 'Samo možne ponudbe';
-t['CUALQUIERA'] = 'Karkoli';
-t['YES'] = 'Da';
-t['NO'] = 'Ne';
-t['LOGIN'] = 'Prijava';
-t['MARCADORES'] = 'Povezave';
-t['ANYADIR'] = 'Dodaj';
-t['UBU'] = 'Cilj povezave';
-t['UBT'] = 'Ime povezave';
-t['DEL'] = 'Izbriši';
-t['MAPA'] = 'Zemljevid';
-t['MAXTIME'] = 'Maksimalen čas';
-t['ARCHIVE'] = 'Arhiv';
-t['SUMMARY'] = 'Pregled';
-t['TROPAS'] = 'Enote';
-t['CHKSCRV'] = 'Posodobi skripto';
-t['ACTUALIZAR'] = 'Posodobi informacije o naseljih';
-t['VENTAS'] = 'Shranjene ponudbe';
-t['MAPSCAN'] = 'Preglej mapo';
-t['BIC'] = 'Dodatne ikone';
-t['22'] = 'Prikaži beležko';
-t['SAVE'] = 'Shrani';
-t['49'] = 'Privzeta izbira Zbirališča';
-t['AT2'] = 'Okrepitve';
-t['AT3'] = 'Napad:  Polni napad';
-t['AT4'] = 'Napad:  Roparski pohod';
-t['24'] = 'Velikost';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normalna (majhna)';
-t['NBSB'] = 'Velik zaslon (velika)';
-t['25'] = 'Višina';
-t['NBHAX'] = 'Samodejno prilagajaj velikost';
-t['NBHK'] = 'Privzeta višina';
-t['43'] = 'Stopnje';
-t['NPCSAVETIME'] = 'Prihrani: ';
-t['38'] = 'Barvne stopnje';
-t['44'] = 'Barvne stopnje';
-t['65'] = 'Barva: Nadgradnja možna<br>(Prazno = privzeto)';
-t['66'] = 'Barva: Najvišja stopnja<br>(Prazno = privzeto)';
-t['67'] = 'Barva: Nadgradnja ni možna<br>(Prazno = privzeto)';
-t['68'] = 'Barva: Nadgradnja možna preko NPC Trgovanja<br>(Prazno = privzeto)';
-t['TOTALTROOPS'] = 'Skupno število enot';
-t['20'] = 'Prikaži povezave';
-t['U.2'] = 'Pleme';
-t['1'] = "Travian v2.x server";
-t['SELECTALLTROOPS'] = "Vse enote";
-t['PARTY'] = "Festivali";
-t['CPPERDAY'] = "KT/Dan";
-t['SLOT'] = "Reže";
-t['TOTAL'] = "Vsota";
-t['SELECTSCOUT'] = "Skavti";
-t['SELECTFAKE'] = "Fake";
-t['NOSCOUT2FAKE'] = "Ni mogoče poslati skavtov kot fake napad";
-t['NOTROOP2FAKE'] = "Ni dovolj enot za fake napad!";
-t['NOTROOP2SCOUT'] = "Ni dovolj enot za poizvedbo!";
-t['NOTROOPS'] = "V naselju ni enot!";
-t['ALL'] = "Vse";
-t['SH2'] = "V polja za barvo lahko vnesete:<br>- npr. green(zelena) ali red(rdeča) ali orange(oranžna)<br>- HEX kodo kot #004523<br>- pustite prazno za privzete barve";
-t['SOREP'] = "Prikaži originalno poročilo (za pošiljanje)";
-t['56'] = "Prikaži tip polja/info oaze<br>med premikanjem miške po mapi";
-t['10'] = "Simulator bitk:<br>(levi meni)";
-t['WSIMO1'] = "Notranji (ponujen v igri)";
-t['WSIMO2'] = "Zunanji (ponujen pri kirilloid.ru)";
-t['27'] = "Uporabi World Analyser";
-t['28'] = "Povezave Analyser statistike";
-t['NONEWVER'] = "Skripte ni treba posodobiti";
-t['BVER'] = "Lahko, da imate beta različico";
-t['NVERAV'] = "Nova različica skripte je na voljo";
-t['UPDSCR'] = "Posodobi skripto";
-t['CHECKUPDATE'] = "Preverjam za posodobitev.<br>Prosim počakajte...";
-t['CROPFINDER'] = "Iskalec Žita";
-t['AVPPV'] = "Povprečna populacija naselja";
-t['AVPPP'] = "Povprečna populacija igralca";
-t['37'] = "Tabela nadgradenj";
-t['41'] = "Tabela nadgradenj";
-t['69'] = "Konzola (Za stopnje)<br>SAMO ZA PROGRAMERJE ALI RAZHROŠČEVANJE<br>(Privzeto = 0)";
-t['48'] = 'Število strani ponudb, ki se naj naložijo:<br>medtem ko ste na "Tržnici => Kupi" strani<br>(Privzeto = 1)';
-t['U.3'] = 'Ime metropole';
-t['U.6'] = 'Koordinate metropole';
-t['MAX'] = 'Maksimalno';
-t['TOTTRTR'] = 'Skupno število enot v postopku';
-t['57'] = 'Razdalje in časi';
-t['TB3SL'] = TB3O.shN + 'Nastavitve';
-t['UPDALLV'] = 'Osveži vsa naselja.';
-t['9'] = 'Dodatne povezave v levem meniju<br>(Traviantoolbox, World Analyser, Travilog, Map.)';
-t['LARGEMAP'] = 'Velik zemljevid';
-t['USETHEMPR'] = 'Uporabi (izmenično)';
-t['USETHEMEQ'] = 'Uporabi (enako)';
-t['TOWNHALL'] = 'Mestna hiša';
-t['GSRVT'] = 'Tip Serverja';
-t['ACCINFO'] = 'Informacije o računu';
-t['NBO'] = 'Beležka';
-t['MNUL'] = 'Meni na levi strani';
-t['STAT'] = 'Statistika';
-t['RESF'] = 'Surovinska polja';
-t['VLC'] = 'Center naselja';
-t['MAPO'] = 'Možnosti zemljevida';
-t['COLO'] = 'Barve';
-t['DBGO'] = 'Možnosti razhroščevanja';
-t['4'] = 'Tržnica';
-t['5'] = 'Zbirališče/Barake/Konjušnica/Izdelovalec oblegovalnih naprav';
-t['6'] = 'Mestna hiša/Herojeva residenca<br>Izdelovalec oklepov/Izdelovalec orožja';
-t['HEROSMANSION'] = 'Herojeva residenca';
-t['BLACKSMITH'] = 'Izdelovalec orožja';
-t['ARMOURY'] = 'Izdelovalec oklepov';
-t['NOW'] = 'Sedaj';
-t['CLOSE'] = 'Zapri';
-t['USE'] = 'Uporabi';
-t['USETHEM1H'] = 'Uporabi (1 urna proizvodnja)';
-t['OVERVIEW'] = 'Pregled';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Napadi';
-t['NEWS'] = 'Novice';
-t['ADDCRTPAGE'] = 'Dodaj trenutno stran';
-t['SCRPURL'] = 'TBeyond stran';
-t['50'] = 'Število skavtov za "Skavti" funkcijo';
-t['SPACER'] = 'Ločilna črta';
-t['53'] = 'Prikaži informacije o enoti, ki je v vasi<br>(Ko greste z miško na enoto)';
-t['MEREO'] = 'Sporočila in Poročila';
-t['59'] = 'Število strani Sporočil/Poročil, ki se naj naložijo<br>(Privzeto = 1)';
-t['ATTABLES'] = 'Tabela enot';
-t['MTW'] = 'Ostane';
-t['MTX'] = 'Preseženo';
-t['MTC'] = 'Skupaj';
-t['ALFL'] = 'Povezava do zunanjega Foruma<br>(Pusti prazno za notranji Forum)';
-t['MTCL'] = 'Počisti vse';
-t['82.L'] = 'Zakleni povezave';
-t['82.U'] = 'Odkleni povezave';
-t['CKSORT'] = 'Razvrsti';
-t['MIN'] = 'Minimalno';
-t['SVGL'] = 'Shrani za vse vasi';
-t['VGL'] = 'Naselja';
-t['12'] = "Prikaži 'dorf1' in 'dorf2' povezave";
-t['UPDATEPOP'] = 'Posodobi populacijo';
-t['54'] = 'Razdalje in časi do vasi';
-t['EDIT'] = 'Uredi';
-t['NPCO'] = 'Možnosti NPC trgovanja';
-t['26'] = 'NPC izračune/povezave';
-t['NEWVILLAGEAV'] = 'Nova vas';
-t['58'] = 'Tabela Igralcev/Vasi/Okupiranih pokrajin';
-t['NEWVILLAGEAV'] = 'Datum/Čas';
-t['TIMEUNTIL'] = 'Čas čakanja';
-t['61'] = '"Izbriši Vse" tabela na strani poročil';
-t['62'] = '"Pošlji IGM" ikona tudi za mene';
-t['CENTERMAP'] = 'Centriraj zemljevid';
-t['13'] = '"Centriraj zemljevid" ikona';
-t['SENDTROOPS'] = 'Pošlji enote';
-t['64'] = 'Podrobnosti pri poročilih';
-t['7'] = "Palača/Rezidenca/Akademija/Zakladnica";
-t['PALACE'] = "Palača";
-t['RESIDENCE'] = "Rezidenca";
-t['ACADEMY'] = "Akademija";
-t['TREASURY'] = "Zakladnica";
-t['45'] = "Utripanje stopenj zgradb, ki se nadgrajujejo";
-t['UPGTB'] = "Tabele surovinskih polj/zgradb";
-t['34'] = "Prikaži KT/Dan v tabeli nadgradenj";
-t['35'] = "Poraba žita v tabeli nadgradenj";
-t['14'] = "Prikaži ikone 'Pošlji enote/Pošlji surovine' v tabeli naselij";
-t['16'] = "Efektivna proizvodnja žita v tabeli naselij";
-t['RBTT'] = "Diagram surovin";
-t['39'] = "'Diagram surovin' tabela";
-t['40'] = "'Diagram surovin' tabela kot plavajoče okno";
-t['21'] = "'Zaznamki' kot kot plavajoče okno";
-t['23'] = "'Beležka' as kot plavajoče okno";
-t['17'] = "Populacija v listi naselij";
-t['29'] = 'Uporabi Map Analyser';
-t['30'] = 'Povezave do mape za uporabnike';
-t['31'] = 'Povezave do mape za alianse';
-t['63'] = 'Napredna  poročila';
-t['60'] = 'Ikona za odpiranje sporočil v novem oknu (Pop-up)';
-t['18'] = 'Dodatna (stolpca) v listi naselij kot plavajoče okno';
-t['42'] = 'Razporedi zgradbe po imenu v tabeli nadgradenj';
-t['19'] = 'Prikaži informacije o zgradbah in premikanju enot<br>v listi naselij';
-t['32'] = "Prikaži 'Iskanje'";
-t['3'] = 'Vsili T3.1 kapaciteto za Legionarje in Falange<br>(za različne T3.1 in T3.5 serverje)';
-t['33'] = "'Iskalnik' kot plavajoče okno";
-t['36'] = "'Dokler/Ostanek' v tabelah nadgradi/uri";
-t['RESIDUE'] = 'Ostanek, če zgradiš';
-t['RESOURCES'] = 'Surovine';
-t['2'] = 'Odstrani reklame';
-t['SH1'] = "Odpri Profil za samodejno odkrvanje metropole/koordinat<br>Zgradite Barake za samodejno odkrivanje plemena in potem odprite Center naselja";
-t['46'] = "Dodatne informacije za vsakega prihajajočega trgovca";
-break;
-case "tw":
-case "hk"://by MarioCheng & chihsun
-t['8'] = '聯盟';
-t['SIM'] = '戰鬥模擬器';
-t['QSURE'] = '是否確定?';
-t['LOSS'] = '損失';
-t['PROFIT'] = '獲益';
-t['EXTAV'] = '已可升級!';
-t['PLAYER'] = '玩家';
-t['VILLAGE'] = '村莊';
-t['POPULATION'] = '人口';
-t['COORDS'] = '座標';
-t['MAPTBACTS'] = '行動';
-t['SAVED'] = '儲存';
-t['YOUNEED'] = '您要';
-t['TODAY'] = '今天';
-t['TOMORROW'] = '明天';
-t['DAYAFTERTOM'] = '後天';
-t['MARKET'] = '市場';
-t['BARRACKS'] = '兵營';
-t['RAP'] = '集結點';
-t['STABLE'] = '馬廄';
-t['WORKSHOP'] = '工場';
-t['SENDRES'] = '運送資源';
-t['BUY'] = '買進';
-t['SELL'] = '賣出';
-t['SENDIGM'] = '發送IGM';
-t['LISTO'] = '升級可於';
-t['ON'] = '-';
-t['AT'] = '-';
-t['EFICIENCIA'] = '效率';
-t['NEVER'] = '永不';
-t['ALDEAS'] = '村莊';
-t['TIEMPO'] = '時間';
-t['OFREZCO'] = '提供';
-t['BUSCO'] = '搜索';
-t['TIPO'] = '比例';
-t['DISPONIBLE'] = '忽略過少物資';
-t['CUALQUIERA'] = '所有';
-t['YES'] = '是';
-t['NO'] = '否';
-t['LOGIN'] = '登入';
-t['MARCADORES'] = '書籤';
-t['ANYADIR'] = '加入';
-t['UBU'] = '新書籤網址';
-t['UBT'] = '新書籤標題(只限英文及數字)';
-t['DEL'] = '刪除';
-t['MAPA'] = '地圖 (TravMap)';
-t['MAXTIME'] = '最大運輸時間';
-t['ARCHIVE'] = '儲存';
-t['SUMMARY'] = '概要';
-t['TROPAS'] = '軍隊';
-t['CHKSCRV'] = '檢查版本更新';
-t['ACTUALIZAR'] = '更新此村莊的資料';
-t['VENTAS'] = '賣出紀錄';
-t['MAPSCAN'] = '搜尋此地圖';
-t['BIC'] = '顯示更多快捷圖示';
-t['22'] = '顯示筆記欄';
-t['SAVE'] = '儲存';
-t['49'] = '集結點的預設行動';
-t['AT2'] = '增援';
-t['AT3'] = '攻擊：正常';
-t['AT4'] = '攻擊：搶奪';
-t['24'] = '筆記欄大小';
-t['NBSA'] = '自動';
-t['NBSN'] = '普通 (細)';
-t['NBSB'] = '大畫面 (大)';
-t['25'] = '筆記欄高度';
-t['NBHAX'] = '自動變更高度';
-t['NBHK'] = '固定高度';
-t['43'] = '顯示建築物等級';
-t['NPCSAVETIME'] = '儲存資源需時：';
-t['38'] = '顯示資源田等級顏色';
-t['44'] = '顯示建築物等級顏色';
-t['65'] = '已可升級的顏色<br>(預設 = 空白)';
-t['66'] = '已達最高等級的顏色<br>(預設 = 空白)';
-t['67'] = '不可升級的顏色<br>(預設 = 空白)';
-t['68'] = '可利用NPC交易來升級的顏色<br>(預設 = 空白)';
-t['TOTALTROOPS'] = '此村莊的軍隊總數';
-t['20'] = '顯示書籤';
-t['U.2'] = '種族';
-t['1'] = "Travian v2.x 伺服器";
-t['SELECTALLTROOPS'] = "選取全部士兵";
-t['PARTY'] = "慶祝";
-t['CPPERDAY'] = "文明點（每天）";
-t['SLOT'] = "擴展量";
-t['TOTAL'] = "總數";
-t['SELECTSCOUT'] = "選取偵察軍隊";
-t['SELECTFAKE'] = "選取佯攻軍隊";
-t['NOSCOUT2FAKE'] = "無法使用偵察軍種來發出佯攻!";
-t['NOTROOP2FAKE'] = "沒有軍隊可以發出佯攻!";
-t['NOTROOP2SCOUT'] = "沒有偵察軍隊!";
-t['NOTROOPS'] = "此村莊無軍隊!";
-t['ALL'] = "全部";
-t['SH2'] = "在欄位中，可以輸入：<br>- green 或 red 或 orange, 等等...<br>- 或是輸入顏色的16進制碼，如 #004523<br>- 也可以保留空白來使用預設顏色";
-t['SOREP'] = "顯示原始的報告 (給張貼用)";
-t['56'] = "當滑鼠移到時<br>顯示村莊種類或綠洲資料";
-t['10'] = "左側選單的戰鬥模擬器連結";
-t['WSIMO1'] = "內置 (由遊戲所提供)";
-t['WSIMO2'] = "外連 (由kirilloid.ru提供)";
-t['27'] = "選取世界分析網站";
-t['28'] = "在玩家名稱右側顯示分析連結";
-t['NONEWVER'] = "您正在使用最新版本";
-t['BVER'] = "目前正在使用測試版";
-t['NVERAV'] = "目前已有更新的版本，";
-t['UPDSCR'] = "是否需要更新？";
-t['CHECKUPDATE'] = "正在檢查程式更新，請稍候...";
-t['CROPFINDER'] = "搜田工具";
-t['AVPPV'] = "平均每村人口";
-t['AVPPP'] = "平均每玩家人口";
-t['37'] = "顯示全資源田升級表單";
-t['41'] = "顯示全建築物升級表單";
-t['69'] = "程式記錄等級<br>只適用於程式開發員 或 除蟲工作<br>(預設 = 0)";
-t['48'] = "預先載入的頁數<br>'市場 → 買進' 的頁面中<br>(預設 = 1, 最多 = 5)";
-t['U.3'] = '您村莊的名稱<br>請瀏覽個人資料來進行自動更新，不要手動修改此欄';
-t['U.6'] = '您村莊的坐標<br>請瀏覽個人資料來進行自動更新，不要手動修改此欄';
-t['MAX'] = '最多';
-t['TOTTRTR'] = '所有正在訓練的士兵';
-t['57'] = '顯示距離及時間';
-t['TB3SL'] = '設定 TBeyond ML&CN';
-t['UPDALLV'] = '更新所有村莊資料。(有機會導致被鎖帳號)';
-t['9'] = "在左側選單中顯示更多連結<br>(Traviantoolbox, World Analyser, Travilog, Map, 等等.)";
-t['LARGEMAP'] = '大地圖';
-t['USETHEMPR'] = '派出所有商人 (按資源比例分配)';
-t['USETHEMEQ'] = '派出所有商人 (平均分配)';
-t['TOWNHALL'] = '村會堂';
-t['GSRVT'] = '遊戲伺服器';
-t['ACCINFO'] = '帳號資料';
-t['NBO'] = '筆記欄';
-t['MNUL'] = '左側選單';
-t['STAT'] = '統計';
-t['RESF'] = '資源田';
-t['VLC'] = '城鎮中心';
-t['MAPO'] = '地圖設定';
-t['COLO'] = '顏色設定';
-t['DBGO'] = '除蟲設定';
-t['4'] = '市場';
-t['5'] = '集結點/兵營/工場/馬廄';
-t['6'] = "村會堂/英雄宅/鐵匠/盔甲廠";
-t['HEROSMANSION'] = "英雄宅";
-t['BLACKSMITH'] = "鐵匠";
-t['ARMOURY'] = "盔甲廠";
-t['NOW'] = '現在';
-t['CLOSE'] = '關閉';
-t['USE'] = '送出';
-t['USETHEM1H'] = '派出所有商人 (資源1小時產量)';
-t['OVERVIEW'] = '概要';
-t['FORUM'] = '論壇';
-t['ATTACKS'] = '攻擊';
-t['NEWS'] = '新聞';
-t['ADDCRTPAGE'] = '加入此頁';
-t['SCRPURL'] = 'TB ML&CN 官網';
-t['50'] = '設定"選取偵察軍隊"時<br>預設派出的軍隊數量';
-t['SPACER'] = '分隔線';
-t['53'] = '在tooltip中顯示軍隊資料';
-t['MEREO'] = '訊息和報告';
-t['59'] = '預先載入的頁數<br> 訊息和報告 的頁面中<br>(預設 = 1, 最多 = 5)';
-t['ATTABLES'] = '軍隊列表';
-t['MTW'] = '浪費負載';
-t['MTX'] = '超載量';
-t['MTC'] = '目前總搬運量';
-t['ALFL'] = '連結到自設聯盟論壇<br>(保留空白來使用預設聯盟論壇)';
-t['82.L'] = '鎖定書籤 (隱藏 刪除, 移上, 移下的圖示)';
-t['MTCL'] = '全部清除';
-t['82.U'] = '解鎖書籤 (顯示 刪除, 移上, 移下的圖示)';
-t['CKSORT'] = '點擊來排序';
-t['MIN'] = '最少';
-t['SVGL'] = '分享記錄到其他村莊';
-t['VGL'] = '村莊列表';
-t['12'] = "在村莊旁顯示 'dorf1.php'和'dorf2.php'的圖示";
-t['UPDATEPOP'] = '更新人口';
-t['54'] = '在tooltip中顯示距離和時間';
-t['EDIT'] = '編輯';
-t['NPCO'] = 'NPC交易選項';
-t['26'] = '顯示NPC交易的連結和計算';
-t['58'] = '在地圖顯示 玩家/村莊/綠洲 表單';
-t['NEWVILLAGEAV'] = '日期/時間';
-t['TIMEUNTIL'] = '需要等待的時間';
-t['61'] = '在報告頁面顯示 "全部刪除" 表單';
-t['62'] = '顯示 "發IGM給自己" 的圖示';
-t['CENTERMAP'] = '將村莊在地圖置中';
-t['13'] = "在村莊旁顯示 '地圖置中'的圖示";
-t['SENDTROOPS'] = '派遣軍隊';
-t['64'] = '顯示詳細戰鬥統計報告';
-t['7'] = "皇宮/行宮/研究院/寶物庫";
-t['PALACE'] = "皇宮";
-t['RESIDENCE'] = "行宮";
-t['ACADEMY'] = "研究院";
-t['TREASURY'] = "寶物庫";
-t['45'] = "閃爍顯示正在升級的建築";
-t['14'] = "在村莊旁顯示 '集結點/運送資源'的圖示";
-t['34'] = "在升級表單顯示 文明點資訊";
-t['UPGTB'] = "資源田/建築物升級表單";
-t['35'] = "在升級表單顯示 糧食消耗";
-t['16'] = "在村莊旁顯示 有效糧產";
-t['39'] = "顯示資源列表單";
-t['34'] = "在升級表單顯示 文明點資訊";
-t['UPGTB'] = "資源田/建築物升級表單";
-t['35'] = "在升級表單顯示 糧食消耗";
-t['16'] = "在村莊旁顯示 有效糧產";
-t['RBTT'] = "資源列";
-t['39'] = "顯示資源列表單";
-t['40'] = "在浮動視窗顯示資源列表單";
-t['21'] = "在浮動視窗顯示書籤";
-t['23'] = "在浮動視窗顯示筆記欄";
-t['17'] = "在村莊旁顯示 村莊人口";
-t['29'] = '選取地圖分析網站';
-t['30'] = '在玩家名稱右側顯示分析連結';
-t['31'] = '在聯盟名稱右側顯示分析連結';
-t['63'] = '顯示強化的戰鬥報告';
-t['18'] = '在浮動視窗顯示額外的村莊列表(兩列排序)';
-t['60'] = '顯示以彈出視窗方式讀取IGM的連結';
-t['3'] = '修正古羅馬步兵及方陣兵的負載量<br>(僅適用於混合 T3.1 & T3.5 的伺服器)';
-t['18'] = '在浮動視窗顯示額外的村莊列表(兩列排序)';
-t['60'] = '顯示以彈出視窗方式讀取IGM的連結';
-t['42'] = '在升級表單顯示 以建築名稱排序的表單';
-t['19'] = '在村莊旁顯示 建造中建築和軍隊移動的訊息';
-t['32'] = "顯示 '搜尋列'";
-t['33'] = "在浮動視窗顯示搜尋列";
-t['36'] = "在升級表單顯示 建造時已存資源及建造後剩餘資源";
-t['RESIDUE'] = '建造後剩餘資源';
-t['RESOURCES'] = '建造時已存資源';
-t['2'] = '移除廣告列';
-t['SH1'] = "點擊玩家資料連結以取得首都相關資料<br>接著建造或點擊兵營以偵測種族，然後再開啟村莊大樓。";
-t['46'] = "顯示每筆抵達商人的額外詳細資訊";
-t['15'] = "在村莊旁顯示 木材、磚塊、鋼鐵的每小時產量";
-t['11'] = "張貼戰鬥報告的網站連結";
-break;
-case "cn"://by 独自疯狂 & congxz6688
-t['8'] = '联盟';
-t['SIM'] = '战斗模拟器';
-t['QSURE'] = '你确定吗?';
-t['LOSS'] = '损失';
-t['PROFIT'] = '获益';
-t['EXTAV'] = '可以升级!';
-t['PLAYER'] = '玩家';
-t['VILLAGE'] = '村庄';
-t['POPULATION'] = '人口';
-t['COORDS'] = '坐标';
-t['MAPTBACTS'] = '行动';
-t['SAVED'] = '已保存';
-t['YOUNEED'] = '您要';
-t['TODAY'] = '今天';
-t['TOMORROW'] = '明天';
-t['DAYAFTERTOM'] = '后天';
-t['MARKET'] = '市场';
-t['BARRACKS'] = '兵营';
-t['RAP'] = '集结点';
-t['STABLE'] = '马厩';
-t['WORKSHOP'] = '工场';
-t['SENDRES'] = '运送资源';
-t['BUY'] = '买';
-t['SELL'] = '卖';
-t['SENDIGM'] = '发送IGM';
-t['LISTO'] = '需要等到';
-t['ON'] = '-';
-t['AT'] = '-';
-t['EFICIENCIA'] = '效率';
-t['NEVER'] = '仓位不足，无法实现';
-t['ALDEAS'] = '村庄';
-t['TIEMPO'] = '时间';
-t['OFREZCO'] = '提供';
-t['BUSCO'] = '搜索';
-t['TIPO'] = '比例';
-t['DISPONIBLE'] = '忽略过少物资';
-t['CUALQUIERA'] = '所有';
-t['YES'] = '是';
-t['NO'] = '否';
-t['LOGIN'] = '登入';
-t['MARCADORES'] = '书签';
-t['ANYADIR'] = '加入';
-t['UBU'] = '新书签网址';
-t['UBT'] = '新书签标题(只限英文及数字)';
-t['MAXTIME'] = '最大运输时间';
-t['DEL'] = '删除';
-t['MAPA'] = 'TravMap';
-t['CHKSCRV'] = '检查更新';
-t['ARCHIVE'] = '保存';
-t['SUMMARY'] = '概要';
-t['TOTALTROOPS'] = '此村庄的士兵总数';
-t['SELECTALLTROOPS'] = "选择全部士兵";
-t['SELECTSCOUT'] = "选择侦察兵";
-t['SELECTFAKE'] = "选择佯攻";
-t['TOTAL'] = "总数";
-t['AVPPV'] = "平均每村人口";
-t['AVPPP'] = "平均每玩家人口";
-t['PARTY'] = "活动";
-t['CPPERDAY'] = "文明点（每天）";
-t['SLOT'] = "扩张";
-t['TROPAS'] = '军队';
-t['AT2'] = '增援';
-t['AT3'] = '攻击：普通';
-t['AT4'] = '攻击：抢夺';
-t['ALL'] = "全部";
-t['CHECKUPDATE'] = "正在检查插件更新，请等等...";
-t['NONEWVER'] = "你正在使用最新版本";
-t['24'] = '笔记栏大小';
-t['NBSA'] = '自动';
-t['NBSN'] = '普通 (细)';
-t['NBSB'] = '大画面 (大)';
-t['25'] = '笔记栏高度';
-t['NBHAX'] = '高度自动伸展';
-t['NBHK'] = '基本高度';
-t['43'] = '显示建筑物等级';
-t['NPCSAVETIME'] = '资源满足需时：';
-t['38'] = '显示资源田等级颜色';
-t['44'] = '显示建筑物等级颜色';
-t['69'] = "控制台日志等级<br>只适用于程序开发员 或 BUG调试<br>(默认 = 0 or 空白)";
-t['48'] = "页数预先加载<br>在 '市场 => 买入' 页面中<br>(默认 = 1 或 空白; 最多 = 5)";
-t['65'] = '已可升级的颜色<br>(默认 = 空白)';
-t['66'] = '已达最高等级的颜色<br>(默认 = 空白)';
-t['67'] = '不可升级的颜色<br>(默认 = 空白)';
-t['68'] = '可利用npc交易来升级的颜色<br>(默认 = 空白)';
-t['20'] = '显示书签';
-t['U.2'] = '种族';
-t['1'] = "Travian v2.x 服务器";
-t['U.3'] = '主村名称<br>请浏览自己的个人资料来进行自动更新，不要自己修改此栏';
-t['U.6'] = '主村坐标<br>请浏览自己的个人资料来进行自动更新，不要自己修改此栏';
-t['MAX'] = '最多';
-t['CROPFINDER'] = "找田助手";
-t['VENTAS'] = '卖出纪录';
-t['SAVE'] = '保存';
-t['49'] = '集结点的默认行动';
-t['BIC'] = '显示更多快捷图标';
-t['22'] = '显示笔记栏';
-t['SOREP'] = "显示原始报告";
-t['56'] = "当鼠标移到时<br>显示村庄种类或绿洲数据";
-t['10'] = "左边选单的战斗模拟器链接";
-t['WSIMO1'] = "内置 (由游戏所提供)";
-t['WSIMO2'] = "外部 (由kirilloid.ru提供)";
-t['27'] = "所选用的世界分析";
-t['28'] = "在玩家名称右边显示分析链接";
-t['37'] = "显示资源田升级信息";
-t['41'] = "显示建筑物升级信息";
-t['SH2'] = "在字段中，你可输入：<br>- green 或 red 或 orange, 等等...<br>- 也可输入颜色的16进制码，如 #004523<br>- 也可以什么也不填来用默认颜色";
-t['NVERAV'] = "已有新版本插件推出了，";
-t['UPDSCR'] = "要进行更新吗？";
-t['MAPSCAN'] = '扫描此地图';
-t['TOTTRTR'] = '所有正在训练的士兵';
-t['57'] = '显示距离及时间';
-t['9'] = "在左边的选单显示更多链接<br>(Travilog,Traviantoolbox,TravMap,World Analyser等等.)";
-t['TB3SL'] = 'TB设置';
-t['UPDALLV'] = '更新所有村庄。(有可能导致账号被锁)';
-t['LARGEMAP'] = '大地图';
-t['USETHEMPR'] = '派出所有商人 (按资源比例分配)';
-t['USETHEMEQ'] = '派出所有商人 (平均分配)';
-t['TOWNHALL'] = '市政厅';
-t['GSRVT'] = '游戏服务器';
-t['ACCINFO'] = '个人资料';
-t['NBO'] = '笔记栏';
-t['MNUL'] = '左边选单';
-t['STAT'] = '统计';
-t['RESF'] = '村落概貌';
-t['VLC'] = '村庄中心';
-t['MAPO'] = '地图设定';
-t['COLO'] = '颜色设定';
-t['DBGO'] = '调试设定';
-t['4'] = '市场';
-t['5'] = '集结点/兵营/马厩/工场';
-t['6'] = "市政厅/英雄园/铁匠铺/军械库";
-t['HEROSMANSION'] = "英雄园";
-t['BLACKSMITH'] = "铁匠铺";
-t['ARMOURY'] = "军械库";
-t['NOW'] = '现在';
-t['CLOSE'] = '关闭';
-t['USE'] = '送出';
-t['USETHEM1H'] = '派出所有商人 (资源1小时产量)';
-t['OVERVIEW'] = '概要';
-t['FORUM'] = '论坛';
-t['ATTACKS'] = '攻击';
-t['NEWS'] = '新闻';
-t['ADDCRTPAGE'] = '加入本页';
-t['SCRPURL'] = 'TB脚本支持';
-t['ACTUALIZAR'] = '更新此村庄的数据';
-t['50'] = '利用"选择侦察兵"时<br>所派出侦察兵的数量';
-t['SPACER'] = '分隔线';
-t['53'] = '快速显示士兵数据';
-t['MEREO'] = '讯息&报告';
-t['59'] = '在讯息和报告的页面中<br>预先加载的页数<br>(默认 = 1 或 空白; 最多 = 5)';
-t['ATTABLES'] = '军队的列表';
-t['MTW'] = '浪费负载';
-t['MTX'] = '超载量';
-t['MTC'] = '现时总搬运数';
-t['ALFL'] = '链接到外置论坛<br>(留空来使用内置论坛)';
-t['82.L'] = '锁定书签 (隐藏 删除, 移上, 移下的图示)';
-t['MTCL'] = '全部清除';
-t['82.U'] = '解锁书签 (显示 删除, 移上, 移下的图示)';
-t['CKSORT'] = '点击来排序';
-t['MIN'] = '最少';
-t['SVGL'] = '分享记录到其村庄';
-t['VGL'] = '村庄列表';
-t['12'] = "显示'dorf1.php'和'dorf2.php'的链接";
-t['UPDATEPOP'] = '更新人口数据';
-t['54'] = '在tooltip中显示距离和时间';
-t['EDIT'] = '修改';
-t['NPCO'] = 'NPC交易选项';
-t['26'] = '显示NPC交易的链接和计算';
-t['NEWVILLAGEAV'] = '日期';
-t['TIMEUNTIL'] = '需要等待的时间';
-t['58'] = '在"karte.php"显示 玩家/村庄/绿洲 信息';
-t['61'] = '在报告页面显示 "全删除"的选项';
-t['62'] = '显示 发IGM给自己的图示';
-t['CENTERMAP'] = '此村庄居中的地图';
-t['13'] = '在村庄旁 显示 "居中地图"的图示';
-t['SENDTROOPS'] = '出兵';
-t['64'] = '显示战报的详细数据';
-t['7'] = "皇宫/行宫/研发所/宝库";
-t['PALACE'] = "皇宫";
-t['RESIDENCE'] = "行宫";
-t['ACADEMY'] = "研发所";
-t['TREASURY'] = "宝库";
-t['45'] = "闪烁显示正在升级的建筑物等级";
-t['14'] = "在村庄旁显示'发兵/运送资源'的图示";
-t['34'] = "在升级信息中显示文明度变化";
-t['UPGTB'] = "资源田和建筑物的升级信息表";
-t['35'] = "在升级信息中显示粮耗变化";
-t['16'] = "在村庄旁显示粮产余额";
-t['RBTT'] = "仓位统计表";
-t['39'] = "显示仓位统计表";
-t['40'] = "在悬浮窗显示仓位统计表";
-t['21'] = "在悬浮窗显示自定义书签";
-t['23'] = "在悬浮窗显示笔记栏";
-t['17'] = "在村庄旁显示村庄人口";
-t['29'] = '选取地图分析网站';
-t['30'] = '在玩家名称右侧显示分析链接';
-t['31'] = '在联盟名称右侧显示分析链接';
-t['3'] = '修正古罗马步兵及方阵兵的负载量（仅适用于部分德服）';
-t['18'] = '在悬浮窗显示额外的村庄列表（两列，便于多村切换）';
-t['63'] = '显示的强化战报信息';
-t['60'] = '使用弹出窗口显示报告和消息';
-t['42'] = '按名称排列建筑升级表（按英文）';
-t['19'] = '在村庄列表中显示升级、建造及部队移动的信息';
-t['32'] = '显示搜索条';
-t['33'] =  "在悬浮窗中显示搜索条";
-t['36'] = "在升级列表中显示已存资源及升级后剩余资源";
-t['RESIDUE'] = '升级后剩余资源';
-t['RESOURCES'] = '升级时已存资源';
-t['2'] = '移除广告并回复服务器时间';
-t['46'] = "运向本村的资源和商队显示附加信息";
-break;
-case "lt"://by Domas & Zrip & Vykintas
-t['8'] = 'Aljansas';
-t['SIM'] = 'Mūšių simuliat.';
-t['QSURE'] = 'Tikrai pašalinti?';
-t['LOSS'] = 'Nuostoliai';
-t['PROFIT'] = 'Pelnas';
-t['EXTAV'] = 'Galima kelti lygį';
-t['PLAYER'] = 'Žaidėjas';
-t['VILLAGE'] = 'Gyvenvietės pavadinimas';
-t['POPULATION'] = 'Populiacija';
-t['COORDS'] = 'Koordinatės';
-t['MAPTBACTS'] = 'Veiksmai';
-t['SAVED'] = 'Išsaugota';
-t['YOUNEED'] = 'Jums reikia';
-t['TODAY'] = 'šiandien';
-t['TOMORROW'] = 'rytoj';
-t['DAYAFTERTOM'] = 'poryt';
-t['MARKET'] = 'Turgavietė';
-t['BARRACKS'] = 'Kareivinės';
-t['RAP'] = 'Susibūrimo vieta';
-t['STABLE'] = 'Arklidė';
-t['WORKSHOP'] = 'Dirbtuvės';
-t['SENDRES'] = 'Siųsti resursus';
-t['BUY'] = 'Pirkti';
-t['SELL'] = 'Parduoti';
-t['SENDIGM'] = 'Siųsti žinutę';
-t['LISTO'] = 'Resursų bus';
-t['ON'] = '';
-t['AT'] = '';
-t['EFICIENCIA'] = 'Efektyvumas';
-t['NEVER'] = 'Niekada';
-t['ALDEAS'] = 'Gyvenvietė(-s)';
-t['TIEMPO'] = 'Laikas';
-t['OFREZCO'] = 'Siūloma';
-t['BUSCO'] = 'Ieškoma';
-t['TIPO'] = 'Santykis';
-t['DISPONIBLE'] = 'Tik įmanomi';
-t['CUALQUIERA'] = 'Nesvarbu';
-t['YES'] = 'Taip';
-t['NO'] = 'Ne';
-t['LOGIN'] = 'Prisijungti';
-t['MARCADORES'] = 'Žymos';
-t['ANYADIR'] = 'Pridėti';
-t['UBU'] = 'Nauja URL nuoroda';
-t['UBT'] = 'Nauja tekstinė nuoroda';
-t['DEL'] = 'Ištrinti';
-t['MAPA'] = 'Žemėlapis';
-t['MAXTIME'] = 'Gabenimo laikas (iki)';
-t['ARCHIVE'] = 'Archyvas';
-t['SUMMARY'] = 'Santrauka';
-t['LARGEMAP'] = 'Didelis žemėlapis';
-t['TROPAS'] = 'Kariai';
-t['CHKSCRV'] = 'Atnaujinti TB';
-t['ACTUALIZAR'] = 'Atnaujinti gyvenvietės informaciją';
-t['VENTAS'] = 'Išsaugoti pasiūlymai';
-t['MAPSCAN'] = 'Skanuoti žemėlapį';
-t['BIC'] = 'Išplėsti naršymo juostą';
-t['22'] = 'Rodyti užrašų knygelę';
-t['SAVE'] = 'Išsaugoti';
-t['49'] = 'Susibūrimo vietos pagrindinis veiksmas';
-t['AT2'] = 'Pastiprinimas';
-t['AT3'] = 'Puolimas: ataka';
-t['AT4'] = 'Puolimas: reidas';
-t['24'] = 'Užrašų knygelės dydis';
-t['NBSA'] = 'Automatinis';
-t['NBSN'] = 'Normalus (maža)';
-t['NBSB'] = 'Dideliems ekranams (didelė)';
-t['25'] = 'Užrašų knygelės aukštis';
-t['NBHAX'] = 'Automatiškai išsiplečianti';
-t['NBHK'] = 'Fiksuoto dydžio';
-t['43'] = 'Rodyti gyvenvietės centro lygius';
-t['NPCSAVETIME'] = 'Bus sukaupta po: ';
-t['38'] = 'Rodyti resursų lygių spalvas';
-t['65'] = 'Galimo lygio kėlimo spalva<br>(Tuščia = pradinė)';
-t['66'] = 'Aukščiausio lygio spalva<br>(Tuščia = pradinė)';
-t['67'] = 'Negalimo lygio kėlimo spalva<br>(Tuščia = pradinė)';
-t['68'] = 'Galimo lygio kėlimo per NPC prekeivį spalva<br>(Tuščia = pradinė)';
-t['TOTALTROOPS'] = 'Visi gyvenvietės kariai';
-t['20'] = 'Rodyti žymas';
-t['U.2'] = 'Gentis';
-t['1'] = "Travian v2.x serveris";
-t['28'] = "Rodyti statistikos nuorodas";
-t['SELECTALLTROOPS'] = "Pasirinkti visus karius";
-t['44'] = 'Rodyti pastatų lygių spalvas';
-t['PARTY'] = "Taškai";
-t['CPPERDAY'] = "KT per dieną";
-t['SLOT'] = "Vietos";
-t['TOTAL'] = "Iš viso";
-t['SELECTSCOUT'] = "Pasirinkti žvalgus";
-t['SELECTFAKE'] = "Pasirinkti netikrą ataką";
-t['NOSCOUT2FAKE'] = "Netikram puolimui negalima naudoti žvalgų!";
-t['NOTROOP2FAKE'] = "Netikram puolimui nėra karių!";
-t['NOTROOP2SCOUT'] = "Šioje gyvenvietėje nėra žvalgų!";
-t['NOTROOPS'] = "Šioje gyvenvietėje nėra karių!";
-t['ALL'] = "Visi";
-t['SH2'] = "Spalvų laukuose galite įvesti:<br>- green arba red arba orange, ir t.t.<br>- taip pat HEX spalvų kodą, pvz.: #004523<br>- jei norite palikti standartinę spalvą, laukelį palikite tuščią";
-t['SOREP'] = "Rodyti originalią ataskaitą (kopijavimui)";
-t['56'] = "Rodyti laukų/oazių informaciją,<br>kai pelė rodo į žemėlapio laukelį";
-t['10'] = "Naudojama nuoroda kovos simuliatoriui:<br>(kairiajame meniu)";
-t['WSIMO1'] = "Vidinė (siūloma žaidimo)";
-t['WSIMO2'] = "Išorinė (siūloma kirilloid.ru)";
-t['27'] = "Naudojamas statistikos tiekėjas";
-t['28'] = "Rodyti statistikos nuorodas";
-t['NONEWVER'] = "Jūs turite naujausią versiją";
-t['BVER'] = "Jūs galite turėti beta versiją";
-t['NVERAV'] = 'Dabartinė versija';
-t['UPDSCR'] = "Atnaujinti dabar?";
-t['CHECKUPDATE'] = "Ieškoma atnaujinimų.<br>Prašome palaukti...";
-t['CROPFINDER'] = "Crop Finder";
-t['AVPPV'] = "Gyventojų vidurkis gyvenvietei";
-t['AVPPP'] = "Gyventojų vidurkis žaidėjui";
-t['37'] = "Rodyti resursų laukų lygių kėlimo lentelę";
-t['41'] = "Rodyti pastatų lygių kėlimo lentelę";
-t['69'] = "Konsolės registro lygis<br>TIK PROGRAMUOTOJAMS ARBA KLAIDŲ PAIEŠKAI<br>(Numatyta = 0)";
-t['48'] = "Pasiūlymų puslapių skaičius užkrovimui<br>esant puslapyje 'Turgavietė => Pirkti'<br>(Numatyta = 1)";
-t['U.3'] = 'Jūsų sostinės pavadinimas';
-t['U.6'] = 'Jūsų sostinės koordinatės';
-t['MAX'] = 'Daugiausiai';
-t['TOTTRTR'] = 'Iš viso treniruojamų karių';
-t['57'] = 'Rodyti atstumą ir laiką';
-t['TB3SL'] = TB3O.shN + ' nustatymai';
-t['UPDALLV'] = 'Atnaujinti visas gyvenvietes.  NAUDOTI ITIN ATSARGIAI, NES DĖL TO GALI BŪTITE BŪTI UŽBLOKUOTAS !';
-t['9'] = "Rodyti papildomas nuorodas kairiajame meniu<br>(Traviantoolbox, World Analyser, Travilog, žemėlapis ir t.t.)";
-t['LARGEMAP'] = 'Didelis žemėlapis';
-t['USETHEMPR'] = 'Naudoti (proporcingai)';
-t['USETHEMEQ'] = 'Naudoti (lygiai)';
-t['TOWNHALL'] = 'Rotušė';
-t['GSRVT'] = 'Žaidimo serveris';
-t['ACCINFO'] = 'Registracijos informacija';
-t['NBO'] = 'Užrašinė';
-t['MNUL'] = 'Meniu kairėje pusėje';
-t['STAT'] = 'Statistika';
-t['RESF'] = 'Resursų laukai';
-t['VLC'] = 'Gyvenvietės centras';
-t['MAPO'] = 'Žemėlapio parinktys';
-t['COLO'] = 'Spalvų parinktys';
-t['DBGO'] = "Debug'inimo parinktys";
-t['4'] = 'Turgavietė';
-t['5'] = 'Susibūrimo vieta/Kareivinės/Dirbtuvės/Arklidė';
-t['6'] = "Rotušė/Karžygio namai/Šarvų kalvė/Ginklų kalvė";
-t['HEROSMANSION'] = "Karžygio namai";
-t['BLACKSMITH'] = 'Ginklų kalvė';
-t['ARMOURY'] = 'Šarvų kalvė';
-t['NOW'] = 'Dabar';
-t['CLOSE'] = 'Atšaukti';
-t['USE'] = 'Naudoti';
-t['USETHEM1H'] = 'Naudoti (1 valandos produkcija)';
-t['OVERVIEW'] = 'Apžvalga';
-t['FORUM'] = 'Forumas';
-t['ATTACKS'] = 'Puolimai';
-t['NEWS'] = 'Naujienos';
-t['ADDCRTPAGE'] = 'Pridėti šį puslapį';
-t['SCRPURL'] = 'TB puslapis';
-t['50'] = 'Žvalgų kiekis<br>Funkcijai "Pasirinkti žvalgus"';
-t['SPACER'] = 'Pridėti skirtuką';
-t['53'] = 'Pranešimų lentelėje rodyti karių informaciją';
-t['MEREO'] = 'Pranešimai ir ataskaitos';
-t['59'] = 'Užkraunamų pranešimų/ataskaitų puslapių skaičius<br>(Numatyta = 1)';
-t['ATTABLES'] = 'Karių lentelė';
-t['MTW'] = 'Neišnaudota';
-t['MTX'] = 'Viršyta';
-t['MTC'] = 'Esamas pakrovimas';
-t['ALFL'] = 'Nuoroda į įšorini forumą<br>(jei naudojate vidinį, nerašykite nieko)';
-t['82.L'] = 'Fiksuoti žymas (nerodyti trynimo, perkėlimo aukštyn bei žemyn ikonų)';
-t['MTCL'] = 'Viską išvalyti';
-t['82.U'] = 'Nefiksuoti žymų (rodyti trynimo, perkėlimo aukštyn bei žemyn ikonas)';
-t['CKSORT'] = 'Rūšiuoti';
-t['MIN'] = 'Mažiausiai';
-t['SVGL'] = 'Visose gyvenvietėse';
-t['VGL'] = 'Gyvenviečių sąrašas';
-t['12'] = "Rodyti 'dorf1.php' ir 'dorf2.php' nuorodas";
-t['UPDATEPOP'] = 'Atnaujinti populiaciją';
-t['54'] = 'Atstumą ir laikus iki gyvenvietės rodyti pranešimų lentelėje';
-t['EDIT'] = 'Redaguoti';
-t['NPCO'] = 'NPC asistentas';
-t['26'] = 'Rodyti NPC asistento skaičiavimus/nuorodas';
-t['58'] = 'Rodyti žaidėjų/gyvenviečių/oazių lentelę';
-t['NEWVILLAGEAV'] = 'Data/Laikas';
-t['TIMEUNTIL'] = 'Laukimo laikas';
-t['61'] = 'Rodyti "Trinti viską" lentelę ataskaitų puslapyje';
-t['62'] = 'Rodyti "Siųsti IGM" piktogramą ir man';
-t['CENTERMAP'] = 'Centruoti šią gyvenvietę žemėlapyje';
-t['13'] = 'Rodyti nuorodą "Centruoti šią gyvenvietę žemėlapyje"';
-t['SENDTROOPS'] = 'Siųsti karius';
-t['64'] = 'Ataskaitų statistikoje rodyti detales';
-t['7'] = "Valdomų rūmai/Rezidencija/Akademija/Iždinė";
-t['PALACE'] = "Valdovų rūmai";
-t['RESIDENCE'] = "Rezidencija";
-t['ACADEMY'] = "Akademija";
-t['TREASURY'] = "Iždinė";
-t['45'] = "Rodyti mirksinčius statomų pastatų lygius";
-t['14'] = "Rodyti 'Siųsti karius/Siųsti resursus' nuorodas";
-t['34'] = "Lygių kėlimo lentelėse rodyti KT per dieną";
-t['UPGTB'] = "Resursų laukų ir pastatų lygių kėlimo lentelės";
-t['35'] = "Rodyti grūdų sunaudojimą";
-t['16'] = "Rodyti efektyvią grūdų gamybą";
-t['39'] = "Rodyti resursų lentelę";
-t['RBTT'] = "Resursų lentelė";
-t['60'] = 'Rodyti nuorodas laiškų atidarymui iškylančiajame lange';
-break;
-case "ae"://by Dream1 & Me_TheKing & kaser15 & aatkco & ghooost
-t['0'] = "Script language"; //please, do not translate !!! translation will never be included into the script !
+function switchLanguage(lang) { if ( lang !== 'en' ) { switch ( lang ) {
+case 'ae': //contributors: Dream1, Me_TheKing, kaser15, aatkco, ghooost
 t['1'] = "Travian v2.x server";
 t['2'] = "إزالة الإعلانات";
-t['3'] = 'T3.1 حساب الحمولة جندي أول & الكتيبة <br> (نسخة ترافيان T3.1 تختلف عن T3.5 )';
-t['4'] = 'السوق';
-t['5'] = 'نقطة التجمع / الثكنة / المصانع الحربية / الإسطبل';
+t['3'] = "T3.1 حساب الحمولة جندي أول & الكتيبة <br> (نسخة ترافيان T3.1 تختلف عن T3.5 )";
+t['4'] = "السوق";
+t['5'] = "نقطة التجمع / الثكنة / المصانع الحربية / الإسطبل";
 t['6'] = "البلدية / قصر الأبطال / مستودع الأسلحة / الحداد";
 t['7'] = "القصر / السكن / الأكاديمية / الخزنة";
-t['8'] = 'التحالف';
+t['8'] = "التحالف";
 t['9'] = "إظهار الروابط الإضافية في القائمة اليمنى <br> (Traviantoolbox, World Analyser, Travilog, Map, وغيره.)";
 t['10'] = "تغيير نوع محاكي المعركة: <br> (في القائمة اليسرى)";
 t['11'] = "وصلة لاستخدامها لنشر التقارير";
 t['12'] = "أظهار روابط 'dorf1.php' و 'dorf2.php'";
-t['13'] = ' إظهار أيقونة "توسيط هذه القرية على الخريطة';
+t['13'] = " إظهار أيقونة \"توسيط هذه القرية على الخريطة";
 t['14'] = "إظهار 'إرسال قوات / أرسل الموارد 'الرموز في قائمة القرية";
 t['15'] = "إظهار الخشب والطين والحديد الإنتاج لكل ساعة في قائمة القرية";
 t['16'] = "أظهار أنتاج القمح بجانب كل قرية";
 t['17'] = "أظهار عدد السكان بجانب كل قرية";
 t['18'] = "أظهار عمودين لقائمة القرية بصفحة عائمة";
-t['19'] = 'عرض معلومات عن تقدم تطوير المباني وتحركات القوات في قائمة القرى';
-t['20'] = 'أظهار الروابط';
+t['19'] = "عرض معلومات عن تقدم تطوير المباني وتحركات القوات في قائمة القرى";
+t['20'] = "أظهار الروابط";
 t['21'] = "إظهار الروابط بصفحة عائمة ";
-t['22'] = 'أظهار دفتر الملاحظات';
+t['22'] = "أظهار دفتر الملاحظات";
 t['23'] = "إظهار دفتر الملاحظات بصفحة عائمة";
-t['24'] = 'مقاس دفتر الملاحظات';
-t['25'] = 'ارتفاع دفتر الملاحظات';
+t['24'] = "مقاس دفتر الملاحظات";
+t['25'] = "ارتفاع دفتر الملاحظات";
 t['26'] = "إظهار الحسابات/الروابط للمساعد NPC";
 t['27'] = "اختيار نوع محلل عالم ترافيان";
 t['28'] = "أظهار رابط محلل الإحصائيات";
@@ -5506,111 +1717,113 @@ t['29'] = "اختيار  نوع محلل الإحصائيات";
 t['30'] = "إظهار روابط الخريطة للمستخدمين";
 t['31'] = "إظهار روابط الخريطة للتحالفات";
 t['32'] = "عرض شريط البحث";
-t['33'] = "إذا اخترت بالأعلى عرض شريط البحث  <br>  تستطيع جعله في نافذة عائمة بالضغط هنا" ;
+t['33'] = "إذا اخترت بالأعلى عرض شريط البحث  <br>  تستطيع جعله في نافذة عائمة بالضغط هنا";
 t['34'] = "أظهار مستوى النقاط الحضارية في جدول الترقية";
 t['35'] = "أظهار استهلاك القمح في جدول الترقية";
-t['36'] = 'عرض الموارد المتبقية بعد البناء <br> والموارد في هذا الوقت في جدول الترقية والتطوير';
+t['36'] = "عرض الموارد المتبقية بعد البناء <br> والموارد في هذا الوقت في جدول الترقية والتطوير";
 t['37'] = "إظهار جدول رفع مستوى الموارد  <br>  الجدول الكبير أسفل الصفحة";
-t['38'] = 'إظهار الألوان على مستويات الموارد';
-t['39'] = 'إظهار شريط الموارد';
-t['40'] = 'إظهار شريط الموارد في صفحة عائمة';
+t['38'] = "إظهار الألوان على مستويات الموارد";
+t['39'] = "إظهار شريط الموارد";
+t['40'] = "إظهار شريط الموارد في صفحة عائمة";
 t['41'] = "إظهار جدول رفع مستوى المباني";
-t['42'] = 'فرز المباني بالاسم في جدول الترقية';
-t['43'] = 'أظهار الأرقام على المباني';
-t['44'] = 'أظهار الألوان على مستويات المباني';
+t['42'] = "فرز المباني بالاسم في جدول الترقية";
+t['43'] = "أظهار الأرقام على المباني";
+t['44'] = "أظهار الألوان على مستويات المباني";
 t['45'] = "تفعيل خاصية الوميض عند تطوير المباني ";
 t['46'] = "عرض معلومات إضافية عن وصول كل تاجر";
 t['47'] = "أظهار آخر عملية نقل موارد في السوق";
 t['48'] = "عدد صفحات العروض <br> في 'السوق => شراء' <br> (الوضع الافتراضي = 1 أو فارغ ؛ الحد الأقصى = 5)";
-t['49'] = 'الاختصار الافتراضي في نقطة التجمع';
-t['50'] = 'عدد الكشافة في <br> وظيفة "اختيار الكشافة"';
+t['49'] = "الاختصار الافتراضي في نقطة التجمع";
+t['50'] = "عدد الكشافة في <br> وظيفة \"اختيار الكشافة\"";
 t['51'] = "أظهار آخر هجوم في نقطة التجمع";
 t['52'] = "أظهار الإحداثيات في قائمة آخر هجوم";
-t['53'] = 'إظهار معلومات القوات';
+t['53'] = "إظهار معلومات القوات";
 t['54'] = "إظهار المسافة و الوقت للقرى كتلميحات";
 t['55'] = "ملء قوات القرية في محاكي المعركة داخل اللعبة";
 t['56'] = "عرض نوع القرية <br> عند المرور بالماوس على الخريطة";
-t['57'] = 'إظهار المسافات & الوقت';
+t['57'] = "إظهار المسافات & الوقت";
 t['58'] = "إظهار جدول اللاعبين ( القرى / الواحات المحتلة )";
-t['59'] = 'عدد الصفحات في الرسائل/التقارير <br> (الوضع الافتراضي = 1 أو فارغ ؛ الحد الأقصى = 5)';
+t['59'] = "عدد الصفحات في الرسائل/التقارير <br> (الوضع الافتراضي = 1 أو فارغ ؛ الحد الأقصى = 5)";
 t['60'] = "إظهار وصلات لفتح الرسائل في نافذة منبثقة";
-t['61'] = 'إظهار جدول "حذف الجميع" على صفحة التقارير';
-t['62'] = 'إظهار أيقونة "أرسال رسالة"';
+t['61'] = "إظهار جدول \"حذف الجميع\" على صفحة التقارير";
+t['62'] = "إظهار أيقونة \"أرسال رسالة\"";
 t['63'] = "عرض الإحصائيات في تقارير المعركة";
-t['64'] = 'إظهار التفاصيل في تقرير الإحصاءات';
-t['65'] = 'لون التطوير متاح <br> المربع فارغ = افتراضي)';
-t['66'] = 'لون الحد الأقصى <br> (المربع فارغ = افتراضي)';
-t['67'] = 'لون التطوير لا يمكن <br> (المربع فارغ = افتراضي)';
-t['68'] = 'لون التطوير عن طريق NPC <br> (المربع فارغ = افتراضي)';
+t['64'] = "إظهار التفاصيل في تقرير الإحصاءات";
+t['65'] = "لون التطوير متاح <br> المربع فارغ = افتراضي)";
+t['66'] = "لون الحد الأقصى <br> (المربع فارغ = افتراضي)";
+t['67'] = "لون التطوير لا يمكن <br> (المربع فارغ = افتراضي)";
+t['68'] = "لون التطوير عن طريق NPC <br> (المربع فارغ = افتراضي)";
 t['69'] = "مستوى الدخول فقط لتصحيح الأخطاء للمبرمجين <br> (الافتراضي = 0 أو أتركه فارغ)";
 t['82.L'] = "إغلاق لوحة الروابط   إخفاء أيقونة ( حذف، فوق، تحت";
 t['82.U'] = "فتح لوحة الروابط   إظهار أيقونة ( حذف، فوق، تحت)";
-t['SIM'] = 'محاكي المعركة';
-t['QSURE'] = 'هل أنت متأكد؟';
-t['LOSS'] = 'الخسائر';
-t['PROFIT'] = 'الفائدة';
-t['EXTAV'] = 'متاح';
-t['PLAYER'] = 'اللاعب';
-t['VILLAGE'] = 'اسم القرية';
-t['POPULATION'] = 'السكان';
-t['COORDS'] = 'الإحداثيات';
-t['MAPTBACTS'] = 'الأمر';
-t['SAVED'] = 'تم حفظ الإعدادات';
-t['YOUNEED'] = 'تحتاج';
-t['TODAY'] = 'اليوم';
-t['TOMORROW'] = 'غداً';
-t['DAYAFTERTOM'] = 'بعد غداً';
-t['MARKET'] = 'السوق';
-t['BARRACKS'] = 'الثكنة';
-t['RAP'] = 'نقطة التجمع';
-t['STABLE'] = 'الإسطبل';
-t['WORKSHOP'] = 'المصانع الحربية';
-t['SENDRES'] = 'إرسال الموارد';
-t['BUY'] = 'شراء';
-t['SELL'] = 'بيع';
-t['SENDIGM'] = 'إرسال رسالة';
-t['LISTO'] = 'يتاح';
-t['ON'] = 'على';
-t['AT'] = 'في';
-t['EFICIENCIA'] = 'الفعالية';
-t['NEVER'] = 'أبدا';
-t['ALDEAS'] = 'القرية-القرى';
-t['TIEMPO'] = 'الوقت';
-t['OFREZCO'] = 'العرض';
-t['BUSCO'] = 'البحث';
-t['TIPO'] = 'النوع';
-t['DISPONIBLE'] = 'فقط المتاح';
-t['CUALQUIERA'] = 'أي';
-t['YES'] = 'نعم';
-t['NO'] = 'لا';
-t['LOGIN'] = 'تسجيل الدخول';
-t['MARCADORES'] = 'الروابط';
-t['ANYADIR'] = 'إضافة رابط +نص';
-t['UBU'] = 'ضع الرابط هنا';
-t['UBT'] = 'ضع نص الرابط هنا';
-t['DEL'] = 'حذف';
-t['MAPA'] = 'الخريطة';
-t['MAXTIME'] = 'الحد الأقصى للوقت';
-t['ARCHIVE'] = 'الأرشيف';
-t['SUMMARY'] = 'الموجز';
-t['TROPAS'] = 'القوات';
-t['CHKSCRV'] = 'أضغط هنا لتحديث السكربت مباشرة';
-t['ACTUALIZAR'] = 'تحديث معلومات القرية';
-t['VENTAS'] = 'حفظ العروض';
-t['MAPSCAN'] = 'فحص الخريطة';
-t['BIC'] = 'الإيقونات المختصرة';
-t['SAVE'] = 'حفظ';
-t['AT2'] = 'مساندة';
-t['AT3'] = 'هجوم: كامل';
-t['AT4'] = 'هجوم: للنهب';
-t['NBSA'] = 'تلقائي';
-t['NBSN'] = 'عادي (صغيره)';
-t['NBSB'] = 'ملء الشاشة (كبيرة)';
-t['NBHAX'] = 'توسيع تلقائي للارتفاع';
-t['NBHK'] = 'ارتفاع افتراضي';
-t['NPCSAVETIME'] = 'حفظ: ';
-t['TOTALTROOPS'] = 'مجموع القوات في القرية';
-t['U.2'] = 'القبيلة';
+t['U.2'] = "القبيلة";
+t['U.3'] = "أسم العاصمة <br> لا يمكنك التعديل, فقط قم بزيارة بطاقة العضوية";
+t['U.6'] = "إحداثيات العاصمة <br> لا يمكنك التعديل, فقط قم بزيارة بطاقة العضوية";
+t['SIM'] = "محاكي المعركة";
+t['QSURE'] = "هل أنت متأكد؟";
+t['LOSS'] = "الخسائر";
+t['PROFIT'] = "الفائدة";
+t['EXTAV'] = "متاح";
+t['PLAYER'] = "اللاعب";
+t['VILLAGE'] = "اسم القرية";
+t['POPULATION'] = "السكان";
+t['COORDS'] = "الإحداثيات";
+t['MAPTBACTS'] = "الأمر";
+t['SAVED'] = "تم حفظ الإعدادات";
+t['YOUNEED'] = "تحتاج";
+t['TODAY'] = "اليوم";
+t['TOMORROW'] = "غداً";
+t['DAYAFTERTOM'] = "بعد غداً";
+t['MARKET'] = "السوق";
+t['BARRACKS'] = "الثكنة";
+t['RAP'] = "نقطة التجمع";
+t['STABLE'] = "الإسطبل";
+t['WORKSHOP'] = "المصانع الحربية";
+t['SENDRES'] = "إرسال الموارد";
+t['BUY'] = "شراء";
+t['SELL'] = "بيع";
+t['SENDIGM'] = "إرسال رسالة";
+t['LISTO'] = "يتاح";
+t['ON'] = "على";
+t['AT'] = "في";
+t['EFICIENCIA'] = "الفعالية";
+t['NEVER'] = "أبدا";
+t['ALDEAS'] = "القرية-القرى";
+t['TIEMPO'] = "الوقت";
+t['OFREZCO'] = "العرض";
+t['BUSCO'] = "البحث";
+t['TIPO'] = "النوع";
+t['DISPONIBLE'] = "فقط المتاح";
+t['CUALQUIERA'] = "أي";
+t['YES'] = "نعم";
+t['NO'] = "لا";
+t['LOGIN'] = "تسجيل الدخول";
+t['MARCADORES'] = "الروابط";
+t['ANYADIR'] = "إضافة رابط +نص";
+t['UBU'] = "ضع الرابط هنا";
+t['UBT'] = "ضع نص الرابط هنا";
+t['DEL'] = "حذف";
+t['MAPA'] = "الخريطة";
+t['MAXTIME'] = "الحد الأقصى للوقت";
+t['ARCHIVE'] = "الأرشيف";
+t['SUMMARY'] = "الموجز";
+t['TROPAS'] = "القوات";
+t['CHKSCRV'] = "أضغط هنا لتحديث السكربت مباشرة";
+t['ACTUALIZAR'] = "تحديث معلومات القرية";
+t['VENTAS'] = "حفظ العروض";
+t['MAPSCAN'] = "فحص الخريطة";
+t['BIC'] = "الإيقونات المختصرة";
+t['SAVE'] = "حفظ";
+t['AT2'] = "مساندة";
+t['AT3'] = "هجوم: كامل";
+t['AT4'] = "هجوم: للنهب";
+t['NBSA'] = "تلقائي";
+t['NBSN'] = "عادي (صغيره)";
+t['NBSB'] = "ملء الشاشة (كبيرة)";
+t['NBHAX'] = "توسيع تلقائي للارتفاع";
+t['NBHK'] = "ارتفاع افتراضي";
+t['NPCSAVETIME'] = "حفظ: ";
+t['TOTALTROOPS'] = "مجموع القوات في القرية";
 t['SELECTALLTROOPS'] = "اختيار كل القوات";
 t['PARTY'] = "الاحتفالات";
 t['CPPERDAY'] = "نقاط حضارية يومياً";
@@ -5618,61 +1831,53 @@ t['SLOT'] = "فتح قرية";
 t['TOTAL'] = "المجموع";
 t['SELECTSCOUT'] = "اختيار الكشافة";
 t['SELECTFAKE'] = "اختيار هجوم وهمي";
-t['NOSCOUT2FAKE'] = "مستحيل اختيار الكشافة في الهجوم الوهمي !";
-t['NOTROOP2FAKE'] = "لا توجد قوات للهجوم الوهمي !";
-t['NOTROOP2SCOUT'] = "لا توجد قوات كشافة !";
-t['NOTROOPS'] = "لا توجد قوات في القرية !";
 t['ALL'] = "الكل";
 t['SH2'] = "يمكنك إدخال الألوان كالأتي:<br>- green أو red أو  orange, الخ.<br>- رمز اللون مثل #004523<br>- تركه فارغ لألون الافتراضي";
 t['SOREP'] = "أظهار النسخة الأصلية للتقرير";
 t['WSIMO1'] = "داخلي (محاكي المعركة العادي)";
 t['WSIMO2'] = "خارجي (محاكي المعركة المطور kirilloid.ru)";
-t['U.3'] = 'أسم العاصمة <br> لا يمكنك التعديل, فقط قم بزيارة بطاقة العضوية';
 t['NONEWVER'] = "لديك أحدث نسخة";
 t['BVER'] = "قد يكون لديك نسخة تجريبية";
 t['NVERAV'] = "يوجد نسخة جديدة من السكربت";
 t['UPDSCR'] = "هل تريد تحديث السكربت الآن؟";
 t['CHECKUPDATE'] = "التحقق من وجود تحديث للسكربت. الرجاء الانتظار...";
-t['CROPFINDER'] = "بحث عن القرى القمحية";
 t['AVPPV'] = "متوسط عدد السكان للقرية الواحدة ";
 t['AVPPP'] = "متوسط عدد السكان للاعب الواحد";
-t['U.6'] = 'إحداثيات العاصمة <br> لا يمكنك التعديل, فقط قم بزيارة بطاقة العضوية';
-t['MAX'] = 'الحد الأقصى';
-t['TOTTRTR'] = 'أجمالي القوات التي يتم تدريبها';
-t['TB3SL'] = 'أعدادات ترافيان بايوند';
-t['UPDALLV'] = 'تحديث جميع القرى. لا تستخدمها بكثرة فقد يؤدي ذالك إلى حظر حسابك !';
-t['LARGEMAP'] = 'خريطة كبيرة';
-t['USETHEMPR'] = 'الاستخدام (النسبي)';
-t['USETHEMEQ'] = 'الاستخدام (المتساوي)';
-t['TOWNHALL'] = 'البلدية';
-t['GSRVT'] = 'سيرفر اللعبة';
-t['ACCINFO'] = 'معلومات الحساب';
-t['NBO'] = 'دفتر الملاحظات';
-t['MNUL'] = 'القائمة على الجانب الأيمن';
-t['STAT'] = 'إحصائيات';
-t['RESF'] = 'حقول الموارد';
-t['VLC'] = 'مركز القرية';
-t['MAPO'] = 'خيارات الخريطة';
-t['COLO'] = 'خيارات الألوان';
-t['DBGO'] = 'خيارات التصحيح';
+t['MAX'] = "الحد الأقصى";
+t['TOTTRTR'] = "أجمالي القوات التي يتم تدريبها";
+t['TB3SL'] = "أعدادات ترافيان بايوند";
+t['UPDALLV'] = "تحديث جميع القرى. لا تستخدمها بكثرة فقد يؤدي ذالك إلى حظر حسابك !";
+t['LARGEMAP'] = "خريطة كبيرة";
+t['USETHEMPR'] = "الاستخدام (النسبي)";
+t['USETHEMEQ'] = "الاستخدام (المتساوي)";
+t['TOWNHALL'] = "البلدية";
+t['GSRVT'] = "سيرفر اللعبة";
+t['ACCINFO'] = "معلومات الحساب";
+t['NBO'] = "دفتر الملاحظات";
+t['MNUL'] = "القائمة على الجانب الأيمن";
+t['STAT'] = "إحصائيات";
+t['RESF'] = "حقول الموارد";
+t['VLC'] = "مركز القرية";
+t['MAPO'] = "خيارات الخريطة";
+t['COLO'] = "خيارات الألوان";
+t['DBGO'] = "خيارات التصحيح";
 t['HEROSMANSION'] = "قصر الأبطال";
-t['BLACKSMITH'] = 'الحداد';
-t['ARMOURY'] = 'مستودع الأسلحة';
-t['NOW'] = 'الآن';
-t['CLOSE'] = 'إغلاق';
-t['USE'] = 'استخدام';
-t['USETHEM1H'] = 'الاستخدام (1 ساعة الإنتاج)';
-t['OVERVIEW'] = 'العرض';
-t['FORUM'] = 'المنتدى';
-t['ATTACKS'] = 'الهجمات';
-t['NEWS'] = 'الإخبار';
-t['ADDCRTPAGE'] = 'إضافة نص للصفحة الحالية';
-t['SCRPURL'] = 'اضغط هنا لفتح الصفحة الرسمية للسكربت';
-t['SPACER'] = 'إضافة فاصل';
-t['MEREO'] = 'رسائل & تقارير';
-t['ATTABLES'] = 'جدول القوات';
-t['MTW'] = 'الباقي';
-t['MTX'] = 'الزائد';
+t['BLACKSMITH'] = "الحداد";
+t['ARMOURY'] = "مستودع الأسلحة";
+t['NOW'] = "الآن";
+t['CLOSE'] = "إغلاق";
+t['USETHEM1H'] = "الاستخدام (1 ساعة الإنتاج)";
+t['OVERVIEW'] = "العرض";
+t['FORUM'] = "المنتدى";
+t['ATTACKS'] = "الهجمات";
+t['NEWS'] = "الإخبار";
+t['ADDCRTPAGE'] = "إضافة نص للصفحة الحالية";
+t['SCRPURL'] = "اضغط هنا لفتح الصفحة الرسمية للسكربت";
+t['SPACER'] = "إضافة فاصل";
+t['MEREO'] = "رسائل & تقارير";
+t['ATTABLES'] = "جدول القوات";
+t['MTW'] = "الباقي";
+t['MTX'] = "الزائد";
 t['MTC'] = "الحمولة الحالية";
 t['ALFL'] = "رابط خارجي للمنتدى <br> (المربع فارغ = إذا كان المنتدى داخلي)";
 t['MTCL'] = "مسح الكل";
@@ -5686,1929 +1891,560 @@ t['NPCO'] = "خيارات المساعدة NPC";
 t['NEWVILLAGEAV'] = "التاريخ/الوقت";
 t['TIMEUNTIL'] = "الوقت اللازم للانتظار";
 t['CENTERMAP'] = "توسيط هذه القرية على الخريطة";
-t['SENDTROOPS'] = 'إرسال القوات';
+t['SENDTROOPS'] = "إرسال القوات";
 t['PALACE'] = "القصر";
 t['RESIDENCE'] = "السكن";
 t['ACADEMY'] = "الأكاديمية";
 t['TREASURY'] = "الخزنة";
 t['UPGTB'] = "جدول الترقية ( المباني/الحقول )";
 t['RBTT'] = "شريط الموارد";
+t['USE'] = "استخدام";
 t['RESIDUE'] = "الموارد بعد البناء ";
 t['RESOURCES'] = "الموارد قبل البناء ";
 t['SH1'] = "أفتح بطاقة العضوية ليتعرف السكربت تلقائياً على العاصمة <br> أبني الثكنة للكشف تلقائياً على نوع القبيلة ومن ثم الدخول على نقطة التجمع";
 t['RESEND'] = "إرسال مرة أخرى ؟";
 t['WSI'] = "محاكي المعركة داخل اللعبة";
+t['CROPFINDER'] = "بحث عن القرى القمحية";
 break;
-case "rs"://by David Maćej & rsinisa
-t['8'] = 'Савез';
-t['SIM'] = 'Симулатор борбе';
-t['QSURE'] = 'Да ли сте сигурни?';
-t['LOSS'] = 'Губитак';
-t['PROFIT'] = 'Добит';
-t['EXTAV'] = 'Надоградња могућа';
-t['PLAYER'] = 'Играч';
-t['VILLAGE'] = 'Село';
-t['POPULATION'] = 'Популација';
-t['COORDS'] = 'Координате';
-t['MAPTBACTS'] = 'Акције';
-t['SAVED'] = 'Сачувано';
-t['YOUNEED'] = 'Потребно је';
-t['TODAY'] = 'данас';
-t['TOMORROW'] = 'сутра';
-t['DAYAFTERTOM'] = 'прекосутра';
-t['MARKET'] = 'Пијаца';
-t['BARRACKS'] = 'Касарна';
-t['RAP'] = 'Место окупљања';
-t['STABLE'] = 'Штала';
-t['WORKSHOP'] = 'Радионица';
-t['SENDRES'] = 'Пошаљи ресурсе';
-t['BUY'] = 'Купи';
-t['SELL'] = 'Продај';
-t['SENDIGM'] = 'Пошаљи поруку';
-t['LISTO'] = 'Доступно';
-t['ON'] = ''; // on
-t['AT'] = 'у'; // at
-t['EFICIENCIA'] = 'Ефикасност';
-t['NEVER'] = 'Никада';
-t['ALDEAS'] = 'Село(а)';
-t['TIEMPO'] = 'Време';
-t['OFREZCO'] = 'Нуди';
-t['BUSCO'] = 'Тражи';
-t['TIPO'] = 'Однос';
-t['DISPONIBLE'] = 'Само доступно';
-t['CUALQUIERA'] = 'Све';
-t['YES'] = 'Да';
-t['NO'] = 'Не';
-t['LOGIN'] = 'Пријави се';
-t['MARCADORES'] = 'Линкови';
-t['ANYADIR'] = 'Додај';
-t['UBU'] = 'Адреса новог линка';
-t['UBT'] = 'Назив новог линка';
-t['DEL'] = 'Обриши';
-t['MAPA'] = 'Мапа';
-t['MAXTIME'] = 'Максимално време';
-t['ARCHIVE'] = 'Архива';
-t['SUMMARY'] = 'Збир'; // summary
-t['TROPAS'] = 'Војска';
-t['CHKSCRV'] = 'Унапреди TBeyond';
-t['ACTUALIZAR'] = 'Освежи информације о селима';
-t['VENTAS'] = 'Сачувај понуду';
-t['MAPSCAN'] = 'Претражи мапу';
-t['BIC'] = 'Прикажи додатне иконе';
-t['22'] = 'Прикажи бележницу';
-t['SAVE'] = 'Сачувај';
-t['49'] = 'Основна акција на месту окупљања';
-t['AT2'] = 'Појачање';
-t['AT3'] = 'Напад';
-t['AT4'] = 'Пљачка';
-t['24'] = 'Величина бележнице';
-t['NBSA'] = 'Аутоматски';
-t['NBSN'] = 'Нормална';
-t['NBSB'] = 'Велика';
-t['25'] = 'Висина бележнице';
-t['NBHAX'] = 'Аутоматски повећај висину';
-t['NBHK'] = 'Основна висина';
-t['43'] = 'Прикажи бројеве у центру села';
-t['NPCSAVETIME'] = 'Убрзај за: ';
-t['38'] = 'Прикажи нивое ресурса у боји';
-t['44'] = 'Прикажи нивое грађевина у боји';
-t['65'] = 'Боја за унапређење могуће<br>(Основна = празно)';
-t['66'] = 'Боја за максимални ниво<br>(Основна = празно)';
-t['67'] = 'Боја за унапређење није могуће<br>(Основна = празно)';
-t['68'] = 'Боја за унапређење помоћу НПЦ<br>(Основна = празно)';
-t['TOTALTROOPS'] = 'Сва војска из села';
-t['20'] = 'Прикажи линкове';
-t['U.2'] = 'Племе';
-t['1'] = "Травиан 2.x сервер";
-t['SELECTALLTROOPS'] = "Сва војска";
-t['PARTY'] = "Забаве";
-t['CPPERDAY'] = "КП/дан";
-t['SLOT'] = "Место за проширење";
-t['TOTAL'] = "Укупно";
-t['SELECTSCOUT'] = "Извиђање";
-t['SELECTFAKE'] = "Лажни напад";
-t['NOSCOUT2FAKE'] = "Немогуће је послати извиђаче у лажни напад!";
-t['NOTROOP2FAKE'] = "У селу нема војске са лажни напад!";
-t['NOTROOP2SCOUT'] = "У селу нема извиђача!";
-t['NOTROOPS'] = "Нема војске у селу!";
-t['ALL'] = "Све";
-t['SH2'] = "У поље за избор боје можете унети:<br>- green или red или orange, итд.<br>- или HEX колорни код нпр. #004523<br>- оставите празно за основне боје.";
-t['SOREP'] = "Прикажи оригинални извештај (за постовање)";
-t['56'] = "Прикажи тип поља/информацију о оази<br>док се миш креће преко мапе";
-t['10'] = "Користи следећи симулатор борбе:<br>(у менију лево)";
-t['WSIMO1'] = "Из игре";
-t['WSIMO2'] = "Са сајта kirilloid.ru";
-t['27'] = "Травиан анализатор";
-t['28'] = "Прикажи анализатор као линк";
-t['NONEWVER'] = "Имате последњу верзију скрипта!";
-t['BVER'] = "Можда имате бетаверзију скрипта";
-t['NVERAV'] = "Постоји нова верзија скрипта";
-t['UPDSCR'] = "Да ли унапредим скрипту сада?";
-t['CHECKUPDATE'] = "Проверавам да ли постоји нова верзија.<br>Молим сачекајте...";
-t['CROPFINDER'] = "Нађи житнице";
-t['AVPPV'] = "Просечна популација по селу";
-t['AVPPP'] = "Просечна популација по играчу";
-t['37'] = "Прикажи табелу унапређења ресурса";
-t['41'] = "Прикажи табелу унапређења грађевина";
-t['69'] = "Console Log Level<br>САМО ЗА ПРОГРАМЕРЕ или ТРАЖЕЊЕ ГРЕШАКА<br>(Основно = 0)";
-t['48'] = "Број страна са понудама ѕа приказ<br>на пијаци => страна ѕа куповину<br>(Основно = 1)";
-t['U.3'] = 'Назив главног града<br>Идите у профил';
-t['U.6'] = 'Координате главног града<br>Идите у профил';
-t['MAX'] = 'Максимум';
-t['TOTTRTR'] = 'Укупна број јединица на обуци';
-t['57'] = 'Прикази даљине и времена';
-t['TB3SL'] = TB3O.shN + ' подешавање';
-t['UPDALLV'] = 'Освежи сва села. КОРИСТИТИ СА ОПРЕЗОМ, МОГУЋЕ ЈЕ БУДЕТЕ БАНОВАНИ!!!';
-t['9'] = "Прикажи додатне линкове у менију лево<br>(Traviantoolbox, World Analyser, Travilog, Map, итд.)";
-t['LARGEMAP'] = 'Велика мапа';
-t['USETHEMPR'] = 'Пропорционална подела';
-t['USETHEMEQ'] = 'Једнака подела';
-t['TOWNHALL'] = 'Општина';
-t['GSRVT'] = 'Сервер';
-t['NBO'] = 'Бележница';
-t['MNUL'] = 'Мени са леве стране';
-t['STAT'] = 'Статистика';
-t['RESF'] = 'Ресурсна поља';
-t['VLC'] = 'Центар села';
-t['MAPO'] = 'Мапа';
-t['COLO'] = 'Боје';
-t['DBGO'] = 'Тражење грешака';
-t['4'] = 'Пијаца';
-t['5'] = 'Место окупљања/Касарна/радионица/Штала';
-t['6'] = "Општина/Дворац хероја/Ковачница оклопа/Ковачница оружја";
-t['HEROSMANSION'] = "Дворац хероја";
-t['BLACKSMITH'] = 'Ковачница оружја';
-t['ARMOURY'] = 'Ковачница оклопа';
-t['NOW'] = 'Сада';
-t['CLOSE'] = 'Затвори';
-t['USE'] = 'Користи';
-t['USETHEM1H'] = 'Једночасовна производња';
-t['OVERVIEW'] = 'Преглед';
-t['FORUM'] = 'Форум';
-t['ATTACKS'] = 'Напади';
-t['NEWS'] = 'Вести';
-t['ADDCRTPAGE'] = 'Додај тренутну страну као линк';
-t['SCRPURL'] = 'TBeyond сајт';
-t['50'] = 'Број извиђача за<br>"Извиђање" функцију';
-t['SPACER'] = 'Размак';
-t['53'] = 'Прикажи информације о јединици кад миш пређе преко ње';
-t['MEREO'] = 'Поруке и извештаји';
-t['59'] = 'Број страна порука/извештаја за приказ<br>(Основно = 1)';
-t['ATTABLES'] = 'Преглед војске';
-t['MTW'] = 'Неискоришћено';
-t['MTX'] = 'Има више';
-t['MTC'] = 'Тренутно се шаље';
-t['ALFL'] = 'Линк до спољног форума<br>(Оставити празно за форум из игре)';
-t['82.L'] = 'Закључај линкове (Уклони, обриши, горе, доле иконе)';
-t['MTCL'] = 'Обриши све';
-t['82.U'] = 'Откључај линкове (Уклони, обриши, горе, доле иконе)';
-t['CKSORT'] = 'Кликни за сортирање';
-t['MIN'] = 'Минимум';
-t['SVGL'] = 'Важи за сва села';
-t['VGL'] = 'Списак села';
-t['12'] = "Прикажи линкове до 'dorf1.php' и 'dorf2.php'";
-t['UPDATEPOP'] = 'Освежи популацију';
-t['54'] = 'Прикажи даљине и времена до села кад миш пређе преко';
-t['EDIT'] = 'Уреди';
-t['NPCO'] = 'NPC помоћник';
-t['26'] = 'Прикажи NPC помоћника';
-t['58'] = 'Прикажи табелу играча/села/освојених долина';
-t['NEWVILLAGEAV'] = 'Датум/Време';
-t['TIMEUNTIL'] = 'Време чекања';
-t['61'] = 'Прикажи "Обриши све" табелу у извештајима';
-t['62'] = 'Прикажи "Пошаљи поруку" икону и за мој налог';
-t['CENTERMAP'] = 'Центритрај мапу на овом селу';
-t['13'] = 'Прикажи "Центритрај мапу на овом селу" икону';
-t['SENDTROOPS'] = 'Пошаљи војску';
-t['64'] = 'Прикажи статистику у извештајима';
-t['7'] = "Палата/Резиденција/Академија/Ризница";
-t['PALACE'] = "Палата";
-t['RESIDENCE'] = "Резиденција";
-t['ACADEMY'] = "Академија";
-t['TREASURY'] = "Ризница";
-t['60'] = 'Прикажи линк за отварање порука у посебном прозору';
-break;
-case "gr":
-case "el"://by maintanosgr & ChuckNorris & Velonis Petros
-t['8'] = 'Συμμαχία';
-t['SIM'] = 'Προσομοιωτής μάχης';
-t['QSURE'] = 'Είσαι σίγουρος;';
-t['LOSS'] = 'Ζημιά';
-t['PROFIT'] = 'Κέρδος';
-t['EXTAV'] = 'Διαθέσιμη αναβάθμιση';
-t['PLAYER'] = 'Παίκτης';
-t['VILLAGE'] = 'Χωριό';
-t['POPULATION'] = 'Πληθυσμός';
-t['COORDS'] = 'Συντεταγμένες';
-t['MAPTBACTS'] = 'Ενέργειες';
-t['SAVED'] = 'Αποθηκεύτηκε';
-t['YOUNEED'] = 'Χρειάζεσαι';
-t['TODAY'] = 'σήμερα';
-t['TOMORROW'] = 'αύριο';
-t['DAYAFTERTOM'] = 'μεθαύριο';
-t['MARKET'] = 'Αγορά';
-t['BARRACKS'] = 'Στρατόπεδο';
-t['RAP'] = 'Πλατεία συγκεντρώσεως';
-t['STABLE'] = 'Στάβλος';
-t['WORKSHOP'] = 'Εργαστήριο';
-t['SENDRES'] = 'Αποστολή πρώτων υλών';
-t['BUY'] = 'Αγόρασε';
-t['SELL'] = 'Πούλησε';
-t['SENDIGM'] = 'Αποστολή μηνύματος';
-t['LISTO'] = 'Διαθέσιμο';
-t['ON'] = 'την';
-t['AT'] = 'στις';
-t['EFICIENCIA'] = 'Πληρότητα';
-t['NEVER'] = 'Ποτέ';
-t['ALDEAS'] = 'Χωριό(ά)';
-t['TIEMPO'] = 'Χρόνος';
-t['OFREZCO'] = 'Προσφέρει';
-t['BUSCO'] = 'Αναζητεί';
-t['TIPO'] = 'Τύπος';
-t['DISPONIBLE'] = 'Μόνο διαθέσιμα';
-t['CUALQUIERA'] = 'Όλα';
-t['YES'] = 'Ναι';
-t['NO'] = 'Όχι';
-t['LOGIN'] = 'Σύνδεση';
-t['MARCADORES'] = 'Αγαπημένα';
-t['ANYADIR'] = 'Προσθήκη';
-t['UBU'] = 'Νέο αγαπημένο URL';
-t['UBT'] = 'Κείμενο';
-t['DEL'] = 'Διαγραφή';
-t['MAXTIME'] = 'Μέγιστος χρόνος';
-t['ARCHIVE'] = 'Αρχείο';
-t['SUMMARY'] = 'Σύνοψη';
-t['TROPAS'] = 'Στρατεύματα';
-t['CHKSCRV'] = 'Αναβάθμιση TBeyond';
-t['ACTUALIZAR'] = 'Ανανέωσε πληροφορίες χωριού';
-t['VENTAS'] = 'Αποθηκευμένες Προσφορές';
-t['MAPSCAN'] = 'Σάρωση του χάρτη';
-t['BIC'] = 'Εμφάνιση μεγάλων εικονιδίων';
-t['22'] = 'Εμφάνιση του σημειωματάριου';
-t['SAVE'] = 'Αποθήκευση';
-t['49'] = 'Προεπιλογή πλατείας συγκεντρώσεως';
-t['AT2'] = 'Ενισχύσεις';
-t['AT3'] = 'Επίθεση: Εισβολή';
-t['AT4'] = 'Επίθεση: Εισβολή αρπαγής';
-t['24'] = 'Μέγεθος σημειωματάριου';
-t['NBSA'] = 'Αυτόματο';
-t['NBSN'] = 'Κανονικό (μικρό)';
-t['NBSB'] = 'Μεγάλη οθόνη (μεγάλο)';
-t['25'] = 'Ύψος σημειωματάριου';
-t['NBAUTOEXPANDHEIGH'] = 'Αυτόματη επέκταση ύψους';
-t['NBHK'] = 'Προεπιλεγμένο ύψος';
-t['43'] = 'Εμφάνιση κεντρικών αριθμών';
-t['NPCSAVETIME'] = 'Κερδίζεις: ';
-t['38'] = 'Δείξε χρώματα για το επίπεδο των πρώτων υλών';
-t['44'] = 'Δείξε χρώματα για το επίπεδο των κτηρίων';
-t['65'] = 'Χρώμα όταν υπάρχει διαθέσιμη αναβάθμιση<br>(Προεπιλογή = άδειο)';
-t['66'] = 'Χρώμα όταν είναι στο επίπεδο<br>(Προεπιλογή = άδειο)';
-t['67'] = 'Χρώμα όταν δεν υπάρχει διαθέσιμη αναβάθμιση<br>(Προεπιλογή = άδειο)';
-t['68'] = 'Χρώμα για αναβάθμιση μέσω του NPC<br>(Προεπιλογή = άδειο)';
-t['TOTALTROOPS'] = 'Συνολικά στρατεύματα χωριού';
-t['20'] = 'Εμφάνιση σελιδοδεικτών';
-t['U.2'] = 'Φυλή';
-t['1'] = "Travian v2.x server";
-t['SELECTALLTROOPS'] = "Επιλογή όλων των στρατευμάτων";
-t['PARTY'] = "Εορταστικές εκδηλώσεις";
-t['CPPERDAY'] = "Πόντοι Πολιτισμού/μέρα";
-t['SLOT'] = "Διαθέσιμος χώρος";
-t['TOTAL'] = "Σύνολο";
-t['SELECTSCOUT'] = "Ανίχνευση";
-t['SELECTFAKE'] = "Αντιπερισπασμός";
-t['NOSCOUT2FAKE'] = "Είναι αδύνατο να χρησιμοποιήσεις ανιχνευτές για αντιπερισπασμό!";
-t['NOTROOP2FAKE'] = "Δεν υπάρχουν στρατεύματα για αντιπερισπασμό!";
-t['NOTROOP2SCOUT'] = "Δεν υπάρχουν ανιχνευτές!";
-t['NOTROOPS'] = "Δεν υπάρχουν στρατεύματα στο χωριό!";
-t['ALL'] = "Όλα";
-t['SH2'] = "Στα πεδία χρωμάτων μπορείς να βάλεις:<br>- <b>green</b> ή <b>reb</b> ή <b>orange</b>, κτλ.<br>- κώδικα HEX για χρώμματα όπως <b>#004523</b><br>- άφησε κενό για προεπιλεγμένο χρώμα";
-t['SOREP'] = "Δείξε κανονική αναφορά (για ποστάρισμα)";
-t['56'] = "Δείξε τον τύπο του χωραφιού/της όασης<br>όταν πηγαίνω πάνω με το ποντίκι";
-t['10'] = "Link για προσομοιωτή μάχης:<br>(αριστερό μενού)";
-t['WSIMO1'] = "Εσωτερικός (παρέχεται από το παιχνίδι)";
-t['WSIMO2'] = "Εξωτερικός (παρέχεται από το kirilloid.ru)";
-t['27'] = "Χρήση World Analyser";
-t['28'] = "Δείξε link για αναλυτικά στατιστικά";
-t['NONEWVER'] = "Έχεις την νεότερη δυνατή έκδοση";
-t['BVER'] = "Έχεις δοκιμαστική έκδοση";
-t['NVERAV'] = 'Διαθέσιμη νέα έκδοση';
-t['UPDSCR'] = "Να ενημερωθεί το scipt τώρα;";
-t['CHECKUPDATE'] = "Έλεγχος για ενημέρωση του script.<br>Παρακαλώ περιμένετε...";
-t['AVPPV'] = "Μέσος πληθυσμός ανα χωριό";
-t['AVPPP'] = "Μέσος πληθυσμός ανά παίκτη";
-t['37'] = "Δείξε τον πίνακα αναβαθμίσεων για τις πρώτες ύλες";
-t['41'] = "Δείξε τον πίνακα αναβαθμίσεων για τα κτήρια";
-t['69'] = "Console Log Level<br><b>ΜΟΝΟ ΓΙΑ ΠΡΟΓΡΑΜΜΑΤΑΤΙΣΤΕΣ Ή ΑΠΑΣΦΑΛΜΑΤΩΣΗ</b><br>(Προεπιλογή = 0)";
-t['48'] = "Αριθμός των σελίδων για φόρτωση<br>μέσα στην αγορά => στην σελίδα 'Αγοράστε'<br>(Προεπιλογή = 1, Μέγιστο = 5)";
-t['U.3'] = "Όνομα πρωτεύουσας<br><b>Μην το πειράζεις, αν' αυτού επισκέψου το προφίλ σου</b>";
-t['U.6'] = "Συντεταγμένες πρωτεύουσας<br><b>Μην το πειράζεις, αν' αυτού επισκέψου το προφίλ σου</b>";
-t['MAX'] = 'Μέγιστο';
-t['TOTTRTR'] = 'Συνολικά στρατεύματα σε εκπαίδευση';
-t['57'] = 'Δείξε αποστάσεις και χρόνους';
-t['TB3SL'] = TB3O.shN + ' Ρυθμίσεις';
-t['UPDALLV'] = 'Ενημέρωσε όλα τα χωριά. ΧΡΗΣΙΜΟΠΟΙΗΣΕ ΤΟ ΜΕ ΜΕΓΑΛΗ ΠΡΟΣΟΧΗ ΚΑΘΩΣ ΜΠΟΡΕΙ ΝΑ ΑΠΟΒΛΗΘΕΙΣ !!!';
-t['9'] = "Δείξε επιπλέον link στο αριστερό μενού<br>(Traviantoolbox, World Analyser, Travilog, TravMap, κτλ.)";
-t['LARGEMAP'] = 'Μεγάλος χάρτης';
-t['USETHEMPR'] = 'Χρησιμοποίησε τα (αναλογικά)';
-t['USETHEMEQ'] = 'Χρησιμοποίησε τα (ίσα)';
-t['TOWNHALL'] = 'Δημαρχείο';
-t['GSRVT'] = 'Server Παιχνιδιού';
-t['ACCINFO'] = 'Πληροφορίες λογαριασμού';
-t['NBO'] = 'Σημειωματάριο';
-t['MNUL'] = 'Μενού στο αριστερό μέρος';
-t['STAT'] = 'Στατιστικά';
-t['RESF'] = 'Χωράφια πρώτων υλών';
-t['VLC'] = 'Κέντρο χωριού';
-t['MAPO'] = 'Επιλογές χάρτη';
-t['COLO'] = 'Επιλογές χρωμάτων';
-t['DBGO'] = 'Επιλογές απασφαλμάτωσης';
-t['4'] = 'Αγορά';
-t['5'] = '>Πλατεία συγκεντρώσεως/Στρατόπεδο/Εργαστήριο/Στάβλος';
-t['6'] = "Δημαρχείο/Περιοχή ηρώων/Πανοπλοποιείο/Οπλοποιείο";
-t['HEROSMANSION'] = "Περιοχή ηρώων";
-t['BLACKSMITH'] = 'Οπλοποιείο';
-t['ARMOURY'] = 'Πανοπλοποιείο';
-t['NOW'] = 'Τώρα';
-t['CLOSE'] = 'Κλείσιμο';
-t['USE'] = 'Χρήση';
-t['USETHEM1H'] = 'Χρησιμοποίησε τα (1 ωριαία παραγωγή)';
-t['OVERVIEW'] = 'Επισκόπηση';
-t['FORUM'] = 'Φόρουμ (Forum)';
-t['ATTACKS'] = 'Επιθέσεις';
-t['NEWS'] = 'Νέα';
-t['ADDCRTPAGE'] = 'Πρόσθεσε τρέχουσα σελίδα ως σελιδοδείκτη';
-t['SCRPURL'] = 'TBeyond website';
-t['50'] = 'Αριθμός ανιχνευτών για την<br>λειτουργία "Ανίχνευση"';
-t['SPACER'] = 'Διάστημα';
-t['53'] = 'Δείξε πληροφορίες στρατιωτών<br>σε παράθυρο συμβουλών';
-t['MEREO'] = 'Μηνύματα & Αναφορές';
-t['59'] = 'Αριθμός μηνυμάτων/αναφορών για φόρτωμα<br>(Προεπιλογή =1, Μέγιστο = 5)';
-t['ATTABLES'] = 'Πίνακες στρατευμάτων';
-t['MTW'] = 'Χάσιμο';
-t['MTX'] = 'Υπέρβαση';
-t['MTC'] = 'Τρέχον φορτίο';
-t['ALFL'] = 'Link σε εξωτερικό φόρουμ<br>(’φησε το άδειο για το εσωτερικό φόρουμ)';
-t['82.L'] = 'Κλείδωσε τους σελιδοδείκτες (κρύψε τα διαγραφή, μετακίνησε πάνω/πάτω εικονίδια)';
-t['MTCL'] = 'Καθαρισμός';
-t['82.U'] = 'Ξεκλείδωσε τους σελιδοδείκτες (δείξε τα διαγραφή, μετακίνησε πάνω/πάτω εικονίδια)';
-t['CKSORT'] = 'Κλικ για ταξινόμηση';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Κοινό σε όλα τα χωριά';
-t['VGL'] = 'Λίστα χωριών';
-t['12'] = "Δείξε τα link 'dorf1.php' και 'dorf2.php'";
-t['UPDATEPOP'] = 'Ενημέρωσε τον πληθυσμό';
-t['54'] = 'Δείξε απόσταση και χρόνους στα χωριά<br>σε παράθυρο συμβουλών';
-t['EDIT'] = 'Επεξεργασία';
-t['NPCO'] = 'Επιλογές του NPC βοηθού';
-t['26'] = 'Δείξε τους υπολογισμούς/link του NPC βοηθού';
-t['58'] = 'Δείξε τον πίνακα των παικτών/χωριών/κατειλημένων οάσεων';
-t['NEWVILLAGEAV'] = 'Ημερομηνία/Ώρα';
-t['TIMEUNTIL'] = 'Χρόνος να περιμένεις';
-t['61'] = 'Δείξε τον πίνακα "Διαγραφή" στην σελίδα αναφορών';
-t['62'] = 'Δείξε το "Αποστολή μηνύματος IGM" εικονίδιο για μένα, επείσης';
-t['CENTERMAP'] = 'Επικέντρωση χάρτη σε αυτό το χωριό';
-t['13'] = 'Δείξε το "Επικέντρωση χάρτη σε αυτό το χωριό" εικονίδιο';
-t['SENDTROOPS'] = 'Αποστολή στρατευμάτων';
-t['64'] = 'Δείξε λεπτομέρειες στατιστικών στις Αναφορές';
-t['7'] = "Παλάτι/Μέγαρο/Ακαδημία/Θησαυροφυλάκιο";
-t['PALACE'] = "Παλάτι";
-t['RESIDENCE'] = "Μέγαρο";
-t['ACADEMY'] = "Ακαδημία";
-t['TREASURY'] = "Θησαυροφυλάκιο";
-t['45'] = "Δείξε το επίπεδο του κτηρίου που αναβαθμίζεται να αναβοσβήνει";
-t['60'] = 'Δείξε links για να ανοίγουν τα μυνήματα<br>σε αναδυόμενο παράθυρο';
-t['36'] = "Εμφάνιση Υπολογισμών 'Μέχρι<br>τότε/Υπόλοιπο' στους πίνακες αναβάθμισης/εκπαίδευσης";
-t['RESIDUE'] = 'Υπόλοιπο αν χτίσεις';
-t['RESOURCES'] = ' Ύλες';
-break;
-case "kr"://by Daniel Cliff & Sapziller
-t['1'] = "Travian v2.x 서버";
-t['2'] = '광고 배너 제거';
-t['3'] = 'Force T3.1 Legionnaire & Phalanx capacity calculation<br>(for mixed T3.1 & T3.5 servers)';
-t['4'] = '시장';
-t['5'] = '집결지/병영/공방/마구간';
-t['6'] = "마을회관/영웅 저택/병기고/대장간";
-t['7'] = "궁전/저택/연구소/보물창고";
-t['8'] = '동맹';
-t['9'] = "왼쪽 메뉴에 추가 링크 보이기 <br>(Traviantoolbox, World Analyser, Travilog, Map, 등.)";
-t['10'] = "사용할 전투 시뮬레이터:<br>(왼쪽메뉴)";
-t['11'] = "글 쓰기를 위해 사용할 보고서 사이트";
-t['12'] = "'dorf1.php(마을 둘러보기)' 과 'dorf2.php(마을 중심)' 링크 보이기";
-t['13'] = '"중앙 지도" 아이콘 보이기';
-t['14'] = "마을 목록에 '부대 보내기/자원 보내기' 아이콘 보이기";
-t['15'] = "마을 목록에 시간당 자원 생산량 보이기";
-t['16'] = "마을 목록에 실제 농작물 생산량 보이기";
-t['17'] = "마을 목록에 인구 수 보이기";
-t['18'] = '마을 목록 창을 이동 가능한 창으로 보이기';
-t['19'] = '마을 목록에 건물 짓기 상황과 부대 이동 상황 보이기';
-t['20'] = '북마크 보이기';
-t['21'] = "'북마크'를 이동 가능한 창으로 보이기";
-t['22'] = '노트 보이기';
-t['23'] = "'노트'를 이동 가능한 창으로 보이기";
-t['24'] = '노트 크기';
-t['25'] = '노트 높이';
-t['26'] = 'NPC 교역 링크 및 계산값 보이기';
-t['27'] = "사용할 World Analyser";
-t['28'] = "World Analyser 통계 링크 보이기";
-t['29'] = '사용할 Map Analyser';
-t['30'] = '사용자의 지도 상 위치 링크 보이기';
-t['31'] = '동맹원의 지도 상 위치 링크 보이기';
-t['32'] = "'찾기 바' 보이기";
-t['33'] = "'찾기 바'를 이동 가능한 창으로 보이기";
-t['34'] = "업그레이드 테이블에 하루 당 문화점수 획득 정보 보이기";
-t['35'] = "업그레이드 테이블에 작물 소비량 증가 보이기";
-t['36'] = "업그레이드/훈련 테이블에 예상 자원과 건축/업그레이드 후 남는 예상 자원 표시";
-t['37'] = "자원 필드에 업그레이드 테이블 보이기";
-t['38'] = '자원필드 레벨 색 보이기';
-t['39'] = "'자원 바' 테이블 보이기";
-t['40'] = "'자원 바' 테이블을 이동 가능한 창으로 보이기";
-t['41'] = "건물에 업그레이드 테이블 보이기";
-t['42'] = '업그레이드 테이블의 건물 정보를 이름순으로 정렬';
-t['43'] = '마을 건물에 레벨 보이기';
-t['44'] = '빌딩 레벨 색 보이기';
-t['45'] = "업그레이드 중인 건물의 레벨 깜빡이기";
-t['46'] = "상인이 도착했을 때 총 자원 정보 보이기";
-t['47'] = "마지막으로 운반한 자원량 보이기";
-t['48'] = "'장터 => 구입' 선택시 미리 읽어들일 제안 페이지 수 (기본값 = 1)";
-t['49'] = '집결지 기본 행동 설정';
-t['50'] = '"정찰병 선택"에 사용할 수 있는 정찰병의 수';
-t['51'] = "마지막 공격 설정 보이기";
-t['52'] = "마지막 공격 대상 좌표 보이기/사용하기";
-t['53'] = '툴팁에 부대 정보 보이기';
-t['54'] = '툴팁에 마을까지의 거리와 시간 보이기';
-t['55'] = "내장 전투 시뮬레이터에 사용 가능한 부대 내역을 자동으로 채우기";
-t['56'] = "지도 위에 마우스를 올리면 지역의 종류와 오아시스 정보 보이기";
-t['57'] = '거리와 시간 보이기';
-t['58'] = '사용자/마을/차지한 오아시스에 대한 목록 보이기';
-t['59'] = '미리 읽어들일 메시지와 보고서 페이지의 수 (기본값 = 1)';
-t['60'] = '메시지/리포트를 팝업창으로 보기 위한 아이콘 보이기';
-t['61'] = '보고서 페이지에 "모두보기 삭제" 보이기';
-t['62'] = '자기 자신에게도 "메시지 보내기" 아이콘 표시';
-t['63'] = ' 확장 전투보고서 보이기';
-t['64'] = '보고서 통계에 세부 사항 보이기';
-t['65'] = '색 : 업그레이드 가능(기본값 = 빈 칸)';
-t['66'] = '색 : 최고 레벨 (기본값 = 빈 칸)';
-t['67'] = '색 : 업그레이드 불가능(기본값 = 빈 칸)';
-t['68'] = '색 : NPC거래 후 업그레이드 가능(기본값 = 빈 칸)';
-t['69'] = "Console Log 표시 등급 설정<br>주의: 개발자나 디버깅 용도로만 사용해야 함(기본값 = 0)";
-t['82.L'] = '북마크 잠금(삭제, 위로 이동, 아래로 이동 아이콘 숨김)';
-t['82.U'] = '북마크 잠금 해제(삭제, 위로 이동, 아래로 이동 아이콘 보이기)';
-t['SIM'] = '전투 시뮬레이터';
-t['QSURE'] = '확실합니까?';
-t['LOSS'] = '손실';
-t['PROFIT'] = '이득';
-t['EXTAV'] = '확장 가능';
-t['PLAYER'] = '플레이어';
-t['VILLAGE'] = '마을';
-t['POPULATION'] = '인구';
-t['COORDS'] = '좌표';
-t['MAPTBACTS'] = '행동';
-t['SAVED'] = '저장됨';
-t['YOUNEED'] = '필요';
-t['TODAY'] = '오늘';
-t['TOMORROW'] = '내일';
-t['DAYAFTERTOM'] = '모레';
-t['MARKET'] = '시장';
-t['BARRACKS'] = '병영';
-t['RAP'] = '집결지';
-t['STABLE'] = '마구간';
-t['WORKSHOP'] = '공방';
-t['SENDRES'] = '자원 보내기';
-t['BUY'] = '구입';
-t['SELL'] = '판매';
-t['SENDIGM'] = '메시지 보내기';
-t['LISTO'] = '가능한';
-t['ON'] = '날짜';
-t['AT'] = '시간';
-t['EFICIENCIA'] = '효율';
-t['NEVER'] = '불가능';
-t['ALDEAS'] = '마을(들)';
-t['TIEMPO'] = '시간';
-t['OFREZCO'] = '제안';
-t['BUSCO'] = '검색';
-t['TIPO'] = '종류';
-t['DISPONIBLE'] = '가능한 거래만 표시';
-t['CUALQUIERA'] = '모두';
-t['YES'] = '네';
-t['NO'] = '아니오';
-t['LOGIN'] = '로그인';
-t['MARCADORES'] = '북마크';
-t['ANYADIR'] = '추가';
-t['UBU'] = '새 북마크 주소';
-t['UBT'] = '새 북마크 이름';
-t['DEL'] = '삭제';
-t['MAPA'] = '지도';
-t['MAXTIME'] = '최대 시간';
-t['ARCHIVE'] = '보관';
-t['SUMMARY'] = '요약';
-t['TROPAS'] = '부대';
-t['CHKSCRV'] = 'TBeyond 업데이트';
-t['ACTUALIZAR'] = '마을 정보 업데이트';
-t['VENTAS'] = '저장된 판매리스트';
-t['MAPSCAN'] = '지도 검색';
-t['BIC'] = '상단 메뉴 추가 아이콘 보이기';
-t['SAVE'] = '저장';
-t['AT2'] = '지원';
-t['AT3'] = '공격: 통상';
-t['AT4'] = '공격: 약탈';
-t['NBSA'] = '자동';
-t['NBSN'] = '보통 (작음)';
-t['NBSB'] = '큰 스크린 (큼)';
-t['NBHAX'] = '높이 자동 설정';
-t['NBHK'] = '기본 높이';
-t['NPCSAVETIME'] = '저장: ';
-t['TOTALTROOPS'] = '모든 마을 병력 총합';
-t['U.2'] = '종족';
-t['SELECTALLTROOPS'] = "부대 모두 선택";
-t['PARTY'] = "잔치";
-t['CPPERDAY'] = "문화점수/일";
-t['SLOT'] = "슬롯";
-t['TOTAL'] = "총합";
-t['SELECTSCOUT'] = "정찰병 선택";
-t['SELECTFAKE'] = "위장 공격";
-t['NOSCOUT2FAKE'] = "정찰병은 위장 공격을 위해 사용할 수 없습니다!";
-t['NOTROOP2FAKE'] = "위장 공격을 위해 사용할 수 있는 부대가 없습니다!";
-t['NOTROOP2SCOUT'] = "정찰을 위해 사용할 수 있는 부대가 없습니다!";
-t['NOTROOPS'] = "마을에 부대가 없습니다!";
-t['ALL'] = "모두";
-t['SH2'] = "색상 필드에 입력할 수 있는 값:<br>- green, red 혹은 orange 등의 영어 색상 단어.<br>- #004523 같은 HEX 색상 코드<br>- 빈 칸으로 두면 기본 색상 적용";
-t['SOREP'] = "원래의 보고서 형식으로 보이기(글쓰기용)";
-t['WSIMO1'] = "내부 (게임에서 제공)";
-t['WSIMO2'] = "외부 (kirilloid.ru 에서 제공)";
-t['U.3'] = '수도 이름<br>업데이트를 위해 프로필 페이지를 방문해 주세요';
-t['NONEWVER'] = "이미 최신 버젼이 설치되어 있습니다.";
-t['BVER'] = "베타 버젼이 설치되어 있습니다.";
-t['NVERAV'] = "새 버젼의 스크립트를 사용하실 수 있습니다.";
-t['UPDSCR'] = "지금 스크립트를 업그레이드 하시겠습니까?";
-t['CHECKUPDATE'] = "스크립트 업데이트를 확인하고 있습니다.<br> 기다려 주십시오...";
-t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "마을 당 평균 인구 수";
-t['AVPPP'] = "사용자 당 평균 인구 수";
-t['U.6'] = '수도의 좌표<br>업데이트를 위해 프로필 페이지를 방문해 주세요';
-t['MAX'] = '최대';
-t['TOTTRTR'] = '훈련 중인 병사 수';
-t['TB3SL'] = TB3O.shN + ' 설정';
-t['UPDALLV'] = '모든 마을 정보 갱신. <br>경고: 이 명령어 사용시 밴 당할 수 있으므로 주의해야 합니다!';
-t['LARGEMAP'] = '큰 지도';
-t['USETHEMPR'] = '비율';
-t['USETHEMEQ'] = '동일한 양';
-t['TOWNHALL'] = '마을회관';
-t['GSRVT'] = '게임 서버';
-t['ACCINFO'] = '결제 정보';
-t['NBO'] = '노트';
-t['MNUL'] = '왼쪽 메뉴';
-t['STAT'] = '통계';
-t['RESF'] = '자원 필드';
-t['VLC'] = '마을 중심';
-t['MAPO'] = '지도 옵션';
-t['COLO'] = '색상 옵션';
-t['DBGO'] = '디버그 옵션';
-t['HEROSMANSION'] = "영웅 저택";
-t['BLACKSMITH'] = '대장간';
-t['ARMOURY'] = '병기고';
-t['NOW'] = '지금';
-t['CLOSE'] = 'Close';
-t['USE'] = '사용';
-t['USETHEM1H'] = '1시간 생산량';
-t['OVERVIEW'] = '정보';
-t['FORUM'] = '포럼';
-t['ATTACKS'] = '전투 기록';
-t['NEWS'] = '소식';
-t['ADDCRTPAGE'] = '지금 페이지를 추가';
-t['SCRPURL'] = 'TBeyond 홈페이지';
-t['SPACER'] = '구분자 추가';
-t['MEREO'] = '메시지 & 보고서';
-t['ATTABLES'] = '부대 테이블';
-t['MTW'] = '낭비';
-t['MTX'] = '초과';
-t['MTC'] = '현재 운반양';
-t['ALFL'] = '외부 포럼에 연결<br>(빈 칸으로 두면 내부 포럼에 연결)';
-t['MTCL'] = '모두 초기화';
-t['CKSORT'] = '정렬';
-t['MIN'] = '최소';
-t['SVGL'] = '마을간 공유';
-t['VGL'] = '마을 목록';
-t['UPDATEPOP'] = '인구 업데이트';
-t['EDIT'] = '편집';
-t['NPCO'] = 'NPC 교역 옵션';
-t['NEWVILLAGEAV'] = '날짜/시간';
-t['TIMEUNTIL'] = '대기 시간';
-t['CENTERMAP'] = '중앙 지도';
-t['SENDTROOPS'] = '부대 보내기';
-t['PALACE'] = "궁전";
-t['RESIDENCE'] = "저택";
-t['ACADEMY'] = "연구소";
-t['TREASURY'] = "보물창고";
-t['UPGTB'] = "자원 필드/건물 업그레이드 테이블";
-t['RBTT'] = "자원 바";
-t['RESIDUE'] = '건축 명령 후 남게 될 예상 자원 ';
-t['RESOURCES'] = '예상 획득 자원';
-t['SH1'] = "수도 및 각 마을 좌표 자동 인식을 위해 프로필을 확인해 주세요<br>종족 자동 인식을 위해 병영을 지은 후 마을 중심을 열어 주세요";
-t['RESEND'] = "다시 보내기";
-t['WSI'] = "게임에서 제공하는 전투 시뮬레이터";
-t['TTT'] = "General troops/distance tooltips";
-break;
-case "my"://by Light@fei & dihaz06-47
-t['8'] = 'Persekutuan';
-t['SIM'] = 'Simulator Peperangan';
-t['QSURE'] = 'Adakah anda pasti?';
-t['LOSS'] = 'Kerugian';
-t['PROFIT'] = 'Keuntungan';
-t['EXTAV'] = 'Boleh dibesarkan';
-t['PLAYER'] = 'Pemain';
-t['VILLAGE'] = 'Kampung';
-t['POPULATION'] = 'Populasi';
-t['COORDS'] = 'Koordinat';
-t['MAPTBACTS'] = 'Aksi';
-t['SAVED'] = 'Disimpan';
-t['YOUNEED'] = 'Anda Perlu';
-t['TODAY'] = 'Hari ini';
-t['TOMORROW'] = 'Esok';
-t['DAYAFTERTOM'] = 'Lusa';
-t['MARKET'] = 'Pasar';
-t['BARRACKS'] = 'Berek';
-t['RAP'] = 'Titik Perhimpunan';
-t['STABLE'] = 'Kandang Kuda';
-t['WORKSHOP'] = 'Bengkel';
-t['SENDRES'] = 'Hantarkan Sumber-sumber';
-t['BUY'] = 'Beli';
-t['SELL'] = 'Tawar';
-t['SENDIGM'] = 'Hantar IGM';
-t['LISTO'] = 'Ada';
-t['ON'] = 'pada';
-t['AT'] = 'di';
-t['EFICIENCIA'] = 'Kecekapan';
-t['NEVER'] = 'Tidak pernah';
-t['ALDEAS'] = 'Kampung(-kampung)';
-t['TIEMPO'] = 'Masa';
-t['OFREZCO'] = 'Menawar';
-t['BUSCO'] = 'Mencari';
-t['TIPO'] = 'Jenis';
-t['DISPONIBLE'] = 'Hanya Ada';
-t['CUALQUIERA'] = 'Mana-mana';
-t['YES'] = 'Ya';
-t['NO'] = 'Tidak';
-t['LOGIN'] = 'Log Masuk';
-t['MARCADORES'] = 'Bookmark';
-t['ANYADIR'] = 'Tambah';
-t['UBU'] = 'URL Bookmark Baru';
-t['UBT'] = 'Teks Bookmark Baru';
-t['DEL'] = 'Padam';
-t['MAPA'] = 'Peta';
-t['MAXTIME'] = 'Masa Maksimum';
-t['ARCHIVE'] = 'Arkib';
-t['SUMMARY'] = 'Rumusan';
-t['TROPAS'] = 'Askar-askar';
-t['CHKSCRV'] = 'Kemaskini TBeyond';
-t['ACTUALIZAR'] = 'Kemaskini informasi kampung';
-t['VENTAS'] = 'Tawaran tersimpan';
-t['MAPSCAN'] = 'Imbaskan Peta';
-t['BIC'] = 'Tunjukkan lebih ikon';
-t['22'] = 'Tunjukkan blok nota';
-t['SAVE'] = 'Simpan';
-t['49'] = 'Aksi Titik perhimpunan';
-t['AT2'] = 'Bantuan';
-t['AT3'] = 'Serangan: Normal';
-t['AT4'] = 'Serangan: Serbuan';
-t['24'] = 'Saiz blok nota';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normal (kecil)';
-t['NBSB'] = 'Skrin besar (besar)';
-t['25'] = 'Ketinggian blok nota';
-t['NBHAX'] = 'Laras Tinggi Automatik';
-t['NBHK'] = 'Ketinggian Default';
-t['43'] = 'Tunjukkan nombor-nombor di pusat kampung';
-t['NPCSAVETIME'] = 'Jimat: ';
-t['38'] = 'Tunjukkan warna-warna tahap sumber';
-t['44'] = 'Tunjukkan warna-warna tahap bangunan';
-t['65'] = 'Warna naiktaraf ada<br>(Default = Kosong)';
-t['66'] = 'Warna tahap maksimum<br>(Default = Kosong)';
-t['67'] = 'Warna naiktaraf tak mungkin<br>(Default = Kosong)';
-t['68'] = 'Warna naiktaraf menggunakan NPC<br>(Default = Kosong)';
-t['TOTALTROOPS'] = 'Jumlah askar-askar dalam kampung';
-t['20'] = 'Tunjukkan bookmarks';
-t['U.2'] = 'Puak';
-t['1'] = "Server Travian v2.x";
-t['SELECTALLTROOPS'] = "Pilihkan semua askar";
-t['PARTY'] = "Perayaan";
-t['CPPERDAY'] = "MB/hari";
-t['SLOT'] = "Slot";
-t['TOTAL'] = "Jumlah";
-t['SELECTSCOUT'] = "Pilihkan peninjau";
-t['SELECTFAKE'] = "Pilihkan fake";
-t['NOSCOUT2FAKE'] = "Adalah mustahil menggunakan peninjau untuk serangan fake !";
-t['NOTROOP2FAKE'] = "Tiada askar untuk serangan fake!";
-t['NOTROOP2SCOUT'] = "Tiada unit peninjau !";
-t['NOTROOPS'] = "Tiada askar-askar didalam kampung !";
-t['ALL'] = "Semua";
-t['SH2'] = "Didalam ruang warna anda boleh memasuskkan:<br>- <b>green</b> or <b>red</b> or  <b>orange</b>, etc.<br>-  Kod warna HEX seperti<b>#004523</b><br>- Tinggalkan kosong untuk warna default";
-t['SOREP'] = "Tunjukkan laporan original (untuk dipost)";
-t['56'] = "Tunjukkan informasi jenis petak/oasis <br>semasa meletakkan cursor diatas peta";
-t['10'] = "Link simulator peperangan untuk digunakan:<br>(menu disebelah kiri)";
-t['WSIMO1'] = "Dalaman (disediakan oleh permainan)";
-t['WSIMO2'] = "Luaran (disediakan oleh kirilloid.ru)";
-t['27'] = "World Analyser untuk digunakan";
-t['28'] = "Tunjukkan link penganalisa statistik";
-t['NONEWVER'] = "Anda mempunyai versi yang terbaru";
-t['BVER'] = "Anda mempunyai versi beta";
-t['NVERAV'] = "A Terdapat versi skrip yang lebih baru";
-t['UPDSCR'] = "Kemaskini skrip sekarang ?";
-t['CHECKUPDATE'] = "Memeriksa untuk kemaskini skrip.<br>Sila tunggu...";
-t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "Populasi purata per kampung";
-t['AVPPP'] = "Populasi purata per pemain";
-t['37'] = "Tunjukkan jadual naiktaraf tapak sumber";
-t['41'] = "Tunjukkan jadual naiktaraf bangunan";
-t['48'] = "Jumlah mukasurat tawaran untuk dipreload<br>Semasa di 'Pasar => Mukasurat beli' <br>(Default = 1)";
-t['U.3'] = 'Namakan ibukota anda<br><b>Lawat Profile anda untuk kemaskini</b>';
-t['U.6'] = 'Koordinat ibukota<br><b>Lawat Profile anda untuk kemaskini</b>';
-t['MAX'] = 'Maksimum';
-t['TOTTRTR'] = 'Jumlah askar sedang dilatih';
-t['57'] = 'Tunjukkan jarak & masa';
-t['TB3SL'] = 'Setup ' + TB3O.shN;
-t['UPDALLV'] = 'Kemaskini semua kampung.  GUNAKAN DENGAN BERHATI-HATI KERANA INI BOLEH MEMBAWA KEPADA PEMBEKUAN AKAUN ANDA !';
-t['9'] = "Tunjukkan link tambahan di menu sebelah kiri<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Peta Besar';
-t['USETHEMPR'] = 'Guna (Dalam Peratus)';
-t['USETHEMEQ'] = 'Guna (Samarata)';
-t['TOWNHALL'] = 'Dewan Perbandaran';
-t['GSRVT'] = 'Server dunia permainan';
-t['ACCINFO'] = 'Informasi Akaun';
-t['NBO'] = 'Tiadablok';
-t['MNUL'] = 'Menu di sebelah kiri';
-t['STAT'] = 'Statistik';
-t['RESF'] = 'Tapak sumber';
-t['VLC'] = 'Pusat Kampung';
-t['MAPO'] = 'Pilihan peta';
-t['COLO'] = 'Pilihan warna';
-t['DBGO'] = 'Pilihan debug';
-t['4'] = 'Pasar';
-t['5'] = 'Titik perhimpunan/Berek/Bengkel/Kandang kuda';
-t['6'] = "Dewan perbandaran/Rumah agam wira/Kedai perisai/Kedai senjata";
-t['HEROSMANSION'] = "Rumah Agam Wira";
-t['BLACKSMITH'] = 'Kedai Senjata';
-t['ARMOURY'] = 'Kedai Perisai';
-t['NOW'] = 'Sekarang';
-t['CLOSE'] = 'Tutup';
-t['USE'] = 'Guna';
-t['USETHEM1H'] = 'Guna (Produksi sejam)';
-t['OVERVIEW'] = 'Keseluruhan';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Serangan';
-t['NEWS'] = 'Berita';
-t['ADDCRTPAGE'] = 'Tambahkan mukasurat sekarang';
-t['SCRPURL'] = 'Mukasurat TBeyond';
-t['50'] = 'Bilangan peninjau untuk fungsi<br>"Pilihkan peninjau"';
-t['SPACER'] = 'Penambah jarak';
-t['53'] = 'Tunjukkan informasi askar-askar di tooltips';
-t['MEREO'] = 'Mesej & Laporan';
-t['59'] = 'Bilangan mukasurat mesej/laporan untuk dipreload<br>(Default = 1)';
-t['ATTABLES'] = 'Jadual askar-askar';
-t['MTW'] = 'Dibazirkan';
-t['MTX'] = 'Melebihi';
-t['MTC'] = 'Kapasiti sekarang';
-t['ALFL'] = 'Linkkan ke forum luaran<br>(Tinggalkan kosong untuk forum dalaman)';
-t['82.L'] = 'Kunci bookmark (Sorokkan ikon padam, keatas, kebawah)';
-t['MTCL'] = 'Padamkan semua';
-t['82.U'] = 'Buka kunci bookmark (Tunjukkan ikon padam, keatas, kebawah)';
-t['CKSORT'] = 'Klikkan untuk membahagi';
-t['MIN'] = 'Minimum';
-t['SVGL'] = 'Kongsikan antara kampung';
-t['VGL'] = 'List kampung-kampung';
-t['12'] = "Tunjukkan link 'dorf1.php' and 'dorf2.php'";
-t['UPDATEPOP'] = 'Kemaskini populasi';
-t['54'] = 'Tunjukkan jarak dan masa kepada sesuatu kampung di tooltips';
-t['EDIT'] = 'Edit';
-t['NPCO'] = 'Pilihan Pembantu NPC';
-t['26'] = 'Tunjukkan pengiraan/link Pembantu NPC';
-t['58'] = 'Tunjukkan jadual pemain/kampung/oasis berpenduduk';
-t['NEWVILLAGEAV'] = 'Tarikh/Masa';
-t['TIMEUNTIL'] = 'Masa untuk menunggu';
-t['61'] = 'Tunjukkan jadual "Padam semua" di mukasurat laporan';
-t['62'] = 'Tunjukkan ikon "Hantar IGM" kepada saya juga';
-t['CENTERMAP'] = 'Ketengahkan peta untuk kampung ini';
-t['13'] = 'Tunjukkan ikon "Ketengahkan peta untuk kampung ini" ';
-t['SENDTROOPS'] = 'Hantarkan askar-askar';
-t['64'] = 'Tunjukkan detail di dalam Statistic Laporan';
-t['7'] = "Istana/Residen/Akademi/Perbendaharaan";
-t['PALACE'] = "Istana";
-t['RESIDENCE'] = "Residen";
-t['ACADEMY'] = "Akademi";
-t['TREASURY'] = "Perbendaharaan";
-t['45'] = "Tunjukkan level berkedip untuk bangunan yang sedang dinaiktaraf";
-t['14'] = "Tunjukkan ikon 'Hantar askar-askar/Hantar sumber-sumber' didalam list kampung";
-t['34'] = "Tunjukkan informasi MB/Hari di dalam jadual naiktaraf";
-t['UPGTB'] = " Jadual naiktaraf Tapak sumber/Bangunan";
-t['35'] = "Tunjukkan penggunaan makanan didalam jadual naik taraf";
-t['16'] = "Tunjukkan produksi tanaman efektif di dalam list kampung";
-t['39'] = "Tunjukkan jadual bar sumber";
-t['RBTT'] = "Bar Sumber";
-t['60'] = 'Tunjukkan link untuk membuka mesej sebagai pop-up';
-break;
-case "lv":
-t['8'] = 'Alianse';
-t['SIM'] = 'Kaujas simulātors';
-t['QSURE'] = 'Vai esi pārliecināts?';
-t['LOSS'] = 'Zaudējumi';
-t['PROFIT'] = 'Guvums';
-t['EXTAV'] = 'Celšana pieejama';
-t['PLAYER'] = 'Spēlētājs';
-t['VILLAGE'] = 'Ciems';
-t['POPULATION'] = 'Populācija';
-t['COORDS'] = 'Koordinātes';
-t['MAPTBACTS'] = 'Notikumi';
-t['SAVED'] = 'Saglabāts';
-t['YOUNEED'] = 'Nepieciešams';
-t['TODAY'] = 'šodien';
-t['TOMORROW'] = 'rītdien';
-t['DAYAFTERTOM'] = 'aizparīt';
-t['MARKET'] = 'Tirgus';
-t['BARRACKS'] = 'Kazarmas';
-t['RAP'] = 'Mītiņa vieta';
-t['STABLE'] = 'Stallis';
-t['WORKSHOP'] = 'Darbnīca';
-t['SENDRES'] = 'Sūtīt resursus';
-t['BUY'] = 'Pirkt';
-t['SELL'] = 'Pārdot';
-t['SENDIGM'] = 'Sūtīt ziņu';
-t['LISTO'] = 'Pieejams';
-t['ON'] = 'ap';
-t['AT'] = 'ap';
-t['EFICIENCIA'] = 'Lietderība';
-t['NEVER'] = 'Ne tagad';
-t['ALDEAS'] = 'Ciemi';
-t['TIEMPO'] = 'Laiks';
-t['OFREZCO'] = 'Piedāvājumi';
-t['BUSCO'] = 'Meklē';
-t['TIPO'] = 'Tips';
-t['DISPONIBLE'] = 'Tikai pieejamos';
-t['CUALQUIERA'] = 'Jebkurš';
-t['YES'] = 'Jā';
-t['NO'] = 'Nē';
-t['LOGIN'] = 'Ieiet';
-t['MARCADORES'] = 'Saglabātās saites';
-t['ANYADIR'] = 'Pievienot';
-t['UBU'] = 'Jaunās saites URL';
-t['UBT'] = 'Jaunās saites nosaukums';
-t['DEL'] = 'Dzēst';
-t['MAPA'] = 'Karte';
-t['MAXTIME'] = 'Maksimālais laiks';
-t['ARCHIVE'] = 'Arhīvs';
-t['SUMMARY'] = 'Pārskats';
-t['TROPAS'] = 'Karavīri';
-t['CHKSCRV'] = 'Atjaunot versiju';
-t['ACTUALIZAR'] = 'Atjaunot ciema informāciju';
-t['VENTAS'] = 'Saglabātie piedāvājumi';
-t['MAPSCAN'] = 'Meklēt kartē';
-t['BIC'] = 'Rādīt papildus ikonas';
-t['22'] = 'Rādīt pierakstu blociņu';
-t['SAVE'] = 'Saglabāt';
-t['49'] = 'Mītiņa vietas noklusētā darbība';
-t['AT2'] = 'Papildspēki';
-t['AT3'] = 'Uzbrukums: Parasts';
-t['AT4'] = 'Uzbrukums: Iebrukums';
-t['24'] = 'Piezīmju blociņa izmērs';
-t['NBSA'] = 'Automātisks';
-t['NBSN'] = 'Normāls (mazais)';
-t['NBSB'] = 'Platiem ekrāniem (lielais)';
-t['25'] = 'Pierakstu blociņa augstums';
-t['NBHAX'] = 'Automātiski izstiepts augstums';
-t['NBHK'] = 'Noklusētais augstums';
-t['43'] = 'Numurus rādīt centrētus';
-t['NPCSAVETIME'] = 'Saglabāt:';
-t['38'] = 'Rādīt resursu līmeņu krāsas';
-t['44'] = 'Rādīt celtņu līmeņu krāsas';
-t['65'] = 'Krāsa: Iespējams uzlabot<br>(Noklusētais = Tukšs)';
-t['66'] = 'Krāsa: Maksimālā līmeņa krāsa l<br>(Noklusētais = Tukšs)';
-t['67'] = 'Krāsa: Līmeni nevar uzlabot<br>( Noklusētais = Tukšs)';
-t['68'] = 'Krāsa: Uzlabošana caur NPC<br>( Noklusētais = Tukšs)';
-t['TOTALTROOPS'] = 'Kopējais karaspēka skaits';
-t['20'] = 'Rādīt saglabātās saites';
-t['U.2'] = 'Rase';
-t['1'] = "Travian v2.x server";
-t['SELECTALLTROOPS'] = "Izvēlēties visu karaspēku";
-t['PARTY'] = "Svinības";
-t['CPPERDAY'] = "Kultūras punkti/Dienā";
-t['SLOT'] = "Vieta";
-t['TOTAL'] = "Kopā";
-t['SELECTSCOUT'] = "Izvēlieties izlūku";
-t['SELECTFAKE'] = "Izvēlieties ne-īsto";
-t['NOSCOUT2FAKE'] = "Nav iespējams izmantot skautus kā māņu uzbrukumu!";
-t['NOTROOP2FAKE'] = "Jums nav karaspēka, lai izpildītu māņu uzbrukumu!";
-t['NOTROOP2SCOUT'] = "Nav karspēka, lai veiktu izspiegošanu !";
-t['NOTROOPS'] = "Jums šajā ciema nav karaspēka!";
-t['ALL'] = "Visi";
-t['SH2'] = "Krāsu laukumos varat ievadīt šādas krāsas:<br>- <b>green</b> vai <b>red</b> vai  <b>orange</b>, utt.<br>- kā arī krāsu kodus <b>#004523</b><br>- vai arī atstājat tukšu, lai izmantotu noklusētās krāsas";
-t['SOREP'] = "Rādīt oriģinālo ziņojumu (priekš kopēšanas utt)";
-t['56'] = "Rādīt sūnas tipu/oāzes informācijuShow <br>while kamēr peles kursors ir uz kartes";
-t['10'] = "Kaujas simulatora saite:<br>(kreisā izvēlnes josla)";
-t['WSIMO1'] = "Iekšējais (nodrošinājusi spēle)";
-t['WSIMO2'] = "Ārējais (nodršinājis kirilloid.ru)";
-t['27'] = "Pasaules analīze";
-t['28'] = "Rādīt analīzes ikonu pie saitēm";
-t['NONEWVER'] = "Jūs jau lietojat pēdējo " + TB3O.shN + " versiju";
-t['BVER'] = "Jūs varat lietot arī Beta versiju";
-t['NVERAV'] = "Jaunākā skripta versija ir pieejama";
-t['UPDSCR'] = "Atjaunot skriptu tagad?";
-t['CHECKUPDATE'] = "Meklēju skripta jauninājumu.<br>Lūdzu uzgaidiet...";
-t['CROPFINDER'] = "Labības lauku meklētajs";
-t['AVPPV'] = "Vidējā populācija pret ciemu";
-t['AVPPP'] = "Vidējā populācija pret spēlētāju";
-t['37'] = "Rādīt resursu līmeņu tabulu";
-t['41'] = "Rādīt celtņu līmeņu tabulu";
-t['69'] = "Konsules Log līmenis<br>TIKAI PRIEKŠ PROGRAMĒTĀJIEM  VAI KĻŪDU NOVĒRŠANAS<br>(Noklusētais = 0)";
-t['48'] = "Piedāvājumu lapu skaits <br>kamēr ‘Tirgus => Pirkt' page<br>(Noklusētais = 1)";
-t['U.3'] = 'Galvaspilsētas nosaukums<br><b>Apmeklē savu profilu</b>';
-t['U.6'] = 'Galvaspilsētas koordinātes<br><b> Apmeklē savu profilu</b>';
-t['MAX'] = 'Maksimālais';
-t['TOTTRTR'] = 'Kopējais karaspēka skaits, kas tiek trenēts';
-t['57'] = 'Rādīt distanci un laiku';
-t['TB3SL'] = TB3O.shN + ' opcijas';
-t['UPDALLV'] = 'Uzlabot visus ciemus. ŠO LABĀK NEIZMANTOT, JO TAS VAR NOVEST PIE KONTA BLOĶĒŠANAS';
-t['9'] = "Rādīt papildus saites kreisajā izvēlnes joslā<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Lielā karte';
-t['USETHEMPR'] = 'Lietot tos (proporcionāli)';
-t['USETHEMEQ'] = 'Lietot tos (vienlīdzīgi)';
-t['TOWNHALL'] = 'Rātsnams';
-t['GSRVT'] = 'Spēles serveris';
-t['NBO'] = 'Pierakstu blociņs';
-t['MNUL'] = 'Kreisās puses izvēles josla';
-t['STAT'] = 'Statistika';
-t['RESF'] = 'Resursu lauki';
-t['VLC'] = 'Ciema centrs';
-t['MAPO'] = 'Kastes iestatījumi';
-t['COLO'] = 'Krāsu iestatījumi';
-t['DBGO'] = 'Kļūdu ziņojumu iestatījumi';
-t['4'] = 'Tirgus';
-t['5'] = 'Mītiņa vieta/Kazarmas/Darbnīca/Stallis';
-t['6'] = "Rātsnams/Varoņu Savrupmāja/Ieroču kaltuve/Bruņu kaltuve";
-t['HEROSMANSION'] = " Varoņu Savrupmāja";
-t['BLACKSMITH'] =  ' Ieroču kaltuve ';
-t['ARMOURY'] = 'Bruņu kaltuve ';
-t['NOW'] = 'Tagad';
-t['CLOSE'] = 'Aizvērt';
-t['USE'] = 'Lietot';
-t['USETHEM1H'] = 'Lietot tos (1 stundas produkcija)';
-t['OVERVIEW'] = 'Pārskats';
-t['FORUM'] = 'Forums';
-t['ATTACKS'] = 'Uzbrukumi';
-t['NEWS'] = 'Ziņojumi';
-t['ADDCRTPAGE'] = 'Pievienot atvērto lapu';
-t['SCRPURL'] = 'TBeyond mājaslapa';
-t['50'] = 'Skautu skaits priekš <br>"Izvēlēties skautus" funkcijas';
-t['SPACER'] = 'Starp';
-t['53'] = 'Rādīt karaspēka informāciju Tooltip’os';
-t['MEREO'] = 'Saņemtās ziņas un ziņojumi';
-t['59'] = 'Ziņojumu skaits <br>(Noklusētais = 1)';
-t['ATTABLES'] = 'Karaspēka saraksti';
-t['MTW'] = 'Izniekots';
-t['MTX'] = 'Pārmērīgs';
-t['MTC'] = 'Pašreizējā krava';
-t['ALFL'] = 'Saite uz ārējo Travian forumu<br>(atstāj tukšu, lai saite būtu uz starptautisko forumu)';
-t['82.L'] = 'Slēgt saites (Slēpt dzēst, pārvietot uz augšu, uz leju ikonas)';
-t['MTCL'] = 'Nodzēst visu';
-t['82.U'] = 'Atslēgt saites ( Rādīt dzēst, pārvietot uz augšu, uz leju ikonas)';
-t['12'] = "Rādīt 'dorf1.php' un 'dorf2.php' saites";
-t['VGL'] = 'Ciemu saraksts';
-break;
-case "jp"://by Jackie Jack & baan
-t['8'] = '同盟';
-t['SIM'] = '戦闘シミュレータ';
-t['QSURE'] = 'ホントに良いですか？';
-t['LOSS'] = '損失';
-t['PROFIT'] = '利益';
-t['EXTAV'] = '準備完了';
-t['PLAYER'] = 'プレイヤー';
-t['VILLAGE'] = '村名';
-t['POPULATION'] = '人口';
-t['COORDS'] = '座標';
-t['MAPTBACTS'] = 'アクション';
-t['SAVED'] = '保存しました';
-t['YOUNEED'] = '不足';
-t['TODAY'] = '今日';
-t['TOMORROW'] = '明日';
-t['DAYAFTERTOM'] = '明後日';
-t['MARKET'] = '市場';
-t['BARRACKS'] = '兵舎';
-t['RAP'] = '集兵所';
-t['STABLE'] = '馬舎';
-t['WORKSHOP'] = '作業場';
-t['SENDRES'] = '資源の送付';
-t['BUY'] = '売方';
-t['SELL'] = '買方';
-t['SENDIGM'] = 'メッセージの送付';
-t['LISTO'] = '準備完了予定';
-t['ON'] = 'on';
-t['AT'] = 'at';
-t['EFICIENCIA'] = '効率';
-t['NEVER'] = '容量不足';
-t['ALDEAS'] = '村';
-t['TIEMPO'] = '時間';
-t['OFREZCO'] = '売方';
-t['BUSCO'] = '買方';
-t['TIPO'] = 'タイプ';
-t['CUALQUIERA'] = '全て';
-t['LARGEMAP'] = '拡張マップ';
-t['DISPONIBLE'] = '取引可能';
-t['YES'] = 'はい';
-t['NO'] = 'いいえ';
-t['LOGIN'] = 'ログイン';
-t['MARCADORES'] = 'ブックマーク';
-t['ANYADIR'] = 'ブックマークへ追加';
-t['UBU'] = '追加するブックマークのURL';
-t['UBT'] = '追加するブックマークのタイトル';
-t['DEL'] = '削除';
-t['MAPA'] = 'TravMap';
-t['MAXTIME'] = '最大時間';
-t['CHKSCRV'] = '最新バージョンのチェック';
-t['TROPAS'] = '兵士';
-t['ARCHIVE'] = 'アーカイブ';
-t['SUMMARY'] = '要約';
-t['NVERAV'] = '最新バージョン';
-t['UPDSCR'] = "スクリプトをアップデートしますか?";
-t['CHECKUPDATE'] = "アップデートが無いか確認しています...";
-t['AVPPV'] = "村当たりの平均人口";
-t['AVPPP'] = "プレイヤー当たりの平均人口";
-t['37'] = "資源タイルのアップグレードテーブルを表示する";
-t['69'] = "コンソールログレベル<br>プログラマーやデバッグのために<br>(Default = 0)";
-t['48'] = "トレードページの同時に読み込むページ数<br>(Default = 1)";
-t['U.3'] = 'あなたの村の名前<br><b>Visit your Profile for an update</b>';
-t['U.6'] = 'あなたの村の座標<br><b>Visit your Profile for an update</b>';
-t['MAX'] = '最大';
-t['57'] = '距離と時間を表示する';
-t['TB3SL'] = TB3O.shN + 'をセットアップ';
-t['9'] = "左側のメニューに追加のリンクを表示<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = '地図を大きくする';
-t['TOWNHALL'] = '集会所';
-t['GSRVT'] = 'ゲームサーバー';
-t['ACCINFO'] = 'アカウント情報';
-t['NBO'] = 'ノートブック';
-t['MNUL'] = '左メニューのリンク設定';
-t['STAT'] = '統計';
-t['RESF'] = 'リソースフィールド';
-t['MAPO'] = '地図オプション';
-t['COLO'] = '文字色オプション';
-t['DBGO'] = 'デバッグオプション';
-t['4'] = '市場';
-t['5'] = '集兵所/兵舎/作業場/馬舎';
-t['6'] = "集会所/英雄の館/防具工場/鍛冶場";
-t['HEROSMANSION'] = "英雄の館";
-t['BLACKSMITH'] = '鍛冶場';
-t['ARMOURY'] = '防具工場';
-t['CLOSE'] = '閉じる';
-t['ADDCRTPAGE'] = 'このページをブックマークに追加する';
-t['SPACER'] = 'スペーサー';
-t['MEREO'] = 'メッセージ・レポート';
-t['MTCL'] = 'すべてを削除';
-t['82.L'] = 'ブックマークのロック (削除,編集,上移動,下移動アイコンを隠す)';
-t['82.U'] = 'ブックマークのアンロック (削除,編集,上移動,下移動アイコンの表示)';
-t['BIC'] = '拡張アイコンを表示する';
-t['20'] = 'ブックマークを表示する';
-t['UPDATEPOP'] = '最新の情報に更新';
-t['OVERVIEW'] = '概要';
-t['FORUM'] = 'フォーラム';
-t['ATTACKS'] = '戦闘';
-t['NEWS'] = 'ニュース';
-t['AT2'] = '援兵';
-t['AT3'] = '通常攻撃';
-t['AT4'] = '奇襲';
-t['MAPSCAN'] = 'マップをスキャン';
-t['ALFL'] = '外部のフォーラムへのリンク<br>(内部フォーラムを使う場合は書かないでください。)';
-t['22'] = 'メモ帳を表示する';
-t['24'] = 'メモ帳のサイズ';
-t['25'] = 'メモ帳の高さ';
-t['10'] = "戦闘シミュレータリンク設定<br>(メニュー左)";
-t['28'] = "analyserへのリンクを表示";
-t['27'] = "World Analyserの設定";
-t['38'] = '色でリソースのレベルを表示';
-t['43'] = 'センターの数字を表示';
-t['44'] = '色で建物のレベルを表示';
-t['56'] = "グリッドのタイプを表示/オアシスインフォメーション";
-t['VLC'] = '村の中心';
-t['41'] = "建物のアップグレードテーブルを表示する";
-t['59'] = 'レポートページの同時に読み込むページ数<br>(Default = 1)';
-t['NONEWVER'] = "あなたは最新バージョンを持っています。";
-t['MTC'] = '総輸送量';
-t['MTW'] = '余剰輸送量';
-t['SOREP'] = "オリジナルレポートを見る";
-t['EDIT'] = '編集';
-t['MTX'] = '不足輸送量';
-t['VGL'] = '村のリスト';
-t['TOTALTROOPS'] = '全村の兵士';
-t['SELECTALLTROOPS'] = "すべての兵士を選択";
-t['SELECTSCOUT'] = "スカウトを選択";
-t['SELECTFAKE'] = "フェイクを選択";
-t['NPCSAVETIME'] = '時間を節約:';
-t['SAVE'] = '保存';
-t['NOTROOP2SCOUT'] = "スカウトが居ません!";
-t['SVGL'] = '全村で共有する';
-t['49'] = '集兵所の基本アクション';
-t['50'] = 'スカウトを選んだ際、選択する人数';
-t['53'] = '兵士アイコンを選んだ際、詳細情報を表示';
-t['54'] = '村の名前を選んだ際、距離・時間を表示する';
-t['NPCO'] = 'NPCトレードオプション';
-t['26'] = 'NPCトレードへのリンクの表示';
-t['USETHEM1H'] = '1時間生産量';
-t['NEWVILLAGEAV'] = '新しい村';
-t['58'] = 'プレイヤーリストの表示(村・オアシス)';
-t['USETHEMEQ'] = '均等';
-t['USETHEMPR'] = '比例';
-t['NEWVILLAGEAV'] = '日付/時刻';
-t['TIMEUNTIL'] = '待ち時間';
-t['61'] = 'レポートページに「全て削除」ボタンを追加';
-t['CENTERMAP'] = '村を中心にMAP表示';
-t['13'] = '「村を中心にマップを表示」アイコンの追加';
-t['SENDTROOPS'] = '兵士を送る';
-t['7'] = "宮殿/官邸/学院/金庫";
-t['PALACE'] = "宮殿";
-t['RESIDENCE'] = "官邸";
-t['ACADEMY'] = "学院";
-t['TREASURY'] = "金庫";
-t['45'] = "アップグレードを行っている建物のLVを点滅表示";
-t['14'] = "村の一覧に「兵士・資源を送る」アイコンの追加";
-t['34'] = "アップグレードテーブルにCPの生産量の表示";
-t['UPGTB'] = "アップグレードテーブル";
-t['35'] = "アップグレードテーブルに穀物消費量を表示";
-t['16'] = "村の一覧に穀物生産量を表示";
-t['39'] = "リソースバーを追加する";
-t['40'] = "リソースバーテーブルをフローティングウィンドウ化する";
-t['21'] = "ブックマークをフローティングウィンドウ化する";
-t['23'] = "ノートブックををフローティングウィンドウ化する";
-t['64'] = '戦闘レポートの統計の詳細を表示する';
-t['17'] = "村の一覧に人口を表示";
-t['29'] = 'Map Analyser の設定';
-t['30'] = 'ユーザー名にMAPへのリンクアイコンを追加';
-t['31'] = '同盟名にMAPへのリンクアイコンを追加';
-t['60'] = 'ポップアップとしてメッセージを表示するアイコンの追加';
-t['63'] = '戦闘レポートの統計を表示する';
-t['18'] = '村のリストを2列にしてフローティングウィンドウ化する';
-t['60'] = 'メッセージ/レポートをポップアップで表示するリンクの追加';
-t['42'] = 'アップグレードテーブルを名前順に表示';
-t['19'] = '村のリストに建設している建物の情報を表示';
-t['32'] = 'サーチバーを追加';
-t['3'] = 'ファランクス・レジョネアをT3.1として計算する<br>(for mixed T3.1 & T3.5 servers)jp1～jp3';
-t['33'] = "サーチバーをフローティングウィンドウ化する";
-t['36'] = "アップグレード/トレーニングテーブルの詳細な計算を表示";
-t['RESIDUE'] = '実行後';
-t['RESOURCES'] = '実行可能時';
-t['2'] = '広告バナーを削除し、サーバ時間の位置を変更';
-t['12'] = "村の概観・村の中心のリンクを表示";
-t['15'] = "村のリストに資源(木・粘土・鉄)の生産量を追加";
-t['46'] = "輸送中の物資の詳細を表示";
-t['ATTABLES'] = '配備一覧'; 
-break;
-case "sk"://by NeWbie (a.k.a. Matthew-PoP), kupony
-t['1'] = "Travian v2.x server";
-t['2'] = 'Vymazať reklamné bannery';
-t['3'] = 'Vypočitať kapacitu vojakov T3.1 Legionárov & Falangov<br>(pre mixované T3.1 & T3.5 servery)';
-t['4'] = 'Trhovisko';
-t['5'] = 'Zhromaždisko/Kasárne/Dielňa/Stájňa';
-t['6'] = "Radnica/Hrdinský dvor/Výzbroj/Kováč";
-t['7'] = "Palác/Rezidencia/Akadémia/Pokladnica";
-t['8'] = 'Aliancia';
-t['9'] = "Ukáž prídavné linky v ľavom menu<br>(Traviantoolbox, World Analyser, Travilog, Mapu, atď.)";
-t['10'] = "Link na bojový simulátor:<br>(ľavé menu)";
-t['11'] = "Link na poslanie spravodajských správ";
-t['12'] = "Ukáž 'dorf1.php' a 'dorf2.php' linky";
-t['13'] = 'Ukáž ikonu" vycentruj mapu na dedinu ';
-t['14'] = "Ukáž 'Poslať vojakov/Poslať suroviny' ikonky v zozname dedín";
-t['15'] = "Ukáž produkciu drevo, hliny, železo v zozname dedín";
-t['16'] = "Ukáž produkciu obilia v zozname dedín";
-t['17'] = "Zobraziť populaciu v zozname dedín";
-t['18'] = 'Ukáž dalšie 2 stĺpy zoznamu dedín posuvne ';
-t['19'] = 'Ukáž informácie o budovách vo výstavbe a a pohybe jednotie<br>v zozname dedín';
-t['20'] = 'Ukáž záložky';
-t['21'] = "Zobraziť 'záložky' ako posuvne okno";
-t['22'] = "Zobraziť ikony 'poslať jednotky/suroviny' v zoznamu dediny";
-t['23'] = "Zobraziť 'poznámkový blok' ako posuvne okno";
-t['24'] = "Zobraziť produkciu obilia v zozname dedine";
-t['25'] = 'Výška poznamkového bloku';
-t['26'] = 'Ukáž kalkulačku/linky NPC asistenta';
-t['27'] = "Analyzátor";
-t['28'] = "Ukaž link na analyzátor ";
-t['29'] = 'Mapy k použitiu';
-t['30'] = 'Zobraziť odkazy na mapu pre hráča';
-t['31'] = 'Zobraziť odkazy na mapu pre alianciu';
-t['32'] = "Ukáž 'Tabuľku vyhľadavanie'";
-t['33'] = "Ukáž 'Tabuľku vyhľadavanie' ako posuvne okno";
-t['34'] = "Ukáž KB/deň v tabuľkách upgradu";
-t['35'] = "Ukáž spotrebu obilia v upgrade tabuľkách";
-t['36'] = "Ukáž výpočet 'Do/Zostáva' vupgrade/trénovacích tabuľká";
-t['37'] = "Ukáž tabuľku pre upgrade surovinových poli";
-t['38'] = 'Ukáž úroveň surovinových polí farebne';
-t['39'] = "Ukáž 'Tabuľku surovin'";
-t['40'] = "Zobraziť 'Tabuľku surovin' ako posuvne okno";
-t['41'] = "Ukáž tabuľku pre upgrade budov";
-t['42'] = "Zobraziť KB/den v tabuľke stavieb";
-t['43'] = "Zobraziť spotrebu obilia v tabuľke stavieb";
-t['44'] = 'Ukáž úroveň budov farebne';
-t['45'] = "Ukázať blikajúc budovy ktoré sa upgradujú?";
-t['46'] = "Ukáž rozširujúce informácie pri každom príchode obchodníka";
-t['47'] = "Ukáž posledný transport obchodníkom";
-t['48'] = "Počet kontrolovaných stránok na trhovovisku => Nákupných stránok<br>(Prednastavené = 1)";
-t['49'] = 'Prednastavená akcia zhromaždištia';
-t['50'] = 'Niesu špehovia<br>"Vyberte funkciu špeha';
-t['51'] = "Ukáž posledný útok";
-t['52'] = "Ukáž/použi súradnice posledného útoku";
-t['53'] = 'Ukáž informácie o vojakoch v bublinách';
-t['54'] = 'Ukáž zdialenosť a čas od dediny v bublinách';
-t['55'] = "Vo vojnovom simulátory automatcky doplň";
-t['56'] = "Ukaž typ bunky/oázy info<br>keď chodiš myšou po mape";
-t['57'] = 'Ukáž zdialenosť a čas';
-t['58'] = 'Ukáž tabuľku s hráčmy/dedinamy/okupovaými oázami';
-t['59'] = 'Počet správ/hlásení stránka na preload<br>(Prednastavené = 1)';
-t['60'] = 'Ukáž link na otvorenie správy v pop-up';
-t['61'] = 'Ukáž "Vymazať všetký" tabuľky na stránke s hláseniami';
-t['62'] = 'Ukáž " v pošli správu" ikonu aj pre mňa';
-t['63'] = 'Ukáž  rozšírené Hlásenie vojny';
-t['64'] = 'Ukáž detaily v štatistikách hlásení';
-t['65'] = 'Farba, upgradu<br>(Prednastavené = Prázdne)';
-t['66'] = 'Farba, maximálnej úrovne<br>(Prednastavené = Prázdne)';
-t['67'] = 'Farba, nemožného upgradu<br>(Prednastavené = Prázdne)';
-t['68'] = 'Farba, upgradu cez NPC<br>(Prednastavené = Prázdne)';
-t['69'] = "Úroveň konzoly. Len pre programátorov alebo na odstránenie chýb.<br>(Prednastavené = 0)";
-//no t items [70..79] & [80..83]
-//t['80'] = t['53'] and t['81'] = t['54'] - both will be set after switchlanguage()
-t['82.L'] = 'Zamkni záložku (Skry vymaž, posuň hore/dole ikony)';
-t['82.U'] = 'Odomkni záložky (Ukáž vymaž, posuň hore/dole ikony)';
-t['85'] = "Ukáž ikonky 'Poslať jednotky/suroviny'";
-t['87'] = "Zapamätať si 1x/2x/3x nastavenia obchodu (pokiaľ je dostupne)";
-t['SIM'] = 'Bojový simulátor';
-//setup end
-//user info
-t['U.2'] = 'Kmeň';
-t['U.3'] = 'Meno tvojej hlavnej dediny<br>Pozry si svoj profil pre opravu';
-t['U.6'] = 'Súradnice hlavnej dediny.<br>Pozri svôj profil';
-t['SIM'] = 'Bojový simulátor';
-t['QSURE'] = 'Naozaj?';
-t['LOSS'] = 'Strata';
-t['PROFIT'] = 'Zisk';
-t['EXTAV'] = 'Môžeš stavať';
-t['PLAYER'] = 'Hráč;';
-t['VILLAGE'] = 'Dedina';
-t['POPULATION'] = 'Populácia';
-t['COORDS'] = 'Súradnice';
-t['MAPTBACTS'] = 'Akcie';
-t['SAVED'] = 'Uložené';
-t['YOUNEED'] = 'Potrebuješ';
-t['TODAY'] = 'dnes';
-t['TOMORROW'] = 'zajtra';
-t['DAYAFTERTOM'] = 'pozajtra';
-t['MARKET'] = 'Trh';
-t['BARRACKS'] = 'Kasárne';
-t['RAP'] = 'Zhromaždište';
-t['STABLE'] = 'Stajňa';
-t['WORKSHOP'] = 'Dielňa';
-t['SENDRES'] = 'Pošli suroviny';
-t['BUY'] = 'Kúpiť';
-t['SELL'] = 'Predať';
-t['SENDIGM'] = 'Pošli správu';
-t['LISTO'] = 'Môžeš stavať';
-t['ON'] = 'Dňa';
-t['AT'] = 'o';
-t['EFICIENCIA'] = 'Efektivnosť';
-t['NEVER'] = 'Nikdy';
-t['ALDEAS'] = 'Počet dedín';
-t['TIEMPO'] = 'Čas';
-t['OFREZCO'] = 'Ponuka';
-t['BUSCO'] = 'Vyhľadať';
-t['TIPO'] = 'Typ';
-t['DISPONIBLE'] = 'Len dostupné';
-t['CUALQUIERA'] = 'Hociaká';
-t['YES'] = 'ÁNO';
-t['NO'] = 'NIE';
-t['LOGIN'] = 'Prihlásiť';
-t['MARCADORES'] = 'Záložka';
-t['ANYADIR'] = 'Pridať;';
-t['UBU'] = 'Url adresa';
-t['UBT'] = 'Názov záložky';
-t['DEL'] = 'Vymazať;';
-t['MAPA'] = 'Mapa';
-t['MAXTIME'] = 'Maximálny čas';
-t['ARCHIVE'] = 'Archivovať';
-t['SUMMARY'] = 'Hlásenie';
-t['TROPAS'] = 'Vojsko';
-t['CHKSCRV'] = 'Aktualizuj';
-t['ACTUALIZAR'] = 'Aktualizovať informácie o dedine';
-t['VENTAS'] = 'Uložiť ponuky';
-t['MAPSCAN'] = 'Skenovať mapu';
-t['BIC'] = 'Ukáž rozširujúce ikony';
-t['SAVE'] = 'Uložené';
-t['AT2'] = 'Podpora';
-t['AT3'] = 'Normálny útok ';
-t['AT4'] = 'Lúpež';
-t['NBSA'] = 'Automatická';
-t['NBSN'] = 'Normálna (malá)';
-t['NBSB'] = 'veľká';
-t['NBHAX'] = 'Automatické rozšírenie výšky';
-t['NBHK'] = 'Prednastavená výška';
-t['NPCSAVETIME'] = 'Ušetrite:';
-t['TOTALTROOPS'] = 'Všetky jednotky vycvičené v tejto dedine';
-t['SELECTALLTROOPS'] = "Vybrať všetky jednotky";
-t['PARTY'] = "Oslavy";
-t['CPPERDAY'] = "KB/denne";
-t['SLOT'] = "Slot";
-t['TOTAL'] = "Spolu";
-t['SELECTSCOUT'] = "Vyber počet špehov";
-t['SELECTFAKE'] = "Vyber jednotky na fake";
-t['NOSCOUT2FAKE'] = "Je nemožné použiť špeha na fake!";
-t['NOTROOP2FAKE'] = "Nemáte jednotky na fake!";
-t['NOTROOP2SCOUT'] = "Nemáte jednotky na špehovanie !";
-t['NOTROOPS'] = "Žiadne jednotky v dedine !";
-t['ALL'] = "Všetko";
-t['SH2'] = "Môžeš vložiť farby :<br>- green alebo red alebo orange, atď. Farby zadávajte len v Anglištine.<br>- Napríklad HEX farba #004523.<br>- Nechajte prázdne ak chcete mať prednastavené farby";
-t['SOREP'] = "Ukáž originálne správy";
-t['WSIMO1'] = "Interný (poskytovaný hrou)";
-t['WSIMO2'] = "Externý (poskytnutý kirilloid.ru)";
-t['NONEWVER'] = "Máte poslednú verziu";
-t['BVER'] = "Máte beta verziu";
-t['NVERAV'] = "Je novšia verzia";
-t['UPDSCR'] = "Aktualizovať script teraz?";
-t['CHECKUPDATE'] = "Kontrolujem aktualizácie...";
-t['CROPFINDER'] = "Vyhľadávač obilia";
-t['AVPPV'] = "Priemerná populácia na dedinu";
-t['AVPPP'] = "Priemerná populácia na hráča";
-t['MAX'] = 'Maximum';
-//version 3.0.7
-t['TOTTRTR'] = 'Všetci vojaci vo výcviku';
-//version 3.1.3
-t['TB3SL'] = TB3O.shN + ' nastavenia';
-t['UPDALLV'] = 'Updatuj všetký dediny. POUŽIVAJTE S MAXIMÁLNOU STAROSTLIVOSŤOU<br>LEBO TO MôžE VIESŤ K ZRUŠENIU ÚČTU !';
-//version 3.1.7
-t['LARGEMAP'] = 'Veľká mapa';
-//version 3.1.9
-t['USETHEMPR'] = 'Použí ich (proporčne)';
-t['USETHEMEQ'] = 'Použí ich (rovným dielom)';
-//version 3.2
-t['TOWNHALL'] = 'Radnica';
-t['GSRVT'] = 'Server hry';
-t['ACCINFO'] = 'Informácie o účte';
-t['NBO'] = 'Poznámkový blok';
-t['MNUL'] = 'Menu na ľavom boku';
-t['STAT'] = 'Štatistika';
-t['RESF'] = 'Surovinové polia';
-t['VLC'] = 'Centrum dediny';
-t['MAPO'] = 'Nastavenia mapy';
-t['COLO'] = 'Nastavenia farieb';
-t['DBGO'] = 'Nastavenia v ladení';
-t['HEROSMANSION'] = "Hrdinský dvor";
-t['BLACKSMITH'] = 'Kováč';
-t['ARMOURY'] = 'Zbrojnica';
-t['NOW'] = 'Teraz';
-t['CLOSE'] = 'Zavrieť';
-t['USE'] = 'Použiť';
-t['USETHEM1H'] = 'Použiť (1 h. produkcia)';
-t['OVERVIEW'] = 'Náhľad';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Útok;';
-t['NEWS'] = 'Noviny';
-t['ADDCRTPAGE'] = 'Pridať túto stránku';
-t['SCRPURL'] = 'TBeyond stránka';
-t['SPACER'] = 'Odeľovač';
-t['MEREO'] = 'Správy & Hlásenia';
-t['ATTABLES'] = 'Tabuľka jednotiek';
-t['MTW'] = 'Obchodníci ešte unesú';
-t['MTX'] = 'Presahuje o';
-t['MTC'] = 'Zaťaženie obchodníka';
-t['ALFL'] = 'Link na externé forum<br>(Nechaj prázdne pre interné forum)';
-t['MTCL'] = 'Vyčistiť všetko';
-t['CKSORT'] = 'Klikni roztiediť';
-t['MIN'] = 'Minimum';
-t['SVGL'] = 'Pre všetky dediny';
-t['VGL'] = 'Zoznam dedin';
-t['UPDATEPOP'] = 'Updatuj populáciu';
-t['EDIT'] = 'Edituj';
-t['NPCO'] = 'Nastavenia NPC asistenta';
-t['NEWVILLAGEAV'] = 'Dátum/čaš';
-t['TIMEUNTIL'] = 'Čas vyčkávania';
-t['CENTERMAP'] = 'Vycentruj mapu na túto dedinu ';
-t['SENDTROOPS'] = 'Poslať jednotky';
-t['PALACE'] = "Palác";
-t['RESIDENCE'] = "Rezidencia";
-t['ACADEMY'] = "Akadémia";
-t['TREASURY'] = "Pokladnica";
-t['UPGTB'] = "Ukáž Surovinove polia/tabuľky upgradu budou";
-t['RBTT'] = "Tabuľka surovin";
-t['UPGTB']	= "Tabuľka vylepšení surovinových polí/budou";
-t['RESIDUE'] = 'Ak vybuduješ zostane ti ';
-t['RESOURCES'] = 'Suroviny';
-//3.8.7.6.3
-t['SH1'] = "Otvoriť tvoj Profil pre automaticke zistenie Hlavnej dediny/súradníc<br>Vybuduj kasárne pree automaticke zistetie kmeňa a otvor stred dediny";
-t['RESEND'] = "Poslať znova ?";
-//3.8.8.8.9
-t['WSI'] = "Vojnový simulátor prevádzkovaný hrou";
-t['TTT'] = "Všeobecné vojsko/bublinky o vzdialenosti";
-break;
-case "tr"://by greench, alinafiz, LeventT
-t['1'] = "Travian v2.x sunucusu";
-t['3'] = 'T3.1 Lejyoner & Phalanx kapasite hesaplayıcıyı zorla<br>(karışık T3.1 & T3.5 sunucuları için)';
-t['4'] = 'Pazar yeri';
-t['5'] = 'Askeri Üs/Kışla/Tamirhane/Ahır';
-t['6'] = "Belediye/Kahraman Kışlası/Silah Dökümhanesi/Zırh Dökümhanesi";
-t['7'] = "Saray/Köşk/Akademi/Hazine Binası";
-t['8'] = 'Birlik';
-t['9'] = "Sol menüde ek bağlantılar göster<br>(Traviantoolbox, World Analyser, Travilog, Map, benzeri.)";
-t['10'] = "Savaş simülatörü kullanımı:<br>(sol menü)";
-t['12'] = "'dorf1.php' ve 'dorf2.php' bağlantılarını göster";
-t['13'] = '"Bu köyü haritada ortala" simgesini göster';
-t['14'] = "Köy listesinde 'Destek gönder/Hammadde gönder' simgelerini göster";
-t['15'] = "Saatlik odun, tuğla, demir üretimini köy listesinde göster";
-t['16'] = "Köy listesinde net tahıl üretimini göster";
-t['17'] = "Köy listesinde nüfusu göster";
-t['18'] = 'Kayan pencere olarak ek köy listesini göster (2 sütunlu)';
-t['19'] = 'Köy listesinde asker hareketleri ve inşaat bilgilerini göster';
-t['20'] = 'Yerimlerini göster';
-t['21'] = "'Kullanıcı Yerimleri'ni kayan pencere olarak göster";
-t['22'] = 'Not defterini göster';
-t['23'] = "'Not Defteri'ni kayan pencere olarak göster";
-t['24'] = 'Not defteri boyutu';
-t['25'] = 'Not defteri yüksekliği';
-t['26'] = 'NPC Asistanı hesaplayıcısını/bağlantılarını göster';
-t['27'] = "İstatistik sitesi kullanımı";
-t['28'] = "Bağlantılarda istatistik bağlantısını göster";
-t['29'] = 'Kullanıcılacak harita analizi sitesi';
-t['30'] = 'Oyuncular için harita bağlantısını göster';
-t['31'] = 'Birlikler için harita bağlantısını göster';
-t['32'] = "'Arama Çubuğu'nu göster";
-t['33'] = "'Arama Çubuğu'nu kayan pencere olarak göster ";
-t['34'] = "Geliştirme tablosunda KP/gün bilgisini göster";
-t['35'] = "Geliştirme tablosunda tahıl tüketimini göster";
-t['37'] = "Kaynak alanlarını geliştirme tablosunu göster";
-t['38'] = 'Kaynak düzeyleri renklerini göster';
-t['39'] = "'Hammadde Grafiği'ni göster";
-t['40'] = "'Hammadde Grafiği'ni kayan pencere olarak göster";
-t['41'] = "Binaların geliştirme tablosunu göster";
-t['42'] = 'Geliştirme tablosunda binaları isme göre sırala';
-t['43'] = 'Orta numaraları göster';
-t['44'] = 'Bina düzeyleri renklerini göster';
-t['45'] = "Binalar için yükseltilen seviyeyi parlat";
-t['46'] = 'Her pazarcı gelişi için ilave bilgi göster';
-t['47'] = 'Son pazar naklini göster';
-t['48'] = "'Pazar Yeri=> Satın al' sayfasındayken<br>önyüklenen sayfa sayısı<br>(Varsayılan= 1 ya da Boş ; Maks = 5)";
-t['49'] = 'Askeri üs varsayılan eylemi';
-t['50'] = '"Casus seç" işlevi için<br> casus sayısı';
-t['53'] = 'Araç ipuçları bölümünde asker bilgisini göster';
-t['54'] = 'Araç ipuçlarında köye ulaşım süresini ve uzaklığı göster';
-t['56'] = "Haritada fare ile üzerine gelindiğinde<br>köy türünü göster/vadi bilgisini göster";
-t['57'] = 'Mesafe ve süreyi göster';
-t['58'] = 'Haritada oyuncu/köy/fethedilmiş vahalar tablosunu göster';
-t['59'] = 'Önyüklenen Mesaj/Rapor sayfası sayısı<br>(Default = 1)';
-t['60'] = 'Açılır pencerede mesaj/rapor açma bağlantısını göster';
-t['61'] = 'Raporlar sayfasına "Tümünü sil" tablosu ekle';
-t['62'] = '"IGM Gönder" simgesini benim için de göster';
-t['63'] = ' geliştirilmiş Savaş Raporlarını göster';
-t['64'] = 'Rapor İstatistiklerinde detayları göster';
-t['65'] = 'Geliştirme olanaklı rengi<br>(Varsayılan = Boş)';
-t['66'] = 'En üst düzey rengi<br>(Varsayılan = Boş)';
-t['67'] = 'Geliştirme olanaklı değil rengi<br>(Varsayılan = Boş)';
-t['68'] = 'NPC üzerinden geliştirme rengi<br>(Varsayılan = Boş)';
-t['69'] = "Konsolun Kayıt Düzeyi<br>PROGRAMCILAR VE SORUN GİDERME İÇİN<br>(Varsayılan = 0)";
-t['82.L'] = 'Yerimlerini kitle (Sil, yukarı taşı, aşağı taşı simgelerini gizler)';
-t['82.U'] = 'Yerimleri kilidini aç (Sil, yukarı taşı, aşağı taşı simgelerini gösterir)';
-t['U.2'] = 'Irk';
-t['U.3'] = 'Merkez Köyün Adı<br>Değiştirmeyin,onun yerine Profilinizi ziyaret edin';
-t['U.6'] = 'Merkez Köyün koordinatları<br>Değiştirmeyin,onun yerine Profilinizi ziyaret edin';
-t['SIM'] = 'Savaş Simülatörü';
-t['QSURE'] = 'Emin misiniz?';
-t['PROFIT'] = 'Kazanç';
-t['LOSS'] = 'Kayıp';
-t['EXTAV'] = 'Geliştirilebilir';
-t['PLAYER'] = 'Oyuncu';
-t['VILLAGE'] = 'Köy';
-t['POPULATION'] = 'Nüfus';
-t['COORDS'] = 'Koordinatlar';
-t['MAPTBACTS'] = 'Eylemler';
-t['SAVED'] = 'Kaydedildi';
-t['YOUNEED'] = 'İhtiyacınız olan';
-t['TODAY'] = 'bugün';
-t['TOMORROW'] = 'yarın';
-t['DAYAFTERTOM'] = 'ertesi gün';
-t['MARKET'] = 'Pazar yeri';
-t['BARRACKS'] = 'Kışla';
-t['RAP'] = 'Askeri üs';
-t['STABLE'] = 'Ahır';
-t['WORKSHOP'] = 'Tamirhane';
-t['SENDRES'] = 'Hammdde gönder';
-t['BUY'] = 'Satın al';
-t['SELL'] = 'Sat';
-t['SENDIGM'] = 'Genel mesaj gönder';
-t['LISTO'] = 'Mümkün';
-t['ON'] = ' ';
-t['AT'] = ' ';
-t['EFICIENCIA'] = 'Verimlilik';
-t['NEVER'] = 'Hiç bir zaman';
-t['ALDEAS'] = 'Köy(ler)';
-t['TIEMPO'] = 'Süre';
-t['OFREZCO'] = 'Önerilen';
-t['BUSCO'] = 'İstenilen';
-t['TIPO'] = 'Oran';
-t['DISPONIBLE'] = 'Sadece olanaklı olanlar';
-t['CUALQUIERA'] = 'Hiçbiri';
-t['YES'] = 'Evet';
-t['NO'] = 'Hayır';
-t['LOGIN'] = 'Giriş';
-t['MARCADORES'] = 'Yerimleri';
-t['ANYADIR'] = 'Ekle';
-t['UBU'] = 'Yeni yerimi adresi';
-t['UBT'] = 'Yeni yerimi yazısı';
-t['DEL'] = 'Sil';
-t['MAPA'] = 'Harita';
-t['MAXTIME'] = 'En fazla süre';
-t['ARCHIVE'] = 'Arşiv';
-t['SUMMARY'] = 'Özet';
-t['TROPAS'] = 'Destekler';
-t['CHKSCRV'] = 'TBeyond u güncelle';
-t['ACTUALIZAR'] = 'Köy bilgisini güncelle';
-t['VENTAS'] = 'Kayıtlı Teklifler';
-t['MAPSCAN'] = 'Haritayı Tara';
-t['BIC'] = 'Ek simgeleri göster';
-t['SAVE'] = 'Kaydet';
-t['AT2'] = 'Destek';
-t['AT3'] = 'Saldırı: Normal';
-t['AT4'] = 'Saldırı: Yağma';
-t['NBSA'] = 'Oto';
-t['NBSN'] = 'Normal (küçük)';
-t['NBSB'] = 'geniş ekran (büyük)';
-t['NBHAX'] = 'Yüksekliği otomatik genişlet';
-t['NBHK'] = 'Varsayılan yükseklik';
-t['NPCSAVETIME'] = 'Kazanılan zaman: ';
-t['TOTALTROOPS'] = 'Köydeki toplam asker';
-t['SELECTALLTROOPS'] = "Tüm askerleri seç";
-t['PARTY'] = "Festivaller";
-t['CPPERDAY'] = "KP/gün";
-t['SLOT'] = "Boşluk";
-t['TOTAL'] = "Toplam";
-t['SELECTSCOUT'] = "Casus seç";
-t['SELECTFAKE'] = "Sahte saldırı seç";
-t['NOSCOUT2FAKE'] = "Sahte saldırı için casusları kullanmak olanaklı değil !";
-t['NOTROOP2FAKE'] = "Sahte saldırı için asker yok!";
-t['NOTROOP2SCOUT'] = "Gözetlemek için asker yok !";
-t['NOTROOPS'] = "Köyde asker yok !";
-t['ALL'] = "Tümü";
-t['SH2'] = "renk alanına şunları girebilirsiniz:<br>- green ya da red ya da orange, vb.<br>- HEX renk kodları, örneğin #004523<br>- varsayılan renkler için boş bırakın";
-t['SOREP'] = "Özgün raporu göster (foruma aktarmak için)";
-t['WSIMO1'] = "Oyunun kendi hesaplayıcısı (oyun tarafından sağlanan)";
-t['WSIMO2'] = "Harici (kirilloid.ru tarafından sağlanan)";
-t['NONEWVER'] = "Son sürüme sahipsiniz";
-t['BVER'] = "Beta sürümüne sahip olabilirsiniz";
-t['NVERAV'] = "Betiğin(script) yeni sürümü var";
-t['UPDSCR'] = "Betik şimdi güncellensin mi ?";
-t['CHECKUPDATE'] = "Betik güncellemesi denetleniyor.<br>Lütfen bekleyin...";
-t['CROPFINDER'] = "Tarla bulucu";
-t['AVPPV'] = "Köy başına ortalama nüfus";
-t['AVPPP'] = "Oyuncu başına ortalama  nüfus";
-t['MAX'] = 'En fazla';
-t['TOTTRTR'] = 'Eğitimdeki asker sayısı';
-t['TB3SL'] = TB3O.shN + ' Ayarları';
-t['UPDALLV'] = 'Tüm köyleri güncelle. DİKKATLİ KULLANIN, HESABINIZ CEZA ALABİLİR!';
-t['LARGEMAP'] = 'Büyük harita';
-t['USETHEMPR'] = 'Bunları kullan (oransal)';
-t['USETHEMEQ'] = 'Bunları kullan (eş miktarda)';
-t['TOWNHALL'] = 'Belediye';
-t['GSRVT'] = 'Oyun sunucusu';
-t['ACCINFO'] = 'Hesap Bilgisi';
-t['NBO'] = 'Not defteri';
-t['MNUL'] = 'Soldaki menü';
-t['STAT'] = 'İstatistikler';
-t['RESF'] = 'Hammadde alanları';
-t['VLC'] = 'Köy merkezi';
-t['MAPO'] = 'Harita ayarları';
-t['COLO'] = 'Renk seçenekleri';
-t['DBGO'] = 'Sorun giderme seçenekleri';
-t['HEROSMANSION'] = "Kahraman kışlası";
-t['BLACKSMITH'] = 'Silah dökümhanesi';
-t['ARMOURY'] = 'Zırh dökümhanesi';
-t['NOW'] = 'Şimdi';
-t['CLOSE'] = 'Kapat';
-t['USE'] = 'Kullan';
-t['USETHEM1H'] = 'Bunları Kullan (1 saatlik üretim)';
-t['OVERVIEW'] = 'Genel bakış';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Saldırılar';
-t['NEWS'] = 'Haberler';
-t['ADDCRTPAGE'] = 'Bu sayfayı yerimine ekle';
-t['SCRPURL'] = 'TBeyond sayfası';
-t['SPACER'] = 'Ayırıcı';
-t['MEREO'] = 'Mesajlar & Raporlar';
-t['ATTABLES'] = 'Asker tablosu';
-t['MTW'] = 'Artan';
-t['MTX'] = 'Aşan';
-t['MTC'] = 'Güncel yük';
-t['ALFL'] = 'Harici forumun adresi<br>(Dahili forum için boş bırakın)';
-t['MTCL'] = 'Tümünü temizle';
-t['CKSORT'] = 'Sıralamak için tıklayın';
-t['MIN'] = 'En az';
-t['SVGL'] = 'Köyler arasında paylaştır';
-t['VGL'] = 'Köy Listesi';
-t['UPDATEPOP'] = 'Nüfusu güncelle';
-t['EDIT'] = 'Düzenle';
-t['NPCO'] = 'NPC Asistanı ayarları';
-t['NEWVILLAGEAV'] = 'Tarih/Zaman';
-t['TIMEUNTIL'] = 'Bekleme süresi';
-t['CENTERMAP'] = 'Bu köyü haritada ortala';
-t['SENDTROOPS'] = 'Asker gönder';
-t['PALACE'] = "Saray";
-t['RESIDENCE'] = "Köşk";
-t['ACADEMY'] = "Akademi";
-t['TREASURY'] = "Hazine Binası";
-t['UPGTB'] = "Hammadde alanlarını ve binaları geliştirme tablosu";
-t['RBTT'] = "Hammadde Grafiği";
-t['RESIDUE'] = "İnşa edilmesi halinde kalan";
-t['RESOURCES'] = "Kaynaklar";
-break;
-case "id"://by CuPliz13 & adudutz
-t['8'] = 'Aliansi';
-t['SIM'] = 'Simulator Perang';
-t['QSURE'] = 'Apakah Anda yakin?';
-t['LOSS'] = 'Kerugian';
-t['PROFIT'] = 'Laba';
-t['EXTAV'] = 'Naikkan tingkat';
-t['PLAYER'] = 'Pemain';
-t['VILLAGE'] = 'Desa';
-t['POPULATION'] = 'Populasi';
-t['COORDS'] = 'Koordinat';
-t['MAPTBACTS'] = 'Aksi';
-t['SAVED'] = 'Disimpan';
-t['YOUNEED'] = 'Anda butuh';
-t['TODAY'] = 'hari ini';
-t['TOMORROW'] = 'besok';
-t['DAYAFTERTOM'] = 'lusa';
-t['MARKET'] = 'Pasar';
-t['BARRACKS'] = 'Barak';
-t['RAP'] = 'Titik Temu';
-t['STABLE'] = 'Istal';
-t['WORKSHOP'] = 'Bengkel';
-t['SENDRES'] = 'Kirim sumberdaya';
-t['BUY'] = 'Beli';
-t['SELL'] = 'Jual';
-t['SENDIGM'] = 'Kirim Pesan';
-t['LISTO'] = 'Tersedia';
-t['ON'] = 'pada';
-t['AT'] = 'pukul';
-t['EFICIENCIA'] = 'Efisiensi';
-t['NEVER'] = 'jika gudang ditingkatkan';
-t['ALDEAS'] = 'Desa';
-t['TIEMPO'] = 'Waktu';
-t['OFREZCO'] = 'Penawaran';
-t['BUSCO'] = 'Cari';
-t['TIPO'] = 'Tipe';
-t['DISPONIBLE'] = 'Hanya tersedia';
-t['CUALQUIERA'] = 'Apapun';
-t['YES'] = 'Ya';
-t['NO'] = 'Tidak';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Bookmark';
-t['ANYADIR'] = 'Tambah';
-t['UBU'] = 'URL Bookmark';
-t['UBT'] = 'Nama Bookmark';
-t['DEL'] = 'Hapus';
-t['MAPA'] = 'Peta';
-t['MAXTIME'] = 'Waktu maks';
-t['ARCHIVE'] = 'Arsip';
-t['SUMMARY'] = 'Laporan';
-t['TROPAS'] = 'Pasukan';
-t['ACTUALIZAR'] = 'Informasi Desa diubah';
-t['VENTAS'] = 'Simpan penawaran';
-t['MAPSCAN'] = 'Pindai peta';
-t['BIC'] = 'Tampilkan ikon tambahan';
-t['22'] = 'Tampilkan blok catatan';
-t['SAVE'] = 'Simpan';
-t['49'] = 'Aksi default dari titik temu';
-t['AT2'] = 'Bantuan';
-t['AT3'] = 'Serangan: Normal';
-t['AT4'] = 'Serangan: Raid';
-t['24'] = 'Ukuran blok catatan';
-t['NBSA'] = 'Otomatis';
-t['NBSN'] = 'Normal (kecil)';
-t['NBSB'] = 'Layar lebar (besar)';
-t['25'] = 'Lebar blok catatan';
-t['NBHAX'] = 'Lebar menyesuaikan otomatis';
-t['NBHK'] = 'Lebar asal';
-t['43'] = 'Tampilkan angka pusat';
-t['NPCSAVETIME'] = 'Simpan: ';
-t['38'] = 'Tampilkan warna tingkatan sumberdaya';
-t['44'] = 'Tampilkan warna tingkatan bangunan';
-t['65'] = 'Upgrade tersedia<br>(Default = Kosong)';
-t['66'] = 'Warna level maks<br>(Default = Kosong)';
-t['67'] = 'Upgrade tidak tersedia<br>(Default = Kosong)';
-t['68'] = 'Upgrade lewat NPC<br>(Default = Kosong)';
-t['TOTALTROOPS'] = 'Jumlah pasukan';
-t['20'] = 'Tampilkan bookmark';
-t['U.2'] = 'Suku';
-t['1'] = "Server Travian v2.x";
-t['SELECTALLTROOPS'] = "Pilih semua pasukan";
-t['PARTY'] = "Festivalitas";
-t['CPPERDAY'] = "NB/hari";
-t['SLOT'] = "Slot";
+
+case 'ar': //contributors: Leonel (aka Phob0z), Gabraham
+case 'cl':
+case 'mx':
+t['1'] = "Servidor Travian v2.x?";
+t['2'] = "Quitar banners publicitarios";
+t['3'] = "Forzar el cálculo de capacidad de Legionarios y Falanges según T3.1<br>(para servidores mixtos T3.1 & T3.5)";
+t['4'] = "Mercado";
+t['5'] = "Plaza de reuniones/Cuartel/Taller/Establo";
+t['6'] = "Ayuntamiento/Hogar del H&eacute;roe/Armer&iacute;a/Herrer&iacute;a";
+t['7'] = "Palacio/Residencia/Academia/Tesoro";
+t['8'] = "Alianza";
+t['9'] = "Mostrar enlaces adicionales en el menu de la izquierda<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "&iquest;Qu&eacute; simulador de combate usar?:<br>(men&uacute; izquierdo)";
+t['12'] = "Mostrar enlaces 'dorf1.php' y 'dorf2.php'";
+t['13'] = "Mostrar ícono \"Centrar mapa sobre esta aldea\"";
+t['14'] = "Mostrar ícono 'Enviar tropas/Enviar recursos' en lista de aldeas";
+t['16'] = "Mostrar producción efectiva de cereales en lista de aldeas";
+t['17'] = "Mostrar cantidad de habitantes en lista de aldeas";
+t['18'] = "Mostrar lista de aldeas adicional (2 columnas) como ventana flotante";
+t['19'] = "Mostrar información acerca de edificios en construcción y movimiento de tropas<br>en lista de aldeas";
+t['20'] = "Mostrar marcadores";
+t['21'] = "Mostrar 'marcadores' como ventana flotante";
+t['22'] = "Mostrar hoja de notas";
+t['23'] = "Mostrar 'hoja de notas' como ventana flotante";
+t['24'] = "Tama&ntilde;o de la hoja de notas";
+t['25'] = "Altura de la hoja de notas";
+t['27'] = "&iquest;Qu&eacute; analizador usar para las estad&iacute;sticas?";
+t['28'] = "Mostrar enlaces del analizador de estadisticas<br>(icono del mundo al lado de usuarios/alianzas)";
+t['29'] = "Analizador de Mapas a ser usado";
+t['30'] = "Mostrar vínculo a mapa, para un usuario";
+t['31'] = "Mostrar vínculo a mapa, para una alianza";
+t['32'] = "Mostrar 'Buscador'";
+t['33'] = "Mostrar 'Buscador' como ventana flotante";
+t['34'] = "Mostrar PC/día en tablas de actualización";
+t['35'] = "Mostrar consumo de cereales en tablas de actualización";
+t['36'] = "Mostrar los cálculos de 'Hasta entonces/Excedentes'<br>en las tablas de entrenamiento/mejora";
+t['37'] = "Mostrar la tabla de actualizaci&oacute;n de los recursos";
+t['38'] = "Mostrar colores en el nivel de los recursos";
+t['39'] = "Mostrar tabla 'Barras de Recursos'";
+t['40'] = "Mostrar tabla 'Barras de Recursos' como ventana flotante";
+t['41'] = "Mostrar la tabla de actualizaci&oacute;n de las construcciones";
+t['42'] = "Ordenar edificios por su nombre en tablas de actualización";
+t['43'] = "Mostrar el nivel de las construcciones en el centro de la aldea";
+t['44'] = "Mostrar colores en el nivel de las construcciones";
+t['45'] = "Mostrar nivel parpadeando en los edificios que están siendo ampliados";
+t['46'] = "Mostrar información adicional para cada mercader en camino";
+t['48'] = "P&aacute;ginas mostradas en la secci&oacute;n 'Comprar' del mercado<br>(Valor por defecto = 1)";
+t['49'] = "Opci&oacute;n por defecto cuando se mandan tropas";
+t['50'] = "N° de esp&iacute;as para selecionar por defecto en \"Seleccionar espías\"";
+t['53'] = "Mostrar informaci&oacute;n de tropas en tooltips";
+t['54'] = "Mostrar tiempos y distancias a aldeas en tooltips";
+t['56'] = "Mostrar el tipo de casilla al ponerle el cursor encima";
+t['57'] = "Mostrar distancias y tiempos en tooltips";
+t['58'] = "Mostrar tabla de Jugadores/Aldeas/Oasis ocupados";
+t['59'] = "N&uacute;mero de pag&iacute;nas de mensajes/reportes precargadas<br>(Valor por defecto = 1)";
+t['60'] = "Mostrar vínculos para abrir mensajes/informes como ventanas emergentes";
+t['61'] = "Mostrar la tabla \"Borrar todo\" en la página de Informes";
+t['62'] = "Mostrar ícono \"Enviar IGM\" también para mi";
+t['63'] = "Mostrar Reportes de Batalla mejorados de ";
+t['64'] = "Mostrar detalles en Infórmes Estadísticos";
+t['65'] = "Color para las actualizaciones disponibles";
+t['66'] = "Color para los niveles m&aacute;ximos";
+t['67'] = "Color para las actualizaciones no disponibles";
+t['68'] = "Color para actualizar por medio de NPC";
+t['69'] = "Nivel de Registro de la Consola<br>SOLO PARA PROGRAMADORES O DEPURACI&Oacute;N<br>(Valor por defecto = 0)";
+t['82.L'] = "Bloquear marcadores (Ocultar iconos de eliminar, subir, bajar)";
+t['82.U'] = "Desbloquear marcadores (Mostrar iconos de eliminar, subir, bajar)";
+t['U.2'] = "Raza";
+t['U.3'] = "Nombre de tu capital<br><b>Revisa tu perfil para actualizarla</b>";
+t['U.6'] = "Coordenadas de tu capital<br><b>Revisa tu perfil para actualizarla</b>";
+t['SIM'] = "Simulador de combate";
+t['QSURE'] = "¿Estás seguro?";
+t['LOSS'] = "P&eacute;rdidas";
+t['PROFIT'] = "Ganancias";
+t['EXTAV'] = "Subir nivel";
+t['PLAYER'] = "Jugador";
+t['VILLAGE'] = "Aldea";
+t['POPULATION'] = "Poblaci&oacute;n";
+t['COORDS'] = "Coordenadas";
+t['MAPTBACTS'] = "Acciones";
+t['SAVED'] = "Guardado";
+t['YOUNEED'] = "Te falta";
+t['TODAY'] = "hoy";
+t['TOMORROW'] = "ma&ntilde;ana";
+t['DAYAFTERTOM'] = "pasado ma&ntilde;ana";
+t['MARKET'] = "Mercado";
+t['BARRACKS'] = "Cuartel";
+t['RAP'] = "Plaza de reuniones";
+t['STABLE'] = "Establo";
+t['WORKSHOP'] = "Taller";
+t['SENDRES'] = "Enviar recursos";
+t['BUY'] = "Comprar";
+t['SELL'] = "Vender";
+t['SENDIGM'] = "Enviar IGM";
+t['LISTO'] = "Listo";
+t['ON'] = "el";
+t['AT'] = "a las";
+t['EFICIENCIA'] = "Eficiencia";
+t['NEVER'] = "Nunca";
+t['ALDEAS'] = "Aldea(s)";
+t['TIEMPO'] = "Tiempo";
+t['OFREZCO'] = "Ofrezco";
+t['BUSCO'] = "Busco";
+t['TIPO'] = "Tipo";
+t['DISPONIBLE'] = "Solo disponible";
+t['CUALQUIERA'] = "Cualquiera";
+t['YES'] = "Si";
+t['NO'] = "No";
+t['LOGIN'] = "Ingresar";
+t['MARCADORES'] = "Marcadores";
+t['ANYADIR'] = "Añadir";
+t['UBU'] = "URL del nuevo Marcador";
+t['UBT'] = "Nombre del nuevo Marcador";
+t['DEL'] = "Eliminar";
+t['MAPA'] = "Mapa";
+t['MAXTIME'] = "Tiempo m&aacute;ximo";
+t['ARCHIVE'] = "Archivar";
+t['SUMMARY'] = "Resumen";
+t['TROPAS'] = "Tropas";
+t['CHKSCRV'] = "Actualice TBeyond";
+t['ACTUALIZAR'] = "Actualizar informaci&oacute;n de aldea";
+t['VENTAS'] = "Guardar ofertas";
+t['MAPSCAN'] = "Escanear el Mapa";
+t['BIC'] = "Mostrar iconos de acceso r&aacute;pido";
+t['SAVE'] = "Guardar";
+t['AT2'] = "Refuerzos";
+t['AT3'] = "Ataque: Normal";
+t['AT4'] = "Ataque: Asalto";
+t['NBSA'] = "Automático";
+t['NBSN'] = "Normal";
+t['NBSB'] = "Grande";
+t['NBHAX'] = "Expandir altura automáticamente";
+t['NBHK'] = "Altura por defecto";
+t['NPCSAVETIME'] = "Tiempo ahorrado: ";
+t['TOTALTROOPS'] = "Tropas totales de la aldea";
+t['SELECTALLTROOPS'] = "Seleccionar todas las tropas";
+t['PARTY'] = "Fiesta";
+t['CPPERDAY'] = "PC/día";
+t['SLOT'] = "Espacios disp.";
 t['TOTAL'] = "Total";
-t['SELECTSCOUT'] = "Pilih pengintai";
-t['SELECTFAKE'] = "Pilih penipu";
-t['NOSCOUT2FAKE'] = "Tidak dimungkinkan untuk memakai pengintai untuk serangan tipuan!";
-t['NOTROOP2FAKE'] = "Tidak ada pasukan untuk serangan tipuan!";
-t['NOTROOP2SCOUT'] = "Tidak ada pasukan untuk mengintai!";
-t['NOTROOPS'] = "Tidak ada pasukan di desa!";
-t['ALL'] = "Seluruh";
-t['SH2'] = "Di kolom warna Anda bisa mengisi:<br>- <b>green</b> atau <b>red</b> atau <b>orange</b>, dll.<br>- warna menggunakan kode heksadesilmal (HEX), seperti <b>#004523</b><br>- kosongkan untuk warna default";
-t['SOREP'] = "Tampilkan laporan asli (untuk posting dalam forum)";
-t['56'] = "Tampilkan tipe info bidang/oasis<br>saat kursor mouse berada di atas peta";
-t['10'] = "Link simulator perang untuk dipakai:<br>(menu kiri)";
-t['WSIMO1'] = "Internal (dari permainan)";
-t['WSIMO2'] = "Eksternal (dari kirilloid.ru)";
-t['27'] = "World Analyser untuk dipakai";
-t['28'] = "Tampilkan link Analyser Statistic";
-t['NONEWVER'] = "Anda memiliki versi terakhir yang tersedia";
-t['BVER'] = "Anda memiliki versi beta";
-t['NVERAV'] = "Versi script terbaru telah tersedia";
-t['UPDSCR'] = "Update script sekarang?";
-t['CHECKUPDATE'] = "Mengecek update script.<br>Harap tunggu...";
-t['CROPFINDER'] = "Crop Finder";
-t['AVPPV'] = "Populasi rata-rata per desa";
-t['AVPPP'] = "Populasi rata-rata per pemain";
-t['37'] = "Tampilkan tabel tingkatan lahan sumberdaya";
-t['41'] = "Tampilkan tabel tingkatan bangunan";
-t['69'] = "Console Log Level<br>HANYA UNTUK PROGRAMMERS SAAT DEBUGGING<br>(Default = 0)";
-t['48'] = "Jumlah halaman penawaran untuk ditampilkan<br>saat ada di halaman 'Pasar => Beli'<br>(Default = 1)";
-t['U.3'] = 'Nama Ibukota<br><b>Kunjungi profil Anda untuk perubahan</b>';
-t['U.6'] = 'Koordinat Ibukota Anda<br><b>Kunjungi profil Anda untuk perubahan</b>';
-t['MAX'] = 'Maks';
-t['TOTTRTR'] = 'Total pelatihan pasukan';
-t['57'] = 'Tampilkan jarak & waktu';
-t['UPDALLV'] = 'Update semua desa. PEMAKAIAN MAKSIMUM BISA MENYEBABKAN AKUN ANDA DIHAPUS!';
-t['9'] = "Tampilkan link tambahan di menu kiri<br>(Travian Toolbox, World Analyser, Travilog, Map, dll.)";
-t['LARGEMAP'] = 'Peta lebar';
-t['USETHEMPR'] = 'Pakai (proporsional)';
-t['USETHEMEQ'] = 'Pakai (sama)';
-t['TOWNHALL'] = 'Balai Desa';
-t['GSRVT'] = 'Server permainan';
-t['ACCINFO'] = 'Informasi Akun';
-t['NBO'] = 'Catatan';
-t['MNUL'] = 'Menu di sebelah kanan';
-t['STAT'] = 'Statistik';
-t['RESF'] = 'Lahan Sumberdaya';
-t['VLC'] = 'Pusat desa';
-t['MAPO'] = 'Opsi peta';
-t['COLO'] = 'Opsi warna';
-t['DBGO'] = 'Opsi debug';
-t['4'] = 'Pasar';
-t['5'] = 'Titik temu|Barak|Bengkel|Istal';
-t['6'] = "Balai desa|Padepokan|Pabrik perisai|Pandai besi";
-t['HEROSMANSION'] = "Padepokan";
-t['BLACKSMITH'] = 'Pandai besi';
-t['ARMOURY'] = 'Pabrik perisai';
-t['NOW'] = 'Sekarang';
-t['CLOSE'] = 'Tutup';
-t['USE'] = 'Pakai';
-t['USETHEM1H'] = 'Pakai (1 jam produksi)';
-t['OVERVIEW'] = 'Peninjauan';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Serangan';
-t['NEWS'] = 'Berita';
-t['ADDCRTPAGE'] = 'Tambahkan halaman ini';
-t['SCRPURL'] = 'TBeyond Home';
-t['50'] = 'Jumlah pengintai untuk<br>fungsi "Pilih pengintai"';
-t['SPACER'] = 'Penjeda';
-t['53'] = 'Tampilkan info pasukan di tooltip';
-t['MEREO'] = 'Pesan & Laporan';
-t['59'] = 'Jumlah halaman pesan/laporan untuk ditampilkan<br>(Default = 1)';
-t['ATTABLES'] = 'Tabel pasukan';
-t['MTW'] = 'Sisa muatan';
-t['MTX'] = 'Melampaui';
-t['MTC'] = 'Muatan saat ini';
-t['ALFL'] = 'Link ke forum luar<br>(kosongkan untuk memakai forum internal)';
-t['82.L'] = 'Kunci bookmark (sembunyikan ikon hapus, naikkan, turunkan)';
-t['MTCL'] = 'Kosongkan Semua';
-t['82.U'] = 'Buka bookmark (tampilkan ikon hapus, naikkan, turunkan)';
-t['CKSORT'] = 'Klik untuk mengurutkan';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Pembagian diantara desa-desa';
-t['VGL'] = 'Daftar Desa';
-t['12'] = "tampilkan link 'Peninjauan Desa' dan 'Pusat Desa'";
-t['UPDATEPOP'] = 'Update populasi';
-t['54'] = 'Tampilkan jarak dan waktu ke desa-desa di tooltip';
-t['EDIT'] = 'Ubah';
-t['NPCO'] = 'Opsi NPC Assistant';
-t['26'] = 'Tampilkan link kalkulasi dari NPC Assistant';
-t['58'] = 'Tampilkan tabel pemain, desa dan oasis yang dikuasai';
-t['NEWVILLAGEAV'] = 'Tanggal/Waktu';
-t['TIMEUNTIL'] = 'Waktu untuk menunggu';
-t['61'] = 'Tampilkan tabel "Hapus semua" di halaman Laporan';
-t['62'] = 'Tampilkan ikon "Kirim Pesan"';
-t['CENTERMAP'] = 'Desa ini sebagai tengah-tengah peta';
-t['13'] = 'Tampilkan ikon "Desa ini sebagai tengah-tengah peta"';
-t['SENDTROOPS'] = 'Kirim Pasukan';
-t['64'] = 'Tampilkan detail pada Laporan Statistik';
-t['7'] = "Istana|Kastil|Akademi|Gudang Ilmu";
-t['PALACE'] = "Istana";
-t['RESIDENCE'] = "Kastil";
-t['ACADEMY'] = "Akademi";
-t['TREASURY'] = "Gudang Ilmu";
-t['45'] = "Tampilkan kedipan untuk bangunan yang sedang ditingkatkan";
-t['60'] = 'Tampilkan link untuk membuka pesan dalam popup';
-t['RBTT'] = "Tabel Sumberdaya";
-t['39'] = "Tampilkan 'Tabel Sumberdaya'";
-t['40'] = "Tampilkan 'Tabel Sumberdaya' sebagai jendela terpisah";
-t['21'] = "Tampilkan bookmark sebagai jendela terpisah";
-t['23'] = "Tampilkan blok catatan sebagai jendela terpisah";
-t['16'] = "Tampilkan produksi gandum efektif di daftar desa";
-t['36'] = "Tampilkan penghitungan sisa Sumberdaya di tabel tingkatan/pelatihan";
-t['RESIDUE'] = 'Sisa Sumberdaya jika dibangun ';
-t['RESOURCES'] = 'Sumberdaya';
-t['34'] = "Tampilkan informasi NB/hari di tabel tingkatan";
-t['35'] = "Tampilkan informasi penggunaan gandum di tabel tingkatan";
-t['29'] = 'Map Analyser yang dipakai';
-t['30'] = 'Tampilkan link ke Map Analyser untuk pemain';
-t['31'] = 'Tampilkan link ke Map Analyser untuk aliansi';
-t['32'] = "Tampilkan 'Tabel Pencarian'";
-t['33'] = "Tampilkan 'Tabel Pencarian' sebagai jendela terpisah";
-t['UPGTB'] = "Tabel Tingkatan Sumberdaya/Bangunan";
-t['14'] = "Tampilkan ikon 'Kirim Sumberdaya/Kirim Pasukkan' di daftar desa";
-t['17'] = "Tampilkan populasi di daftar desa";
-t['18'] = 'Tampilkan daftar desa tambahan (2 kolom) sebagai jendela terpisah';
-t['19'] = 'Tampilkan informasi tentang pembangunan dan pergerakan pasukkan<br>di daftar desa';
-t['42'] = 'Urutkan bangunan berdasarkan nama di tabel tingkatan';
-t['63'] = 'Tampilkan laporan penyerangan  yang disempurnakan';
+t['SELECTSCOUT'] = "Seleccionar esp&iacute;as";
+t['SELECTFAKE'] = "Seleccionar unidad para fake";
+t['ALL'] = "Todo";
+t['SH2'] = "En los campos para escribir en el color, puedes poner:<br>- <b>green</b> o <b>red</b> o <b>orange</b>, etc.<br>- El c&oacute;digo Hexadecimal del color.<br>- D&eacute;jalo vac&iacute;o para usar el color por defecto";
+t['SOREP'] = "Mostrar reporte original (para poner en foros)";
+t['WSIMO1'] = "Interno (el que trae travian por defecto)";
+t['WSIMO2'] = "Externo (kirilloid.ru)";
+t['NONEWVER'] = "Tiene la última versión disponible";
+t['BVER'] = "Tal ves tengas una versión beta";
+t['NVERAV'] = "Hay una nueva versión del script disponible";
+t['UPDSCR'] = "Actualizar el script?";
+t['CHECKUPDATE'] = "Buscando nuevas versiones del script.<br>Por favor espera...";
+t['AVPPV'] = "Poblaci&oacute;n promedio por aldea";
+t['AVPPP'] = "Poblaci&oacute;n promedio por jugador";
+t['MAX'] = "Max.";
+t['TOTTRTR'] = "Tropas totales que se estan creando";
+t['TB3SL'] = "Config. de TBeyond";
+t['UPDALLV'] = "Actualizar todas las aldeas. USAR CON MUCHO CUIDADO, PUEDE LLEVAR A QUE BORREN TU CUENTA!";
+t['LARGEMAP'] = "Mapa grande";
+t['USETHEMPR'] = "Llenar proporcionalmente a la cantidad de cada recurso que hay en los almacenes";
+t['USETHEMEQ'] = "Llenar con la misma cantidad de cada recurso";
+t['TOWNHALL'] = "Ayuntamiento";
+t['GSRVT'] = "Versi&oacute;n del servidor";
+t['ACCINFO'] = "Información de la Cuenta";
+t['NBO'] = "Hoja de notas";
+t['MNUL'] = "Men&uacute; en el lado izquierdo";
+t['STAT'] = "Estad&iacute;sticas";
+t['RESF'] = "Campos de recursos";
+t['VLC'] = "Centro de la aldea";
+t['MAPO'] = "Opciones del Mapa";
+t['COLO'] = "Opciones de color";
+t['DBGO'] = "Opciones de depuraci&oacute;n (DEBUG)";
+t['HEROSMANSION'] = "Hogar del H&eacute;roe";
+t['BLACKSMITH'] = "Armer&iacute;a";
+t['ARMOURY'] = "Herrer&iacute;a";
+t['NOW'] = "Ahora";
+t['CLOSE'] = "Cerrar";
+t['USETHEM1H'] = "Llenar con 1 hora de producci&oacute;n de esta aldea";
+t['OVERVIEW'] = "Resumen";
+t['FORUM'] = "Foro";
+t['ATTACKS'] = "Ataques";
+t['NEWS'] = "Noticias";
+t['ADDCRTPAGE'] = "Añadir Página Actual";
+t['SCRPURL'] = "Pág. de TBeyond";
+t['SPACER'] = "Separador";
+t['MEREO'] = "Mensajes y Reportes";
+t['ATTABLES'] = "Tabla de tropas";
+t['MTW'] = "Disponible";
+t['MTX'] = "Excedido";
+t['MTC'] = "Carga actual";
+t['ALFL'] = "V&iacute;nculo a foro externo<br>(Dejar en blanco para foro interno)";
+t['MTCL'] = "Limpiar todo";
+t['CKSORT'] = "Haga clic para ordenar";
+t['MIN'] = "Min";
+t['SVGL'] = "Compartir entre las aldeas";
+t['VGL'] = "Lista de Aldeas";
+t['UPDATEPOP'] = "Actualizar habitantes";
+t['EDIT'] = "Editar";
+t['NEWVILLAGEAV'] = "Fecha/Hora";
+t['TIMEUNTIL'] = "Tiempo a esperar";
+t['CENTERMAP'] = "Centrar mapa sobre esta aldea";
+t['SENDTROOPS'] = "Enviar tropas";
+t['PALACE'] = "Palacio";
+t['RESIDENCE'] = "Residencia";
+t['ACADEMY'] = "Academia";
+t['TREASURY'] = "Tesoro";
+t['UPGTB'] = "Tablas de actualización de Recursos y Edificios";
+t['RBTT'] = "Barras de Recursos";
+t['USE'] = "Usar";
+t['RESIDUE'] = "Excedentes si construyes ";
+t['RESOURCES'] = "Recursos";
+t['SH1'] = "Abra su Perfil para detectar automáticamente la capital/coordenadas<br>Construya el cuartel para la detección automática de la raza y<br>abra entonces el centro de la aldea";
+t['CROPFINDER'] = "Buscar Cultivos";
 break;
-case "bg"://by NUT 
-t['8'] = 'Съюз';
-t['SIM'] = 'Симулатор на битки';
-t['QSURE'] = 'Сигурни ли сте?';
-t['LOSS'] = 'Загуба';
-t['PROFIT'] = 'Печалба';
-t['EXTAV'] = 'Възможно надстрояване';
-t['PLAYER'] = 'Играч';
-t['VILLAGE'] = 'Село';
-t['POPULATION'] = 'Популация';
-t['COORDS'] = 'Координати';
-t['MAPTBACTS'] = 'Действия';
-t['SAVED'] = 'Промените са запазени';
-t['YOUNEED'] = 'Имате нужда от';
-t['TODAY'] = 'днес';
-t['TOMORROW'] = 'утре';
-t['DAYAFTERTOM'] = 'в други ден';
-t['MARKET'] = 'Пазар';
-t['BARRACKS'] = 'Казарма';
-t['RAP'] = 'Сборен пункт';
-t['STABLE'] = 'Конюшня';
-t['WORKSHOP'] = 'Работилница';
-t['SENDRES'] = 'Изпрати ресурси';
-t['BUY'] = 'Купи';
-t['SELL'] = 'Продай';
-t['SENDIGM'] = 'Изпрати лично съобщение';
-t['LISTO'] = 'Възможно';
-t['ON'] = 'на';
-t['AT'] = 'в';
-t['EFICIENCIA'] = 'Способност';
-t['NEVER'] = 'Никога';
-t['ALDEAS'] = 'Село(а)';
-t['TIEMPO'] = 'Време';
-t['OFREZCO'] = 'Предлагане';
-t['BUSCO'] = 'Търсене';
-t['TIPO'] = 'Вид';
-t['DISPONIBLE'] = 'Само възможните';
-t['CUALQUIERA'] = 'Всички';
-t['YES'] = 'Да';
-t['NO'] = 'Не';
-t['LOGIN'] = 'Влизане';
-t['MARCADORES'] = 'Отметки';
-t['ANYADIR'] = 'Прибавяне';
-t['UBU'] = 'Нова отметка URL';
-t['UBT'] = 'Нова отметка Текст';
-t['DEL'] = 'Изтриване';
-t['MAPA'] = 'Карта';
-t['MAXTIME'] = 'Максимално време';
-t['ARCHIVE'] = 'Архив';
-t['SUMMARY'] = 'Общо';
-t['TROPAS'] = 'Войски';
-t['CHKSCRV'] = 'Обнови TBeyond';
-t['ACTUALIZAR'] = 'Обнови информацията за селото';
-t['VENTAS'] = 'Запази офертите';
-t['MAPSCAN'] = 'Сканирай картата';
-t['BIC'] = 'Покажи допълнителни икони';
-t['22'] = 'Покажи бележка';
-t['SAVE'] = 'Възможно:';
-t['49'] = 'Сборен пункт нормално действие';
-t['AT2'] = 'Подкрепление';
-t['AT3'] = 'Атака: Нормална';
-t['AT4'] = 'Атака: Набег';
-t['24'] = 'Размер на бележката';
-t['NBSA'] = 'Автоматично';
-t['NBSN'] = 'Нормално (малко)';
-t['NBSB'] = 'Широк екран (голямо)';
-t['25'] = 'Размер бележка - височина';
-t['NBHAX'] = 'Автоматично уголеми височината';
-t['NBHK'] = 'Стандартна височина';
-t['43'] = 'Покажи нивата на сградите';
-t['NPCSAVETIME'] = 'Запази: ';
-t['38'] = 'Покажи цветни нива на ресурсите';
-t['44'] = 'Покажи цветни нива на сградите';
-t['65'] = 'Разрешена промяна на цвета<br>(Default = Empty)';
-t['66'] = 'Цвят за максимално ниво<br>(Default = Empty)';
-t['67'] = 'Невъзможна смяна на цвета<br>(Default = Empty)';
-t['68'] = 'Смяна на цвета през NPC<br>(Default = Empty)';
-t['TOTALTROOPS'] = 'Общо войски за селото';
-t['20'] = 'Покажи отметките';
-t['U.2'] = 'Раса';
+
+case 'ba': //contributors: Nemanja
+case 'hr':
+t['1'] = "Travian v2.x server";
+t['4'] = "Pijaca";
+t['5'] = "Vojska Mjesto okupljanja/Kasarna/Radionica/Štala";
+t['6'] = "Opština/Herojska vila/Kovačnica oklopa/Kovačnica oružja";
+t['7'] = "Dvorac/Rezidencija/Akademija/Zgrada za blago";
+t['8'] = "Alijansa";
+t['9'] = "Prikazuj dodatne linkove u lijevom<br>izborniku<br>(Traviantoolbox, World Analyser, Travilog, Map, itd.)";
+t['10'] = "Simulator borbe koji se koristi: (izbornik lijevo)";
+t['12'] = "Prikazuj 'dorf1.php' i 'dorf2.php' linkove";
+t['13'] = "Prikaži \"Centriraj kartu na ovo selo\" ikonu";
+t['20'] = "Prikaži Oznake";
+t['22'] = "Prikaži notes";
+t['24'] = "Veličina notesa";
+t['25'] = "Visina notesa";
+t['26'] = "Prikazuj NPC Assistant kalkulacije/linkove";
+t['27'] = "Analizator svijeta koji se koristi";
+t['28'] = "Prikaži statističke linkove analizatora";
+t['37'] = "Prikazuj tablicu nadogradnje za polja resursa";
+t['38'] = "Prikazuj boje nivoa resursa";
+t['41'] = "Prikazuj tablicu nadogradnje za infrastrukturu";
+t['43'] = "Prikaži centralne brojeve";
+t['44'] = "Prikazuj boje nivoa građevine";
+t['48'] = "Proj preučitanih stranica ponude<br>dok ste na stranici za kupovinu => na Pijaci<br>(Zadano = 1)";
+t['49'] = "Standardna akcija za<br>mjesto okupljanja";
+t['50'] = "Broj izviđača za \"Izaberi izviđača\" funkciju";
+t['53'] = "Prikazuj informacije o vojsci na napomenama";
+t['54'] = "Prikazuj udaljenosti i vremena<br>do sela u napomenama";
+t['56'] = "Prikazuj podatke o tipu/oazi ćelije pri prelazu miša preko mape";
+t['57'] = "Prikazuj udaljenosti i vremena";
+t['58'] = "Prikaži tabelu igrača/sela/oaza";
+t['59'] = "Broj unaprijed učitanih<br>poruka/izvještaja<br>(Zadano = 1)";
+t['60'] = "Prikazuj linkove na otvorene<br>poruke u pop-upu";
+t['61'] = "Prikaži \"Izbriši sve\" u izvještajima";
+t['62'] = "Prikaži \"Pošalji IGM\" ikonu i za mene";
+t['64'] = "Prikaži detalje u izvještajima";
+t['65'] = "Boja dostupne nadogradnje<br>(Zadano = prazno)";
+t['66'] = "Boja maksimalnog nivoa<br>(Zadano = prazno)";
+t['67'] = "Boja nemoguće nadogradnje<br>(Zadano = prazno)";
+t['68'] = "Boja nadogradnje pomoću NPC-a<br>(Zadano = prazno)";
+t['69'] = "Nivo zapisa konzole<br>ONLY FOR PROGRAMMERS(Zadano = 0)";
+t['82.L'] = "Zaključaj Oznake (Sakrij ikone za brisanje i pomjeranje)";
+t['82.U'] = "Otključaj Oznake (Prikaži ikone za brisanje i pomjeranje)";
+t['U.2'] = "Pleme";
+t['U.3'] = "Naziv glavnog grada<br>Za ažuriranje posjetite vaš profil";
+t['U.6'] = "Koordinate vašeg glavnog grada<br>Za ažuriranje posjetite vaš profil";
+t['SIM'] = "Simulator borbe";
+t['QSURE'] = "Da li ste sigurni?";
+t['LOSS'] = "Gubitak";
+t['PROFIT'] = "Profit";
+t['EXTAV'] = "Dostupna ekstenzija";
+t['PLAYER'] = "Igrač";
+t['VILLAGE'] = "Selo";
+t['POPULATION'] = "Populacija";
+t['COORDS'] = "Koordinate";
+t['MAPTBACTS'] = "Akcije";
+t['SAVED'] = "Sačuvano";
+t['YOUNEED'] = "Potrebno";
+t['TODAY'] = "danas";
+t['TOMORROW'] = "sutra";
+t['DAYAFTERTOM'] = "prekosutra";
+t['MARKET'] = "Pijaca";
+t['BARRACKS'] = "Kasarna";
+t['RAP'] = "Mjesto okupljanja";
+t['STABLE'] = "Štala";
+t['WORKSHOP'] = "Radionica";
+t['SENDRES'] = "Slanje resursa";
+t['BUY'] = "Kupovina";
+t['SELL'] = "Prodaja";
+t['SENDIGM'] = "Pošalji poruku";
+t['LISTO'] = "Dostupno";
+t['ON'] = "za";
+t['AT'] = "u";
+t['EFICIENCIA'] = "Učinkovitost";
+t['NEVER'] = "Nikad";
+t['ALDEAS'] = "Sela";
+t['TIEMPO'] = "Vrijemo";
+t['OFREZCO'] = "Nudi";
+t['BUSCO'] = "Traži";
+t['TIPO'] = "Tip";
+t['DISPONIBLE'] = "Dostupno samo";
+t['CUALQUIERA'] = "Svejedno";
+t['YES'] = "Da";
+t['NO'] = "Ne";
+t['LOGIN'] = "Prijava";
+t['MARCADORES'] = "Oznake";
+t['ANYADIR'] = "Dodaj";
+t['UBU'] = "Dodaj adresu u Oznake";
+t['UBT'] = "Dodaj tekst u Oznake";
+t['DEL'] = "Obriši";
+t['MAPA'] = "Mapa";
+t['MAXTIME'] = "Maksimalno vrijeme";
+t['ARCHIVE'] = "Arhiva";
+t['SUMMARY'] = "Rezime";
+t['TROPAS'] = "Vojska";
+t['CHKSCRV'] = "Update";
+t['ACTUALIZAR'] = "Ažuriraj podatke o selu";
+t['VENTAS'] = "Spremljenje ponude";
+t['MAPSCAN'] = "Skeniraj mapu";
+t['BIC'] = "Prikazuj proširene ikone";
+t['SAVE'] = "Spremi";
+t['AT2'] = "Pojačanje";
+t['AT3'] = "Napad: normalan";
+t['AT4'] = "Napad: pljačka";
+t['NBSA'] = "Automatski";
+t['NBSN'] = "Normalno (malo)";
+t['NBSB'] = "Veliki ekran (veliko)";
+t['NBHAX'] = "Automatsko proširenje visine";
+t['NBHK'] = "Standardna visina";
+t['NPCSAVETIME'] = "Spremi: ";
+t['TOTALTROOPS'] = "Ukupna vojska sela";
+t['SELECTALLTROOPS'] = "Izaberi sve vojnike";
+t['PARTY'] = "Zabave";
+t['CPPERDAY'] = "KP/dnevno";
+t['SLOT'] = "Slot";
+t['TOTAL'] = "Ukupno";
+t['SELECTSCOUT'] = "Izaberi izviđača";
+t['SELECTFAKE'] = "Izaberi lažnjak";
+t['ALL'] = "Sve";
+t['SH2'] = "U polja boje možeš unijeti:<br>- green ili red ili  orange, itd.<br>- HEX (heksadecimalni) kod boje poput #004523<br>- ostaviti prazno za standardnu boju";
+t['SOREP'] = "Prikaži originalni izvještaj (za postanje)";
+t['WSIMO1'] = "Interni (iz igre)";
+t['WSIMO2'] = "Eksterni (kirilloid.ru)";
+t['NONEWVER'] = "Imate posljednju dostupnu verziju";
+t['BVER'] = "Moguće da imate beta verziju";
+t['NVERAV'] = "Dostupna je nova verzija skripte";
+t['UPDSCR'] = "Nadograditi odmah?";
+t['CHECKUPDATE'] = "Provjera nadogradnje skripte.<br>Molimo sačekajte...";
+t['AVPPV'] = "Prosječno populacije po selu";
+t['AVPPP'] = "Prosječno populacije po igraču";
+t['MAX'] = "Maksimalno";
+t['TOTTRTR'] = "Ukupno obučavane vojske";
+t['TB3SL'] = "$1 Podešavanje";
+t['UPDALLV'] = "Ažuriraj sva sela. KORISTITI OPREZNO JER MOŽE DOVESTI DO SUSPENZIJE NALOGA!";
+t['LARGEMAP'] = "Velika mapa";
+t['USETHEMPR'] = "Koristi ih (proporcionalno)";
+t['USETHEMEQ'] = "Koristi ih (jednako)";
+t['TOWNHALL'] = "Opština";
+t['ACCINFO'] = "Informacije o nalogu";
+t['NBO'] = "Notes";
+t['MNUL'] = "Izbornik s lijeve strane";
+t['STAT'] = "Statistika";
+t['RESF'] = "Polja resursa";
+t['VLC'] = "Centar sela";
+t['MAPO'] = "Opcije mape";
+t['COLO'] = "Opcije boje";
+t['DBGO'] = "Debug opcije";
+t['HEROSMANSION'] = "Herojska vila";
+t['BLACKSMITH'] = "Kovačnica oružja";
+t['ARMOURY'] = "Kovačnica oklopa";
+t['NOW'] = "Odmah";
+t['CLOSE'] = "Zatvori";
+t['USETHEM1H'] = "Koristi ih (1 satna proizvodnja)";
+t['OVERVIEW'] = "Pregled";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Napadi";
+t['NEWS'] = "Vijesti";
+t['ADDCRTPAGE'] = "Dodaj trenutnu";
+t['SCRPURL'] = "TBeyond";
+t['SPACER'] = "Spacer";
+t['MEREO'] = "Poruke & Izvještaji";
+t['ATTABLES'] = "Vojne tabele";
+t['MTW'] = "Škart";
+t['MTX'] = "Premašuje";
+t['MTC'] = "Trenutni tovar";
+t['ALFL'] = "Link na eksterni forum<br>(Ostaviti prazno za interni forum)";
+t['MTCL'] = "Poništi sve";
+t['CKSORT'] = "Klikni da sortiraš";
+t['MIN'] = "Min";
+t['SVGL'] = "Djeljeno među selima";
+t['VGL'] = "Lista sela";
+t['UPDATEPOP'] = "Ažuriraj populaciju";
+t['EDIT'] = "Uredi";
+t['NPCO'] = "NPC Assistant opcije";
+t['NEWVILLAGEAV'] = "Datum/Vrijeme";
+t['TIMEUNTIL'] = "Vrijeme za sačekajte";
+t['CENTERMAP'] = "Centriraj kartu na ovo selo";
+t['SENDTROOPS'] = "Pošalji vojsku";
+t['PALACE'] = "Dvorac";
+t['RESIDENCE'] = "Rezidencija";
+t['ACADEMY'] = "Akademija";
+t['TREASURY'] = "Zgrada za blago";
+t['USE'] = "Koristi";
+t['CROPFINDER'] = "Crop finder";
+break;
+
+case 'bg': //contributors: NUT 
 t['1'] = "Travian v2.x сървър";
+t['2'] = "Премахни рекламните банери";
+t['3'] = "Изчисли T3.1 Легионери & Фаланги капацитет<br>(за смесени T3.1 & T3.5 сървъри)";
+t['4'] = "Пазар";
+t['5'] = "Сборен пункт/Казарма/Работилница/Конюшня";
+t['6'] = "Кметство/Таверна/Ковачница за оръжия/Ковачница за брони";
+t['7'] = "Дворец/Резиденция/Академия/Съкровишница";
+t['8'] = "Съюз";
+t['9'] = "Покажи допълнителни връзки в лявото меню<br>(Traviantoolbox, World Analyser, Travilog, Map, и т.н.)";
+t['10'] = "Симулатор на битки:<br>(в лявото меню)";
+t['11'] = "Препратка за военни доклади";
+t['12'] = "Покажи 'dorf1.php' и 'dorf2.php' връзки";
+t['13'] = "Покажи \"Карта\" икона";
+t['14'] = "Покажи 'Изпрати войски/Изпрати ресурси' икони в списъка на селото";
+t['15'] = "Покажи дърва, глина, желязо продукция за час в списъка на селото";
+t['16'] = "Покажи ефективната продукция на полетата в списъка на селото";
+t['17'] = "Покажи популацията в списъка на селото";
+t['18'] = "Покажи допълнителни (2 колони) в списъка на селото в отделен прозорец";
+t['19'] = "Покажи информация за сградите в прогрес и движението на войските<br>в списъка на селото";
+t['20'] = "Покажи отметките";
+t['21'] = "Покажи 'Потребителски отметки' в отделен прозорец";
+t['22'] = "Покажи бележка";
+t['23'] = "Покажи 'Бележник' в отделен прозорец";
+t['24'] = "Размер на бележката";
+t['25'] = "Размер бележка - височина";
+t['26'] = "Покажи NPC помошник калкулатор/връзка";
+t['27'] = "Световен анализатор";
+t['28'] = "Покажи връзка към анализатора";
+t['29'] = "Анализатор на картата";
+t['30'] = "Покажи връзки към потребителите в картата";
+t['31'] = "Покажи връзки към съюзите в картата";
+t['32'] = "Покажи 'Лента за търсене'";
+t['33'] = "Покажи 'Лента за търсене' в отделен прозорец";
+t['34'] = "Покажи КР/ден информация в таблицата";
+t['35'] = "Покажи консумацията на сградите в таблицата";
+t['36'] = "Покажи 'Докато/Остатък' калкулатор в надстрой/тренирай таблиците";
+t['37'] = "Покажи таблица с надстройките на ресурсните полета";
+t['38'] = "Покажи цветни нива на ресурсите";
+t['39'] = "Покажи 'Лента на ресурсите' таблица";
+t['40'] = "Покажи 'Лента на ресурсите' таблица в отделен прозорец";
+t['41'] = "Покажи таблица с надстройките на сградите";
+t['42'] = "Сортирай сградите по име в таблицата";
+t['43'] = "Покажи нивата на сградите";
+t['44'] = "Покажи цветни нива на сградите";
+t['45'] = "Покажи мигащи нива на сградите които са надстроени";
+t['46'] = "Покажи допълнителна информация за всеки пристигнал търговец";
+t['48'] = "Брой страници с оферти за презареждане<br>докато е в 'Пазара => Купи' страница<br>(Default = 1)";
+t['49'] = "Сборен пункт нормално действие";
+t['50'] = "Бр. на шпионите за<br>\"Избери шпиони\" функция";
+t['53'] = "Покажи информация за войските в tooltips";
+t['54'] = "Покажи разстоянието и времето до селата в tooltips";
+t['56'] = "Покажи информация за вида/оазиса<br>докато посочвам с мишката върху картата";
+t['57'] = "Покажи разстоянието & времето";
+t['58'] = "Покажи таблица на играчите/селата/превзети оазиси";
+t['59'] = "Брой Съобщения/доклади страници за презареждане<br>(Default = 1)";
+t['60'] = "Покажи връзки към съобщенията/докладите в отворящ се прозорец";
+t['61'] = "Покажи \"Изтрий всички\" таблица в страницата с докладите";
+t['62'] = "Покажи \"Изпрати лично съобщение\" икона за мен също";
+t['63'] = "Покажи  Разширен доклад на битки";
+t['64'] = "Покажи детайли в докладите";
+t['65'] = "Разрешена промяна на цвета<br>(Default = Empty)";
+t['66'] = "Цвят за максимално ниво<br>(Default = Empty)";
+t['67'] = "Невъзможна смяна на цвета<br>(Default = Empty)";
+t['68'] = "Смяна на цвета през NPC<br>(Default = Empty)";
+t['69'] = "Ниво на LOG<br>САМО ЗА ПРОГРАМИСТИ<br>(Default = 0)";
+t['82.L'] = "Заключи отметките (Скрий изтриване, местене нагоре, местене на долу на иконите)";
+t['82.U'] = "Отключи отметките (Покажи изтриване, местене нагоре, местене на долу на иконите)";
+t['U.2'] = "Раса";
+t['U.3'] = "Име на вашата столица<br>Посети твоя профил за обновяване";
+t['U.6'] = "Координати на твоята столица<br>Посети твоя профил за обновяване";
+t['SIM'] = "Симулатор на битки";
+t['QSURE'] = "Сигурни ли сте?";
+t['LOSS'] = "Загуба";
+t['PROFIT'] = "Печалба";
+t['EXTAV'] = "Възможно надстрояване";
+t['PLAYER'] = "Играч";
+t['VILLAGE'] = "Село";
+t['POPULATION'] = "Популация";
+t['COORDS'] = "Координати";
+t['MAPTBACTS'] = "Действия";
+t['SAVED'] = "Промените са запазени";
+t['YOUNEED'] = "Имате нужда от";
+t['TODAY'] = "днес";
+t['TOMORROW'] = "утре";
+t['DAYAFTERTOM'] = "в други ден";
+t['MARKET'] = "Пазар";
+t['BARRACKS'] = "Казарма";
+t['RAP'] = "Сборен пункт";
+t['STABLE'] = "Конюшня";
+t['WORKSHOP'] = "Работилница";
+t['SENDRES'] = "Изпрати ресурси";
+t['BUY'] = "Купи";
+t['SELL'] = "Продай";
+t['SENDIGM'] = "Изпрати лично съобщение";
+t['LISTO'] = "Възможно";
+t['ON'] = "на";
+t['AT'] = "в";
+t['EFICIENCIA'] = "Способност";
+t['NEVER'] = "Никога";
+t['ALDEAS'] = "Село(а)";
+t['TIEMPO'] = "Време";
+t['OFREZCO'] = "Предлагане";
+t['BUSCO'] = "Търсене";
+t['TIPO'] = "Вид";
+t['DISPONIBLE'] = "Само възможните";
+t['CUALQUIERA'] = "Всички";
+t['YES'] = "Да";
+t['NO'] = "Не";
+t['LOGIN'] = "Влизане";
+t['MARCADORES'] = "Отметки";
+t['ANYADIR'] = "Прибавяне";
+t['UBU'] = "Нова отметка URL";
+t['UBT'] = "Нова отметка Текст";
+t['DEL'] = "Изтриване";
+t['MAPA'] = "Карта";
+t['MAXTIME'] = "Максимално време";
+t['ARCHIVE'] = "Архив";
+t['SUMMARY'] = "Общо";
+t['TROPAS'] = "Войски";
+t['CHKSCRV'] = "Обнови TBeyond";
+t['ACTUALIZAR'] = "Обнови информацията за селото";
+t['VENTAS'] = "Запази офертите";
+t['MAPSCAN'] = "Сканирай картата";
+t['BIC'] = "Покажи допълнителни икони";
+t['SAVE'] = "Възможно:";
+t['AT2'] = "Подкрепление";
+t['AT3'] = "Атака: Нормална";
+t['AT4'] = "Атака: Набег";
+t['NBSA'] = "Автоматично";
+t['NBSN'] = "Нормално (малко)";
+t['NBSB'] = "Широк екран (голямо)";
+t['NBHAX'] = "Автоматично уголеми височината";
+t['NBHK'] = "Стандартна височина";
+t['NPCSAVETIME'] = "Запази: ";
+t['TOTALTROOPS'] = "Общо войски за селото";
 t['SELECTALLTROOPS'] = "Маркирай всички войски";
 t['PARTY'] = "Празненства";
 t['CPPERDAY'] = "КР/ден";
@@ -7616,696 +2452,2863 @@ t['SLOT'] = "Слот";
 t['TOTAL'] = "Общо";
 t['SELECTSCOUT'] = "Избери шпионин";
 t['SELECTFAKE'] = "Избери фалшив";
-t['NOSCOUT2FAKE'] = "Не е възможно да използвате шпионин за фалшива атака !";
-t['NOTROOP2FAKE'] = "Няма избрани войски за фалшива атака!";
-t['NOTROOP2SCOUT'] = "Няма налични шпиони!";
-t['NOTROOPS'] = "Няма налични войски !";
 t['ALL'] = "Всички";
 t['SH2'] = "В цветните полета можеш да поставяш:<br>- orange или red или green, и т.н.<br>- HEX цвят пример #004523<br>- остави празно за стандартния цвят";
 t['SOREP'] = "Покажи оригиналния доклад";
-t['56'] = "Покажи информация за вида/оазиса<br>докато посочвам с мишката върху картата";
-t['10'] = "Симулатор на битки:<br>(в лявото меню)";
 t['WSIMO1'] = "Вътрешно (доставено от играта)";
 t['WSIMO2'] = "Външно (доставено от kirilloid.ru)";
-t['27'] = "Световен анализатор";
-t['28'] = "Покажи връзка към анализатора";
 t['NONEWVER'] = "Имате последната възможна версия";
 t['BVER'] = "Вие разполагате с бета версия";
 t['NVERAV'] = "Има нова версия на скрипта";
 t['UPDSCR'] = "Обнови версията на скрипта сега ?";
 t['CHECKUPDATE'] = "Проверка за обновявания.<br>Моля изчакайте...";
-t['CROPFINDER'] = "Търсене на поля";
 t['AVPPV'] = "Средна популация за селото";
 t['AVPPP'] = "Средна популация за играч";
-t['37'] = "Покажи таблица с надстройките на ресурсните полета";
-t['41'] = "Покажи таблица с надстройките на сградите";
-t['69'] = "Ниво на LOG<br>САМО ЗА ПРОГРАМИСТИ<br>(Default = 0)";
-t['48'] = "Брой страници с оферти за презареждане<br>докато е в 'Пазара => Купи' страница<br>(Default = 1)";
-t['U.3'] = 'Име на вашата столица<br>Посети твоя профил за обновяване';
-t['U.6'] = 'Координати на твоята столица<br>Посети твоя профил за обновяване';
-t['MAX'] = 'Максимално';
-t['TOTTRTR'] = 'Общо тренирани единици';
-t['57'] = 'Покажи разстоянието & времето';
-t['TB3SL'] = TB3O.shN + ' Настройка';
-t['UPDALLV'] = 'Обнови за всички села. ИЗПОЛЗВАЙ С МАКСИМАЛНО ВНИМАНИЕ ЗА ДА НЕ БЪДЕШ НАКАЗАН !';
-t['9'] = "Покажи допълнителни връзки в лявото меню<br>(Traviantoolbox, World Analyser, Travilog, Map, и т.н.)";
-t['LARGEMAP'] = 'Голяма карта';
-t['USETHEMPR'] = 'Използвай ги (пропорционално)';
-t['USETHEMEQ'] = 'Използвай ги (по равно)';
-t['TOWNHALL'] = 'Кметство';
-t['GSRVT'] = 'Сървър на играта';
-t['ACCINFO'] = 'Информация за акаунта';
-t['NBO'] = 'Бележник';
-t['MNUL'] = 'Меню от лявата страна';
-t['STAT'] = 'Статистика';
-t['RESF'] = 'Ресурсни полета';
-t['VLC'] = 'Мегдан';
-t['MAPO'] = 'Опции на картата';
-t['COLO'] = 'Опции за цвета';
-t['DBGO'] = 'Debug опции';
-t['4'] = 'Пазар';
-t['5'] = 'Сборен пункт/Казарма/Работилница/Конюшня';
-t['6'] = "Кметство/Таверна/Ковачница за оръжия/Ковачница за брони";
+t['MAX'] = "Максимално";
+t['TOTTRTR'] = "Общо тренирани единици";
+t['TB3SL'] = "$1 Настройка";
+t['UPDALLV'] = "Обнови за всички села. ИЗПОЛЗВАЙ С МАКСИМАЛНО ВНИМАНИЕ ЗА ДА НЕ БЪДЕШ НАКАЗАН !";
+t['LARGEMAP'] = "Голяма карта";
+t['USETHEMPR'] = "Използвай ги (пропорционално)";
+t['USETHEMEQ'] = "Използвай ги (по равно)";
+t['TOWNHALL'] = "Кметство";
+t['GSRVT'] = "Сървър на играта";
+t['ACCINFO'] = "Информация за акаунта";
+t['NBO'] = "Бележник";
+t['MNUL'] = "Меню от лявата страна";
+t['STAT'] = "Статистика";
+t['RESF'] = "Ресурсни полета";
+t['VLC'] = "Мегдан";
+t['MAPO'] = "Опции на картата";
+t['COLO'] = "Опции за цвета";
+t['DBGO'] = "Debug опции";
 t['HEROSMANSION'] = "Таверна";
-t['ARMOURY'] = 'Ковачница за брони';
-t['BLACKSMITH'] = 'Ковачница за оръжия';
-t['NOW'] = 'Сега';
-t['CLOSE'] = 'Затвори';
-t['USE'] = 'Използвай';
-t['USETHEM1H'] = 'Използвай ги (1 часова продукция)';
-t['OVERVIEW'] = 'Общ изглед';
-t['FORUM'] = 'Форум';
-t['ATTACKS'] = 'Атаки';
-t['NEWS'] = 'Новини';
-t['ADDCRTPAGE'] = 'Добави текущо';
-t['SCRPURL'] = 'TBeyond страница';
-t['50'] = 'Бр. на шпионите за<br>"Избери шпиони" функция';
-t['SPACER'] = 'Разстояния';
-t['53'] = 'Покажи информация за войските в tooltips';
-t['MEREO'] = 'Съобщения & Доклади';
-t['59'] = 'Брой Съобщения/доклади страници за презареждане<br>(Default = 1)';
-t['ATTABLES'] = 'Таблица на войските';
-t['MTW'] = 'Налично';
-t['MTX'] = 'В излишък';
-t['MTC'] = 'Текущ товар';
-t['ALFL'] = 'Връзка към форум<br>(Остави празно за вътрешния форум)';
-t['82.L'] = 'Заключи отметките (Скрий изтриване, местене нагоре, местене на долу на иконите)';
-t['MTCL'] = 'Изчисти всички';
-t['82.U'] = 'Отключи отметките (Покажи изтриване, местене нагоре, местене на долу на иконите)';
-t['CKSORT'] = 'Натисни за сортиране';
-t['MIN'] = 'Минимално';
-t['SVGL'] = 'Разпределяне между селата';
-t['VGL'] = 'Списък на селата';
-t['12'] = "Покажи 'dorf1.php' и 'dorf2.php' връзки";
-t['UPDATEPOP'] = 'Обнови популацията';
-t['54'] = 'Покажи разстоянието и времето до селата в tooltips';
-t['EDIT'] = 'Промяна';
-t['NPCO'] = 'NPC опции за помощ';
-t['26'] = 'Покажи NPC помошник калкулатор/връзка';
-t['58'] = 'Покажи таблица на играчите/селата/превзети оазиси';
-t['NEWVILLAGEAV'] = 'Дата/Час';
-t['TIMEUNTIL'] = 'Време за изчакване';
-t['61'] = 'Покажи "Изтрий всички" таблица в страницата с докладите';
-t['62'] = 'Покажи "Изпрати лично съобщение" икона за мен също';
-t['CENTERMAP'] = 'Карта';
-t['13'] = 'Покажи "Карта" икона';
-t['SENDTROOPS'] = 'Изпрати войски';
-t['64'] = 'Покажи детайли в докладите';
-t['7'] = "Дворец/Резиденция/Академия/Съкровишница";
+t['BLACKSMITH'] = "Ковачница за оръжия";
+t['ARMOURY'] = "Ковачница за брони";
+t['NOW'] = "Сега";
+t['CLOSE'] = "Затвори";
+t['USETHEM1H'] = "Използвай ги (1 часова продукция)";
+t['OVERVIEW'] = "Общ изглед";
+t['FORUM'] = "Форум";
+t['ATTACKS'] = "Атаки";
+t['NEWS'] = "Новини";
+t['ADDCRTPAGE'] = "Добави текущо";
+t['SCRPURL'] = "TBeyond страница";
+t['SPACER'] = "Разстояния";
+t['MEREO'] = "Съобщения & Доклади";
+t['ATTABLES'] = "Таблица на войските";
+t['MTW'] = "Налично";
+t['MTX'] = "В излишък";
+t['MTC'] = "Текущ товар";
+t['ALFL'] = "Връзка към форум<br>(Остави празно за вътрешния форум)";
+t['MTCL'] = "Изчисти всички";
+t['CKSORT'] = "Натисни за сортиране";
+t['MIN'] = "Минимално";
+t['SVGL'] = "Разпределяне между селата";
+t['VGL'] = "Списък на селата";
+t['UPDATEPOP'] = "Обнови популацията";
+t['EDIT'] = "Промяна";
+t['NPCO'] = "NPC опции за помощ";
+t['NEWVILLAGEAV'] = "Дата/Час";
+t['TIMEUNTIL'] = "Време за изчакване";
+t['CENTERMAP'] = "Карта";
+t['SENDTROOPS'] = "Изпрати войски";
 t['PALACE'] = "Дворец";
 t['RESIDENCE'] = "Резиденция";
 t['ACADEMY'] = "Академия";
 t['TREASURY'] = "Съкровишница";
-t['45'] = "Покажи мигащи нива на сградите които са надстроени";
-t['14'] = "Покажи 'Изпрати войски/Изпрати ресурси' икони в списъка на селото";
-t['34'] = "Покажи КР/ден информация в таблицата";
 t['UPGTB'] = "Ресурсни полета/сгради таблица";
-t['35'] = "Покажи консумацията на сградите в таблицата";
-t['16'] = "Покажи ефективната продукция на полетата в списъка на селото";
 t['RBTT'] = "Лента на ресурсите";
-t['39'] = "Покажи 'Лента на ресурсите' таблица";
-t['40'] = "Покажи 'Лента на ресурсите' таблица в отделен прозорец";
-t['21'] = "Покажи 'Потребителски отметки' в отделен прозорец";
-t['23'] = "Покажи 'Бележник' в отделен прозорец";
-t['17'] = "Покажи популацията в списъка на селото";
-t['29'] = 'Анализатор на картата';
-t['30'] = 'Покажи връзки към потребителите в картата';
-t['31'] = 'Покажи връзки към съюзите в картата';
-t['63'] = 'Покажи  Разширен доклад на битки';
-t['18'] = 'Покажи допълнителни (2 колони) в списъка на селото в отделен прозорец';
-t['60'] = 'Покажи връзки към съобщенията/докладите в отворящ се прозорец';
-t['42'] = 'Сортирай сградите по име в таблицата';
-t['19'] = 'Покажи информация за сградите в прогрес и движението на войските<br>в списъка на селото';
-t['32'] = "Покажи 'Лента за търсене'";
-t['3'] = 'Изчисли T3.1 Легионери & Фаланги капацитет<br>(за смесени T3.1 & T3.5 сървъри)';
-t['33'] = "Покажи 'Лента за търсене' в отделен прозорец";
-t['36'] = "Покажи 'Докато/Остатък' калкулатор в надстрой/тренирай таблиците";
-t['RESIDUE'] = 'Остатък ако построите ';
-t['RESOURCES'] = 'Ресурси';
+t['USE'] = "Използвай";
+t['RESIDUE'] = "Остатък ако построите ";
+t['RESOURCES'] = "Ресурси";
 t['SH1'] = "Отвори твоя профил за автоматично намиране на столица/координати<br>Построй казарма за автоматично засичане на расата и после отвори мегдана";
-t['46'] = "Покажи допълнителна информация за всеки пристигнал търговец";
-t['2'] = 'Премахни рекламните банери';
-t['15'] = "Покажи дърва, глина, желязо продукция за час в списъка на селото";
-t['11'] = "Препратка за военни доклади";
+t['CROPFINDER'] = "Търсене на поля";
 break;
-case "pl"://by Dzikuska & Signum & llameth
-t['8'] = 'Sojusz';
-t['SIM'] = 'Symulator Walki';
-t['QSURE'] = 'Jesteś pewien?';
-t['LOSS'] = 'Strata';
-t['PROFIT'] = 'Zysk';
-t['EXTAV'] = 'Rozbudowa możliwa';
-t['PLAYER'] = 'Gracz';
-t['VILLAGE'] = 'Osada';
-t['POPULATION'] = 'Populacja';
-t['COORDS'] = 'Koordynaty';
-t['MAPTBACTS'] = 'Akcje';
-t['SAVED'] = 'Zapisane';
-t['YOUNEED'] = 'Potrzebujesz';
-t['TODAY'] = 'Dzisiaj';
-t['TOMORROW'] = 'Jutro';
-t['DAYAFTERTOM'] = 'Pojutrze';
-t['MARKET'] = 'Rynek';
-t['BARRACKS'] = 'Koszary';
-t['RAP'] = 'Miejsce Zbiórki';
-t['STABLE'] = 'Stajnia';
-t['WORKSHOP'] = 'Warsztat';
-t['SENDRES'] = 'Wyślij surowce';
-t['BUY'] = 'Kup';
-t['SELL'] = 'Sprzedaj';
-t['SENDIGM'] = 'Wyślij PW';
-t['LISTO'] = 'Możliwe';
-t['ON'] = 'na';
-t['AT'] = 'o';
-t['EFICIENCIA'] = 'Efektywność';
-t['NEVER'] = 'Nigdy';
-t['ALDEAS'] = 'Osada(y)';
-t['TIEMPO'] = 'Czas';
-t['OFREZCO'] = 'Oferuję';
-t['BUSCO'] = 'Szukam';
-t['TIPO'] = 'Rodzaj';
-t['DISPONIBLE'] = 'Tylko możliwe';
-t['CUALQUIERA'] = 'Jakikolwiek';
-t['YES'] = 'Tak';
-t['NO'] = 'Nie';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Zakładki';
-t['ANYADIR'] = 'Dodaj';
-t['UBU'] = 'Nowa zakładka URL';
-t['UBT'] = 'Nowa zakładka Text';
-t['DEL'] = 'Usuń';
-t['MAPA'] = 'Mapa';
-t['MAXTIME'] = 'Maksimum czasu';
-t['ARCHIVE'] = 'Archiwum';
-t['SUMMARY'] = 'Razem';
-t['TROPAS'] = 'Jednostki';
-t['CHKSCRV'] = 'Uaktualnij TBeyond';
-t['ACTUALIZAR'] = 'Aktualizuj informacje o osadzie';
-t['VENTAS'] = 'Zapisz ofertę';
-t['MAPSCAN'] = 'Skanuj mapę';
-t['BIC'] = 'Pokaż rozszerzone ikony';
-t['22'] = 'Pokaż notatnik';
-t['SAVE'] = 'Zapisz';
-t['49'] = 'Miejsce zbiórki, domyślna akcja';
-t['AT2'] = 'Posiłki';
-t['AT3'] = 'Atak: Normalny';
-t['AT4'] = 'Atak: Grabież';
-t['24'] = 'Notatnik - Rozmiar';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normalny (mały)';
-t['NBSB'] = 'Duży obraz (duży)';
-t['25'] = 'Notatnik - wysokość';
-t['NBHAX'] = 'Automatycznie ustaw wysokość';
-t['NBHK'] = 'Domyślna wysokość';
-t['43'] = 'Pokaż centrum osady';
-t['NPCSAVETIME'] = 'Zapisz: ';
-t['38'] = 'Pokaż kolory poziomu surowców';
-t['44'] = 'Pokaż kolory poziomu budynków';
-t['65'] = 'Kolor: rozbudowa możliwa<br>(Domyślnie  = Brak)';
-t['66'] = 'Kolor: poziomu maksymalnego<br>(Domyślnie  = Brak)';
-t['67'] = 'Kolor: rozbudowa niemożliwa<br>(Domyślnie  = Brak)';
-t['68'] = 'Kolor: rozbudowa przy pomocy NPC<br>(Domyślnie  = Brak)';
-t['TOTALTROOPS'] = 'Wszystkie jednostki';
-t['20'] = 'Pokaż zakładki';
-t['U.2'] = 'Rasa';
+
+case 'br': //contributors: Bruno Guerreiro - brunogc@limao.com.br
 t['1'] = "Travian v2.x server";
-t['SELECTALLTROOPS'] = "Wybierz wszystkie jednostki";
-t['PARTY'] = "Święto";
-t['CPPERDAY'] = "PK/dzień";
-t['SLOT'] = "Miejsce";
-t['TOTAL'] = "Razem";
-t['SELECTSCOUT'] = "Wybierz zwiadowców";
-t['SELECTFAKE'] = "Wybierz fejka";
-t['NOSCOUT2FAKE'] = "Nie można użyć zwiadowcy do wysłania fejka !";
-t['NOTROOP2FAKE'] = "Brak jednostek aby wysłać fejka!";
-t['NOTROOP2SCOUT'] = "Brak jednostek aby wysłać zwiadowcę !";
-t['NOTROOPS'] = "Brak jednostek w osadzie !";
-t['ALL'] = "Wszystko";
-t['SH2'] = "Jako kolor pól możesz wpisać:<br>- <b>green</b> or <b>red</b> or  <b>orange</b>, etc.<br>- lub kod koloru w HEX np. <b>#004523</b><br>- zostaw puste dla domyślnych kolorów";
-t['SOREP'] = "Pokaż oryginalny raport (do publikacji)";
-t['56'] = "Pokaż zawartość i typ doliny<br>kiedy wskażesz myszką";
-t['10'] = "Symulator walki link do:<br>(menu z lewej strony)";
-t['WSIMO1'] = "Wewnętrzny (wbudowany w grę)";
-t['WSIMO2'] = "Zewnętrzny (zrobiony przez kirilloid.ru)";
-t['27'] = "Używany World Analyser ";
-t['28'] = "Pokaż linki statystyki analysera";
-t['NONEWVER'] = "Masz najnowszą wersję";
-t['BVER'] = "Masz wersję beta";
-t['NVERAV'] = "Nowa wersja skryptu jest możliwa do pobrania";
-t['UPDSCR'] = "Uaktualnić skrypt teraz? ?";
-t['CHECKUPDATE'] = "Sprawdzam aktualizację skryptu.<br>Proszę czekać...";
-t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "Średnia populacja wg osady";
-t['AVPPP'] = "Średnia populacja wg gracza";
-t['37'] = "Pokaż tabelkę rozbudowy surowców";
-t['41'] = "Pokaż tabelkę rozbudowy budynków";
+t['4'] = "Mercado";
+t['5'] = "Ponto de encontro/Quartel/Oficina/Cavalaria";
+t['6'] = "Edifício Principaç/Mansão do Herói/Fábrica de Armaduras/Ferreiro";
+t['8'] = "Aliança";
+t['9'] = "Exibir links adicionais no menu esquerdo?<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['12'] = "Mostrar 'dorf1.php' and 'dorf2.php' links";
+t['20'] = "Exibir favoritos";
+t['22'] = "Exibir bloco de anotações";
+t['24'] = "Tamanho do bloco de anotações";
+t['25'] = "Altura do bloco de anotações";
+t['37'] = "Exibir recursos disponíveis para elevar";
+t['38'] = "Exibir cores nos recursos";
+t['41'] = "Exibir construções disponíveis para elevar";
+t['43'] = "Exibir níveis de construção";
+t['44'] = "Exibir cores nos edifícios";
+t['48'] = "Number of offer pages to preload<br>while on the 'Market => Buy' page<br>(Default = 1)";
+t['49'] = "Ação padrão do Ponto de Encontro";
+t['50'] = "Nº de tropas espiãs<br>\"Select scout\" fuction";
+t['53'] = "Mostrar informações de tropas";
+t['57'] = "Exibir distâncias e tempos";
+t['59'] = "Número de mensagens/relatórios por página<br>(Default = 1)";
+t['65'] = "Cores disponíveis<br>(Default = Empty)";
+t['66'] = "Cor de nível máximo<br>(Default = Empty)";
+t['67'] = "Cor de não disponível<br>(Default = Empty)";
+t['68'] = "Cor de atualização via NPC<br>(Default = Empty)";
 t['69'] = "Console Log Level<br>ONLY FOR PROGRAMMERS OR DEBUGGING<br>(Default = 0)";
-t['48'] = "Liczba stron ofert na rynku <br>w zakładce 'Rynek => Kupowanie' Stron<br>(Domyślnie = 1)";
-t['U.3'] = 'Nazwa Twojej stolicy<br><b>Wejdź do swojego profilu w ustawieniach aby zaktualizować</b>';
-t['U.6'] = 'Współrzędne Twojej stolicy<br><b>Wejdź do swojego profilu w ustawieniach aby zaktualizować</b>';
-t['MAX'] = 'Maks.';
-t['TOTTRTR'] = 'Suma szkolonych jednostek';
-t['57'] = 'Pokaż dystans i czas';
-t['UPDALLV'] = 'Uaktualnij wszystkie osady. UŻYWAJ TEGO Z MAKSYMALNĄ ROZWAGĄ. MOŻE DOPROWADZIĆ DO ZABLOKOWANIA KONTA !';
-t['9'] = "Pokaż dodatkowe linki w menu po lewej stronie<br>(Traviantoolbox, World Analyser, Travilog, Map, itp.)";
-t['LARGEMAP'] = 'Duża mapa';
-t['USETHEMPR'] = 'Użyj je  (proporcjonalnie)';
-t['USETHEMEQ'] = 'Użyj je (równe)';
-t['TOWNHALL'] = 'Ratusz';
-t['GSRVT'] = 'Serwer gry';
-t['ACCINFO'] = 'Informacje o koncie';
-t['NBO'] = 'Notatnik';
-t['MNUL'] = 'Menu po lewej stronie';
-t['STAT'] = 'Statystyki';
-t['RESF'] = 'Pola surowców';
-t['VLC'] = 'Centrum osady';
-t['MAPO'] = 'Opcje mapy';
-t['COLO'] = 'Opcje kolorów';
-t['DBGO'] = 'Debug options';
-t['4'] = 'Rynek';
-t['5'] = 'Miejsce zbiórki/koszary/Warsztat/Stajnia';
-t['6'] = "Ratusz/Dwór bohaterów/Kuźnia/Zbrojownia";
-t['HEROSMANSION'] = "Dwór bohaterów";
-t['BLACKSMITH'] = 'Zbrojownia';
-t['ARMOURY'] = 'Kuźnia';
-t['NOW'] = 'Teraz';
-t['CLOSE'] = 'Zamknij';
-t['USE'] = 'Użyj';
-t['USETHEM1H'] = 'Użyj je (1 godzinna  produkcja)';
-t['OVERVIEW'] = 'Ogólne';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Ataki';
-t['NEWS'] = 'Nowości';
-t['ADDCRTPAGE'] = 'Dodaj bieżącą';
-t['SCRPURL'] = 'Strona TBeyond';
-t['50'] = 'Ilość zwiadowców dla funkcji<br>"Wybierz zwiadowców"';
-t['SPACER'] = 'Odstęp';
-t['53'] = 'Pokaż informację o jednostkach w podpowiedziach';
-t['MEREO'] = 'Wiadomości i raporty';
-t['59'] = 'Liczba wiadomości/raportów na stronie  <br>(Domyslnie = 1)';
-t['ATTABLES'] = 'Tabela jednostek';
-t['MTW'] = 'Niewykorzystane';
-t['MTX'] = 'Przekroczenie';
-t['MTC'] = 'Bierząca ładowność';
-t['ALFL'] = 'Link do zewnętrznego forum<br>(Zostaw puste dla wewnętrznego forum)';
-t['82.L'] = 'Zablokuj zakładki (Ukryj usuń, do góry, na dół ikonki)';
-t['MTCL'] = 'Wyczyść wszystko';
-t['82.U'] = 'Odblokuj zakładki (Ukryj usuń, do góry, na dół ikonki)';
-t['CKSORT'] = 'Kliknij aby posortować';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Zapisz również dla innych osad';
-t['VGL'] = 'Lista Osad';
-t['12'] = "Pokaż 'dorf1.php' i 'dorf2.php' linki";
-t['UPDATEPOP'] = 'Aktualizuj populację';
-t['54'] = 'Pokaż odległość i czas dojścia do osady w podpowiedziach';
-t['EDIT'] = 'Edytuj';
-t['NPCO'] = 'Opcje handlarza NPC';
-t['26'] = 'Pokaż kalkulacje handlarza NPC /linki';
-t['NEWVILLAGEAV'] = 'Nowa osada';
-t['58'] = 'Pokaż tabelkę graczy/osad/zdobytych dolin';
-t['NEWVILLAGEAV'] = 'Data/Czas';
-t['TIMEUNTIL'] = 'Pozostało czasu';
-t['61'] = 'Pokaż tabelkę "Usuń wszystko" na stronie z raportami';
-t['62'] = 'Pokaż ikonkę "Wyślij PW" również dla mnie';
-t['CENTERMAP'] = 'Centruj mapę na tej osadzie';
-t['13'] = 'Pokaż ikonkę "Centruj mapę na tej osadzie"';
-t['SENDTROOPS'] = 'Wyślij jednostki';
-t['64'] = 'Pokaż szczegóły statystyk w raporcie';
-t['7'] = "Pałac/Rezydencja/Akademia/Skarbiec";
-t['PALACE'] = "Pałac";
-t['RESIDENCE'] = "Rezydencja";
-t['ACADEMY'] = "Akademia";
-t['TREASURY'] = "Skarbiec";
-t['45'] = "Pokaż poziom budynku który jest aktualnie budowany jako migający";
-t['14'] = "W spisie osad pokaż ikonki 'Wyślij jednostki/Wyślij surowce'";
-t['34'] = "Pokaż PK/dzień w tabelce rozbudowy";
-t['UPGTB'] = "Tabelka rozbudowy Pola surowców/budynków";
-t['35'] = "Pokaż zjadane zboże w tabelce rozbudowy";
-t['60'] = 'Pokaż link do otwarcia wiadomości w okienku';
-t['16'] = "Pokaż rzeczywistą produkcję zboża na liście osad";
-t['RBTT'] = "Tabela surowców";
-t['39'] = "Pokaż 'Tabelę surowców'";
-t['40'] = "Pokaż 'Tabelę surowców' jako 'pływające' okno";
-t['21'] = "Pokaż 'Zakładki' jako 'pływające' okno";
-t['23'] = "Pokaż 'Notatnik' jako 'pływające' okno";
-t['17'] = "Pokaż liczbę ludnosci na liście osad";
-t['29'] = 'Jakiego analizatora map chcesz używać';
-t['30'] = 'Pokaż odwołania do mapy dla graczy';
-t['31'] = ' Pokaż odwołania do mapy dla sojuszy';
-t['63'] = 'Pokaz rozszerzone Raporty Bitewne ';
-t['3'] = 'Wymuś obliczanie liczby Legionistów i Falang wg. wersji T3.1<br>(dla mieszanych serwerów T3.1 & T3.5 – zwykle tylko serwery .de)';
-t['18'] = "Pokaż dodatkową (2-kolumnową) listę osad jako 'pływające okno'";
-t['60'] = 'Pokaż ikonkę pozwalającą otwierać wiadomości/raporty<br>w osobnym okienku (pop-up)';
-t['42'] = 'Sortowanie budynków wg. nazwy w tabeli rozbudowy osady';
-t['46'] = "Wyświetl dodatkowe informacje dla każdego przybywającego handlarza";
-t['47'] = "Pokaż ostatni transport na rynku"; t['51'] = "Pokaż ostatni atak";
-t['52'] = "Pokaż/użyj współrzędnych ostatniego ataku";
-t['55'] = "Automatycznie użyj dostępnych jednostek w wewnętrznym symulatorze bitwy";
-t['57'] = "Pokaż odległości i czasy dojścia jednostek";
-t['61'] = "Pokaż tabelę 'Usuń wszystko' na stronie z raportami";
-//3.8.7.5
-t['RESIDUE'] = "Pozostałe surowce (jeśli wybudujesz)";
-t['RESOURCES'] = "Surowce";
-//3.8.7.6.3
-t['SH1'] = "Otwórz swój profil w celu automatycznego rozpoznania stolicy<br>Wybuduj koszary w celu rozpoznania nacji i przejdź do centrum osady";
-t['RESEND'] = "Wysłać ponownie?";
-//3.8.8.8.9
-t['WSI'] = "Symulator bitwy wbudowany w grę";
-t['TTT'] = "Ogólne podpowiedzi n.t. jednostek/odległości";
+t['82.L'] = "Fechar favoritos (ocultar ícones de edição)";
+t['82.U'] = "Abrir Favoritos (Mostrar ícones de edição)";
+t['U.2'] = "Raça";
+t['U.3'] = "Nome da sua capital<br>Visite seu perfil";
+t['U.6'] = "Coordenadas da sua capital<br>Visite seu perfil";
+t['SIM'] = "Simulador de Combate";
+t['QSURE'] = "Tem certeza?";
+t['LOSS'] = "Perdas";
+t['PROFIT'] = "Lucro";
+t['EXTAV'] = "Recursos suficientes";
+t['PLAYER'] = "Jogador";
+t['VILLAGE'] = "Aldeia";
+t['POPULATION'] = "População";
+t['COORDS'] = "Coords";
+t['MAPTBACTS'] = "Ações";
+t['SAVED'] = "Configurações salvas";
+t['YOUNEED'] = "Você precisa";
+t['TODAY'] = "hoje";
+t['TOMORROW'] = "amanhã";
+t['DAYAFTERTOM'] = "depois de amanhã";
+t['MARKET'] = "Mercado";
+t['BARRACKS'] = "Quartel";
+t['RAP'] = "Enviar tropas";
+t['STABLE'] = "Cavalaria";
+t['WORKSHOP'] = "Oficina";
+t['SENDRES'] = "Enviar recursos";
+t['BUY'] = "Comprar";
+t['SELL'] = "Vender";
+t['SENDIGM'] = "Enviar IGM";
+t['LISTO'] = "Disponível";
+t['ON'] = "em";
+t['AT'] = "as";
+t['EFICIENCIA'] = "Eficiência";
+t['NEVER'] = "Nunca";
+t['ALDEAS'] = "Aldeias";
+t['TIEMPO'] = "Tempo";
+t['OFREZCO'] = "Oferecendo";
+t['BUSCO'] = "Procurando";
+t['TIPO'] = "Tipo";
+t['DISPONIBLE'] = "Somente disponível?";
+t['CUALQUIERA'] = "Qualquer";
+t['YES'] = "Sim";
+t['NO'] = "Não";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Favoritos";
+t['ANYADIR'] = "Adicionar";
+t['UBU'] = "URL do novo favorito";
+t['UBT'] = "Texto do novo favorito";
+t['DEL'] = "Deletar";
+t['MAPA'] = "Mapa";
+t['MAXTIME'] = "Tempo máximo";
+t['ARCHIVE'] = "Arquivo";
+t['SUMMARY'] = "Sumário";
+t['TROPAS'] = "Tropas";
+t['CHKSCRV'] = "Atualizar TBeyond";
+t['ACTUALIZAR'] = "Atualizar informação da aldeia";
+t['VENTAS'] = "Ofertas salvas";
+t['MAPSCAN'] = "Analisar mapa";
+t['BIC'] = "Exibir ícones adicionais";
+t['SAVE'] = "Salvo";
+t['AT2'] = "Reforço";
+t['AT3'] = "Ataque: Normal";
+t['AT4'] = "Ataque: Assalto";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normal (pequeno)";
+t['NBSB'] = "Grande";
+t['NBHAX'] = "Altura automática";
+t['NBHK'] = "Altura padrão";
+t['NPCSAVETIME'] = "Salvo: ";
+t['TOTALTROOPS'] = "Total de tropas da aldeia";
+t['SELECTALLTROOPS'] = "Selecionar todas as tropas";
+t['PARTY'] = "Festividades";
+t['CPPERDAY'] = "CP/dia";
+t['SLOT'] = "Slot";
+t['TOTAL'] = "Total";
+t['SELECTSCOUT'] = "Enviar espiões";
+t['SELECTFAKE'] = "Enviar fakes";
+t['ALL'] = "Todos";
+t['SOREP'] = "Exibir relatório original";
+t['WSIMO1'] = "Interno (provided by the game)";
+t['WSIMO2'] = "Externo (provided by kirilloid.ru)";
+t['NONEWVER'] = "Você tem a última versão instalada.";
+t['BVER'] = "VOcê tem uma versão beta.";
+t['NVERAV'] = "Uma nova versão do script foi encontrada";
+t['UPDSCR'] = "Atualizar script agora ?";
+t['CHECKUPDATE'] = "Checando novas atualizações.<br>Aguarde...";
+t['AVPPV'] = "Média de população por aldeia";
+t['AVPPP'] = "Média de população por jogadores";
+t['MAX'] = "Máximo";
+t['TOTTRTR'] = "Total de tropas sendo treinadas";
+t['TB3SL'] = "Configurações do Script";
+t['UPDALLV'] = "Atualizar todas as aldeias.  UTILIZAR COM O MÁXIMO DE CAUTELA, ESSA FUNÇÃO PODE FAZER SUA CONTA SER BANIDA DO JOGO !";
+t['LARGEMAP'] = "Mapa maior";
+t['USETHEMPR'] = "Usar tudo (proporcional)";
+t['USETHEMEQ'] = "Usar tudo (equilibrar)";
+t['TOWNHALL'] = "Edifício Principal";
+t['NBO'] = "Bloco de anotações";
+t['MNUL'] = "Menu on the left side";
+t['STAT'] = "Statistics";
+t['RESF'] = "Resource fields";
+t['VLC'] = "Centro da Aldeia";
+t['MAPO'] = "Opções de Mapa";
+t['COLO'] = "Opções de Cor";
+t['DBGO'] = "Opções de DEBUG";
+t['HEROSMANSION'] = "Mansão do Herói";
+t['BLACKSMITH'] = "Ferreiro";
+t['ARMOURY'] = "Fábrica de Armaduras";
+t['NOW'] = "Agora";
+t['CLOSE'] = "Fechar";
+t['USETHEM1H'] = "Usar tudo (1 hora de produção)";
+t['OVERVIEW'] = "Visão geral";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "LOG de ataques";
+t['NEWS'] = "Notícias";
+t['ADDCRTPAGE'] = "Adicionar atual";
+t['SCRPURL'] = "TBeyond page";
+t['SPACER'] = "Separador";
+t['MEREO'] = "Mensagens e Relatórios";
+t['ATTABLES'] = "Tabela de tropas";
+t['MTW'] = "Capacidade desperdiçada";
+t['MTX'] = "Capacidade excedida";
+t['MTC'] = "Capacidade utilizada";
+t['ALFL'] = "Link para fórum externo<br>(deixe vazio o fórum interno)";
+t['MTCL'] = "Apagar tudo";
+t['CKSORT'] = "Click to sort";
+t['MIN'] = "Mínimo";
+t['SVGL'] = "Shared among villages";
+t['VGL'] = "Lista de Aldeias";
+t['UPDATEPOP'] = "Atualizar habitantes";
+t['USE'] = "Usar";
+t['RESIDUE'] = "Se construir, sobra";
+t['RESOURCES'] = "Recursos";
+t['CROPFINDER'] = "Localizador de CROPs";
 break;
-case "ba":
-case "hr"://by Nemanja
-t['8'] = 'Alijansa';
-t['SIM'] = 'Simulator borbe';
-t['QSURE'] = 'Da li ste sigurni?';
-t['LOSS'] = 'Gubitak';
-t['PROFIT'] = 'Profit';
-t['EXTAV'] = 'Dostupna ekstenzija';
-t['PLAYER'] = 'Igrač';
-t['VILLAGE'] = 'Selo';
-t['POPULATION'] = 'Populacija';
-t['COORDS'] = 'Koordinate';
-t['MAPTBACTS'] = 'Akcije';
-t['SAVED'] = 'Sačuvano';
-t['YOUNEED'] = 'Potrebno';
-t['TODAY'] = 'danas';
-t['TOMORROW'] = 'sutra';
-t['DAYAFTERTOM'] = 'prekosutra';
-t['MARKET'] = 'Pijaca';
-t['BARRACKS'] = 'Kasarna';
-t['RAP'] = 'Mjesto okupljanja';
-t['STABLE'] = 'Štala';
-t['WORKSHOP'] = 'Radionica';
-t['SENDRES'] = 'Slanje resursa';
-t['BUY'] = 'Kupovina';
-t['SELL'] = 'Prodaja';
-t['SENDIGM'] = 'Pošalji poruku';
-t['LISTO'] = 'Dostupno';
-t['ON'] = 'za';
-t['AT'] = 'u';
-t['EFICIENCIA'] = 'Učinkovitost';
-t['NEVER'] = 'Nikad';
-t['PC'] = 'Kulturalni poeni';
-t['ALDEAS'] = 'Sela';
-t['TIEMPO'] = 'Vrijemo';
-t['OFREZCO'] = 'Nudi';
-t['BUSCO'] = 'Traži';
-t['TIPO'] = 'Tip';
-t['DISPONIBLE'] = 'Dostupno samo';
-t['CUALQUIERA'] = 'Svejedno';
-t['YES'] = 'Da';
-t['NO'] = 'Ne';
-t['LOGIN'] = 'Prijava';
-t['MARCADORES'] = 'Oznake';
-t['ANYADIR'] = 'Dodaj';
-t['UBU'] = 'Dodaj adresu u Oznake';
-t['UBT'] = 'Dodaj tekst u Oznake';
-t['DEL'] = 'Obriši';
-t['MAPA'] = 'Mapa';
-t['MAXTIME'] = 'Maksimalno vrijeme';
-t['ARCHIVE'] = 'Arhiva';
-t['SUMMARY'] = 'Rezime';
-t['TROPAS'] = 'Vojska';
-t['CHKSCRV'] = 'Update';
-t['ACTUALIZAR'] = 'Ažuriraj podatke o selu';
-t['VENTAS'] = 'Spremljenje ponude';
-t['MAPSCAN'] = 'Skeniraj mapu';
-t['BIC'] = 'Prikazuj proširene ikone';
-t['22'] = 'Prikaži notes';
-t['SAVE'] = 'Spremi';
-t['49'] = 'Standardna akcija za<br>mjesto okupljanja';
-t['AT2'] = 'Pojačanje';
-t['AT3'] = 'Napad: normalan';
-t['AT4'] = 'Napad: pljačka';
-t['24'] = 'Veličina notesa';
-t['NBSA'] = 'Automatski';
-t['NBSN'] = 'Normalno (malo)';
-t['NBSB'] = 'Veliki ekran (veliko)';
-t['25'] = 'Visina notesa';
-t['NBHAX'] = 'Automatsko proširenje visine';
-t['NBHK'] = 'Standardna visina';
-t['43'] = 'Prikaži centralne brojeve';
-t['NPCSAVETIME'] = 'Spremi: ';
-t['38'] = 'Prikazuj boje nivoa resursa';
-t['44'] = 'Prikazuj boje nivoa građevine';
-t['65'] = 'Boja dostupne nadogradnje<br>(Zadano = prazno)';
-t['66'] = 'Boja maksimalnog nivoa<br>(Zadano = prazno)';
-t['67'] = 'Boja nemoguće nadogradnje<br>(Zadano = prazno)';
-t['68'] = 'Boja nadogradnje pomoću NPC-a<br>(Zadano = prazno)';
-t['TOTALTROOPS'] = 'Ukupna vojska sela';
-t['20'] = 'Prikaži Oznake';
-t['U.2'] = 'Pleme';
-t['1'] = 'Travian v2.x server';
-t['SELECTALLTROOPS'] = 'Izaberi sve vojnike';
-t['PARTY'] = 'Zabave';
-t['CPPERDAY'] = 'KP/dnevno';
-t['SLOT'] = 'Slot';
-t['TOTAL'] = 'Ukupno';
-t['SELECTSCOUT'] = 'Izaberi izviđača';
-t['SELECTFAKE'] = 'Izaberi lažnjak';
-t['NOSCOUT2FAKE'] = 'Nije moguće koristiti izviđače za lažni napad!';
-t['NOTROOP2FAKE'] = 'Nema jedinica za lažni napad!';
-t['NOTROOP2SCOUT'] = 'Nema jedinica za izviđanje!';
-t['NOTROOPS'] = 'Nema jedinica u selu!';
-t['ALL'] = 'Sve';
-t['SH2'] = 'U polja boje možeš unijeti:<br>- green ili red ili  orange, itd.<br>- HEX (heksadecimalni) kod boje poput #004523<br>- ostaviti prazno za standardnu boju';
-t['SOREP'] = 'Prikaži originalni izvještaj (za postanje)';
-t['56'] = 'Prikazuj podatke o tipu/oazi ćelije pri prelazu miša preko mape';
-t['10'] = 'Simulator borbe koji se koristi: (izbornik lijevo)';
-t['WSIMO1'] = 'Interni (iz igre)';
-t['WSIMO2'] = 'Eksterni (kirilloid.ru)';
-t['27'] = 'Analizator svijeta koji se koristi';
-t['28'] = 'Prikaži statističke linkove analizatora';
-t['NONEWVER'] = 'Imate posljednju dostupnu verziju';
-t['BVER'] = 'Moguće da imate beta verziju';
-t['NVERAV'] = 'Dostupna je nova verzija skripte';
-t['UPDSCR'] = 'Nadograditi odmah?';
-t['CHECKUPDATE'] = 'Provjera nadogradnje skripte.<br>Molimo sačekajte...';
-t['CROPFINDER'] = 'Crop finder';
-t['AVPPV'] = 'Prosječno populacije po selu';
-t['AVPPP'] = 'Prosječno populacije po igraču';
-t['37'] = 'Prikazuj tablicu nadogradnje za polja resursa';
-t['41'] = 'Prikazuj tablicu nadogradnje za infrastrukturu';
-t['69'] = 'Nivo zapisa konzole<br>ONLY FOR PROGRAMMERS(Zadano = 0)';
-t['48'] = 'Proj preučitanih stranica ponude<br>dok ste na stranici za kupovinu => na Pijaci<br>(Zadano = 1)';
-t['U.3'] = 'Naziv glavnog grada<br>Za ažuriranje posjetite vaš profil';
-t['U.6'] = 'Koordinate vašeg glavnog grada<br>Za ažuriranje posjetite vaš profil';
-t['MAX'] = 'Maksimalno';
-t['TOTTRTR'] = 'Ukupno obučavane vojske';
-t['57'] = 'Prikazuj udaljenosti i vremena';
-t['TB3SL'] = TB3O.shN + ' Podešavanje';
-t['UPDALLV'] = 'Ažuriraj sva sela. KORISTITI OPREZNO JER MOŽE DOVESTI DO SUSPENZIJE NALOGA!';
-t['9'] = 'Prikazuj dodatne linkove u lijevom<br>izborniku<br>(Traviantoolbox, World Analyser, Travilog, Map, itd.)';
-t['LARGEMAP'] = 'Velika mapa';
-t['USETHEMPR'] = 'Koristi ih (proporcionalno)';
-t['USETHEMEQ'] = 'Koristi ih (jednako)';
-t['TOWNHALL'] = 'Opština';
-t['ACCINFO'] = 'Informacije o nalogu';
-t['NBO'] = 'Notes';
-t['MNUL'] = 'Izbornik s lijeve strane';
-t['STAT'] = 'Statistika';
-t['RESF'] = 'Polja resursa';
-t['VLC'] = 'Centar sela';
-t['MAPO'] = 'Opcije mape';
-t['COLO'] = 'Opcije boje';
-t['DBGO'] = 'Debug opcije';
-t['4'] = 'Pijaca';
-t['5'] = 'Vojska Mjesto okupljanja/Kasarna/Radionica/Štala';
-t['6'] = 'Opština/Herojska vila/Kovačnica oklopa/Kovačnica oružja';
-t['HEROSMANSION'] = 'Herojska vila';
-t['BLACKSMITH'] = 'Kovačnica oružja';
-t['ARMOURY'] = 'Kovačnica oklopa';
-t['NOW'] = 'Odmah';
-t['CLOSE'] = 'Zatvori';
-t['USE'] = 'Koristi';
-t['USETHEM1H'] = 'Koristi ih (1 satna proizvodnja)';
-t['OVERVIEW'] = 'Pregled';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Napadi';
-t['NEWS'] = 'Vijesti';
-t['ADDCRTPAGE'] = 'Dodaj trenutnu';
-t['SCRPURL'] = 'TBeyond';
-t['50'] = 'Broj izviđača za "Izaberi izviđača" funkciju';
-t['SPACER'] = 'Spacer';
-t['53'] = 'Prikazuj informacije o vojsci na napomenama';
-t['MEREO'] = 'Poruke & Izvještaji';
-t['59'] = 'Broj unaprijed učitanih<br>poruka/izvještaja<br>(Zadano = 1)';
-t['ATTABLES'] = 'Vojne tabele';
-t['MTW'] = 'Škart';
-t['MTX'] = 'Premašuje';
-t['MTC'] = 'Trenutni tovar';
-t['ALFL'] = 'Link na eksterni forum<br>(Ostaviti prazno za interni forum)';
-t['82.L'] = 'Zaključaj Oznake (Sakrij ikone za brisanje i pomjeranje)';
-t['MTCL'] = 'Poništi sve';
-t['82.U'] = 'Otključaj Oznake (Prikaži ikone za brisanje i pomjeranje)';
-t['CKSORT'] = 'Klikni da sortiraš';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Djeljeno među selima';
-t['VGL'] = 'Lista sela';
-t['12'] = "Prikazuj 'dorf1.php' i 'dorf2.php' linkove";
-t['UPDATEPOP'] = 'Ažuriraj populaciju';
-t['54'] = 'Prikazuj udaljenosti i vremena<br>do sela u napomenama';
-t['EDIT'] = 'Uredi';
-t['NPCO'] = 'NPC Assistant opcije';
-t['26'] = 'Prikazuj NPC Assistant kalkulacije/linkove';
-t['58'] = 'Prikaži tabelu igrača/sela/oaza';
-t['NEWVILLAGEAV'] = 'Datum/Vrijeme';
-t['TIMEUNTIL'] = 'Vrijeme za sačekajte';
-t['61'] = 'Prikaži "Izbriši sve" u izvještajima';
-t['62'] = 'Prikaži "Pošalji IGM" ikonu i za mene';
-t['CENTERMAP'] = 'Centriraj kartu na ovo selo';
-t['13'] = 'Prikaži "Centriraj kartu na ovo selo" ikonu';
-t['SENDTROOPS'] = 'Pošalji vojsku';
-t['64'] = 'Prikaži detalje u izvještajima';
-t['7'] = "Dvorac/Rezidencija/Akademija/Zgrada za blago";
-t['PALACE'] = "Dvorac";
-t['RESIDENCE'] = "Rezidencija";
-t['ACADEMY'] = "Akademija";
-t['TREASURY'] = "Zgrada za blago";
-t['60'] = 'Prikazuj linkove na otvorene<br>poruke u pop-upu';
+
+case 'cn': //contributors: 独自疯狂, congxz6688
+t['1'] = "Travian v2.x 服务器";
+t['2'] = "移除广告并回复服务器时间";
+t['3'] = "修正古罗马步兵及方阵兵的负载量（仅适用于部分德服）";
+t['4'] = "市场";
+t['5'] = "集结点/兵营/马厩/工场";
+t['6'] = "市政厅/英雄园/铁匠铺/军械库";
+t['7'] = "皇宫/行宫/研发所/宝库";
+t['8'] = "联盟";
+t['9'] = "在左边的选单显示更多链接<br>(Travilog,Traviantoolbox,TravMap,World Analyser等等.)";
+t['10'] = "左边选单的战斗模拟器链接";
+t['12'] = "显示'dorf1.php'和'dorf2.php'的链接";
+t['13'] = "在村庄旁 显示 \"居中地图\"的图示";
+t['14'] = "在村庄旁显示'发兵/运送资源'的图示";
+t['16'] = "在村庄旁显示粮产余额";
+t['17'] = "在村庄旁显示村庄人口";
+t['18'] = "在悬浮窗显示额外的村庄列表（两列，便于多村切换）";
+t['19'] = "在村庄列表中显示升级、建造及部队移动的信息";
+t['20'] = "显示书签";
+t['21'] = "在悬浮窗显示自定义书签";
+t['22'] = "显示笔记栏";
+t['23'] = "在悬浮窗显示笔记栏";
+t['24'] = "笔记栏大小";
+t['25'] = "笔记栏高度";
+t['26'] = "显示NPC交易的链接和计算";
+t['27'] = "所选用的世界分析";
+t['28'] = "在玩家名称右边显示分析链接";
+t['29'] = "选取地图分析网站";
+t['30'] = "在玩家名称右侧显示分析链接";
+t['31'] = "在联盟名称右侧显示分析链接";
+t['32'] = "显示搜索条";
+t['33'] = "在悬浮窗中显示搜索条";
+t['34'] = "在升级信息中显示文明度变化";
+t['35'] = "在升级信息中显示粮耗变化";
+t['36'] = "在升级列表中显示已存资源及升级后剩余资源";
+t['37'] = "显示资源田升级信息";
+t['38'] = "显示资源田等级颜色";
+t['39'] = "显示仓位统计表";
+t['40'] = "在悬浮窗显示仓位统计表";
+t['41'] = "显示建筑物升级信息";
+t['42'] = "按名称排列建筑升级表（按英文）";
+t['43'] = "显示建筑物等级";
+t['44'] = "显示建筑物等级颜色";
+t['45'] = "闪烁显示正在升级的建筑物等级";
+t['46'] = "运向本村的资源和商队显示附加信息";
+t['48'] = "页数预先加载<br>在 '市场 => 买入' 页面中<br>(默认 = 1 或 空白; 最多 = 5)";
+t['49'] = "集结点的默认行动";
+t['50'] = "利用\"选择侦察兵\"时<br>所派出侦察兵的数量";
+t['53'] = "快速显示士兵数据";
+t['54'] = "在tooltip中显示距离和时间";
+t['56'] = "当鼠标移到时<br>显示村庄种类或绿洲数据";
+t['57'] = "显示距离及时间";
+t['58'] = "在\"karte.php\"显示 玩家/村庄/绿洲 信息";
+t['59'] = "在讯息和报告的页面中<br>预先加载的页数<br>(默认 = 1 或 空白; 最多 = 5)";
+t['60'] = "使用弹出窗口显示报告和消息";
+t['61'] = "在报告页面显示 \"全删除\"的选项";
+t['62'] = "显示 发IGM给自己的图示";
+t['63'] = "显示的强化战报信息";
+t['64'] = "显示战报的详细数据";
+t['65'] = "已可升级的颜色<br>(默认 = 空白)";
+t['66'] = "已达最高等级的颜色<br>(默认 = 空白)";
+t['67'] = "不可升级的颜色<br>(默认 = 空白)";
+t['68'] = "可利用npc交易来升级的颜色<br>(默认 = 空白)";
+t['69'] = "控制台日志等级<br>只适用于程序开发员 或 BUG调试<br>(默认 = 0 or 空白)";
+t['82.L'] = "锁定书签 (隐藏 删除, 移上, 移下的图示)";
+t['82.U'] = "解锁书签 (显示 删除, 移上, 移下的图示)";
+t['U.2'] = "种族";
+t['U.3'] = "主村名称<br>请浏览自己的个人资料来进行自动更新，不要自己修改此栏";
+t['U.6'] = "主村坐标<br>请浏览自己的个人资料来进行自动更新，不要自己修改此栏";
+t['SIM'] = "战斗模拟器";
+t['QSURE'] = "你确定吗?";
+t['LOSS'] = "损失";
+t['PROFIT'] = "获益";
+t['EXTAV'] = "可以升级!";
+t['PLAYER'] = "玩家";
+t['VILLAGE'] = "村庄";
+t['POPULATION'] = "人口";
+t['COORDS'] = "坐标";
+t['MAPTBACTS'] = "行动";
+t['SAVED'] = "已保存";
+t['YOUNEED'] = "您要";
+t['TODAY'] = "今天";
+t['TOMORROW'] = "明天";
+t['DAYAFTERTOM'] = "后天";
+t['MARKET'] = "市场";
+t['BARRACKS'] = "兵营";
+t['RAP'] = "集结点";
+t['STABLE'] = "马厩";
+t['WORKSHOP'] = "工场";
+t['SENDRES'] = "运送资源";
+t['BUY'] = "买";
+t['SELL'] = "卖";
+t['SENDIGM'] = "发送IGM";
+t['LISTO'] = "需要等到";
+t['ON'] = "-";
+t['AT'] = "-";
+t['EFICIENCIA'] = "效率";
+t['NEVER'] = "仓位不足，无法实现";
+t['ALDEAS'] = "村庄";
+t['TIEMPO'] = "时间";
+t['OFREZCO'] = "提供";
+t['BUSCO'] = "搜索";
+t['TIPO'] = "比例";
+t['DISPONIBLE'] = "忽略过少物资";
+t['CUALQUIERA'] = "所有";
+t['YES'] = "是";
+t['NO'] = "否";
+t['LOGIN'] = "登入";
+t['MARCADORES'] = "书签";
+t['ANYADIR'] = "加入";
+t['UBU'] = "新书签网址";
+t['UBT'] = "新书签标题(只限英文及数字)";
+t['DEL'] = "删除";
+t['MAPA'] = "TravMap";
+t['MAXTIME'] = "最大运输时间";
+t['ARCHIVE'] = "保存";
+t['SUMMARY'] = "概要";
+t['TROPAS'] = "军队";
+t['CHKSCRV'] = "检查更新";
+t['ACTUALIZAR'] = "更新此村庄的数据";
+t['VENTAS'] = "卖出纪录";
+t['MAPSCAN'] = "扫描此地图";
+t['BIC'] = "显示更多快捷图标";
+t['SAVE'] = "保存";
+t['AT2'] = "增援";
+t['AT3'] = "攻击：普通";
+t['AT4'] = "攻击：抢夺";
+t['NBSA'] = "自动";
+t['NBSN'] = "普通 (细)";
+t['NBSB'] = "大画面 (大)";
+t['NBHAX'] = "高度自动伸展";
+t['NBHK'] = "基本高度";
+t['NPCSAVETIME'] = "资源满足需时：";
+t['TOTALTROOPS'] = "此村庄的士兵总数";
+t['SELECTALLTROOPS'] = "选择全部士兵";
+t['PARTY'] = "活动";
+t['CPPERDAY'] = "文明点（每天）";
+t['SLOT'] = "扩张";
+t['TOTAL'] = "总数";
+t['SELECTSCOUT'] = "选择侦察兵";
+t['SELECTFAKE'] = "选择佯攻";
+t['ALL'] = "全部";
+t['SH2'] = "在字段中，你可输入：<br>- green 或 red 或 orange, 等等...<br>- 也可输入颜色的16进制码，如 #004523<br>- 也可以什么也不填来用默认颜色";
+t['SOREP'] = "显示原始报告";
+t['WSIMO1'] = "内置 (由游戏所提供)";
+t['WSIMO2'] = "外部 (由kirilloid.ru提供)";
+t['NONEWVER'] = "你正在使用最新版本";
+t['NVERAV'] = "已有新版本插件推出了，";
+t['UPDSCR'] = "要进行更新吗？";
+t['CHECKUPDATE'] = "正在检查插件更新，请等等...";
+t['AVPPV'] = "平均每村人口";
+t['AVPPP'] = "平均每玩家人口";
+t['MAX'] = "最多";
+t['TOTTRTR'] = "所有正在训练的士兵";
+t['TB3SL'] = "TB设置";
+t['UPDALLV'] = "更新所有村庄。(有可能导致账号被锁)";
+t['LARGEMAP'] = "大地图";
+t['USETHEMPR'] = "派出所有商人 (按资源比例分配)";
+t['USETHEMEQ'] = "派出所有商人 (平均分配)";
+t['TOWNHALL'] = "市政厅";
+t['GSRVT'] = "游戏服务器";
+t['ACCINFO'] = "个人资料";
+t['NBO'] = "笔记栏";
+t['MNUL'] = "左边选单";
+t['STAT'] = "统计";
+t['RESF'] = "村落概貌";
+t['VLC'] = "村庄中心";
+t['MAPO'] = "地图设定";
+t['COLO'] = "颜色设定";
+t['DBGO'] = "调试设定";
+t['HEROSMANSION'] = "英雄园";
+t['BLACKSMITH'] = "铁匠铺";
+t['ARMOURY'] = "军械库";
+t['NOW'] = "现在";
+t['CLOSE'] = "关闭";
+t['USETHEM1H'] = "派出所有商人 (资源1小时产量)";
+t['OVERVIEW'] = "概要";
+t['FORUM'] = "论坛";
+t['ATTACKS'] = "攻击";
+t['NEWS'] = "新闻";
+t['ADDCRTPAGE'] = "加入本页";
+t['SCRPURL'] = "TB脚本支持";
+t['SPACER'] = "分隔线";
+t['MEREO'] = "讯息&报告";
+t['ATTABLES'] = "军队的列表";
+t['MTW'] = "浪费负载";
+t['MTX'] = "超载量";
+t['MTC'] = "现时总搬运数";
+t['ALFL'] = "链接到外置论坛<br>(留空来使用内置论坛)";
+t['MTCL'] = "全部清除";
+t['CKSORT'] = "点击来排序";
+t['MIN'] = "最少";
+t['SVGL'] = "分享记录到其村庄";
+t['VGL'] = "村庄列表";
+t['UPDATEPOP'] = "更新人口数据";
+t['EDIT'] = "修改";
+t['NPCO'] = "NPC交易选项";
+t['NEWVILLAGEAV'] = "日期";
+t['TIMEUNTIL'] = "需要等待的时间";
+t['CENTERMAP'] = "此村庄居中的地图";
+t['SENDTROOPS'] = "出兵";
+t['PALACE'] = "皇宫";
+t['RESIDENCE'] = "行宫";
+t['ACADEMY'] = "研发所";
+t['TREASURY'] = "宝库";
+t['UPGTB'] = "资源田和建筑物的升级信息表";
+t['RBTT'] = "仓位统计表";
+t['USE'] = "送出";
+t['RESIDUE'] = "升级后剩余资源";
+t['RESOURCES'] = "升级时已存资源";
+t['CROPFINDER'] = "找田助手";
 break;
-case "ir"://by mohammad6006 & Reza_na
+
+case 'cz': //contributors: Rypi, JiriK
+t['1'] = "Travian verze 2.x";
+t['2'] = "Odstranit reklamní bannery";
+t['3'] = "Vynutit výpočty kapacit Legionářů a Falang jako v T3.1<br>(pro smíšené servery T3.1 & T3.5)";
+t['4'] = "Tržiště";
+t['5'] = "Shromaždiště/Kasárny/Dílny/Stáje";
+t['6'] = "Radnice/Hrdinský dvůr/Zbrojnice/Kovárna";
+t['7'] = "Palác/Rezidence/Akademie/Pokladnice";
+t['8'] = "Aliance";
+t['9'] = "Zobrazit odkazy v levém menu<br>(Traviantoolbox, World Analyser, Travilog, Mapa atd.)";
+t['10'] = "Bitevní simulátor:<br>(levé menu)";
+t['12'] = "Zobrazit odkazy 'dorf1.php' a 'dorf2.php'";
+t['13'] = "Zobrazit ikonu 'Vycentruj mapu na tuto vesnici'";
+t['14'] = "Zobrazit ikonu 'Poslat jednotky/suroviny' v seznamu vesnic";
+t['16'] = "Zobrazit produkci obilí v seznamu vesnic";
+t['17'] = "Zobrazit populaci v seznamu vesnic";
+t['20'] = "Zobrazit záložky";
+t['21'] = "Zobrazit 'záložky' jako okno";
+t['22'] = "Zobrazit poznámkový blok";
+t['23'] = "Zobrazit 'poznámkový blok' jako okno";
+t['24'] = "Velikost poznámkového bloku";
+t['25'] = "Výška poznámkového bloku";
+t['26'] = "Zobrazit NPC pomocníky (výpočty a odkazy)";
+t['27'] = "Analyser:";
+t['28'] = "Zobrazit odkaz na analyser";
+t['29'] = "Mapy k použití";
+t['30'] = "Zobrazit odkazy na mapu pro hráče";
+t['31'] = "Zobrazit odkazy na mapu pro aliance";
+t['34'] = "Zobrazit KB/den v tabulce staveb";
+t['35'] = "Zobrazit spotřebu obilí v tabulce staveb";
+t['37'] = "Zobrazit tabulku rozšíření polí";
+t['38'] = "Obarvit úrovně polí";
+t['39'] = "Zobrazit tabulku 'suroviny'";
+t['40'] = "Zobrazit tabulku 'suroviny' jako okno";
+t['41'] = "Zobrazit tabulku rozšíření budov";
+t['43'] = "Zobrazit úrovně budov";
+t['44'] = "Obarvit úrovně budov";
+t['45'] = "Zobrazit blikající levely pro budovy, které se staví";
+t['48'] = "Počet kontrolovaných stránek<br>na 'Tržiště => Koupit'<br>(Výchozí= 1)";
+t['49'] = "Výchozí vojenská akce";
+t['50'] = "Počet špehů při použití<br>funkce poslat špehy";
+t['53'] = "Informace o jednotkách při najetí myší";
+t['54'] = "Zobrazit vzdálenosti a časy při najetí myší";
+t['56'] = "Zobrazit typ vesnic<br>při najetí myší na mapu";
+t['57'] = "Zobrazit vzdálenosti a časy";
+t['58'] = "Zobrazit tabulku hráčů/vesnic/oáz";
+t['59'] = "Počet stránek zpráv/reportů k načtení<br>(Výchozí= 1)";
+t['60'] = "Zobrazit odkaz pro otevření zprávy v novém okně.";
+t['61'] = "Zobrazit tabulku \"Smazat vše\" na stránce s reporty";
+t['62'] = "Zobrazit \"Poslat zprávu\" i pro mě";
+t['64'] = "Zobrazit detaily ve statistice reportu";
+t['65'] = "Možnost vylepšení (barva)<br>(Nezadáno = Výchozí)";
+t['66'] = "Maximální úroveň (barva)<br>(Nezadáno = Výchozí)";
+t['67'] = "Vylepšení nemožné (barva)<br>(Nezadáno = Výchozí)";
+t['68'] = "Vylepšení pomocí NPC (barva)<br>(Nezadáno = Výchozí)";
+t['69'] = "Console Log Level<br>ONLY FOR PROGRAMMERS OR DEBUGGING<br>(Výchozí= 0)";
+t['82.L'] = "Uzamknout záložky (skryje ikony smazat a přesunout)";
+t['82.U'] = "Odemknout záložky (zobrazí ikony smazat a přesunout)";
+t['U.2'] = "Národ";
+t['U.3'] = "Jméno hlavní vesnice<br><b>Pro aktualizaci navštiv svůj profil</b>";
+t['U.6'] = "Souřadnice hlavní vesnice<br><b>Pro aktualizaci navštiv svůj profil</b>";
+t['SIM'] = "Bitevní simulátor";
+t['QSURE'] = "Jsi si jistý?";
+t['LOSS'] = "Materiální ztráta";
+t['PROFIT'] = "Výnos";
+t['EXTAV'] = "Rozšířit";
+t['PLAYER'] = "Hráč";
+t['VILLAGE'] = "Vesnice";
+t['POPULATION'] = "Populace";
+t['COORDS'] = "Souřadnice";
+t['MAPTBACTS'] = "Akce";
+t['SAVED'] = "Uloženo";
+t['YOUNEED'] = "Potřebuješ:";
+t['TODAY'] = "dnes";
+t['TOMORROW'] = "zítra";
+t['DAYAFTERTOM'] = "pozítří";
+t['MARKET'] = "Tržiště";
+t['BARRACKS'] = "Kasárny";
+t['RAP'] = "Shromaždiště";
+t['STABLE'] = "Stáje";
+t['WORKSHOP'] = "Dílna";
+t['SENDRES'] = "Poslat suroviny";
+t['BUY'] = "Koupit";
+t['SELL'] = "Prodat";
+t['SENDIGM'] = "Poslat zprávu";
+t['LISTO'] = "Dostupné";
+t['ON'] = "v";
+t['AT'] = "v";
+t['EFICIENCIA'] = "Efektivita";
+t['NEVER'] = "Nikdy";
+t['ALDEAS'] = "Vesnic";
+t['TIEMPO'] = "Čas";
+t['OFREZCO'] = "Nabízí";
+t['BUSCO'] = "Hledá";
+t['TIPO'] = "Poměr";
+t['DISPONIBLE'] = "Pouze dostupné";
+t['CUALQUIERA'] = "Cokoli";
+t['YES'] = "Ano";
+t['NO'] = "Ne";
+t['LOGIN'] = "Přihlášení";
+t['MARCADORES'] = "Záložky";
+t['ANYADIR'] = "Přidat";
+t['UBU'] = "URL odkazu";
+t['UBT'] = "Název záložky";
+t['DEL'] = "Odstranit";
+t['MAPA'] = "Mapa";
+t['MAXTIME'] = "Maximální čas";
+t['ARCHIVE'] = "Archiv";
+t['SUMMARY'] = "Souhrn";
+t['TROPAS'] = "Vojsko";
+t['CHKSCRV'] = "Aktualizuj TBeyond";
+t['ACTUALIZAR'] = "Aktualizovat informace o vesnici";
+t['VENTAS'] = "Nabídky tržiště (neměnit)";
+t['MAPSCAN'] = "Prohledat mapu";
+t['BIC'] = "Zobrazení rozšiřujících ikon";
+t['SAVE'] = "Uložit";
+t['AT2'] = "Podpora";
+t['AT3'] = "Normální";
+t['AT4'] = "Loupež";
+t['NBSA'] = "Automatická";
+t['NBSN'] = "Malý";
+t['NBSB'] = "Velký";
+t['NBHAX'] = "Automatická výška";
+t['NBHK'] = "Výchozí výška";
+t['NPCSAVETIME'] = "Ušetříš: ";
+t['TOTALTROOPS'] = "Všechny jednotky vyrobené ve vesnici";
+t['SELECTALLTROOPS'] = "Všechny jednotky";
+t['PARTY'] = "Slavnosti";
+t['CPPERDAY'] = "KB/den";
+t['SLOT'] = "Sloty";
+t['TOTAL'] = "Celkem";
+t['SELECTSCOUT'] = "Špehy";
+t['SELECTFAKE'] = "Fake";
+t['ALL'] = "Vše";
+t['SH2'] = "Barvy můžeš zadat jako:<br>- <b>green</b> , <b>red</b> nebo <b>orange</b> atd.<br>- HEX kód barvy např. <b>#004523</b><br>- nechat prázdné pro výchozí barvu";
+t['SOREP'] = "Zobrazit originální report";
+t['WSIMO1'] = "Interní (travian.cz)";
+t['WSIMO2'] = "Externí (kirilloid.ru)";
+t['NONEWVER'] = "Máš poslední dostupnou verzi";
+t['BVER'] = "Patrně máš betaverzi";
+t['NVERAV'] = "Je dostupná nová verze";
+t['UPDSCR'] = "Aktualizovat nyní?";
+t['CHECKUPDATE'] = "Kontroluji novou verzi.<br>Prosím čekej...";
+t['AVPPV'] = "Průměrná populace vesnic";
+t['AVPPP'] = "Průměrná populace hráčů";
+t['MAX'] = "Maximum";
+t['TOTTRTR'] = "Celkem jednotek ve výcviku";
+t['TB3SL'] = "Nastavení $1";
+t['UPDALLV'] = "Aktualizovat všechny vesnice. POUŽÍVEJ VELMI OPATRNĚ! MŮŽE VÉST K ZABLOKOVÁNÍ ÚČTU!";
+t['LARGEMAP'] = "Velká mapa";
+t['USETHEMPR'] = "Rozdělit (proportional)";
+t['USETHEMEQ'] = "Rozdělit (equal)";
+t['TOWNHALL'] = "Radnice";
+t['GSRVT'] = "Nastavení serveru";
+t['ACCINFO'] = "Nastavení hráče <b>Čeština: <a href=\"http://www.rypi.cz\">Rypi</a></b>";
+t['NBO'] = "Nastavení poznámkového bloku";
+t['MNUL'] = "Nastavení levého menu";
+t['STAT'] = "Nastavení statistik";
+t['RESF'] = "Nastavení surovinových polí";
+t['VLC'] = "Nastavení centra vesnice";
+t['MAPO'] = "Nastavení mapy";
+t['COLO'] = "Nastavení barev";
+t['DBGO'] = "Nastavení ladění (pouze pro programátory)";
+t['HEROSMANSION'] = "Hrdinský dvůr";
+t['BLACKSMITH'] = "Kovárna";
+t['ARMOURY'] = "Zbrojnice";
+t['NOW'] = "Teď";
+t['CLOSE'] = "Zavřít";
+t['USETHEM1H'] = "Rozdělit (1 hodinová produkce)";
+t['OVERVIEW'] = "Přehled";
+t['FORUM'] = "Fórum";
+t['ATTACKS'] = "Útoky";
+t['NEWS'] = "Novinky";
+t['ADDCRTPAGE'] = "Přidat aktuální stránku";
+t['SCRPURL'] = "Stránka TBeyond";
+t['SPACER'] = "Oddělovač";
+t['MEREO'] = "Zprávy & Reporty";
+t['ATTABLES'] = "Přehled jednotek";
+t['MTW'] = "Zbývá";
+t['MTX'] = "Přebývá";
+t['MTC'] = "Současný náklad";
+t['ALFL'] = "Odkaz na externí fórum<br>(nevyplněno = interní fórum)";
+t['MTCL'] = "Vyčistit vše";
+t['CKSORT'] = "Klikni pro seřazení";
+t['MIN'] = "Min";
+t['SVGL'] = "Pro všechny vesnice";
+t['VGL'] = "Seznam vesnic";
+t['UPDATEPOP'] = "Aktualizovat populaci";
+t['EDIT'] = "Upravit";
+t['NPCO'] = "Nastavení NPC pomocníka";
+t['NEWVILLAGEAV'] = "Datum/čas";
+t['TIMEUNTIL'] = "Čas čekání";
+t['CENTERMAP'] = "Vycentruj mapu kolem této vesnice";
+t['SENDTROOPS'] = "Poslat jednotky";
+t['PALACE'] = "Palác";
+t['RESIDENCE'] = "Rezidence";
+t['ACADEMY'] = "Akademie";
+t['TREASURY'] = "Pokladnice";
+t['UPGTB'] = "Tabulka vylepšení surovinových polí/budov";
+t['RBTT'] = "Tabulka surovin";
+t['USE'] = "Použít";
+t['CROPFINDER'] = "Vyhledávač MC";
+break;
+
+case 'de': //contributors: ms99
+t['1'] = "Travian v2.x Server";
+t['2'] = "Banners entfernen";
+t['3'] = "T3.1 Tragekapazität für Legionär & Phalanx erzwingen<br>(für T3.1 & T3.5 Spieleserver)";
+t['4'] = "Marktplatz";
+t['5'] = "Versammlungsplatz/Kaserne/Stall/Werkstatt";
+t['6'] = "Rathaus/Heldenhof/Rüstungs-/Waffenschmiede";
+t['7'] = "Palast/Residenz/Akademie/Schatzkammer";
+t['8'] = "Allianz";
+t['9'] = "Zusätzliche Links im linken Menü anzeigen<br />(Traviantoolbox, World Analyser, Travilog, Map, usw.)";
+t['10'] = "Option Kampfsimulatorlink";
+t['11'] = "Option Sitelink für das Hochladen der Reports";
+t['12'] = "Zeige die Links 'dorf1.php' und 'dorf2.php' an";
+t['13'] = "Zeige \"Zentriere Karte auf dieses Dorf\" Icon an";
+t['14'] = "Zeige 'Truppen schicken/Rohstoffe verschicken' Icons in der Liste der D&ouml;rfer an";
+t['15'] = "Zeige Produktion von Holz, Lehm, Eisen pro Stunde in der Liste der Dörfer an";
+t['16'] = "Zeige effektive Getreide-Produktion in the Liste der D&ouml;fer an";
+t['17'] = "Zeige Anzahl der Einwohner in der Liste der D&ouml;rfer an";
+t['18'] = "Zeige eine zusätzliche Dörferliste (2 Spalten) als Floating-Fenster an";
+t['19'] = "Zeige Informationen über Gebäude die ausgebaut werden und<br>Truppenbewegungen in der Liste der Dörfer";
+t['20'] = "Lesezeichen anzeigen";
+t['21'] = "Zeige 'User Bookmarks' als Floating-Fenster an";
+t['22'] = "Notizblock anzeigen";
+t['23'] = "Zeige 'NoteBlock' als Floating-Fenster an";
+t['24'] = "Grösse Notizblock";
+t['25'] = "Notizblock: Höhe";
+t['26'] = "NPC Assistent Kalkulation/Links anzeigen";
+t['27'] = "Benutze World Analyser";
+t['28'] = "World Analyser Statistiklinks anzeigen";
+t['29'] = "Option Karten-Analyser";
+t['30'] = "Links zur Karte anzeigen - Spieler";
+t['31'] = "Links zur Karte anzeigen - Allianzen";
+t['32'] = "Zeige 'Suche-Bar' an";
+t['33'] = "Zeige 'Suche-Bar' als Floating-Fenster an";
+t['34'] = "Zeige KP/Tag Info in den Upgradetabellen an";
+t['35'] = "Zeige Getreide-Verbrauch in Upgradetabellen an";
+t['36'] = "Zeige 'Am/Rest' Kalkulation in Upgrade/Ausbildungstabellen an";
+t['37'] = "Upgradetabelle f&uuml;r Resifelder anzeigen";
+t['38'] = "Ressilevel Farbcode anzeigen";
+t['39'] = "Zeige die Ressi-Bar an";
+t['40'] = "Zeige 'Ressi-Bar' als Floating-Fenster an";
+t['41'] = "Upgradetabelle f&uuml;r Gebäude anzeigen";
+t['42'] = "Sortiere Gebäude nach Name in der Upgradetabelle";
+t['43'] = "Levels im Dorfzentrum anzeigen";
+t['44'] = "Gebäudelevel Farbcode anzeigen";
+t['45'] = "Blinkende Levels für Gebäude die gerade ausgebaut werden";
+t['46'] = "Zeige zus&auml;tzliche Infos für jede Händlerankunft";
+t['48'] = "Anzahl der Angebotsseiten auf der 'Markt => Kaufen' Seite,<br />die vom Server automatisch runtergeladen werden sollen (Standard = 1)";
+t['49'] = "Standard Aktion Versammlungsplatz";
+t['50'] = "Anzahl der Späher für die \"Späher auswählen\" Funktion";
+t['53'] = "Truppeninformationen anzeigen (in Informations-Boxen)";
+t['54'] = "Zeige Entfernung & Zeiten zu den Dörfern in ToolTips an";
+t['56'] = "Zelltyp auf der Karte anzeigen wenn Mauszeiger &uuml;ber Zelle";
+t['57'] = "Entfernungen & Zeiten anzeigen";
+t['58'] = "Tabelle der Spieler/Dörfer/besetzte Oasen anzeigen";
+t['59'] = "Anzahl der \"Nachrichten & Berichte\" Seiten<br />die vom Server automatisch runtergeladen werden sollen (Standard = 1)";
+t['60'] = "Links um IGMs/KB in Pop-ups zu öffnen anzeigen";
+t['61'] = "\"Alle löschen\" Tabelle auf Berichte Seite anzeigen";
+t['62'] = "Zeige das \"Sende IGM\" Icon auch f&uuml;r mich an";
+t['63'] = "Zeige  erweiterte Kampfreports";
+t['64'] = "Details in Berichte Statistiken anzeigen";
+t['65'] = "Farbe \"Upgrade möglich\"";
+t['66'] = "Farbe \"Max Level\"";
+t['67'] = "Farbe \"Upgrade nicht möglich\"";
+t['68'] = "Farbe \"Upgrade via NPC\"";
+t['69'] = "Log Level Konsole - Nur f&uuml;r Programmierer (Standard = 0)";
+t['82.L'] = "Lesezeichen sperren (Die Icons werden ausgeblendet)";
+t['82.U'] = "Lesezeichen entsperren (Die Icons fürs Löschen und sortieren werden wieder angezeigt)";
+t['U.2'] = "Volk";
+t['U.3'] = "Name des Hauptdorfs";
+t['U.6'] = "Koordinaten des Hauptdorfs";
+t['SIM'] = "Kampfsimulator";
+t['QSURE'] = "Sind Sie sicher?";
+t['LOSS'] = "Rohstoff-Verluste";
+t['PROFIT'] = "Rentabilit&auml;t";
+t['EXTAV'] = "Ausbau m&ouml;glich";
+t['PLAYER'] = "Spieler";
+t['VILLAGE'] = "Dorf";
+t['POPULATION'] = "Einwohner";
+t['COORDS'] = "Koordinaten";
+t['MAPTBACTS'] = "Aktion";
+t['SAVED'] = "Gespeichert";
+t['YOUNEED'] = "Ben&ouml;tige";
+t['TODAY'] = "heute";
+t['TOMORROW'] = "morgen";
+t['DAYAFTERTOM'] = "&uuml;bermorgen";
+t['MARKET'] = "Marktplatz";
+t['BARRACKS'] = "Kaserne";
+t['RAP'] = "Versammlungsplatz";
+t['STABLE'] = "Stall";
+t['WORKSHOP'] = "Werkstatt";
+t['SENDRES'] = "H&auml;ndler schicken";
+t['BUY'] = "Kaufen";
+t['SELL'] = "Verkaufen";
+t['SENDIGM'] = "IGM schreiben";
+t['LISTO'] = "Genug";
+t['ON'] = "";
+t['AT'] = "um";
+t['EFICIENCIA'] = "Effektivität";
+t['NEVER'] = "Nie";
+t['ALDEAS'] = "Dörfer";
+t['TIEMPO'] = "Zeit";
+t['OFREZCO'] = "Biete";
+t['BUSCO'] = "Suche";
+t['TIPO'] = "Tauschverhältnis";
+t['DISPONIBLE'] = "Nur annehmbare Angebote";
+t['CUALQUIERA'] = "Beliebig";
+t['YES'] = "Ja";
+t['NO'] = "Nein";
+t['MARCADORES'] = "Lesezeichen";
+t['ANYADIR'] = "Hinzuf&uuml;gen";
+t['UBU'] = "Lesezeichen URL";
+t['UBT'] = "Lesezeichen Text";
+t['DEL'] = "Entfernen";
+t['MAPA'] = "Karte";
+t['MAXTIME'] = "Maximale Dauer";
+t['ARCHIVE'] = "Archiv";
+t['SUMMARY'] = "Zusammenfassung";
+t['CHKSCRV'] = "Update TBeyond";
+t['ACTUALIZAR'] = "Update Dorf Info";
+t['VENTAS'] = "Gespeicherte Angebote";
+t['BIC'] = "Zusätzliche Icons";
+t['SAVE'] = "Speichern";
+t['AT2'] = "Unterstützung";
+t['AT3'] = "Angriff: Normal";
+t['AT4'] = "Angriff: Raubzug";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normal (klein)";
+t['NBSB'] = "Breiter Monitor (breit)";
+t['NBHAX'] = "Höhe automatisch anpassen";
+t['NBHK'] = "Standard Höhe";
+t['NPCSAVETIME'] = "Zeitgewinn";
+t['TOTALTROOPS'] = "Truppen dieses Dorfes";
+t['SELECTALLTROOPS'] = "Alle Truppen ausw&auml;hlen";
+t['PARTY'] = "Feste";
+t['CPPERDAY'] = "KPs/Tag";
+t['SLOT'] = "Slots";
+t['SELECTSCOUT'] = "Späher auswählen";
+t['SELECTFAKE'] = "Fake Truppen auswählen";
+t['ALL'] = "Alles";
+t['SH2'] = "Was man in Farbfelder eintragen kann:<br>- (Englisch) <b>green</b> oder <b>red</b> oder <b>orange</b>, etc.<br>- HEX Farbkod, z.B. <b>#004523</b><br>- leer für Standardfarbe";
+t['SOREP'] = "Original Bericht anzeigen";
+t['WSIMO1'] = "Intern (vom Spiel zur Verfügung gestellt)";
+t['WSIMO2'] = "Extern (von der kirilloid.ru Seite)";
+t['NONEWVER'] = "Sie haben die letzte Version installiert";
+t['BVER'] = "Sie haben vielleicht eine Beta Version installiert";
+t['NVERAV'] = "Eine neue Version des Scripts steht zur Verfügung";
+t['UPDSCR'] = "Script jetzt aktualisieren ?";
+t['CHECKUPDATE'] = "Es wird nach einer neuen Scriptversion gesucht.<br>Bitte warten...";
+t['AVPPV'] = "Durchschnitt: Bewohner/Dorf";
+t['AVPPP'] = "Durchschnitt: Bewohner/Spieler";
+t['TOTTRTR'] = "Total Truppen in Ausbildung";
+t['TB3SL'] = "$1 Einstellungen";
+t['UPDALLV'] = "Alle Dörfer aktualisieren. BITTE MIT VORSICHT BENUTZEN, DIES KÖNNTE ZUR SPERRUNG DES ACCOUNTS FÜHREN !";
+t['LARGEMAP'] = "Große Karte";
+t['USETHEMPR'] = "Rohstoffe proportional verteilen";
+t['USETHEMEQ'] = "Rohstoffe gleichmäßig verteilen";
+t['TOWNHALL'] = "Rathaus";
+t['GSRVT'] = "Server";
+t['ACCINFO'] = "Account Info";
+t['NBO'] = "Notizblock";
+t['MNUL'] = "Menü links";
+t['STAT'] = "Statistiken";
+t['RESF'] = "Rohstofffelder";
+t['VLC'] = "Dorfzentrum";
+t['MAPO'] = "Karten Einstellung";
+t['COLO'] = "Farbeinstellungen  (Standard = Leer)";
+t['DBGO'] = "Fehlersuche";
+t['HEROSMANSION'] = "Heldenhof";
+t['BLACKSMITH'] = "Waffenschmiede";
+t['ARMOURY'] = "Rüstungsschmiede";
+t['NOW'] = "Jetzt";
+t['CLOSE'] = "Schließen";
+t['USETHEM1H'] = "1 Stundenproduktion schicken";
+t['OVERVIEW'] = "Übersicht";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Angriffe";
+t['NEWS'] = "News";
+t['ADDCRTPAGE'] = "Aktuelle Seite hinzufügen";
+t['SCRPURL'] = "TB-Homepage";
+t['SPACER'] = "Abstandshalter";
+t['MEREO'] = "Nachrichten & Berichte";
+t['ATTABLES'] = "Truppenübersicht";
+t['MTW'] = "Noch verfügbaren Platz verschwendet";
+t['MTX'] = "Zuviel";
+t['MTC'] = "Aktuell verwendet";
+t['ALFL'] = "Link externes Forum (Für internes Forum leer lassen)";
+t['MTCL'] = "Alle entfernen";
+t['CKSORT'] = "Zum Sortieren klicken";
+t['MIN'] = "Min";
+t['SVGL'] = "Für alle Dörfer verfügbar";
+t['VGL'] = "Dorfübersicht";
+t['UPDATEPOP'] = "Einwohnerzahl aktualisieren";
+t['EDIT'] = "Bearbeiten";
+t['NPCO'] = "Optionen NPC Assistent";
+t['NEWVILLAGEAV'] = "Datum/Uhrzeit";
+t['TIMEUNTIL'] = "Wartezeit";
+t['CENTERMAP'] = "Zentriere Karte auf dieses Dorf";
+t['SENDTROOPS'] = "Truppen schicken";
+t['PALACE'] = "Palast";
+t['RESIDENCE'] = "Residenz";
+t['ACADEMY'] = "Akademie";
+t['TREASURY'] = "Schatzkammer";
+t['UPGTB'] = "Ressifelder/Gebäude Upgradetabellen";
+t['RBTT'] = "Ressi-Bar";
+t['USE'] = "Benutze";
+t['RESIDUE'] = "Rest wenn gebaut ";
+t['RESOURCES'] = "Rohstoffe";
+t['SH1'] = "Öffne Dein Profil für automatische Erkennung des Hauptdorfs und Koordinated<br>Baue eine Kaserne f&uuml;r die automatische Volkserkennung und öffne dann das Dorfzentrum";
+t['CROPFINDER'] = "Crop finder";
+break;
+
+case 'dk': //contributors: polle1
+t['1'] = "Travian v2.x server";
+t['4'] = "Markedesplads";
+t['5'] = "Forsamlingsplads/Kaserne/Værksted/Stald";
+t['6'] = "Rådhus/Heltegården/Armoury/Blacksmith";
+t['7'] = "Palads/Residens/Akademi/Skattekammer";
+t['8'] = "Alliance";
+t['9'] = "Vis extra links i venstre menu<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "Kampsimulator link der skal bruges:<br>(menu venstre)";
+t['12'] = "Vis 'dorf1.php' and 'dorf2.php' links";
+t['13'] = "Vis \"Centré kortet på denne by\" ikon";
+t['14'] = "Vis 'Send tropper/Send råstoffer' ikoner i by listen";
+t['16'] = "Vis effektiv kornproduktion i by liste";
+t['17'] = "Vis indbygger i by liste";
+t['20'] = "Vis links";
+t['21'] = "vis 'Bruger links' som flytbar vindue";
+t['22'] = "Vis notesbog";
+t['23'] = "Vis 'Notesblok' som flytbar vindue";
+t['24'] = "Notesbog størrelse";
+t['25'] = "Notesbog højde";
+t['26'] = "Vis NPC Assistant calculations/links";
+t['27'] = "World Analyser der skal bruges";
+t['28'] = "Vis analyser statistic links";
+t['29'] = "Map Analyser der skal bruges";
+t['30'] = "Vis link til kort over spiller";
+t['31'] = "Vis link til kort over alliancer";
+t['34'] = "Vis kP/dag information i opgradringstabel";
+t['35'] = "Vis kornforbrug i opgradringstabel";
+t['37'] = "Vis råstoffelter opgradringstabel";
+t['38'] = "Vis råstof trin farver";
+t['39'] = "Vis 'Råstofbar' tabel";
+t['40'] = "vis 'Råstofbar' tabel som flytbar vindue";
+t['41'] = "vis bygnings opgradringstabel";
+t['43'] = "Vis center nummer";
+t['44'] = "Vis bygningstrin faver";
+t['45'] = "Vis blinkende ikoner for bygninger der bliver opgraderet";
+t['48'] = "Antallet af sider med tilbud der skal indlæsses<br>Mens du er på markede => køb' side<br>(Default = 1)";
+t['49'] = "Forsamlingsplads standart action";
+t['50'] = "Antallet af spioner til<br>\"Vælg spioner\" funktion";
+t['53'] = "Vis troppe information i tooltips";
+t['54'] = "Vis afstande og tider til byer i tooltips";
+t['56'] = "Vis celle type/oase info<br>Hold musen over kortet";
+t['57'] = "Vis afstand & tider";
+t['58'] = "Vis tabel med spiller/byer/besatte oaser";
+t['59'] = "antallet af besked/report sider som skal indlæses<br>(Default = 1)";
+t['60'] = "Vis link til at åbne beskeder i et pop-up";
+t['61'] = "Vis \"Slet alle\" tabel på Report side";
+t['62'] = "Vis \"Send IGM\" ikon for mig, også";
+t['63'] = "Vis extra information i kampreporter";
+t['64'] = "Vis detaljer in Report Statestik";
+t['65'] = "Farve opgradering mulig<br>(Default = Empty)";
+t['66'] = "Farve Fuldt udbygget<br>(Default = Empty)";
+t['67'] = "Farve opgradering ikke mulig<br>(Default = Empty)";
+t['68'] = "Farve opgradering via NPC<br>(Default = Empty)";
+t['82.L'] = "Lock links (Gem slet, flyt op, flyt ned ikoner)";
+t['82.U'] = "Unlock links (Vis slet, flyt op, flyt ned ikoner)";
+t['U.2'] = "Race";
+t['U.3'] = "Din hovedlandsbys navn<br><b>Visit your Profile for an update</b>";
+t['U.6'] = "Din hovedlandsbys koordinater<br><b>Visit your Profile for an update</b>";
+t['SIM'] = "Kamp simulator";
+t['QSURE'] = "Er du sikker?";
+t['LOSS'] = "Tab";
+t['PROFIT'] = "Profit";
+t['EXTAV'] = "udvidelse mulig";
+t['PLAYER'] = "Spiller";
+t['VILLAGE'] = "By";
+t['POPULATION'] = "Indbygger";
+t['COORDS'] = "Koordinater";
+t['MAPTBACTS'] = "Actions";
+t['SAVED'] = "Gemt";
+t['YOUNEED'] = "Du mangler";
+t['TODAY'] = "i dag";
+t['TOMORROW'] = "i morgen";
+t['DAYAFTERTOM'] = "overmorgen";
+t['MARKET'] = "Markedsplads";
+t['BARRACKS'] = "Kaserne";
+t['RAP'] = "Forsamlingsplads";
+t['STABLE'] = "Stald";
+t['WORKSHOP'] = "Værksted";
+t['SENDRES'] = "Send råstoffer";
+t['BUY'] = "Køb";
+t['SELL'] = "Sælg";
+t['SENDIGM'] = "Send IGM";
+t['LISTO'] = "Tilgænglig";
+t['ON'] = "on";
+t['AT'] = "at";
+t['EFICIENCIA'] = "Effektivit";
+t['NEVER'] = "Aldrig";
+t['ALDEAS'] = "By(er)";
+t['TIEMPO'] = "Tid";
+t['OFREZCO'] = "Tilbyder";
+t['BUSCO'] = "Søger";
+t['TIPO'] = "Type";
+t['DISPONIBLE'] = "Kun tilgænglig";
+t['CUALQUIERA'] = "Alle";
+t['YES'] = "Ja";
+t['NO'] = "Nej";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Links";
+t['ANYADIR'] = "Tilføj";
+t['UBU'] = "Nyt link URL";
+t['UBT'] = "Nyt link Tekst";
+t['DEL'] = "Slet";
+t['MAPA'] = "Kort";
+t['MAXTIME'] = "Maximum tid";
+t['ARCHIVE'] = "Arkive";
+t['SUMMARY'] = "Total";
+t['TROPAS'] = "Tropper";
+t['CHKSCRV'] = "Opdater TBeyond";
+t['ACTUALIZAR'] = "Opdater by information";
+t['VENTAS'] = "Gemte tilbud";
+t['MAPSCAN'] = "Skan kortet";
+t['BIC'] = "Vis udvidet ikoner";
+t['SAVE'] = "Gem";
+t['AT2'] = "Opbakning";
+t['AT3'] = "Angreb: Normal";
+t['AT4'] = "Angreb: Plyndringstogt";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normal (lille)";
+t['NBSB'] = "Stor skærm (Stor)";
+t['NBHAX'] = "Automatisk udvid højde";
+t['NBHK'] = "Standart højde";
+t['NPCSAVETIME'] = "Gem: ";
+t['TOTALTROOPS'] = "Byens totale troppeantal";
+t['SELECTALLTROOPS'] = "Vælg alle tropper";
+t['PARTY'] = "Fest";
+t['CPPERDAY'] = "KP/dag";
+t['SLOT'] = "Slot";
+t['TOTAL'] = "Total";
+t['SELECTSCOUT'] = "Vælg spioner";
+t['SELECTFAKE'] = "Vælg fake";
+t['ALL'] = "Alle";
+t['SH2'] = "I farve felterne kan du skrive:<br>- <b>green</b> or <b>red</b> or  <b>orange</b>, etc.<br>- the HEX color code like <b>#004523</b><br>- leave empty for the default color";
+t['SOREP'] = "Vis original report (Til visning)";
+t['WSIMO1'] = "Inten (leveret af spillet)";
+t['WSIMO2'] = "Extern (leveret af kirilloid.ru)";
+t['NONEWVER'] = "Du har den seneste version";
+t['BVER'] = "Du må have en beta version";
+t['NVERAV'] = "En ny version af scriptet er tilgænglig";
+t['UPDSCR'] = "Opdater scriptet nu ?";
+t['CHECKUPDATE'] = "Checker for script opdateringer.<br>Vent venligst...";
+t['AVPPV'] = "Gennemsnitlig antal indbygger per by";
+t['AVPPP'] = "Gennemsnitlig antal indbygger per spiller";
+t['TOTTRTR'] = "Totale antal tropper der trænes";
+t['UPDALLV'] = "opdater alle byer.  BRUGS MED STOR FORSIGTIGHED DA DET KAN FØRE TIL EN BANNED KONTO !";
+t['LARGEMAP'] = "Stort kort";
+t['USETHEMPR'] = "Brug dem (proportional)";
+t['USETHEMEQ'] = "Brug dem (equal)";
+t['TOWNHALL'] = "Rådhus";
+t['ACCINFO'] = "Konto Information";
+t['NBO'] = "Notesblok";
+t['MNUL'] = "Menu i venstre side";
+t['STAT'] = "Statestik";
+t['RESF'] = "Råstoffelter";
+t['VLC'] = "Landsbycenter";
+t['MAPO'] = "Kort options";
+t['COLO'] = "Farve options";
+t['DBGO'] = "Debug options";
+t['HEROSMANSION'] = "Hero's mansion";
+t['BLACKSMITH'] = "våbensmedje";
+t['ARMOURY'] = "Rustningssmedje";
+t['NOW'] = "Nu";
+t['CLOSE'] = "Luk";
+t['USETHEM1H'] = "brug dem (1 times produktion)";
+t['OVERVIEW'] = "oversigt";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Angreb";
+t['NEWS'] = "Nyheder";
+t['ADDCRTPAGE'] = "tilføj nuværende";
+t['SCRPURL'] = "TBeyond page";
+t['SPACER'] = "Mellemrumslinje";
+t['MEREO'] = "Beskeder & Reporter";
+t['ATTABLES'] = "Troppetabel";
+t['MTW'] = "mistede";
+t['MTX'] = "overskrider";
+t['MTC'] = "Nuværende last";
+t['ALFL'] = "Link til extern forum<br>(Tom for intern forum)";
+t['MTCL'] = "Clear all";
+t['CKSORT'] = "Klik for at sorter";
+t['MIN'] = "Min";
+t['SVGL'] = "Del imellem byer";
+t['VGL'] = "By Liste";
+t['UPDATEPOP'] = "opdater indbygger";
+t['EDIT'] = "Edit";
+t['NPCO'] = "NPC Assistant options";
+t['NEWVILLAGEAV'] = "Dato/Tid";
+t['TIMEUNTIL'] = "Ventetid";
+t['CENTERMAP'] = "Centré kortet på denne by";
+t['SENDTROOPS'] = "Send tropper";
+t['PALACE'] = "Palads";
+t['RESIDENCE'] = "Residens";
+t['ACADEMY'] = "Akademi";
+t['TREASURY'] = "Skattekammer";
+t['UPGTB'] = "Råstoffelter/Bygnings opgradringstabel";
+t['RBTT'] = "Råstofbar";
+t['USE'] = "Brug";
+t['CROPFINDER'] = "Crop finder";
+break;
+
+case 'el': //contributors: maintanosgr, ChuckNorris, Velonis Petros
+case 'gr':
+t['1'] = "Travian v2.x server";
+t['4'] = "Αγορά";
+t['5'] = ">Πλατεία συγκεντρώσεως/Στρατόπεδο/Εργαστήριο/Στάβλος";
+t['6'] = "Δημαρχείο/Περιοχή ηρώων/Πανοπλοποιείο/Οπλοποιείο";
+t['7'] = "Παλάτι/Μέγαρο/Ακαδημία/Θησαυροφυλάκιο";
+t['8'] = "Συμμαχία";
+t['9'] = "Δείξε επιπλέον link στο αριστερό μενού<br>(Traviantoolbox, World Analyser, Travilog, TravMap, κτλ.)";
+t['10'] = "Link για προσομοιωτή μάχης:<br>(αριστερό μενού)";
+t['12'] = "Δείξε τα link 'dorf1.php' και 'dorf2.php'";
+t['13'] = "Δείξε το \"Επικέντρωση χάρτη σε αυτό το χωριό\" εικονίδιο";
+t['20'] = "Εμφάνιση σελιδοδεικτών";
+t['22'] = "Εμφάνιση του σημειωματάριου";
+t['24'] = "Μέγεθος σημειωματάριου";
+t['25'] = "Ύψος σημειωματάριου";
+t['26'] = "Δείξε τους υπολογισμούς/link του NPC βοηθού";
+t['27'] = "Χρήση World Analyser";
+t['28'] = "Δείξε link για αναλυτικά στατιστικά";
+t['36'] = "Εμφάνιση Υπολογισμών 'Μέχρι<br>τότε/Υπόλοιπο' στους πίνακες αναβάθμισης/εκπαίδευσης";
+t['37'] = "Δείξε τον πίνακα αναβαθμίσεων για τις πρώτες ύλες";
+t['38'] = "Δείξε χρώματα για το επίπεδο των πρώτων υλών";
+t['41'] = "Δείξε τον πίνακα αναβαθμίσεων για τα κτήρια";
+t['43'] = "Εμφάνιση κεντρικών αριθμών";
+t['44'] = "Δείξε χρώματα για το επίπεδο των κτηρίων";
+t['45'] = "Δείξε το επίπεδο του κτηρίου που αναβαθμίζεται να αναβοσβήνει";
+t['48'] = "Αριθμός των σελίδων για φόρτωση<br>μέσα στην αγορά => στην σελίδα 'Αγοράστε'<br>(Προεπιλογή = 1, Μέγιστο = 5)";
+t['49'] = "Προεπιλογή πλατείας συγκεντρώσεως";
+t['50'] = "Αριθμός ανιχνευτών για την<br>λειτουργία \"Ανίχνευση\"";
+t['53'] = "Δείξε πληροφορίες στρατιωτών<br>σε παράθυρο συμβουλών";
+t['54'] = "Δείξε απόσταση και χρόνους στα χωριά<br>σε παράθυρο συμβουλών";
+t['56'] = "Δείξε τον τύπο του χωραφιού/της όασης<br>όταν πηγαίνω πάνω με το ποντίκι";
+t['57'] = "Δείξε αποστάσεις και χρόνους";
+t['58'] = "Δείξε τον πίνακα των παικτών/χωριών/κατειλημένων οάσεων";
+t['59'] = "Αριθμός μηνυμάτων/αναφορών για φόρτωμα<br>(Προεπιλογή =1, Μέγιστο = 5)";
+t['60'] = "Δείξε links για να ανοίγουν τα μυνήματα<br>σε αναδυόμενο παράθυρο";
+t['61'] = "Δείξε τον πίνακα \"Διαγραφή\" στην σελίδα αναφορών";
+t['62'] = "Δείξε το \"Αποστολή μηνύματος IGM\" εικονίδιο για μένα, επείσης";
+t['64'] = "Δείξε λεπτομέρειες στατιστικών στις Αναφορές";
+t['65'] = "Χρώμα όταν υπάρχει διαθέσιμη αναβάθμιση<br>(Προεπιλογή = άδειο)";
+t['66'] = "Χρώμα όταν είναι στο επίπεδο<br>(Προεπιλογή = άδειο)";
+t['67'] = "Χρώμα όταν δεν υπάρχει διαθέσιμη αναβάθμιση<br>(Προεπιλογή = άδειο)";
+t['68'] = "Χρώμα για αναβάθμιση μέσω του NPC<br>(Προεπιλογή = άδειο)";
+t['69'] = "Console Log Level<br><b>ΜΟΝΟ ΓΙΑ ΠΡΟΓΡΑΜΜΑΤΑΤΙΣΤΕΣ Ή ΑΠΑΣΦΑΛΜΑΤΩΣΗ</b><br>(Προεπιλογή = 0)";
+t['82.L'] = "Κλείδωσε τους σελιδοδείκτες (κρύψε τα διαγραφή, μετακίνησε πάνω/πάτω εικονίδια)";
+t['82.U'] = "Ξεκλείδωσε τους σελιδοδείκτες (δείξε τα διαγραφή, μετακίνησε πάνω/πάτω εικονίδια)";
+t['U.2'] = "Φυλή";
+t['U.3'] = "Όνομα πρωτεύουσας<br><b>Μην το πειράζεις, αν' αυτού επισκέψου το προφίλ σου</b>";
+t['U.6'] = "Συντεταγμένες πρωτεύουσας<br><b>Μην το πειράζεις, αν' αυτού επισκέψου το προφίλ σου</b>";
+t['SIM'] = "Προσομοιωτής μάχης";
+t['QSURE'] = "Είσαι σίγουρος;";
+t['LOSS'] = "Ζημιά";
+t['PROFIT'] = "Κέρδος";
+t['EXTAV'] = "Διαθέσιμη αναβάθμιση";
+t['PLAYER'] = "Παίκτης";
+t['VILLAGE'] = "Χωριό";
+t['POPULATION'] = "Πληθυσμός";
+t['COORDS'] = "Συντεταγμένες";
+t['MAPTBACTS'] = "Ενέργειες";
+t['SAVED'] = "Αποθηκεύτηκε";
+t['YOUNEED'] = "Χρειάζεσαι";
+t['TODAY'] = "σήμερα";
+t['TOMORROW'] = "αύριο";
+t['DAYAFTERTOM'] = "μεθαύριο";
+t['MARKET'] = "Αγορά";
+t['BARRACKS'] = "Στρατόπεδο";
+t['RAP'] = "Πλατεία συγκεντρώσεως";
+t['STABLE'] = "Στάβλος";
+t['WORKSHOP'] = "Εργαστήριο";
+t['SENDRES'] = "Αποστολή πρώτων υλών";
+t['BUY'] = "Αγόρασε";
+t['SELL'] = "Πούλησε";
+t['SENDIGM'] = "Αποστολή μηνύματος";
+t['LISTO'] = "Διαθέσιμο";
+t['ON'] = "την";
+t['AT'] = "στις";
+t['EFICIENCIA'] = "Πληρότητα";
+t['NEVER'] = "Ποτέ";
+t['ALDEAS'] = "Χωριό(ά)";
+t['TIEMPO'] = "Χρόνος";
+t['OFREZCO'] = "Προσφέρει";
+t['BUSCO'] = "Αναζητεί";
+t['TIPO'] = "Τύπος";
+t['DISPONIBLE'] = "Μόνο διαθέσιμα";
+t['CUALQUIERA'] = "Όλα";
+t['YES'] = "Ναι";
+t['NO'] = "Όχι";
+t['LOGIN'] = "Σύνδεση";
+t['MARCADORES'] = "Αγαπημένα";
+t['ANYADIR'] = "Προσθήκη";
+t['UBU'] = "Νέο αγαπημένο URL";
+t['UBT'] = "Κείμενο";
+t['DEL'] = "Διαγραφή";
+t['MAXTIME'] = "Μέγιστος χρόνος";
+t['ARCHIVE'] = "Αρχείο";
+t['SUMMARY'] = "Σύνοψη";
+t['TROPAS'] = "Στρατεύματα";
+t['CHKSCRV'] = "Αναβάθμιση TBeyond";
+t['ACTUALIZAR'] = "Ανανέωσε πληροφορίες χωριού";
+t['VENTAS'] = "Αποθηκευμένες Προσφορές";
+t['MAPSCAN'] = "Σάρωση του χάρτη";
+t['BIC'] = "Εμφάνιση μεγάλων εικονιδίων";
+t['SAVE'] = "Αποθήκευση";
+t['AT2'] = "Ενισχύσεις";
+t['AT3'] = "Επίθεση: Εισβολή";
+t['AT4'] = "Επίθεση: Εισβολή αρπαγής";
+t['NBSA'] = "Αυτόματο";
+t['NBSN'] = "Κανονικό (μικρό)";
+t['NBSB'] = "Μεγάλη οθόνη (μεγάλο)";
+t['NBHK'] = "Προεπιλεγμένο ύψος";
+t['NPCSAVETIME'] = "Κερδίζεις: ";
+t['TOTALTROOPS'] = "Συνολικά στρατεύματα χωριού";
+t['SELECTALLTROOPS'] = "Επιλογή όλων των στρατευμάτων";
+t['PARTY'] = "Εορταστικές εκδηλώσεις";
+t['CPPERDAY'] = "Πόντοι Πολιτισμού/μέρα";
+t['SLOT'] = "Διαθέσιμος χώρος";
+t['TOTAL'] = "Σύνολο";
+t['SELECTSCOUT'] = "Ανίχνευση";
+t['SELECTFAKE'] = "Αντιπερισπασμός";
+t['ALL'] = "Όλα";
+t['SH2'] = "Στα πεδία χρωμάτων μπορείς να βάλεις:<br>- <b>green</b> ή <b>reb</b> ή <b>orange</b>, κτλ.<br>- κώδικα HEX για χρώμματα όπως <b>#004523</b><br>- άφησε κενό για προεπιλεγμένο χρώμα";
+t['SOREP'] = "Δείξε κανονική αναφορά (για ποστάρισμα)";
+t['WSIMO1'] = "Εσωτερικός (παρέχεται από το παιχνίδι)";
+t['WSIMO2'] = "Εξωτερικός (παρέχεται από το kirilloid.ru)";
+t['NONEWVER'] = "Έχεις την νεότερη δυνατή έκδοση";
+t['BVER'] = "Έχεις δοκιμαστική έκδοση";
+t['NVERAV'] = "Διαθέσιμη νέα έκδοση";
+t['UPDSCR'] = "Να ενημερωθεί το scipt τώρα;";
+t['CHECKUPDATE'] = "Έλεγχος για ενημέρωση του script.<br>Παρακαλώ περιμένετε...";
+t['AVPPV'] = "Μέσος πληθυσμός ανα χωριό";
+t['AVPPP'] = "Μέσος πληθυσμός ανά παίκτη";
+t['MAX'] = "Μέγιστο";
+t['TOTTRTR'] = "Συνολικά στρατεύματα σε εκπαίδευση";
+t['TB3SL'] = "$1 Ρυθμίσεις";
+t['UPDALLV'] = "Ενημέρωσε όλα τα χωριά. ΧΡΗΣΙΜΟΠΟΙΗΣΕ ΤΟ ΜΕ ΜΕΓΑΛΗ ΠΡΟΣΟΧΗ ΚΑΘΩΣ ΜΠΟΡΕΙ ΝΑ ΑΠΟΒΛΗΘΕΙΣ !!!";
+t['LARGEMAP'] = "Μεγάλος χάρτης";
+t['USETHEMPR'] = "Χρησιμοποίησε τα (αναλογικά)";
+t['USETHEMEQ'] = "Χρησιμοποίησε τα (ίσα)";
+t['TOWNHALL'] = "Δημαρχείο";
+t['GSRVT'] = "Server Παιχνιδιού";
+t['ACCINFO'] = "Πληροφορίες λογαριασμού";
+t['NBO'] = "Σημειωματάριο";
+t['MNUL'] = "Μενού στο αριστερό μέρος";
+t['STAT'] = "Στατιστικά";
+t['RESF'] = "Χωράφια πρώτων υλών";
+t['VLC'] = "Κέντρο χωριού";
+t['MAPO'] = "Επιλογές χάρτη";
+t['COLO'] = "Επιλογές χρωμάτων";
+t['DBGO'] = "Επιλογές απασφαλμάτωσης";
+t['HEROSMANSION'] = "Περιοχή ηρώων";
+t['BLACKSMITH'] = "Οπλοποιείο";
+t['ARMOURY'] = "Πανοπλοποιείο";
+t['NOW'] = "Τώρα";
+t['CLOSE'] = "Κλείσιμο";
+t['USETHEM1H'] = "Χρησιμοποίησε τα (1 ωριαία παραγωγή)";
+t['OVERVIEW'] = "Επισκόπηση";
+t['FORUM'] = "Φόρουμ (Forum)";
+t['ATTACKS'] = "Επιθέσεις";
+t['NEWS'] = "Νέα";
+t['ADDCRTPAGE'] = "Πρόσθεσε τρέχουσα σελίδα ως σελιδοδείκτη";
+t['SCRPURL'] = "TBeyond website";
+t['SPACER'] = "Διάστημα";
+t['MEREO'] = "Μηνύματα & Αναφορές";
+t['ATTABLES'] = "Πίνακες στρατευμάτων";
+t['MTW'] = "Χάσιμο";
+t['MTX'] = "Υπέρβαση";
+t['MTC'] = "Τρέχον φορτίο";
+t['ALFL'] = "Link σε εξωτερικό φόρουμ<br>(’φησε το άδειο για το εσωτερικό φόρουμ)";
+t['MTCL'] = "Καθαρισμός";
+t['CKSORT'] = "Κλικ για ταξινόμηση";
+t['MIN'] = "Min";
+t['SVGL'] = "Κοινό σε όλα τα χωριά";
+t['VGL'] = "Λίστα χωριών";
+t['UPDATEPOP'] = "Ενημέρωσε τον πληθυσμό";
+t['EDIT'] = "Επεξεργασία";
+
+t['NPCO'] = "Επιλογές του NPC βοηθού";
+t['NEWVILLAGEAV'] = "Ημερομηνία/Ώρα";
+t['TIMEUNTIL'] = "Χρόνος να περιμένεις";
+t['CENTERMAP'] = "Επικέντρωση χάρτη σε αυτό το χωριό";
+t['SENDTROOPS'] = "Αποστολή στρατευμάτων";
+t['PALACE'] = "Παλάτι";
+t['RESIDENCE'] = "Μέγαρο";
+t['ACADEMY'] = "Ακαδημία";
+t['TREASURY'] = "Θησαυροφυλάκιο";
+t['USE'] = "Χρήση";
+t['RESIDUE'] = "Υπόλοιπο αν χτίσεις";
+t['RESOURCES'] = " Ύλες";
+break;
+
+case 'es': //contributors: Psicothika
+t['1'] = "Servidor de Travian v2.x?";
+t['2'] = "Eliminar anuncios";
+t['3'] = "Forzar T3.1 Legionnaire & Phalanx capacity calculation<br>(para servidores mixtos T3.1 & T3.5)";
+t['4'] = "Mercado";
+t['5'] = "Plaza de reuniones/Cuartel/Taller/Establo";
+t['6'] = "Ayuntamiento/Hogar del Héroe/Armería/Herrería";
+t['7'] = "Palacio/Residencia/Academia/Tesoro";
+t['8'] = "Alianza";
+t['9'] = "Mostrar enlaces adicionales en el menú de la izquierda<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "¿Qué simulador de ataque deseas usar?:<br>(menú izquierdo)";
+t['11'] = "Enlace para la publicación de informes";
+t['12'] = "Mostrar enlaces 'dorf1.php' y 'dorf2.php'";
+t['13'] = "Mostrar icono \"Centrar mapa sobre esta aldea\"";
+t['14'] = "Mostrar icono 'Enviar tropas/Enviar recursos' en lista de aldeas";
+t['15'] = "Mostrar la produccion por hora de madera, barro, hierro y cereal en el listado de aldeas";
+t['16'] = "Mostrar eficacia de producción de cereal en el listado de aldeas";
+t['17'] = "Mostrar población en el listado de aldeas";
+t['18'] = "Muestra en 2 columnas una lista de aldeas en una ventana flotante";
+t['19'] = "Mostrar información sobre los avances en los edificios y los movimientos de tropas en el listado de aldeas";
+t['20'] = "Mostrar marcadores";
+t['21'] = "Ver tabla de 'Enlaces' en una ventana flotante";
+t['22'] = "Mostrar block de notas";
+t['23'] = "Ver 'Block de notas' en una ventana flotante";
+t['24'] = "Tamaño del block de notas";
+t['25'] = "Altura del block de notas";
+t['26'] = "Mostrar Asistente de NPC para calculadora/enlaces";
+t['27'] = "¿Qué Analizador de estadísticas deseas usar?";
+t['28'] = "Mostrar enlaces del analizador de estadísticas<br>(icono de la bola del mundo al lado de usuarios/alianzas)";
+t['29'] = "Usar el analizador del mapa";
+t['30'] = "Mostrar mapa de enlaces para usuarios";
+t['31'] = "Mostrar mapa de enlaces para alianzas";
+t['32'] = "Mostrar 'Barra de Búsqueda'";
+t['33'] = "Ver 'Barra de Búsqueda' en una ventana flotante";
+t['34'] = "Ver información de CP por día en la actualización de las tablas";
+t['35'] = "Mostrar actualizaciones en las tablas de consumo de cereal.";
+t['36'] = "Mostrar los cálculos de 'Hasta entonces/Excedentes'<br>en las tablas de entrenamiento/mejora";
+t['37'] = "Mostrar la tabla de actualización de recursos";
+t['38'] = "Mostrar colores en el nivel de los recursos";
+t['39'] = "Ver tabla de 'Recursos'";
+t['40'] = "Ver tabla de 'Recursos' en una ventana flotante";
+t['41'] = "Mostrar la tabla de actualización de las construcciones";
+t['42'] = "Ordenar edificios por su nombre en la tabla de actualizaciones";
+t['43'] = "Mostrar el nivel de las construcciones en el centro de la aldea";
+t['44'] = "Mostrar colores en el nivel de las construcciones";
+t['45'] = "Mostrar nivel parpadeando en los edificios que están siendo ampliados";
+t['48'] = "Páginas mostradas en la sección 'Comprar' del mercado<br>(Valor por defecto = 1)";
+t['49'] = "Opción por defecto para el envió de tropas";
+t['50'] = "N° de espías para seleccionar por defecto en<br>\"Seleccionar espías\"";
+t['53'] = "Mostrar información de las tropas en mensajes emergentes";
+t['54'] = "Mostrar tiempos y distancias a aldeas en mensajes emergentes";
+t['56'] = "Mostar la descripción del tipo de casilla/oasis<br>al pasar el mouse por encima de la casilla.";
+t['57'] = "Mostrar distancias y tiempos en un mensaje emergente";
+t['58'] = "Mostrar tabla de Jugadores/Aldeas/Oasis ocupados";
+t['59'] = "Número de páginas de mensajes/reportes precargados<br>(Valor por defecto = 1)";
+t['60'] = "Mostrar vínculos para abrir los mensajes e informes en ventanas emergentes";
+t['61'] = "Mostar \"Borrar todo\" en la página de informes";
+t['62'] = "Mostrar icono \"Enviar IGM\" para mitambién";
+t['63'] = "Mostar  en los informes de batalla";
+t['64'] = "Mostrar detalles estadísticos en los reportes";
+t['65'] = "Color para las actualizaciones disponibles <br>(Defecto = En blanco)";
+t['66'] = "Color para los niveles máximos<br>(Defecto = En blanco)";
+t['67'] = "Color para las actualizaciones no disponibles<br>(Defecto = En blanco)";
+t['68'] = "Color para actualizar por medio de NPC<br>(Defecto = En blanco)";
+t['69'] = "Nivel de Registro de la Consola<br>SOLO PARA PROGRAMADORES O DEPURACIÓN<br>(Valor por defecto = 0)";
+t['82.L'] = "Bloquear marcadores (Ocultar iconos de eliminar, subir, bajar)";
+t['82.U'] = "Desbloquear marcadores (Mostrar iconos de eliminar, subir, bajar)";
+t['U.2'] = "Raza";
+t['U.3'] = "Nombre de tu capital<br>Entra en tu perfil para actualizarla";
+t['U.6'] = "Coordenadas de tu capital<br>Entra en tu perfil para actualizarlas";
+t['SIM'] = "Simulador de combate";
+t['QSURE'] = "¿Estás seguro?";
+t['LOSS'] = "Pérdidas";
+t['PROFIT'] = "Ganancias";
+t['EXTAV'] = "Subir nivel";
+t['PLAYER'] = "Jugador";
+t['VILLAGE'] = "Aldea";
+t['POPULATION'] = "Población";
+t['COORDS'] = "Coordenadas";
+t['MAPTBACTS'] = "Acciones";
+t['SAVED'] = "Guardado";
+t['YOUNEED'] = "Te falta";
+t['TODAY'] = "hoy";
+t['TOMORROW'] = "mañana";
+t['DAYAFTERTOM'] = "pasado mañana";
+t['MARKET'] = "Mercado";
+t['BARRACKS'] = "Cuartel";
+t['RAP'] = "Plaza de reuniones";
+t['STABLE'] = "Establo";
+t['WORKSHOP'] = "Taller";
+t['SENDRES'] = "Enviar recursos";
+t['BUY'] = "Comprar";
+t['SELL'] = "Vender";
+t['SENDIGM'] = "Enviar IGM";
+t['LISTO'] = "Disponible";
+t['ON'] = "el";
+t['AT'] = "a las";
+t['EFICIENCIA'] = "Eficacia";
+t['NEVER'] = "Nunca";
+t['ALDEAS'] = "Aldea(s)";
+t['TIEMPO'] = "Tiempo";
+t['OFREZCO'] = "Ofrezco";
+t['BUSCO'] = "Busco";
+t['TIPO'] = "Tipo";
+t['DISPONIBLE'] = "Solo disponible";
+t['CUALQUIERA'] = "Cualquiera";
+t['YES'] = "Si";
+t['NO'] = "No";
+t['LOGIN'] = "Identificarse";
+t['MARCADORES'] = "Marcadores";
+t['ANYADIR'] = "Añadir";
+t['UBU'] = "URL del nuevo Marcador";
+t['UBT'] = "Nombre del nuevo Marcador";
+t['DEL'] = "Eliminar";
+t['MAPA'] = "Mapa";
+t['MAXTIME'] = "Tiempo máximo";
+t['ARCHIVE'] = "Archivar";
+t['SUMMARY'] = "Resumen";
+t['TROPAS'] = "Tropas";
+t['CHKSCRV'] = "Actualizar TBeyond";
+t['ACTUALIZAR'] = "Actualizar información sobre la aldea";
+t['VENTAS'] = "Guardar ofertas";
+t['MAPSCAN'] = "Escanear el Mapa";
+t['BIC'] = "Mostrar iconos de acceso rápido";
+t['SAVE'] = "Guardar";
+t['AT2'] = "Refuerzos";
+t['AT3'] = "Ataque: Normal";
+t['AT4'] = "Ataque: Atraco";
+t['NBSA'] = "Automático";
+t['NBSN'] = "Normal (pequeño)";
+t['NBSB'] = "Grande (alargado)";
+t['NBHAX'] = "Expandir altura automáticamente";
+t['NBHK'] = "Altura por defecto";
+t['NPCSAVETIME'] = "Tiempo ahorrado: ";
+t['TOTALTROOPS'] = "Total de tropas de la aldea";
+t['SELECTALLTROOPS'] = "Seleccionar todas las tropas";
+t['PARTY'] = "Fiesta";
+t['CPPERDAY'] = "PC por día";
+t['SLOT'] = "Espacio disponible";
+t['TOTAL'] = "Total";
+t['SELECTSCOUT'] = "Seleccionar espías";
+t['SELECTFAKE'] = "Seleccionar unidad para fake (Engaño)";
+t['ALL'] = "Todo";
+t['SH2'] = "Puedes modificar o personalizar los colores, escribiendo en los campos destinados al color:<br>- Green, Red, orange, etc.<br>- El código Hexadecimal del color como por ejemplo #004523.<br>- Dejar en blanco para usar el color por defecto.";
+t['SOREP'] = "Mostrar el reporte original (para poner en foros)";
+t['WSIMO1'] = "Interno (el que trae travian por defecto)";
+t['WSIMO2'] = "Externo (promovido por kirilloid.ru)";
+t['NONEWVER'] = "Usted tiene la última versión disponible";
+t['BVER'] = "Usted dispone de una versión de prueba";
+t['NVERAV'] = "Una nueva versión del script está disponible";
+t['UPDSCR'] = "¿Actualizar el script?";
+t['CHECKUPDATE'] = "Buscando una nueva versión del script.<br>Por favor espere...";
+t['AVPPV'] = "Promedio de población por aldea";
+t['AVPPP'] = "Promedio de población por jugador";
+t['MAX'] = "Máximo.";
+t['TOTTRTR'] = "Tropas totales que se están creando";
+t['TB3SL'] = "Configurar TBeyond";
+t['UPDALLV'] = "Actualizar todas las aldeas. USAR CON MUCHO CUIDADO, PUEDE LLEVAR A QUE BORREN TU CUENTA!";
+t['LARGEMAP'] = "Mapa grande";
+t['USETHEMPR'] = "Repartir la cantidad de recursos de los almacenes (de manera proporcional)";
+t['USETHEMEQ'] = "Repartir la cantidad de recursos de los almacenes (equitativa=misma cantidad)";
+t['TOWNHALL'] = "Ayuntamiento";
+t['GSRVT'] = "Versión del servidor";
+t['ACCINFO'] = "Información de la Cuenta";
+t['NBO'] = "Block de notas";
+t['MNUL'] = "Menú en el lado izquierdo";
+t['STAT'] = "Estadísticas";
+t['RESF'] = "Campos de recursos";
+t['VLC'] = "Centro de la aldea";
+t['MAPO'] = "Opciones del mapa";
+t['COLO'] = "Opciones de color";
+t['DBGO'] = "Opciones de depuración (DEBUG MODE)";
+t['HEROSMANSION'] = "Hogar del Héroe";
+t['BLACKSMITH'] = "Herrería";
+t['ARMOURY'] = "Armería";
+t['NOW'] = "Ahora";
+t['CLOSE'] = "Cerrar";
+t['USETHEM1H'] = "Repartir materias primas de esta aldea (1 hora de producción)";
+t['OVERVIEW'] = "Resumen";
+t['FORUM'] = "Foro";
+t['ATTACKS'] = "Ataques";
+t['NEWS'] = "Noticias";
+t['ADDCRTPAGE'] = "Añadir página actual";
+t['SCRPURL'] = "Página de TBeyond";
+t['SPACER'] = "Espacio";
+t['MEREO'] = "Mensajes y Reportes";
+t['ATTABLES'] = "Tabla de tropas";
+t['MTW'] = "Disponible";
+t['MTX'] = "Excedido";
+t['MTC'] = "Carga actual";
+t['ALFL'] = "Vínculo a foro externo<br>(Dejar en blanco para foro interno)";
+t['MTCL'] = "Limpiar todo";
+t['CKSORT'] = "Haga clic aquí para ordenar";
+t['MIN'] = "Mínimo";
+t['SVGL'] = "Repartir entre las aldeas";
+t['VGL'] = "Lista de Aldeas";
+t['UPDATEPOP'] = "Actualizar habitantes";
+t['EDIT'] = "Editar";
+t['NPCO'] = "Asistente de opciones del NPC";
+t['NEWVILLAGEAV'] = "Fecha/Hora";
+t['TIMEUNTIL'] = "Tiempo de espera";
+t['CENTERMAP'] = "Centrar mapa sobre esta aldea";
+t['SENDTROOPS'] = "Enviar tropas";
+t['PALACE'] = "Palacio";
+t['RESIDENCE'] = "Residencia";
+t['ACADEMY'] = "Academia";
+t['TREASURY'] = "Tesoro";
+t['UPGTB'] = "Mostrar actualizaciones en las tablas de  recursos y edificios.";
+t['RBTT'] = "Recursos";
+t['USE'] = "Usar";
+t['RESIDUE'] = "Excedentes si construyes ";
+t['RESOURCES'] = "Recursos";
+t['CROPFINDER'] = "Búsqueda 9c / 15c";
+break;
+
+case 'fi': //contributors: Syanidi, Haukka
+t['1'] = "Travian v2.x serveri";
+t['2'] = "Poista mainosbannerit";
+t['3'] = "Pakota T3.1 Legioonalaisten ja Falangien kantomäärälaskenta<br />(sekoitetuille T3.1 ja T3.5 servereille)";
+t['4'] = "Tori";
+t['5'] = "Kokoontumispiste/Kasarmi/Työpaja/Talli";
+t['6'] = "Kaupungintalo/Sankarinkartano/Haarniskapaja/Aseseppä";
+t['7'] = "Palatsi/Virka-asunto/Akatemia/Aarrekammio";
+t['8'] = "Liittouma";
+t['9'] = "Näytä lisälinkit vasemmanpuoleisessa valikossa<br />(Traviantoolbox, World Analyser, Travilog, Map, jne.)";
+t['10'] = "Taistelusimulaattorilinkki käytössä:<br />(Vasemmanpuoleinen valikko)";
+t['11'] = "Valitse sivu mitä käytetään raporttien lähettämiseen";
+t['12'] = "Näytä 'dorf1.php' ja 'dorf2.php' linkit";
+t['13'] = "Näytä \"Keskitä kartta tähän kylään\" kuvake";
+t['14'] = "Näytä 'Lähetä joukkoja/Lähetä resursseja' kuvakkeet kylälistassa";
+t['15'] = "Näytä puun, saven ja raudan tuntituotannot kylälistassa";
+t['16'] = "Näytä viljantuotanto kylälistassa";
+t['17'] = "Näytä asukasluku kylälistassa";
+t['18'] = "Näytä lisäksi kahden palstan kylälista siirrettävänä ikkunana";
+t['19'] = "Näytä tiedot valmistuvista rakennuksista ja joukkojen liikkeistä <br />kylälistassa";
+t['20'] = "Näytä kirjanmerkit";
+t['21'] = "Näytä 'kirjanmerkit' siirrettävänä ikkunana";
+t['22'] = "Näytä muistilappu";
+t['23'] = "Näytä 'Muistilappu' siirrettävänä ikkunana";
+t['24'] = "Muistilapun koko";
+t['25'] = "Muistilapun korkeus";
+t['26'] = "Näytä NPC Avustajan laskelmat ja linkit";
+t['27'] = "Valitse World Analyser";
+t['28'] = "Näytä analyysitilastot linkkeinä";
+t['29'] = "Mitä kartta-analysoijaa käytetään";
+t['30'] = "Näytä pelaajien linkit karttaan";
+t['31'] = "Näytä liittojen linkit karttaan";
+t['32'] = "Näytä Hakupalkki";
+t['33'] = "Näytä 'Hakupalkki' siirrettävänä ikkunana";
+t['34'] = "Näytä KP/päivä päivitystaulukoissa";
+t['35'] = "Näytä viljan kulutus päivitystaulukoissa";
+t['36'] = "Näytä 'Siihen mennessä/Ylijäävät' laskelma, päivitys ja koulutus taulukoissa";
+t['37'] = "Näytä resurssikenttien päivitystaulukko";
+t['38'] = "Näytä resurssipeltojen tasovärit";
+t['39'] = "Näytä 'Resurssipalkki'";
+t['40'] = "Näytä 'Resurssipalkki' siirrettävänä ikkunana";
+t['41'] = "Näytä rakennusten päivitystaulukko";
+t['42'] = "Järjestä rakennukset päivityslistassa nimen perusteella";
+t['43'] = "Näytä rakennuksien tasonumerot";
+t['44'] = "Näytä rakennuksien tasovärit";
+t['45'] = "Näytä rakennuksien tasot vilkkuvina, kun niitä päivitetään";
+t['46'] = "Näytä lisätiedot kaikille saapuville kauppiaille";
+t['47'] = "Näytä viimeisin resurssilähetys";
+t['48'] = "Tarjoussivujen latautumismäärä<br />ollessasi torilla => Osta sivu<br />(Oletus = 1)";
+t['49'] = "Kokoontumispisteen oletustoiminto";
+t['50'] = "Tiedustelijoiden määrä<br />\"Valitse tiedustelija\" ominaisuudelle";
+t['51'] = "Näytä viimeisin hyökkäykseni";
+t['52'] = "Näytä/käytä viimeisimmän hyökkäyksen koordinaatteja";
+t['53'] = "Näytä joukkotiedot vihjeissä";
+t['54'] = "Näytä välimatka ja ajat vihjeissä";
+t['55'] = "Täytä simulaattori automaattisesti kylässä olevien joukkojen perusteella";
+t['56'] = "Näytä kylätyypit ja keitaat<br />liikutellessasi hiirtä kartalla";
+t['57'] = "Näytä matkat ja ajat";
+t['58'] = "Näytä taulukko pelaajista/kylistä/varatuista keitaista";
+t['59'] = "Esiladattujen viesti- ja raporttisivujen määrä<br />(Oletus = 1)";
+t['60'] = "Näytä linkki ponnahdusikkunaan";
+t['61'] = "Näytä \"Poista kaikki\"-painike raporttisivulla";
+t['62'] = "Näytä \"Lähetä viesti\" kuvake myös itselleni";
+t['63'] = "Näytä  parannellut taisteluraportit";
+t['64'] = "Näytä yksityiskohdat raporttitilastoissa";
+t['65'] = "\"Päivitys mahdollinen\" väri<br />(Oletus = Tyhjä)";
+t['66'] = "\"Korkein mahdollinen taso\" väri<br />(Oletus = Tyhjä)";
+t['67'] = "\"Päivitys ei mahdollista\" väri<br />(Oletus = Tyhjä)";
+t['68'] = "\"Päivitys mahdollinen NPC:llä\" väri<br />(Oletus = Tyhjä)";
+t['69'] = "Kirjautumistaso konsoliin<br>VAIN OHJELMOIJILLE JA TESTAAJILLE<br>(Oletus = 0)";
+t['82.L'] = "Lukitse kirjanmerkit (Piilottaa: poista, siirrä ylös, siirrä alas ja muokkaa -painikkeet)";
+t['82.U'] = "Avaa kirjanmerkit (Näyttää: poista, siirrä ylös, siirrä alas ja muokkaa -painikkeet)";
+t['U.2'] = "Rotu";
+t['U.3'] = "Pääkaupunkisi nimi<br /><b>Käy profiilissa päivittääksesi</b>";
+t['U.6'] = "Pääkaupunkisi koordinaatit<br /><b>Käy profiilissa päivittääksesi</b>";
+t['SIM'] = "Taistelusimulaattori";
+t['QSURE'] = "Oletko varma?";
+t['LOSS'] = "Menetys";
+t['PROFIT'] = "Hyöty";
+t['EXTAV'] = "Päivitys mahdollista ";
+t['PLAYER'] = "Pelaaja";
+t['VILLAGE'] = "Kylä";
+t['POPULATION'] = "Asukasluku";
+t['COORDS'] = "Koordinaatit";
+t['MAPTBACTS'] = "Toiminnot";
+t['SAVED'] = "Tallennettu";
+t['YOUNEED'] = "Tarvitset";
+t['TODAY'] = "tänään";
+t['TOMORROW'] = "huomenna";
+t['DAYAFTERTOM'] = "ylihuomenna";
+t['MARKET'] = "Tori";
+t['BARRACKS'] = "Kasarmi";
+t['RAP'] = "Kokoontumispiste";
+t['STABLE'] = "Talli";
+t['WORKSHOP'] = "Työpaja";
+t['SENDRES'] = "Lähetä resursseja";
+t['SELL'] = "Myy";
+t['SENDIGM'] = "Lähetä viesti";
+t['LISTO'] = "Saatavilla";
+t['ON'] = "Saatavilla";
+t['AT'] = "kello";
+t['EFICIENCIA'] = "Hyötysuhde";
+t['NEVER'] = "Ei koskaan";
+t['ALDEAS'] = "Kylä(t)";
+t['TIEMPO'] = "Aika";
+t['OFREZCO'] = "Tarjonnut minulle";
+t['BUSCO'] = "Pyytänyt minulta";
+t['TIPO'] = "Suhde";
+t['DISPONIBLE'] = "Vain saatavilla olevat";
+t['CUALQUIERA'] = "Mikä tahansa";
+t['YES'] = "Kyllä";
+t['NO'] = "Ei";
+t['LOGIN'] = "Kirjaudu sisään";
+t['MARCADORES'] = "Kirjanmerkit";
+t['ANYADIR'] = "Lisää";
+t['UBU'] = "Uusi kirjanmerkin URL";
+t['UBT'] = "Uusi kirjanmerkkiteksti";
+t['DEL'] = "Poista";
+t['MAPA'] = "Kartta";
+t['MAXTIME'] = "Enimmäisaika";
+t['ARCHIVE'] = "Arkisto";
+t['SUMMARY'] = "Yhteenveto";
+t['TROPAS'] = "Joukot";
+t['ACTUALIZAR'] = "Päivitä kylän tiedot";
+t['VENTAS'] = "Tallennetut tarjoukset";
+t['MAPSCAN'] = "Tutki kartta";
+t['BIC'] = "Näytä laajennetut kuvakkeet";
+t['SAVE'] = "Tallenna";
+t['AT2'] = "Vahvistus";
+t['AT3'] = "Hyökkäys: Normaali";
+t['AT4'] = "Hyökkäys: Ryöstö";
+t['NBSA'] = "Automaattinen";
+t['NBSN'] = "Normaali";
+t['NBSB'] = "Laaja";
+t['NBHAX'] = "Automaattinen korkeuden säätö";
+t['NBHK'] = "Oletus korkeus";
+t['NPCSAVETIME'] = "Säästä: ";
+t['TOTALTROOPS'] = "Kylän joukkojen kokonaismäärä";
+t['SELECTALLTROOPS'] = "Valitse kaikki joukot";
+t['PARTY'] = "Juhlat";
+t['CPPERDAY'] = "KP/päivä";
+t['SLOT'] = "Kyliä";
+t['TOTAL'] = "Yhteensä";
+t['SELECTSCOUT'] = "Valitse tiedustelija";
+t['SELECTFAKE'] = "Valitse hämy";
+t['ALL'] = "Kaikki";
+t['SH2'] = "Värikentissä voit käyttää:<br />- <b>Green</b> , <b>red</b> , <b>orange</b> jne.<br />- HEX värikoodeja kuten <b>#004523</b><br />- Oletus: tyhjä";
+t['SOREP'] = "Näytä alkuperäinen raportti";
+t['WSIMO1'] = "Sisäinen (Pelin tarjoama)";
+t['WSIMO2'] = "Ulkoinen (kirilloid.ru tarjoama)";
+t['NONEWVER'] = "Sinulla on uusin saatavilla oleva versio";
+t['BVER'] = "Sinulla saattaa olla beta-versio";
+t['NVERAV'] = "Scriptistä on saatavilla uusi versio";
+t['UPDSCR'] = "Päivitä scripti nyt ?";
+t['CHECKUPDATE'] = "Tarkistetaan päivitystä scriptille.<br />Odota hetki...";
+t['AVPPV'] = "Kylien keskimääräinen asukasluku";
+t['AVPPP'] = "Pelaajien keskimääräinen asukasluku";
+t['MAX'] = "Enintään";
+t['TOTTRTR'] = "Koulutuksessa olevien joukkojen kokonaismäärä";
+t['TB3SL'] = "$1 Asetukset";
+t['UPDALLV'] = "Päivitä kaikki kylät. HUOMIOI: SAATTAA JOHTAA TILIN JÄÄDYTTÄMISEEN!!";
+t['LARGEMAP'] = "Iso kartta";
+t['USETHEMPR'] = "Käytä ne (Prosentuaalisesti)";
+t['USETHEMEQ'] = "Käytä ne (tasaisesti)";
+t['TOWNHALL'] = "Kaupungintalo";
+t['GSRVT'] = "Serveri";
+t['ACCINFO'] = "Tilin tiedot";
+t['NBO'] = "Muistilappu";
+t['MNUL'] = "Vasemmanpuoleinen valikko";
+t['STAT'] = "Tilastot";
+t['RESF'] = "Resurssikentät";
+t['VLC'] = "Kylän keskusta";
+t['MAPO'] = "Kartta asetukset";
+t['COLO'] = "Väri asetukset";
+t['DBGO'] = "Debug asetukset";
+t['HEROSMANSION'] = "Sankarinkartano";
+t['BLACKSMITH'] = "Aseseppä";
+t['ARMOURY'] = "Haarniskapaja";
+t['NOW'] = "Nyt";
+t['CLOSE'] = "Sulje";
+t['USETHEM1H'] = "Käytä ne (Tunnin tuotto)";
+t['OVERVIEW'] = "Yleiskatsaus";
+t['FORUM'] = "Foorumi";
+t['ATTACKS'] = "Hyökkäykset";
+t['NEWS'] = "Uutiset";
+t['ADDCRTPAGE'] = "Lisää nykyinen";
+t['SPACER'] = "Väliviiva";
+t['MEREO'] = "Viestit ja Raportit";
+t['ATTABLES'] = "Joukko taulukot";
+t['MTW'] = "Tuhlattu";
+t['MTX'] = "Ylittää";
+t['MTC'] = "Nykyinen määrä";
+t['ALFL'] = "Linkki pelin ulkopuoliselle foorumille<br />(Jätä tyhjäksi kun käytät pelinsisäistä foorumia)";
+t['MTCL'] = "Tyhjennä kaikki";
+t['CKSORT'] = "Klikkaa järjestääksesi";
+t['MIN'] = "Vähintään";
+t['SVGL'] = "Jaa kylien välillä";
+t['VGL'] = "Kylälista";
+t['UPDATEPOP'] = "Päivitä asukasluku";
+t['EDIT'] = "Muokkaa";
+t['NPCO'] = "NPC Avustajan asetukset";
+t['NEWVILLAGEAV'] = "Päivä ja aika";
+t['TIMEUNTIL'] = "Aikaa jäljellä";
+t['CENTERMAP'] = "Keskitä kartta tähän kylään";
+t['SENDTROOPS'] = "Lähetä joukkoja";
+t['PALACE'] = "Palatsi";
+t['RESIDENCE'] = "Virka-asunto";
+t['ACADEMY'] = "Akatemia";
+t['TREASURY'] = "Aarrekammio";
+t['UPGTB'] = "Resurssikentät/Rakennukset";
+t['RBTT'] = "Resurssipalkki";
+t['USE'] = "Käytä";
+t['RESIDUE'] = "Ylijäävät resurssit jos rakennat";
+t['RESOURCES'] = "Resurssit";
+t['SH1'] = "Automaattinen kaupunki ja koordinaatti tunnistus, kun käyt profiilissasi<br />Automaattinen rotu tunnistus, kun rakennat ja avaat kasarmin";
+t['RESEND'] = "Lähetä uudelleen?";
+t['WSI'] = "Pelin sisäinen taistelusimulaattori";
+t['TTT'] = "Yleiset joukko ja matka vihjeet";
+t['CROPFINDER'] = "Crop finder";
+break;
+
+case 'fr': //contributors: fr3nchlover, britch, sp4m4me
+t['1'] = "Serveur Travian v2.x";
+t['3'] = "Forcer le calcul des Légionnaires & Phalanges T3.1<br>(pour les serveurs mixtes 3.1 et 3.5)";
+t['4'] = "Marché";
+t['5'] = "Rassemblement/Caserne/Atelier/Etable";
+t['6'] = "Hotel de ville/Manoir héros/Armurerie/Usine";
+t['7'] = "Palais/Residence/Academie/Tresor";
+t['9'] = "Ajouter liens dans menu gauche<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "Simulateur de combat à utiliser :<br>(menu gauche)";
+t['12'] = "Afficher liens 'Global' et 'Centre' sur liste des Villages";
+t['13'] = "Afficher l icone \"Centrer sur ce village\"";
+t['14'] = "Afficher icones 'Envoyer troupes/Envoyer ressources' dans la liste des villages";
+t['16'] = "Afficher la production de cereales dans la liste des villages";
+t['17'] = "Afficher la population dans la liste des villages";
+t['18'] = "Afficher en plus une liste des villages (2 colonnes) en fenêtre flottante";
+t['19'] = "Afficher les informations sur les constructions et les mouvements de troupes<br>dans la liste de villages";
+t['20'] = "Afficher les liens favoris";
+t['21'] = "Afficher 'Liens favoris' comme une fenetre flotante";
+t['22'] = "Afficher le bloc-notes";
+t['23'] = "Afficher 'Bloc note' comme une fenetre flotante";
+t['24'] = "Taille Bloc-notes";
+t['25'] = "Hauteur Bloc-notes";
+t['26'] = "Afficher options NPC Assistant";
+t['27'] = "Analyseur à utiliser ";
+t['28'] = "Afficher liens Analyseur";
+t['29'] = "Analyser de carte a utiliser";
+t['30'] = "Afficher un lien vers la carte pour les joueurs";
+t['31'] = "Afficher un lien vers la carte pour les alliances";
+t['32'] = "Afficher 'Rechercher'";
+t['33'] = "Afficher 'Rechercher' dans fenêtre flottante";
+t['34'] = "Afficher PC/jour dans le tableau";
+t['35'] = "Afficher la consommation de cereales dans le tableau";
+t['37'] = "Afficher tableau sur page ressources";
+t['38'] = "Afficher les ressources en couleur";
+t['39'] = "Afficher le tableau de 'Barre de ressource'";
+t['40'] = "Afficher le tableau de 'Barre de ressource' comme une fenetre flotante";
+t['41'] = "Afficher tableau sur page batiments";
+t['42'] = "Classer les batiments par nom dans le tableau";
+t['43'] = "Afficher nombres";
+t['44'] = "Afficher les batiments en couleur";
+t['45'] = "Afficher niveau clignotant sur batiment constructible";
+t['48'] = "Nombre de pages des offres marché ('Marché => Offre')<br>à charger/consulter (Défaut = 1)";
+t['49'] = "Action par défaut sur place de rassemblement";
+t['50'] = "Nb. d'éclaireurs lors du clic sur \"Eclaireur\"";
+t['53'] = "Afficher info troupes dans info-bulle";
+t['54'] = "Afficher distance temps dans info bulle";
+t['56'] = "Affiche le type de case (sur carte)<br>lorsdu survol du curseur";
+t['57'] = "Afficher distance & temps";
+t['58'] = "Afficher tableau joueurs/villages/oasis";
+t['59'] = "Nb. de pages message/rapport à charger<br>(Défaut = 1)";
+t['60'] = "Montrer liens pour ouvrir les messages/rapports dans une popup";
+t['61'] = "Afficher \"Tout supprimer\" dans page de rapports";
+t['62'] = "Afficher icone \"Envoi message\" pour moi aussi";
+t['63'] = "Montrer les RC ameliores ";
+t['64'] = "Afficher detail Statistiques dans rapport";
+t['65'] = "Couleur pour Construction possible<br>(Vide = couleur par défaut)";
+t['66'] = "Couleur pour 'Niveau max'<br>(Vide = couleur par défaut)";
+t['67'] = "Couleur pour 'Construction impossible'<br>(Vide = couleur par défaut)";
+t['68'] = "Couleur pour 'Construction avec NPC'<br>(Vide = défaut)";
+t['69'] = "Console Log - RÉSERVÉ aux DEVELOPPEURS et DEBUGGEURS<br>(Défaut = 0)";
+t['82.L'] = "Verrouiller (Cache icones pour gérer les liens)";
+t['82.U'] = "Déverrouiller (Affiche icones pour gérer les liens)";
+t['U.2'] = "Peuple";
+t['U.3'] = "Nom de la Capitale";
+t['U.6'] = "Coordonnées de la Capitale";
+t['SIM'] = "Simulateur";
+t['QSURE'] = "Es-tu certain ?";
+t['LOSS'] = "Pertes en matériels";
+t['PROFIT'] = "Rentabilité";
+t['EXTAV'] = "Tu peux déjà augmenter son niveau";
+t['PLAYER'] = "Joueur";
+t['POPULATION'] = "Population";
+t['COORDS'] = "Coordonnées";
+t['SAVED'] = "Sauvegarde";
+t['YOUNEED'] = "Il manque";
+t['TODAY'] = "aujourd'hui";
+t['TOMORROW'] = "demain";
+t['DAYAFTERTOM'] = "après-demain";
+t['MARKET'] = "Place du marché";
+t['BARRACKS'] = "Caserne";
+t['RAP'] = "Place de rassemblement";
+t['STABLE'] = "Ecurie";
+t['WORKSHOP'] = "Atelier";
+t['SENDRES'] = "Envoyer des ressources";
+t['BUY'] = "Acheter des ressources";
+t['SELL'] = "Vendre des ressources";
+t['SENDIGM'] = "Envoyer MSG";
+t['LISTO'] = "Prêt";
+t['ON'] = "le";
+t['AT'] = "à";
+t['EFICIENCIA'] = "Efficacité";
+t['NEVER'] = "Jamais";
+t['TIEMPO'] = "Temps";
+t['OFREZCO'] = "Offre";
+t['BUSCO'] = "Recherche";
+t['DISPONIBLE'] = "Disponible";
+t['CUALQUIERA'] = "Toutes";
+t['YES'] = "Oui";
+t['NO'] = "Non";
+t['MARCADORES'] = "Liens";
+t['ANYADIR'] = "Ajouter";
+t['UBU'] = "URL du nouveau lien";
+t['UBT'] = "Texte du nouveau lien";
+t['DEL'] = "Supprimer";
+t['MAPA'] = "Carte";
+t['MAXTIME'] = "Temps maximum";
+t['SUMMARY'] = "Résumé";
+t['TROPAS'] = "Troupes";
+t['CHKSCRV'] = "MàJ TBeyond";
+t['ACTUALIZAR'] = "Mise a jour informations village";
+t['VENTAS'] = "Paramètres Vente";
+t['MAPSCAN'] = "Analyse de la carte - ATTENTION NE PAS UTILISER- RISQUE BLOCAGE OP !";
+t['BIC'] = "Afficher les icones étendues";
+t['SAVE'] = "Sauver";
+t['AT2'] = "Assistance";
+t['AT3'] = "Attaque: Normal";
+t['AT4'] = "Attaque: Pillage";
+t['NBSN'] = "Normal";
+t['NBSB'] = "Large";
+t['NBHAX'] = "Hauteur Auto";
+t['NBHK'] = "Hauteur par défaut";
+t['NPCSAVETIME'] = "Sauver : ";
+t['TOTALTROOPS'] = "Troupes totales du village";
+t['SELECTALLTROOPS'] = "Tout sélectionner";
+t['PARTY'] = "Festivités";
+t['CPPERDAY'] = "PC/jour";
+t['SELECTSCOUT'] = "Eclaireur";
+t['SELECTFAKE'] = "Diversion";
+t['ALL'] = "Tout";
+t['SH2'] = "Dans case 'Couleur' vous pouvez saisir :<br>-red ou orange, etc.<br>- ou une couleur HEX exemple :#004523<br>- Laisser vide pour couleur par défaut";
+t['SOREP'] = "Rapport original (A cocher obligatoirement avant diffusion du RC)";
+t['WSIMO1'] = "Interne (celui du jeu)";
+t['WSIMO2'] = "Externe (fourni par kirilloid.ru)";
+t['NONEWVER'] = "Pas de mise à jour disponible";
+t['BVER'] = "Tu as une version Beta du script (supérieure à version officielle) - Mise à jour impossible";
+t['NVERAV'] = "Une nouvelle version du script est disponible";
+t['UPDSCR'] = "Mettre à jour le script ?";
+t['CHECKUPDATE'] = "Recherche de nouvelle version du script.<br>Veuillez patienter...";
+t['AVPPV'] = "Population moyenne par village";
+t['AVPPP'] = "Population moyenne par joueur";
+t['TOTTRTR'] = "Total troupes en fabrication ";
+t['UPDALLV'] = "Actualiser tous les villages. ATTENTION : NE PAS UTILISER - RISQUE BLOCAGE OP. !";
+t['LARGEMAP'] = "Carte étendue";
+t['USETHEMPR'] = "Calculer (proportionnel)";
+t['USETHEMEQ'] = "Calculer (égalité)";
+t['TOWNHALL'] = "Hotel de ville";
+t['GSRVT'] = "Type de serveur";
+t['ACCINFO'] = "Données personnelles";
+t['NBO'] = "Bloc-notes";
+t['MNUL'] = "Menu à gauche";
+t['STAT'] = "Statistiques";
+t['RESF'] = "Vue globale";
+t['VLC'] = "Centre village";
+t['MAPO'] = "options Carte";
+t['COLO'] = "options Couleur";
+t['DBGO'] = "options Debug";
+t['HEROSMANSION'] = "Manoir Héros";
+t['BLACKSMITH'] = "Armurerie";
+t['ARMOURY'] = "Usine armure";
+t['NOW'] = "Maintenant";
+t['CLOSE'] = "Fermer";
+t['USETHEM1H'] = "Calculer 1h de Prod.";
+t['OVERVIEW'] = "Vue globale";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Attaques";
+t['NEWS'] = "Nouvelles";
+t['ADDCRTPAGE'] = "Marquer cette page";
+t['SCRPURL'] = "Page TBeyond";
+t['SPACER'] = "Séparateur";
+t['MEREO'] = "Messages & Rapports";
+t['ATTABLES'] = "Liste troupes";
+t['MTW'] = "Non utilisé";
+t['MTX'] = "En trop";
+t['MTC'] = "Transporté";
+t['ALFL'] = "Lien vers forum externe<br>(Laisser vide pour forum interne)";
+t['MTCL'] = "Tout effacer";
+t['CKSORT'] = "Cliquer pour trier";
+t['SVGL'] = "Sauver pour tous";
+t['VGL'] = "Liste des Villages";
+t['UPDATEPOP'] = "MaJ pop.";
+t['EDIT'] = "Editer";
+t['NPCO'] = "Options assistant NPC";
+t['NEWVILLAGEAV'] = "Date/Heure";
+t['TIMEUNTIL'] = "Temps d attente";
+t['CENTERMAP'] = "Centrer la carte sur ce village";
+t['SENDTROOPS'] = "Envoyer troupes";
+t['PALACE'] = "Palais";
+t['RESIDENCE'] = "Résidence";
+t['ACADEMY'] = "Académie";
+t['TREASURY'] = "Trésor";
+t['UPGTB'] = "Tableau de mise a jour des batiments/champs";
+t['RBTT'] = "Barre de ressource";
+t['USE'] = "Utiliser";
+t['CROPFINDER'] = "Recherche 15C";
+break;
+
+case 'hk': //contributors: MarioCheng, chihsun
+case 'tw':
+t['1'] = "Travian v2.x 伺服器";
+t['2'] = "移除廣告列";
+t['3'] = "修正古羅馬步兵及方陣兵的負載量<br>(僅適用於混合 T3.1 & T3.5 的伺服器)";
+t['4'] = "市場";
+t['5'] = "集結點/兵營/工場/馬廄";
+t['6'] = "村會堂/英雄宅/鐵匠/盔甲廠";
+t['7'] = "皇宮/行宮/研究院/寶物庫";
+t['8'] = "聯盟";
+t['9'] = "在左側選單中顯示更多連結<br>(Traviantoolbox, World Analyser, Travilog, Map, 等等.)";
+t['10'] = "左側選單的戰鬥模擬器連結";
+t['11'] = "張貼戰鬥報告的網站連結";
+t['12'] = "在村莊旁顯示 'dorf1.php'和'dorf2.php'的圖示";
+t['13'] = "在村莊旁顯示 '地圖置中'的圖示";
+t['14'] = "在村莊旁顯示 '集結點/運送資源'的圖示";
+t['15'] = "在村莊旁顯示 木材、磚塊、鋼鐵的每小時產量";
+t['16'] = "在村莊旁顯示 有效糧產";
+t['17'] = "在村莊旁顯示 村莊人口";
+t['18'] = "在浮動視窗顯示額外的村莊列表(兩列排序)";
+t['19'] = "在村莊旁顯示 建造中建築和軍隊移動的訊息";
+t['20'] = "顯示書籤";
+t['21'] = "在浮動視窗顯示書籤";
+t['22'] = "顯示筆記欄";
+t['23'] = "在浮動視窗顯示筆記欄";
+t['24'] = "筆記欄大小";
+t['25'] = "筆記欄高度";
+t['26'] = "顯示NPC交易的連結和計算";
+t['27'] = "選取世界分析網站";
+t['28'] = "在玩家名稱右側顯示分析連結";
+t['29'] = "選取地圖分析網站";
+t['30'] = "在玩家名稱右側顯示分析連結";
+t['31'] = "在聯盟名稱右側顯示分析連結";
+t['32'] = "顯示 '搜尋列'";
+t['33'] = "在浮動視窗顯示搜尋列";
+t['34'] = "在升級表單顯示 文明點資訊";
+t['35'] = "在升級表單顯示 糧食消耗";
+t['36'] = "在升級表單顯示 建造時已存資源及建造後剩餘資源";
+t['37'] = "顯示全資源田升級表單";
+t['38'] = "顯示資源田等級顏色";
+t['39'] = "顯示資源列表單";
+t['40'] = "在浮動視窗顯示資源列表單";
+t['41'] = "顯示全建築物升級表單";
+t['42'] = "在升級表單顯示 以建築名稱排序的表單";
+t['43'] = "顯示建築物等級";
+t['44'] = "顯示建築物等級顏色";
+t['45'] = "閃爍顯示正在升級的建築";
+t['46'] = "顯示每筆抵達商人的額外詳細資訊";
+t['48'] = "預先載入的頁數<br>'市場 → 買進' 的頁面中<br>(預設 = 1, 最多 = 5)";
+t['49'] = "集結點的預設行動";
+t['50'] = "設定\"選取偵察軍隊\"時<br>預設派出的軍隊數量";
+t['53'] = "在tooltip中顯示軍隊資料";
+t['54'] = "在tooltip中顯示距離和時間";
+t['56'] = "當滑鼠移到時<br>顯示村莊種類或綠洲資料";
+t['57'] = "顯示距離及時間";
+t['58'] = "在地圖顯示 玩家/村莊/綠洲 表單";
+t['59'] = "預先載入的頁數<br> 訊息和報告 的頁面中<br>(預設 = 1, 最多 = 5)";
+t['60'] = "顯示以彈出視窗方式讀取IGM的連結";
+t['61'] = "在報告頁面顯示 \"全部刪除\" 表單";
+t['62'] = "顯示 \"發IGM給自己\" 的圖示";
+t['63'] = "顯示強化的戰鬥報告";
+t['64'] = "顯示詳細戰鬥統計報告";
+t['65'] = "已可升級的顏色<br>(預設 = 空白)";
+t['66'] = "已達最高等級的顏色<br>(預設 = 空白)";
+t['67'] = "不可升級的顏色<br>(預設 = 空白)";
+t['68'] = "可利用NPC交易來升級的顏色<br>(預設 = 空白)";
+t['69'] = "程式記錄等級<br>只適用於程式開發員 或 除蟲工作<br>(預設 = 0)";
+t['82.L'] = "鎖定書籤 (隱藏 刪除, 移上, 移下的圖示)";
+t['82.U'] = "解鎖書籤 (顯示 刪除, 移上, 移下的圖示)";
+t['U.2'] = "種族";
+t['U.3'] = "您村莊的名稱<br>請瀏覽個人資料來進行自動更新，不要手動修改此欄";
+t['U.6'] = "您村莊的坐標<br>請瀏覽個人資料來進行自動更新，不要手動修改此欄";
+t['SIM'] = "戰鬥模擬器";
+t['QSURE'] = "是否確定?";
+t['LOSS'] = "損失";
+t['PROFIT'] = "獲益";
+t['EXTAV'] = "已可升級!";
+t['PLAYER'] = "玩家";
+t['VILLAGE'] = "村莊";
+t['POPULATION'] = "人口";
+t['COORDS'] = "座標";
+t['MAPTBACTS'] = "行動";
+t['SAVED'] = "儲存";
+t['YOUNEED'] = "您要";
+t['TODAY'] = "今天";
+t['TOMORROW'] = "明天";
+t['DAYAFTERTOM'] = "後天";
+t['MARKET'] = "市場";
+t['BARRACKS'] = "兵營";
+t['RAP'] = "集結點";
+t['STABLE'] = "馬廄";
+t['WORKSHOP'] = "工場";
+t['SENDRES'] = "運送資源";
+t['BUY'] = "買進";
+t['SELL'] = "賣出";
+t['SENDIGM'] = "發送IGM";
+t['LISTO'] = "升級可於";
+t['ON'] = "-";
+t['AT'] = "-";
+t['EFICIENCIA'] = "效率";
+t['NEVER'] = "永不";
+t['ALDEAS'] = "村莊";
+t['TIEMPO'] = "時間";
+t['OFREZCO'] = "提供";
+t['BUSCO'] = "搜索";
+t['TIPO'] = "比例";
+t['DISPONIBLE'] = "忽略過少物資";
+t['CUALQUIERA'] = "所有";
+t['YES'] = "是";
+t['NO'] = "否";
+t['LOGIN'] = "登入";
+t['MARCADORES'] = "書籤";
+t['ANYADIR'] = "加入";
+t['UBU'] = "新書籤網址";
+t['UBT'] = "新書籤標題(只限英文及數字)";
+t['DEL'] = "刪除";
+t['MAPA'] = "地圖 (TravMap)";
+t['MAXTIME'] = "最大運輸時間";
+t['ARCHIVE'] = "儲存";
+t['SUMMARY'] = "概要";
+t['TROPAS'] = "軍隊";
+t['CHKSCRV'] = "檢查版本更新";
+t['ACTUALIZAR'] = "更新此村莊的資料";
+t['VENTAS'] = "賣出紀錄";
+t['MAPSCAN'] = "搜尋此地圖";
+t['BIC'] = "顯示更多快捷圖示";
+t['SAVE'] = "儲存";
+t['AT2'] = "增援";
+t['AT3'] = "攻擊：正常";
+t['AT4'] = "攻擊：搶奪";
+t['NBSA'] = "自動";
+t['NBSN'] = "普通 (細)";
+t['NBSB'] = "大畫面 (大)";
+t['NBHAX'] = "自動變更高度";
+t['NBHK'] = "固定高度";
+t['NPCSAVETIME'] = "儲存資源需時：";
+t['TOTALTROOPS'] = "此村莊的軍隊總數";
+t['SELECTALLTROOPS'] = "選取全部士兵";
+t['PARTY'] = "慶祝";
+t['CPPERDAY'] = "文明點（每天）";
+t['SLOT'] = "擴展量";
+t['TOTAL'] = "總數";
+t['SELECTSCOUT'] = "選取偵察軍隊";
+t['SELECTFAKE'] = "選取佯攻軍隊";
+t['ALL'] = "全部";
+t['SH2'] = "在欄位中，可以輸入：<br>- green 或 red 或 orange, 等等...<br>- 或是輸入顏色的16進制碼，如 #004523<br>- 也可以保留空白來使用預設顏色";
+t['SOREP'] = "顯示原始的報告 (給張貼用)";
+t['WSIMO1'] = "內置 (由遊戲所提供)";
+t['WSIMO2'] = "外連 (由kirilloid.ru提供)";
+t['NONEWVER'] = "您正在使用最新版本";
+t['BVER'] = "目前正在使用測試版";
+t['NVERAV'] = "目前已有更新的版本，";
+t['UPDSCR'] = "是否需要更新？";
+t['CHECKUPDATE'] = "正在檢查程式更新，請稍候...";
+t['AVPPV'] = "平均每村人口";
+t['AVPPP'] = "平均每玩家人口";
+t['MAX'] = "最多";
+t['TOTTRTR'] = "所有正在訓練的士兵";
+t['TB3SL'] = "設定 TBeyond ML&CN";
+t['UPDALLV'] = "更新所有村莊資料。(有機會導致被鎖帳號)";
+t['LARGEMAP'] = "大地圖";
+t['USETHEMPR'] = "派出所有商人 (按資源比例分配)";
+t['USETHEMEQ'] = "派出所有商人 (平均分配)";
+t['TOWNHALL'] = "村會堂";
+t['GSRVT'] = "遊戲伺服器";
+t['ACCINFO'] = "帳號資料";
+t['NBO'] = "筆記欄";
+t['MNUL'] = "左側選單";
+t['STAT'] = "統計";
+t['RESF'] = "資源田";
+t['VLC'] = "城鎮中心";
+t['MAPO'] = "地圖設定";
+t['COLO'] = "顏色設定";
+t['DBGO'] = "除蟲設定";
+t['HEROSMANSION'] = "英雄宅";
+t['BLACKSMITH'] = "鐵匠";
+t['ARMOURY'] = "盔甲廠";
+t['NOW'] = "現在";
+t['CLOSE'] = "關閉";
+t['USETHEM1H'] = "派出所有商人 (資源1小時產量)";
+t['OVERVIEW'] = "概要";
+t['FORUM'] = "論壇";
+t['ATTACKS'] = "攻擊";
+t['NEWS'] = "新聞";
+t['ADDCRTPAGE'] = "加入此頁";
+t['SCRPURL'] = "TB ML&CN 官網";
+t['SPACER'] = "分隔線";
+t['MEREO'] = "訊息和報告";
+t['ATTABLES'] = "軍隊列表";
+t['MTW'] = "浪費負載";
+t['MTX'] = "超載量";
+t['MTC'] = "目前總搬運量";
+t['ALFL'] = "連結到自設聯盟論壇<br>(保留空白來使用預設聯盟論壇)";
+t['MTCL'] = "全部清除";
+t['CKSORT'] = "點擊來排序";
+t['MIN'] = "最少";
+t['SVGL'] = "分享記錄到其他村莊";
+t['VGL'] = "村莊列表";
+t['UPDATEPOP'] = "更新人口";
+t['EDIT'] = "編輯";
+t['NPCO'] = "NPC交易選項";
+t['NEWVILLAGEAV'] = "日期/時間";
+t['TIMEUNTIL'] = "需要等待的時間";
+t['CENTERMAP'] = "將村莊在地圖置中";
+t['SENDTROOPS'] = "派遣軍隊";
+t['PALACE'] = "皇宮";
+t['RESIDENCE'] = "行宮";
+t['ACADEMY'] = "研究院";
+t['TREASURY'] = "寶物庫";
+t['UPGTB'] = "資源田/建築物升級表單";
+t['RBTT'] = "資源列";
+t['USE'] = "送出";
+t['RESIDUE'] = "建造後剩餘資源";
+t['RESOURCES'] = "建造時已存資源";
+t['SH1'] = "點擊玩家資料連結以取得首都相關資料<br>接著建造或點擊兵營以偵測種族，然後再開啟村莊大樓。";
+t['CROPFINDER'] = "搜田工具";
+break;
+
+case 'hu': //contributors: geo
+t['1'] = "Travian v2.x kiszolgáló";
+t['4'] = "Piac";
+t['5'] = "Gyülekezõtér/Kaszárnya/Mûhely/Istálló";
+t['6'] = "Tanácsháza/Hõsök háza/Páncélkovács/Fegyverkovács";
+t['7'] = "Palota/Rezidencia/Akadémia/Kincstár";
+t['8'] = "Klán";
+t['9'] = "További linkek bal oldalon<br>(Traviantoolbox, World Analyser, Travilog, Térkép, stb.)";
+t['10'] = "Harcszimulátor link:<br>(bal oldali menü)";
+t['12'] = "'dorf1.php' és 'dorf2.php' linkek mutatása";
+t['13'] = "Mutasd a \"Térkép központosítása\" ikont";
+t['20'] = "Könyvjelzõk mutatása";
+t['22'] = "Jegyzettömb mutatása";
+t['24'] = "Jegyzettömb mérete";
+t['25'] = "Jegyzettömb magassága";
+t['26'] = "NPC segítõ számítások és linkek mutatása";
+t['27'] = "World Analyser választása";
+t['28'] = "Linkek a statisztika elemzõhöz";
+t['37'] = "Külterület fejlesztési táblája";
+t['38'] = "Külterület színjelzése";
+t['41'] = "Épületek fejlesztési táblája";
+t['43'] = "Épület szintek mutatása";
+t['44'] = "Épületek színjelzése";
+t['45'] = "Villogó szintjelzés az éppen fejlesztett épületekhez";
+t['48'] = "Piaci ajánlatoknál több oldal elõre betöltése<br>A Piac -Vásárlás- oldalán<br>(Alap = 1)";
+t['49'] = "Gyülekezõtér alapmûvelet";
+t['50'] = "Kémek száma a<br>\"Kémek választása\" funkcióhoz";
+t['53'] = "Egység információ mutatása gyorstippben";
+t['54'] = "Távolság és idõ mutatása falvakhoz";
+t['56'] = "Mezõ-típus, oázis infó mutatása<br>az egérmutató alatt";
+t['57'] = "Távolság/idõ mutatása";
+t['58'] = "Játékosok/falvak/oázisok mutatása a térképnél";
+t['59'] = "Üzenetek/jelentések elõre betöltött oldalainak száma<br>(Default = 1)";
+t['60'] = "Linkek az üzenetek felugró ablakban mutatásához";
+t['61'] = "\"Mindet törölni\" mutatása a jelentésekhez";
+t['62'] = "\"Üzenet küldése\" mutatása magam részére is";
+t['64'] = "Jelentés statisztika részletezése";
+t['65'] = "Szín, ha fejleszthetõ<br>(az alaphoz hagyd üresen)";
+t['66'] = "Szín, ha teljesen ki van építve<br>(az alaphoz hagyd üresen)";
+t['67'] = "Szín, ha nem elérhetõ a fejlesztés<br>(az alaphoz hagyd üresen)";
+t['68'] = "Szín, ha NPC-vel fejleszthetõ<br>(az alaphoz hagyd üresen)";
+t['69'] = "Konzol naplózási szint<br>CSAK PROGRAMOZÓKNAK VAGY HIBAKERESÉSHEZ<br>(Alap = 0)";
+t['82.L'] = "Könyvjelzõk lezárása (Törlés és mozgatás ikonok eltüntetése)";
+t['82.U'] = "Könyvjelzõk feloldása (Törlés és mozgatás ikonok mutatása)";
+t['U.2'] = "Nép";
+t['U.3'] = "Fõfalud neve<br><a href=\"spieler.php\">Nézd meg a profilodat a frissítéshez</a>";
+t['U.6'] = "Fõfalud koordinátái<br><a href=\"spieler.php\">Nézd meg a profilodat a frissítéshez</a>";
+t['SIM'] = "Harc szimulátor";
+t['QSURE'] = "Biztos vagy benne?";
+t['LOSS'] = "Veszteség";
+t['PROFIT'] = "Nyereség";
+t['EXTAV'] = "Fejlesztés elérhetõ";
+t['PLAYER'] = "Játékos";
+t['VILLAGE'] = "Falu";
+t['POPULATION'] = "Népesség";
+t['COORDS'] = "Koordináták";
+t['MAPTBACTS'] = "Mozgás:";
+t['SAVED'] = "Mentve";
+t['YOUNEED'] = "Kell";
+t['TODAY'] = "ma";
+t['TOMORROW'] = "holnap";
+t['DAYAFTERTOM'] = "holnapután";
+t['MARKET'] = "Piac";
+t['BARRACKS'] = "Kaszárnya";
+t['RAP'] = "Gyülekezõtér";
+t['STABLE'] = "Istálló";
+t['WORKSHOP'] = "Mûhely";
+t['SENDRES'] = "Nyersanyag küldése";
+t['BUY'] = "Vétel";
+t['SELL'] = "Eladás";
+t['SENDIGM'] = "Üzenet küldése";
+t['LISTO'] = "Elérhetõ";
+t['ON'] = "ezen a napon:";
+t['AT'] = "ekkor:";
+t['EFICIENCIA'] = "Hatékonyság";
+t['NEVER'] = "Soha";
+t['ALDEAS'] = "Falvak";
+t['TIEMPO'] = "Idõ";
+t['OFREZCO'] = "Felajánlás";
+t['BUSCO'] = "Keresés";
+t['TIPO'] = "Típus";
+t['DISPONIBLE'] = "Csak elfogadhatót";
+t['CUALQUIERA'] = "Mind";
+t['YES'] = "Igen";
+t['NO'] = "Nem";
+t['LOGIN'] = "Bejelentkezés";
+t['MARCADORES'] = "Könyvjelzõk";
+t['ANYADIR'] = "Hozzáad";
+t['UBU'] = "Könyvjelzõ URL";
+t['UBT'] = "Könyvjelzõ szövege";
+t['DEL'] = "Törlés";
+t['MAPA'] = "Térkép";
+t['MAXTIME'] = "Maximum idõ";
+t['ARCHIVE'] = "Archívum";
+t['SUMMARY'] = "Összefoglalás";
+t['TROPAS'] = "Egységek";
+t['CHKSCRV'] = "TBeyond frissítése";
+t['ACTUALIZAR'] = "Falu információ frissítése";
+t['VENTAS'] = "Mentett ajánlatok";
+t['MAPSCAN'] = "Térkép vizsgálata";
+t['BIC'] = "Bõvített ikonok";
+t['SAVE'] = "Mentés";
+t['AT2'] = "Támogatás";
+t['AT3'] = "Normál támadás";
+t['AT4'] = "Rablótámadás";
+t['NBSA'] = "Automatikus";
+t['NBSN'] = "Normál (kicsi)";
+t['NBSB'] = "Nagy képernyõ (nagy)";
+t['NBHAX'] = "Magasság automatikus bõvítése";
+t['NBHK'] = "Alap magasság";
+t['NPCSAVETIME'] = "Spórolsz: ";
+t['TOTALTROOPS'] = "A faluban képzett egységek";
+t['SELECTALLTROOPS'] = "Minden egység kiválasztása";
+t['PARTY'] = "Ünnepségek";
+t['CPPERDAY'] = "KP/nap";
+t['SLOT'] = "Hely";
+t['TOTAL'] = "Teljes";
+t['SELECTSCOUT'] = "Kémek kiválasztása";
+t['SELECTFAKE'] = "Fake kiválasztása";
+t['ALL'] = "Mind";
+t['SH2'] = "A színeket így add meg:<br>- green vagy red vagy  orange stb.<br>- vagy HEX színkóddal #004523<br>- hagyd üresen az alapértelmezett színhez";
+t['SOREP'] = "Eredeti jelentés (küldéshez)";
+t['WSIMO1'] = "Beépített";
+t['WSIMO2'] = "Külsõ (kirilloid.ru által)";
+t['NONEWVER'] = "A legújabb verziót használod";
+t['BVER'] = "Lehet hogy BETA verziód van";
+t['NVERAV'] = "A szkript új verziója elérhetõ";
+t['UPDSCR'] = "Frissíted most?";
+t['CHECKUPDATE'] = "Szkript-frissítés keresése.<br>Kérlek várj...";
+t['AVPPV'] = "Falunkénti átlag népesség";
+t['AVPPP'] = "Játékosonkénti átlag népesség";
+t['TOTTRTR'] = "Összes kiképzés alatt álló egység";
+t['TB3SL'] = "$1 Beállítások";
+t['UPDALLV'] = "Minden falu frissítése. HASZNÁLD ÓVATOSAN, TILTÁS JÁRHAT ÉRTE!";
+t['LARGEMAP'] = "Nagy térkép";
+t['USETHEMPR'] = "Arányos elosztás";
+t['USETHEMEQ'] = "Egyenlõ elosztás";
+t['TOWNHALL'] = "Tanácsháza";
+t['GSRVT'] = "Játék kiszolgáló";
+t['ACCINFO'] = "Felhasználó információ";
+t['NBO'] = "Jegyzettömb";
+t['MNUL'] = "Baloldali menü";
+t['STAT'] = "Statisztikák";
+t['RESF'] = "Külterület";
+t['VLC'] = "Faluközpont";
+t['MAPO'] = "Térkép beállítások";
+t['COLO'] = "Szín beállítások";
+t['DBGO'] = "Hibakeresési beállítások";
+t['HEROSMANSION'] = "Hõsök háza";
+t['BLACKSMITH'] = "Fegyverkovács";
+t['ARMOURY'] = "Páncélkovács";
+t['NOW'] = "Most";
+t['CLOSE'] = "Bezárás";
+t['USETHEM1H'] = "Egy órai termelés";
+t['OVERVIEW'] = "Áttekintés";
+t['FORUM'] = "Fórum";
+t['ATTACKS'] = "Támadások";
+t['NEWS'] = "Hírek";
+t['ADDCRTPAGE'] = "Jelenlegi hozzáadása";
+t['SCRPURL'] = "TBeyond oldal";
+t['SPACER'] = "Elválasztó";
+t['MEREO'] = "Üzenetek & Jelentések";
+t['ATTABLES'] = "Egység tábla";
+t['MTW'] = "Elpazarolva";
+t['MTX'] = "Meghaladja";
+t['MTC'] = "Jelenlegi rakomány";
+t['ALFL'] = "Link külsõ fórumhoz<br>(belsõhöz hagyd üresen)";
+t['MTCL'] = "Mindet törölni";
+t['CKSORT'] = "Rendezéshez kattints";
+t['MIN'] = "Min";
+t['SVGL'] = "Minden faluhoz menteni";
+t['VGL'] = "Falu lista";
+t['UPDATEPOP'] = "Népesség frissítése";
+t['EDIT'] = "Szerkesztés";
+t['NPCO'] = "NPC segítõ beállításai";
+t['NEWVILLAGEAV'] = "Dátum/Idõ";
+t['TIMEUNTIL'] = "Várakozás";
+t['CENTERMAP'] = "Térkép középpontjába ezt a falut";
+t['SENDTROOPS'] = "Egységek kiküldése";
+t['PALACE'] = "Palota";
+t['RESIDENCE'] = "Rezidencia";
+t['ACADEMY'] = "Akadémia";
+t['TREASURY'] = "Kincstár";
+t['USE'] = "Használat";
+t['CROPFINDER'] = "Búzakeresõ";
+break;
+
+case 'id': //contributors: CuPliz13, adudutz
+t['1'] = "Server Travian v2.x";
+t['4'] = "Pasar";
+t['5'] = "Titik temu|Barak|Bengkel|Istal";
+t['6'] = "Balai desa|Padepokan|Pabrik perisai|Pandai besi";
+t['7'] = "Istana|Kastil|Akademi|Gudang Ilmu";
+t['8'] = "Aliansi";
+t['9'] = "Tampilkan link tambahan di menu kiri<br>(Travian Toolbox, World Analyser, Travilog, Map, dll.)";
+t['10'] = "Link simulator perang untuk dipakai:<br>(menu kiri)";
+t['12'] = "tampilkan link 'Peninjauan Desa' dan 'Pusat Desa'";
+t['13'] = "Tampilkan ikon \"Desa ini sebagai tengah-tengah peta\"";
+t['14'] = "Tampilkan ikon 'Kirim Sumberdaya/Kirim Pasukkan' di daftar desa";
+t['16'] = "Tampilkan produksi gandum efektif di daftar desa";
+t['17'] = "Tampilkan populasi di daftar desa";
+t['18'] = "Tampilkan daftar desa tambahan (2 kolom) sebagai jendela terpisah";
+t['19'] = "Tampilkan informasi tentang pembangunan dan pergerakan pasukkan<br>di daftar desa";
+t['20'] = "Tampilkan bookmark";
+t['21'] = "Tampilkan bookmark sebagai jendela terpisah";
+t['22'] = "Tampilkan blok catatan";
+t['23'] = "Tampilkan blok catatan sebagai jendela terpisah";
+t['24'] = "Ukuran blok catatan";
+t['25'] = "Lebar blok catatan";
+t['26'] = "Tampilkan link kalkulasi dari NPC Assistant";
+t['27'] = "World Analyser untuk dipakai";
+t['28'] = "Tampilkan link Analyser Statistic";
+t['29'] = "Map Analyser yang dipakai";
+t['30'] = "Tampilkan link ke Map Analyser untuk pemain";
+t['31'] = "Tampilkan link ke Map Analyser untuk aliansi";
+t['32'] = "Tampilkan 'Tabel Pencarian'";
+t['33'] = "Tampilkan 'Tabel Pencarian' sebagai jendela terpisah";
+t['34'] = "Tampilkan informasi NB/hari di tabel tingkatan";
+t['35'] = "Tampilkan informasi penggunaan gandum di tabel tingkatan";
+t['36'] = "Tampilkan penghitungan sisa Sumberdaya di tabel tingkatan/pelatihan";
+t['37'] = "Tampilkan tabel tingkatan lahan sumberdaya";
+t['38'] = "Tampilkan warna tingkatan sumberdaya";
+t['39'] = "Tampilkan 'Tabel Sumberdaya'";
+t['40'] = "Tampilkan 'Tabel Sumberdaya' sebagai jendela terpisah";
+t['41'] = "Tampilkan tabel tingkatan bangunan";
+t['42'] = "Urutkan bangunan berdasarkan nama di tabel tingkatan";
+t['43'] = "Tampilkan angka pusat";
+t['44'] = "Tampilkan warna tingkatan bangunan";
+t['45'] = "Tampilkan kedipan untuk bangunan yang sedang ditingkatkan";
+t['48'] = "Jumlah halaman penawaran untuk ditampilkan<br>saat ada di halaman 'Pasar => Beli'<br>(Default = 1)";
+t['49'] = "Aksi default dari titik temu";
+t['50'] = "Jumlah pengintai untuk<br>fungsi \"Pilih pengintai\"";
+t['53'] = "Tampilkan info pasukan di tooltip";
+t['54'] = "Tampilkan jarak dan waktu ke desa-desa di tooltip";
+t['56'] = "Tampilkan tipe info bidang/oasis<br>saat kursor mouse berada di atas peta";
+t['57'] = "Tampilkan jarak & waktu";
+t['58'] = "Tampilkan tabel pemain, desa dan oasis yang dikuasai";
+t['59'] = "Jumlah halaman pesan/laporan untuk ditampilkan<br>(Default = 1)";
+t['60'] = "Tampilkan link untuk membuka pesan dalam popup";
+t['61'] = "Tampilkan tabel \"Hapus semua\" di halaman Laporan";
+t['62'] = "Tampilkan ikon \"Kirim Pesan\"";
+t['63'] = "Tampilkan laporan penyerangan  yang disempurnakan";
+t['64'] = "Tampilkan detail pada Laporan Statistik";
+t['65'] = "Upgrade tersedia<br>(Default = Kosong)";
+t['66'] = "Warna level maks<br>(Default = Kosong)";
+t['67'] = "Upgrade tidak tersedia<br>(Default = Kosong)";
+t['68'] = "Upgrade lewat NPC<br>(Default = Kosong)";
+t['69'] = "Console Log Level<br>HANYA UNTUK PROGRAMMERS SAAT DEBUGGING<br>(Default = 0)";
+t['82.L'] = "Kunci bookmark (sembunyikan ikon hapus, naikkan, turunkan)";
+t['82.U'] = "Buka bookmark (tampilkan ikon hapus, naikkan, turunkan)";
+t['U.2'] = "Suku";
+t['U.3'] = "Nama Ibukota<br><b>Kunjungi profil Anda untuk perubahan</b>";
+t['U.6'] = "Koordinat Ibukota Anda<br><b>Kunjungi profil Anda untuk perubahan</b>";
+t['SIM'] = "Simulator Perang";
+t['QSURE'] = "Apakah Anda yakin?";
+t['LOSS'] = "Kerugian";
+t['PROFIT'] = "Laba";
+t['EXTAV'] = "Naikkan tingkat";
+t['PLAYER'] = "Pemain";
+t['VILLAGE'] = "Desa";
+t['POPULATION'] = "Populasi";
+t['COORDS'] = "Koordinat";
+t['MAPTBACTS'] = "Aksi";
+t['SAVED'] = "Disimpan";
+t['YOUNEED'] = "Anda butuh";
+t['TODAY'] = "hari ini";
+t['TOMORROW'] = "besok";
+t['DAYAFTERTOM'] = "lusa";
+t['MARKET'] = "Pasar";
+t['BARRACKS'] = "Barak";
+t['RAP'] = "Titik Temu";
+t['STABLE'] = "Istal";
+t['WORKSHOP'] = "Bengkel";
+t['SENDRES'] = "Kirim sumberdaya";
+t['BUY'] = "Beli";
+t['SELL'] = "Jual";
+t['SENDIGM'] = "Kirim Pesan";
+t['LISTO'] = "Tersedia";
+t['ON'] = "pada";
+t['AT'] = "pukul";
+t['EFICIENCIA'] = "Efisiensi";
+t['NEVER'] = "jika gudang ditingkatkan";
+t['ALDEAS'] = "Desa";
+t['TIEMPO'] = "Waktu";
+t['OFREZCO'] = "Penawaran";
+t['BUSCO'] = "Cari";
+t['TIPO'] = "Tipe";
+t['DISPONIBLE'] = "Hanya tersedia";
+t['CUALQUIERA'] = "Apapun";
+t['YES'] = "Ya";
+t['NO'] = "Tidak";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Bookmark";
+t['ANYADIR'] = "Tambah";
+t['UBU'] = "URL Bookmark";
+t['UBT'] = "Nama Bookmark";
+t['DEL'] = "Hapus";
+t['MAPA'] = "Peta";
+t['MAXTIME'] = "Waktu maks";
+t['ARCHIVE'] = "Arsip";
+t['SUMMARY'] = "Laporan";
+t['TROPAS'] = "Pasukan";
+t['ACTUALIZAR'] = "Informasi Desa diubah";
+t['VENTAS'] = "Simpan penawaran";
+t['MAPSCAN'] = "Pindai peta";
+t['BIC'] = "Tampilkan ikon tambahan";
+t['SAVE'] = "Simpan";
+t['AT2'] = "Bantuan";
+t['AT3'] = "Serangan: Normal";
+t['AT4'] = "Serangan: Raid";
+t['NBSA'] = "Otomatis";
+t['NBSN'] = "Normal (kecil)";
+t['NBSB'] = "Layar lebar (besar)";
+t['NBHAX'] = "Lebar menyesuaikan otomatis";
+t['NBHK'] = "Lebar asal";
+t['NPCSAVETIME'] = "Simpan: ";
+t['TOTALTROOPS'] = "Jumlah pasukan";
+t['SELECTALLTROOPS'] = "Pilih semua pasukan";
+t['PARTY'] = "Festivalitas";
+t['CPPERDAY'] = "NB/hari";
+t['SLOT'] = "Slot";
+t['TOTAL'] = "Total";
+t['SELECTSCOUT'] = "Pilih pengintai";
+t['SELECTFAKE'] = "Pilih penipu";
+t['ALL'] = "Seluruh";
+t['SH2'] = "Di kolom warna Anda bisa mengisi:<br>- <b>green</b> atau <b>red</b> atau <b>orange</b>, dll.<br>- warna menggunakan kode heksadesilmal (HEX), seperti <b>#004523</b><br>- kosongkan untuk warna default";
+t['SOREP'] = "Tampilkan laporan asli (untuk posting dalam forum)";
+t['WSIMO1'] = "Internal (dari permainan)";
+t['WSIMO2'] = "Eksternal (dari kirilloid.ru)";
+t['NONEWVER'] = "Anda memiliki versi terakhir yang tersedia";
+t['BVER'] = "Anda memiliki versi beta";
+t['NVERAV'] = "Versi script terbaru telah tersedia";
+t['UPDSCR'] = "Update script sekarang?";
+t['CHECKUPDATE'] = "Mengecek update script.<br>Harap tunggu...";
+t['AVPPV'] = "Populasi rata-rata per desa";
+t['AVPPP'] = "Populasi rata-rata per pemain";
+t['MAX'] = "Maks";
+t['TOTTRTR'] = "Total pelatihan pasukan";
+t['UPDALLV'] = "Update semua desa. PEMAKAIAN MAKSIMUM BISA MENYEBABKAN AKUN ANDA DIHAPUS!";
+t['LARGEMAP'] = "Peta lebar";
+t['USETHEMPR'] = "Pakai (proporsional)";
+t['USETHEMEQ'] = "Pakai (sama)";
+t['TOWNHALL'] = "Balai Desa";
+t['GSRVT'] = "Server permainan";
+t['ACCINFO'] = "Informasi Akun";
+t['NBO'] = "Catatan";
+t['MNUL'] = "Menu di sebelah kanan";
+t['STAT'] = "Statistik";
+t['RESF'] = "Lahan Sumberdaya";
+t['VLC'] = "Pusat desa";
+t['MAPO'] = "Opsi peta";
+t['COLO'] = "Opsi warna";
+t['DBGO'] = "Opsi debug";
+t['HEROSMANSION'] = "Padepokan";
+t['BLACKSMITH'] = "Pandai besi";
+t['ARMOURY'] = "Pabrik perisai";
+t['NOW'] = "Sekarang";
+t['CLOSE'] = "Tutup";
+t['USETHEM1H'] = "Pakai (1 jam produksi)";
+t['OVERVIEW'] = "Peninjauan";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Serangan";
+t['NEWS'] = "Berita";
+t['ADDCRTPAGE'] = "Tambahkan halaman ini";
+t['SCRPURL'] = "TBeyond Home";
+t['SPACER'] = "Penjeda";
+t['MEREO'] = "Pesan & Laporan";
+t['ATTABLES'] = "Tabel pasukan";
+t['MTW'] = "Sisa muatan";
+t['MTX'] = "Melampaui";
+t['MTC'] = "Muatan saat ini";
+t['ALFL'] = "Link ke forum luar<br>(kosongkan untuk memakai forum internal)";
+t['MTCL'] = "Kosongkan Semua";
+t['CKSORT'] = "Klik untuk mengurutkan";
+t['MIN'] = "Min";
+t['SVGL'] = "Pembagian diantara desa-desa";
+t['VGL'] = "Daftar Desa";
+t['UPDATEPOP'] = "Update populasi";
+t['EDIT'] = "Ubah";
+t['NPCO'] = "Opsi NPC Assistant";
+t['NEWVILLAGEAV'] = "Tanggal/Waktu";
+t['TIMEUNTIL'] = "Waktu untuk menunggu";
+t['CENTERMAP'] = "Desa ini sebagai tengah-tengah peta";
+t['SENDTROOPS'] = "Kirim Pasukan";
+t['PALACE'] = "Istana";
+t['RESIDENCE'] = "Kastil";
+t['ACADEMY'] = "Akademi";
+t['TREASURY'] = "Gudang Ilmu";
+t['UPGTB'] = "Tabel Tingkatan Sumberdaya/Bangunan";
+t['RBTT'] = "Tabel Sumberdaya";
+t['USE'] = "Pakai";
+t['RESIDUE'] = "Sisa Sumberdaya jika dibangun ";
+t['RESOURCES'] = "Sumberdaya";
+t['CROPFINDER'] = "Crop Finder";
+break;
+
+case 'il': //contributors: zZzMichel, BlueShark, yabash, removesoul, DMaster
+t['1'] = "שרת טרוויאן גירסה 2.x";
+t['2'] = "הסר באנרים";
+t['3'] = "שנה חישובי יכולת נשיאה של ליגיונר ופלנקס בשרתי T3.1<br>(מיועד לשרתי T3.1 ו- T3.5 משולבים - מופיע בעיקר בשרתי .de)";
+t['4'] = "שוק";
+t['5'] = "נקודת מפגש/מגורי חיילים/בית-מלאכה/אורווה ";
+t['6'] = "בניין העירייה/אחוזת הגיבור/חרש שריון/חרש נשק";
+t['7'] = "ארמון/מגורים/אקדמיה/משרד-האוצר";
+t['8'] = "ברית";
+t['9'] = "הראה לינקים נוספים בתפריט הימני<br>(Traviantoolbox, World Analyser, Travilog, מפה, וכו')";
+t['10'] = "סימולטור קרב לשימוש (בתפריט הימני)";
+t['12'] = "הצג קישוריי 'dorf1.php' ו- 'dorf2.php' ברשימת הכפרים";
+t['13'] = "הצג סמל \"מַרְכֵּז כפר זה במפה\" ברשימת הכפרים";
+t['14'] = "הצג את הסמלים 'שליחת כוחות/משאבים' ברשימת הכפרים";
+t['16'] = "הצג נטו ייצור יבול של כל כפר ברשימת הכפרים";
+t['17'] = "הצג אוכלוסייה ברשימת הכפרים";
+t['18'] = "הצג טבלאת רשימת כפרים נוספת כחלון צף (יוצג בשני טורים)";
+t['19'] = "הצג סמל מידע אודות תנועת כוחות ובניינים בתהליכי שידרוג/בנייה ברשימת הכפרים";
+t['20'] = "הראה מועדפים";
+t['21'] = "הצג את ה'מועדפים' כחלון מרחף";
+t['22'] = "הצג פנקס הערות";
+t['23'] = "הצג את 'פנקס הרשימות' כחלון צף";
+t['24'] = "גודל פנקס הערות";
+t['25'] = "גובה פנקס הערות";
+t['26'] = "הצג חישובים ולינקים של מְסַיֵּעַ ה- NPC";
+t['27'] = "מאגר נתונים לשימוש";
+t['28'] = "הצג לינקים סטטיסטיים ממאגר נתונים";
+t['29'] = "מנתח מפה לשימוש";
+t['30'] = "הצג לינקים למפה - למיקומי שחקנים";
+t['31'] = "הצג לינקים למפה - למיקומי בריתות";
+t['32'] = "הצג מסגרת חיפוש'";
+t['33'] = "הצג 'מסגרת חיפוש' כחלון צף";
+t['34'] = "הצג נקודות תרבות ליום בטבלאת השידרוגים";
+t['35'] = "הצג צריכת יבול בטבלאת השידרוגים";
+t['36'] = "הצג חישוביי זמנים ומשאבים נחוצים בטבלאות שידרוג מבנים וייצור חיילים";
+t['37'] = "הראה טבלת שדרוג שדות משאבים";
+t['38'] = "הצג רמת שדות משאבים בצבע";
+t['39'] = "הצג טבלאת 'גרף בארים'";
+t['40'] = "הצג טבלאת 'גרף בארים' כחלון צף";
+t['41'] = "הראה טבלת שדרוג מבנים";
+t['42'] = "סדר את המבנים בטבלת שידרוג המבנים לפי שמות";
+t['43'] = "הצג רמות מבנים";
+t['44'] = "הצג רמת מבנים בצבע";
+t['45'] = "הצג מספרים מהבהבים למבנים שעוברים שידרוג";
+t['46'] = "הצג מידע נוסף אצל כל סוחר שמגיע";
+t['48'] = "מספר דפי הצעות לטעינה בזמן שנמצאים בעמוד 'שוק => הצעות'<br>(ברירת מחדל = 1)";
+t['49'] = "פעולת ברירת מחדל בנקודת המפגש";
+t['50'] = "מספר הסיירים שירשם בשימוש בפונקציה 'שלח סייר'";
+t['53'] = "הצג מידע על החיילים בהצבעת העכבר על תמונותיהם";
+t['54'] = "הצג מרחקים וזמנים בהצבעת העכבר על שמות כפרים";
+t['56'] = "הראה סוג עמק נטוש/נווה מדבר בזמן העברת העכבר מעליו במפה";
+t['57'] = "הצג מרחקים וזמנים";
+t['58'] = "הצג טבלה של שחקנים/כפרים/עמקים תפוסים";
+t['59'] = "מספר דפי ההודעות/דוחות שברצונך לטעון<br>(ברירת-מחדל = 1)";
+t['60'] = "הצג קישור לפתיחת הודעות בחלון מוקפץ";
+t['61'] = "הצג את טבלת כפתורי המחיקה בדפי הדוחות";
+t['62'] = "הצג את סמל 'שליחת הודעה' גם ליד שם המשתמש שלי";
+t['63'] = "הצג סטטיסטיקה בסיסית בדפי הדוחות";
+t['64'] = "הצג פרטי סטטיסטיקה נוספים בדפי הדוחות";
+t['65'] = "צבע שדרוג זמין (ברירת מחדל = ריק)";
+t['66'] = "צבע שלב מקסימאלי (ברירת מחדל = ריק)";
+t['67'] = "צבע כאשר שדרוג לא אפשרי (ברירת מחדל = ריק)";
+t['68'] = "צבע שדרוג ע\"י NPC (ברירת מחדל = ריק)";
+t['69'] = "Console Log Level<br>רק בשביל מתכנתים או בודקי באגים, (ברירת מחדל = 0)";
+t['82.L'] = "נעל מועדפים (מסתיר את סמלי המחיקה וההזזה)";
+t['82.U'] = "בטל נעילת מועדפים (מציג את סמלי המחיקה וההזזה)";
+t['U.2'] = "<b>גזע</b><br>אם מופיעה שגיאה/ריק, אנא הכנס למגורי החיילים";
+t['U.3'] = "<b>שם הבירה</b><br>אם מופיעה שגיאה/ריק, אנא הכנס לדף הפרופיל";
+t['U.6'] = "<b>קואורדינטות הבירה</b><br>אם מופיעה שגיאה/ריק, אנא הכנס לדף הפרופיל";
+t['SIM'] = "סימולטור קרב ";
+t['QSURE'] = "האם אתה בטוח?";
+t['LOSS'] = "הפסד";
+t['PROFIT'] = "רווח";
+t['EXTAV'] = "שידרוג זמין";
+t['PLAYER'] = "שחקן";
+t['VILLAGE'] = "כפר";
+t['POPULATION'] = "אוכלוסייה";
+t['COORDS'] = "קואורדינטות";
+t['MAPTBACTS'] = "פעולות";
+t['SAVED'] = "נשמר";
+t['YOUNEED'] = "את/ה צריכ/ה";
+t['TODAY'] = "היום";
+t['TOMORROW'] = "מחר";
+t['DAYAFTERTOM'] = "מחרתיים";
+t['MARKET'] = "שוק";
+t['BARRACKS'] = "מגורי חיילים";
+t['RAP'] = "נקודת מפגש";
+t['STABLE'] = "אורווה";
+t['WORKSHOP'] = "בית מלאכה";
+t['SENDRES'] = "שלח משאבים";
+t['BUY'] = "קנה";
+t['SELL'] = "מכור";
+t['SENDIGM'] = "שלח הודעה";
+t['LISTO'] = "זמין";
+t['ON'] = "זמין";
+t['AT'] = "ב";
+t['EFICIENCIA'] = "יעילות";
+t['NEVER'] = "אף פעם";
+t['ALDEAS'] = "כפר(ים)";
+t['TIEMPO'] = "זמן";
+t['OFREZCO'] = "מציע";
+t['BUSCO'] = "מחפש";
+t['TIPO'] = "יחס ההחלפה";
+t['DISPONIBLE'] = "רק עסקאות אפשריות ?";
+t['CUALQUIERA'] = "כל סוג";
+t['YES'] = "כן";
+t['NO'] = "לא";
+t['LOGIN'] = "התחבר";
+t['MARCADORES'] = "מועדפים";
+t['ANYADIR'] = "הוסף";
+t['UBU'] = "לינק";
+t['UBT'] = "שם";
+t['DEL'] = "מחק";
+t['MAPA'] = "מפה";
+t['MAXTIME'] = "מקסימום זמן שליחה";
+t['ARCHIVE'] = "ארכיון";
+t['SUMMARY'] = "סיכום";
+t['TROPAS'] = "כוחות";
+t['CHKSCRV'] = "עדכן TBeyond";
+t['ACTUALIZAR'] = "עדכן מידע על הכפר";
+t['VENTAS'] = "הצעות שמורות";
+t['MAPSCAN'] = "סרוק מפה";
+t['BIC'] = "הצג אייקונים מורחבים";
+t['SAVE'] = "שמור";
+t['AT2'] = "תגבורת";
+t['AT3'] = "התקפה רגילה";
+t['AT4'] = "התקפת פשיטה";
+t['NBSA'] = "אוטומאטי";
+t['NBSN'] = "רגיל (קטן)";
+t['NBSB'] = "מסך רחב";
+t['NBHAX'] = "הרחב גובה אוטומאטית";
+t['NBHK'] = "גובה ברירת מחדל";
+t['NPCSAVETIME'] = "שמור: ";
+t['TOTALTROOPS'] = "סה\"כ כוחות שיש לכפר זה";
+t['SELECTALLTROOPS'] = "בחר את כל החיילים";
+t['PARTY'] = "חגיגות";
+t['CPPERDAY'] = "נקודות תרבות ליום";
+t['SLOT'] = "מקום פנוי";
+t['TOTAL'] = "סה\"כ";
+t['SELECTSCOUT'] = "בחר סייר";
+t['SELECTFAKE'] = "התקפה מזויפת";
+t['ALL'] = "הכל";
+t['SH2'] = "בשורות הצבעים אתה יכול להכניס:<br>- <b>green</b> או <b>red</b> או  <b>orange</b> וכו'<br>- קוד HEX  כמו <b>#004523</b><br>- השאר ריק בשביל ברירת המחדל";
+t['SOREP'] = "הראה דוח רגיל (לפרסום)";
+t['WSIMO1'] = "פנימי (מסופק על ידי המשחק)";
+t['WSIMO2'] = "חיצוני (מסופק על ידי kirilloid.ru)";
+t['NONEWVER'] = "יש לך את הגירסה העדכנית ביותר";
+t['BVER'] = "אתה יכול להוריד את גירסת הבטא";
+t['NVERAV'] = "קיימת גירסה חדשה לסקריפט";
+t['UPDSCR'] = "עדכן את הסקיפט עכשיו?";
+t['CHECKUPDATE'] = "בודק עדכונים לסקריפט. אנא המתן...";
+t['AVPPV'] = "ממוצע אוכלוסייה לכפר";
+t['AVPPP'] = "ממוצע אוכלוסייה לשחקן";
+t['MAX'] = "מקס";
+t['TOTTRTR'] = "סה\"כ חיילים באימון";
+t['TB3SL'] = "הגדרות $1";
+t['UPDALLV'] = "עדכן מידע על כל הכפרים. השתמשו בזהירות כי הדבר יכול להוביל לקבלת באן!";
+t['LARGEMAP'] = "מפה גדולה";
+t['USETHEMPR'] = "חלק משאבים (באופן פרופורציוני)";
+t['USETHEMEQ'] = "חלק משאבים (באופן שווה)";
+t['TOWNHALL'] = "בניין העירייה";
+t['GSRVT'] = "סוג השרת";
+t['ACCINFO'] = "מידע חשבון";
+t['NBO'] = "פנקס הרשימות";
+t['MNUL'] = "תוספות התפריט שבצד ימין";
+t['STAT'] = "סטטיסטיקות";
+t['RESF'] = "שדות משאבים";
+t['VLC'] = "מרכז הכפר";
+t['MAPO'] = "אפשרויות מפה";
+t['COLO'] = "אפשרויות צבעים";
+t['DBGO'] = "מסוף שגיאות";
+t['HEROSMANSION'] = "אחוזת הגיבור";
+t['BLACKSMITH'] = "חרש נשק";
+t['ARMOURY'] = "חרש שריון";
+t['NOW'] = "כעת";
+t['CLOSE'] = "סגור";
+t['USETHEM1H'] = "חלק משאבים (תוצר של שעה)";
+t['OVERVIEW'] = "מבט-על";
+t['FORUM'] = "פורום";
+t['ATTACKS'] = "התקפות";
+t['NEWS'] = "חדשות";
+t['ADDCRTPAGE'] = "הוסף דף נוכחי";
+t['SCRPURL'] = "אתר הסקריפט";
+t['SPACER'] = "קו הפרדה";
+t['MEREO'] = "הודעות ודוחות";
+t['ATTABLES'] = "טבלאות חיילים";
+t['MTW'] = "מקום פנוי";
+t['MTX'] = "לא ניתן לשלוח";
+t['MTC'] = "סה\"כ משאבים";
+t['ALFL'] = "קישור לפורום ברית חיצוני (השאר ריק כדי להשתמש בפורום שמספק המשחק)";
+t['MTCL'] = "נקה הכל";
+t['CKSORT'] = "לחץ כדי למיין";
+t['MIN'] = "מינימום";
+t['SVGL'] = "שתף את ההצעה השמורה בכל הכפרים שלי";
+t['VGL'] = "רשימת הכפרים";
+t['UPDATEPOP'] = "עדכן אוכלוסייה";
+t['NPCO'] = "אפשרויות מְסַיֵּעַ ה- NPC";
+t['NEWVILLAGEAV'] = "מתי ?";
+t['TIMEUNTIL'] = "עוד כמה זמן ?";
+t['CENTERMAP'] = "מַרְכֵּז כפר זה במפה";
+t['SENDTROOPS'] = "שלח כוחות";
+t['PALACE'] = "ארמון";
+t['RESIDENCE'] = "מגורים מלכותיים";
+t['ACADEMY'] = "אקדמיה";
+t['TREASURY'] = "משרד-האוצר";
+t['UPGTB'] = "טבלאות שידרוג משאבים/מבנים";
+t['RBTT'] = "סרגל משאבים";
+t['USE'] = "השתמש";
+t['RESIDUE'] = "משאבים שישארו לך אם תבנה ";
+t['RESOURCES'] = "משאבים";
+t['SH1'] = "פתח את הפרופיל שלך לזיהוי עיר בירה/קוארדינטות<br>בנה מגורי חיילים בשביל זיהוי גזע אוטומטי ואז כנס למרכז הכפר";
+t['CROPFINDER'] = "מוצא קרופרים";
+break;
+
+case 'ir': //contributors: mohammad6006, Reza_na
 t['1'] = "تراویان نسخه*.2";
-t['2'] = 'پاک کردن تبلیغات';
-t['3'] = 'مجبور کردن برآورد گنجایش T3.1 سرباز لژیون و سرباز پیاده(تواما برای خدمات رسان های T3.1 و T3.5)';
-t['4'] = 'بازار';
-t['5'] = 'اردوگاه/سربازخانه/کارگاه/اصطبل';
+t['2'] = "پاک کردن تبلیغات";
+t['3'] = "مجبور کردن برآورد گنجایش T3.1 سرباز لژیون و سرباز پیاده(تواما برای خدمات رسان های T3.1 و T3.5)";
+t['4'] = "بازار";
+t['5'] = "اردوگاه/سربازخانه/کارگاه/اصطبل";
 t['6'] = "تالار شهر/امارت قهرمان/زره سازی/اسلحه سازی";
 t['7'] = "قصر/اقامتگاه/دارالفنون/خزانه";
-t['8'] = 'اتحاد';
+t['8'] = "اتحاد";
 t['9'] = "نمایش پیوند های اضافی در فهرست سمت راست<br>(جعبه ابزار تراویان، تحلیلگر جهان، ثبت گزارش نبرد، نقشه و غیره.)";
 t['10'] = "پیوند به شبیه ساز نبرد برای استفاده:<br>(فهرست سمت راست)";
 t['11'] = "پیوند برای استفاده از پایگاه های ثبت گزارش(نبرد)";
 t['12'] = "نمایش پیوند های 'dorf1.php' و 'dorf2.php'";
-t['13'] = 'نمایش دکمه "مرکز نقشه برای این دهکده"';
+t['13'] = "نمایش دکمه \"مرکز نقشه برای این دهکده\"";
 t['14'] = "نمایش  دکمه 'ارسال سرباز/ارسال منابع' در فهرست دهکده";
 t['15'] = "نمایش میزان تولید در ساعت چوب، خشت، آهن در فهرست دهکده";
 t['16'] = "نمایش تولید مؤثر گندم در فهرست دهکده";
 t['17'] = "نمایش جمعیت در فهرست دهکده";
-t['18'] = 'نمایش فهرست دهکده اضافی (2 ستون) به صورت شناور';
-t['19'] = 'نمایش اطلاعات درباره ساختمان های در حال گسترش و سربازان در حرکت<br>در فهرست دهکده';
-t['20'] = 'نشاندادن برچسب ها';
+t['18'] = "نمایش فهرست دهکده اضافی (2 ستون) به صورت شناور";
+t['19'] = "نمایش اطلاعات درباره ساختمان های در حال گسترش و سربازان در حرکت<br>در فهرست دهکده";
+t['20'] = "نشاندادن برچسب ها";
 t['21'] = "نمایش 'برچسب های کاربر' به صورت پنجره شناور";
-t['22'] = 'نمایش دفترچه یادداشت';
+t['22'] = "نمایش دفترچه یادداشت";
 t['23'] = "نمایش 'دفترچه یادداشت' به صورت شناور";
-t['24'] = 'اندازه دفترچه یادداشت';
-t['25'] = 'ارتفاع دفترچه یادداشت';
-t['26'] = 'نمایش محاسبات و پیوند به دستیار تعدیل منابع';
+t['24'] = "اندازه دفترچه یادداشت";
+t['25'] = "ارتفاع دفترچه یادداشت";
+t['26'] = "نمایش محاسبات و پیوند به دستیار تعدیل منابع";
 t['27'] = "تحلیلگر جهان برای استفاده";
 t['28'] = "نمایش پیوند تحلیلگر آماری";
-t['29'] = 'تحلیلگر نقشه برای استفاده';
-t['30'] = 'نمایش پیوند به نقشه برای کاربران';
-t['31'] = 'نمایش پیوند به نقشه برای اتحاد ها ';
+t['29'] = "تحلیلگر نقشه برای استفاده";
+t['30'] = "نمایش پیوند به نقشه برای کاربران";
+t['31'] = "نمایش پیوند به نقشه برای اتحاد ها ";
 t['32'] = "نمایش 'نوار جستجو'";
 t['33'] = "نمایش 'نوار جستجو' به صورت پنجره شناور";
 t['34'] = "نمایش اطلاعات 'امتیاز فرهنگی در روز' در جدول گسترش منابع و ساختمان ها";
 t['35'] = "نمایش میزان مصرف گندم در جدول گسترش";
 t['36'] = "نمایش محاسبات 'سپس/پس مانده' در جدول های تعلیم/ارتقاء";
 t['37'] = "نمایش جدول گسترش منابع";
-t['38'] = 'نشاندادن رنگ های سطح منابع';
+t['38'] = "نشاندادن رنگ های سطح منابع";
 t['39'] = "نمایش جدول 'نوار منابع'";
 t['40'] = "نمایش جدول 'نوار منابع' به صورت پنجره شناور";
 t['41'] = "نمایش جدول گسترش ساختمان ها";
-t['42'] = 'مرتبسازی ساختمان ها بر اساس نام در جدول گسترش';
-t['43'] = 'نشان دادن شماره های مرکزی';
-t['44'] = 'نشان دادن رنگ های سطح ساختمان ها';
+t['42'] = "مرتبسازی ساختمان ها بر اساس نام در جدول گسترش";
+t['43'] = "نشان دادن شماره های مرکزی";
+t['44'] = "نشان دادن رنگ های سطح ساختمان ها";
 t['45'] = "نمایش سطح ساختمان و منابع به صورت چشمکزن برای ساختمان ها یا منابع در حال ارتقاء";
 t['46'] = "نمایش اطلاعات اضافی برای هر بازرگان در حرکت";
 t['47'] = "نشاندادن آخرین تبادل بازار";
 t['48'] = "تعداد صفحات پیشنهاد برای پیش بارگذاری<br>که در صفحه 'بازار => خرید' وجود دارد<br>(پیشفرض = 1)";
-t['49'] = 'عملکرد پیشفرض اردوگاه';
-t['50'] = 'تعداد ماموران شناسایی برای<br>تابع "انتخاب مامور شناسایی"';
+t['49'] = "عملکرد پیشفرض اردوگاه";
+t['50'] = "تعداد ماموران شناسایی برای<br>تابع \"انتخاب مامور شناسایی\"";
 t['51'] = "نمایش آخرین حمله";
 t['52'] = "نشاندادن/استفاده مختصات برای آخرین حمله";
-t['53'] = 'نمایش اطلاعات لشکریان در توضیحات یک خطی (tooltip)';
-t['54'] = 'نمایش فاصله و زمان رسیدن به دهکده در توضیحات یک خطی (tooltip)';
+t['53'] = "نمایش اطلاعات لشکریان در توضیحات یک خطی (tooltip)";
+t['54'] = "نمایش فاصله و زمان رسیدن به دهکده در توضیحات یک خطی (tooltip)";
 t['55'] = "پر کردن خودکار شبیه ساز نبرد داخلی با لشکریان موجود";
 t['56'] = "وقتی که موس روی نقشه است<br>اطلاعات نوع سرزمین یا دهکده نمایش داده شود";
-t['57'] = 'نمایش فاصله و زمان';
-t['58'] = 'نمایش جدولی بازیکن ها/دهکده ها/سرزمین های تصرف شده';
-t['59'] = 'تعداد پیغام ها یا گزارشات برای پیش بار گزاری<br>(پیشفرض = 1)';
-t['60'] = 'نمایش پیوند برای باز کردن پیغام ها/گزارش ها در پنجره حبابی';
+t['57'] = "نمایش فاصله و زمان";
+t['58'] = "نمایش جدولی بازیکن ها/دهکده ها/سرزمین های تصرف شده";
+t['59'] = "تعداد پیغام ها یا گزارشات برای پیش بار گزاری<br>(پیشفرض = 1)";
+t['60'] = "نمایش پیوند برای باز کردن پیغام ها/گزارش ها در پنجره حبابی";
 t['61'] = "نمایش جدول 'حذف همه' در صفحه گزارشات";
-t['62'] = 'نشان دادن دکمه ارسال پیام خصوصی برای من';
-t['63'] = 'نمایش تسهيلات گزارش نبرد فراتراویان 3 ()';
-t['64'] = 'نمایش جزئیات در گزارشات آماری';
-t['65'] = 'رنگ قابل گسترش<br>(پیشفرض = خالی)';
-t['66'] = 'رنگ حداکثر سطح<br>(پیشفرض = خالی)';
-t['67'] = 'رنگ عدم امکان گسترش<br>(پیشفرض = خالی)';
-t['68'] = 'رنگ امکان گسترش با تعدیل منابع<br>(پیشفرض = خالی)';
+t['62'] = "نشان دادن دکمه ارسال پیام خصوصی برای من";
+t['63'] = "نمایش تسهيلات گزارش نبرد فراتراویان 3 ()";
+t['64'] = "نمایش جزئیات در گزارشات آماری";
+t['65'] = "رنگ قابل گسترش<br>(پیشفرض = خالی)";
+t['66'] = "رنگ حداکثر سطح<br>(پیشفرض = خالی)";
+t['67'] = "رنگ عدم امکان گسترش<br>(پیشفرض = خالی)";
+t['68'] = "رنگ امکان گسترش با تعدیل منابع<br>(پیشفرض = خالی)";
 t['69'] = "Console Log Level<br>فقط برای برنامه نویس ها و خطایابی<br>(پیشفرض = 0)";
-t['82.L'] = 'قفل برچسب ها (پنهان سازی دکمه های حذف، انتقال به بالا، انتقال به پایین)';
-t['82.U'] = 'باز کردن قفل برچسب ها (نشاندادن دکمه حذف، انتقال به بالا، انتقال به پایین)';
+t['82.L'] = "قفل برچسب ها (پنهان سازی دکمه های حذف، انتقال به بالا، انتقال به پایین)";
+t['82.U'] = "باز کردن قفل برچسب ها (نشاندادن دکمه حذف، انتقال به بالا، انتقال به پایین)";
 t['85'] = "نشاندادن شمایل 'ارسال لشکریان/ارسال منابع'";
 t['87'] = "به یاد داشتن آخرین گزینه های '1/2/3 برابر' ارسال بازار (در صورت موجودیت)";
-t['U.2'] = 'نژاد';
-t['U.3'] = 'نام پایتخت شما <br>برای بروز رسانی به پروفایل خود بروید';
-t['U.6'] = 'موقعیت پایتخت شما<br>برای به روز رسانی به پروفایل خود بروید';
-t['SIM'] = 'شبیه ساز نبرد';
-t['QSURE'] = 'آیا مطمئن هستید؟';
-t['LOSS'] = 'زیان';
-t['PROFIT'] = 'سود';
-t['EXTAV'] = 'قابل توسعه';
-t['PLAYER'] = 'بازیکن';
-t['VILLAGE'] = 'دهکده';
-t['POPULATION'] = 'جمعیت';
-t['COORDS'] = 'موقعیت';
-t['MAPTBACTS'] = 'اقدامات';
-t['SAVED'] = 'ذخیره شد';
-t['YOUNEED'] = 'مورد نیاز';
-t['TODAY'] = 'امروز';
-t['TOMORROW'] = 'فردا';
-t['DAYAFTERTOM'] = 'پس فردا';
-t['MARKET'] = 'بازار';
-t['BARRACKS'] = 'سربازخانه';
-t['RAP'] = 'اردوگاه';
-t['STABLE'] = 'اصطبل';
-t['WORKSHOP'] = 'کارگاه';
-t['SENDRES'] = 'ارسال منابع';
-t['BUY'] = 'خرید';
-t['SELL'] = 'فروش';
-t['SENDIGM'] = 'ارسال پیام خصوصی';
-t['LISTO'] = 'در دسترس';
-t['ON'] = 'در';
-t['AT'] = 'در';
-t['EFICIENCIA'] = 'بازدهی';
-t['NEVER'] = 'هرگز';
-t['ALDEAS'] = 'دهکده(ها)';
-t['TIEMPO'] = 'زمان';
-t['OFREZCO'] = 'گذاشتن پیشنهاد';
-t['BUSCO'] = 'جستجو';
-t['TIPO'] = 'نوع';
-t['DISPONIBLE'] = 'فقط در دسترس';
-t['CUALQUIERA'] = 'همه';
-t['YES'] = 'بله';
-t['NO'] = 'خیر';
-t['LOGIN'] = 'ورود';
-t['MARCADORES'] = 'برچسب ها';
-t['ANYADIR'] = 'اضافه کردن';
-t['UBU'] = 'نشانی برچسب جدید';
-t['UBT'] = 'متن برچسب جدید';
-t['DEL'] = 'پاک کردن';
-t['MAPA'] = 'نقشه';
-t['MAXTIME'] = 'حداکثر زمان';
-t['ARCHIVE'] = 'بایگانی';
-t['SUMMARY'] = 'خلاصه';
-t['TROPAS'] = 'لشکریان';
-t['CHKSCRV'] = 'بروز رسانی TBeyond';
-t['ACTUALIZAR'] = 'بروز رسانی اطلاعات دهکده';
-t['VENTAS'] = 'پیشنهاد های ذخیره شده';
-t['MAPSCAN'] = 'پویش کردن نقشه';
-t['BIC'] = 'نمایش شمایل های (icon) رمز شده';
-t['SAVE'] = 'ذخیره';
-t['AT2'] = 'نیروی کمکی';
-t['AT3'] = 'حمله: عادی';
-t['AT4'] = 'حمله: غارت';
-t['NBSA'] = 'خودکار';
-t['NBSN'] = 'عادی (کوچک)';
-t['NBSB'] = 'صفحه بزرگ (بزرگ)';
-t['NBHAX'] = 'گسترش خودکار ارتفاع';
-t['NBHK'] = 'ارتفاع پیشفرض';
-t['NPCSAVETIME'] = 'ذخیره: ';
-t['TOTALTROOPS'] = 'لشکریان موجود در روستا';
+t['U.2'] = "نژاد";
+t['U.3'] = "نام پایتخت شما <br>برای بروز رسانی به پروفایل خود بروید";
+t['U.6'] = "موقعیت پایتخت شما<br>برای به روز رسانی به پروفایل خود بروید";
+t['SIM'] = "شبیه ساز نبرد";
+t['QSURE'] = "آیا مطمئن هستید؟";
+t['LOSS'] = "زیان";
+t['PROFIT'] = "سود";
+t['EXTAV'] = "قابل توسعه";
+t['PLAYER'] = "بازیکن";
+t['VILLAGE'] = "دهکده";
+t['POPULATION'] = "جمعیت";
+t['COORDS'] = "موقعیت";
+t['MAPTBACTS'] = "اقدامات";
+t['SAVED'] = "ذخیره شد";
+t['YOUNEED'] = "مورد نیاز";
+t['TODAY'] = "امروز";
+t['TOMORROW'] = "فردا";
+t['DAYAFTERTOM'] = "پس فردا";
+t['MARKET'] = "بازار";
+t['BARRACKS'] = "سربازخانه";
+t['RAP'] = "اردوگاه";
+t['STABLE'] = "اصطبل";
+t['WORKSHOP'] = "کارگاه";
+t['SENDRES'] = "ارسال منابع";
+t['BUY'] = "خرید";
+t['SELL'] = "فروش";
+t['SENDIGM'] = "ارسال پیام خصوصی";
+t['LISTO'] = "در دسترس";
+t['ON'] = "در";
+t['AT'] = "در";
+t['EFICIENCIA'] = "بازدهی";
+t['NEVER'] = "هرگز";
+t['ALDEAS'] = "دهکده(ها)";
+t['TIEMPO'] = "زمان";
+t['OFREZCO'] = "گذاشتن پیشنهاد";
+t['BUSCO'] = "جستجو";
+t['TIPO'] = "نوع";
+t['DISPONIBLE'] = "فقط در دسترس";
+t['CUALQUIERA'] = "همه";
+t['YES'] = "بله";
+t['NO'] = "خیر";
+t['LOGIN'] = "ورود";
+t['MARCADORES'] = "برچسب ها";
+t['ANYADIR'] = "اضافه کردن";
+t['UBU'] = "نشانی برچسب جدید";
+t['UBT'] = "متن برچسب جدید";
+t['DEL'] = "پاک کردن";
+t['MAPA'] = "نقشه";
+t['MAXTIME'] = "حداکثر زمان";
+t['ARCHIVE'] = "بایگانی";
+t['SUMMARY'] = "خلاصه";
+t['TROPAS'] = "لشکریان";
+t['CHKSCRV'] = "بروز رسانی TBeyond";
+t['ACTUALIZAR'] = "بروز رسانی اطلاعات دهکده";
+t['VENTAS'] = "پیشنهاد های ذخیره شده";
+t['MAPSCAN'] = "پویش کردن نقشه";
+t['BIC'] = "نمایش شمایل های (icon) رمز شده";
+t['SAVE'] = "ذخیره";
+t['AT2'] = "نیروی کمکی";
+t['AT3'] = "حمله: عادی";
+t['AT4'] = "حمله: غارت";
+t['NBSA'] = "خودکار";
+t['NBSN'] = "عادی (کوچک)";
+t['NBSB'] = "صفحه بزرگ (بزرگ)";
+t['NBHAX'] = "گسترش خودکار ارتفاع";
+t['NBHK'] = "ارتفاع پیشفرض";
+t['NPCSAVETIME'] = "ذخیره: ";
+t['TOTALTROOPS'] = "لشکریان موجود در روستا";
 t['SELECTALLTROOPS'] = "انتخاب تمام لشکریان";
 t['PARTY'] = "جشن ها";
 t['CPPERDAY'] = "امتیاز فرهنگی در روز";
@@ -8313,10 +5316,6 @@ t['SLOT'] = "شکاف";
 t['TOTAL'] = "مجموع";
 t['SELECTSCOUT'] = "انتخاب مامور شناسایی(جاسوس)";
 t['SELECTFAKE'] = "انتخاب حمله بدلی";
-t['NOSCOUT2FAKE'] = "انتخاب مامور شناسایی برای حمله بدلی امکان پذیر نیست!";
-t['NOTROOP2FAKE'] = "برای حمله بدلی سربازی موجود نیست!";
-t['NOTROOP2SCOUT'] = "سربازی برای شناسایی وجود ندارد!";
-t['NOTROOPS'] = "لشکریانی در دهکده موجود نیست!";
 t['ALL'] = "همه";
 t['SH2'] = "در فیلد رنگ شما می توانید وارد کنید:<br>- green یا red یا  orange و غیره.<br>- رمز رنگ در مبنای 16 مانند #004523<br>- برای پیش فرض خالی رها کنید";
 t['SOREP'] = "نمایش گزارش اصلی (برای ارسال پیغام)";
@@ -8327,1102 +5326,3301 @@ t['BVER'] = "ممکن است شما نشخه آزمایشی را در اختیا
 t['NVERAV'] = "نسخه جدید اسکریپت موجود می باشد";
 t['UPDSCR'] = "هم اکنون به روز رسانی شود؟";
 t['CHECKUPDATE'] = "بررسی برای بروز رسانی. لطفا صبر کنید...";
-t['CROPFINDER'] = "کاوشگر گندمزار";
 t['AVPPV'] = "میلنگین جمعییت برای هر دهکده";
 t['AVPPP'] = "میانگین جمعییت برای هر بازیکن";
-t['MAX'] = 'حداکثر';
-t['TOTTRTR'] = 'مجموع سربازان در حال تعلیم';
-t['TB3SL'] = 'تنظیمات فراتراویان ' + TB3O.shN;
-t['UPDALLV'] = 'بروز رسانی تمام دهکده ها. با دقت زیاد از این گزینه استفاده کنید زیرا ممکن است باعث توقیف حساب شما شود!';
-t['LARGEMAP'] = 'نقشه بزرگ';
-t['USETHEMPR'] = 'استفاده از آنها (به نسبت)';
-t['USETHEMEQ'] = 'استفاده از آنها (برابر)';
-t['TOWNHALL'] = 'تالار دهکده';
-t['GSRVT'] = 'خدمات رسان بازی(سرور)';
-t['ACCINFO'] = 'اطلاعات حساب';
-t['NBO'] = 'دفترچه یادداشت';
-t['MNUL'] = 'فهرست سمت راست';
-t['STAT'] = 'آمار';
-t['RESF'] = 'منابع';
-t['VLC'] = 'مرکز دهکده';
-t['MAPO'] = 'تنظیمات نقشه';
-t['COLO'] = 'تنظیمات رنگ';
-t['DBGO'] = 'تنظیمات خطا یابی';
+t['MAX'] = "حداکثر";
+t['TOTTRTR'] = "مجموع سربازان در حال تعلیم";
+t['TB3SL'] = "تنظیمات فراتراویان $1";
+t['UPDALLV'] = "بروز رسانی تمام دهکده ها. با دقت زیاد از این گزینه استفاده کنید زیرا ممکن است باعث توقیف حساب شما شود!";
+t['LARGEMAP'] = "نقشه بزرگ";
+t['USETHEMPR'] = "استفاده از آنها (به نسبت)";
+t['USETHEMEQ'] = "استفاده از آنها (برابر)";
+t['TOWNHALL'] = "تالار دهکده";
+t['GSRVT'] = "خدمات رسان بازی(سرور)";
+t['ACCINFO'] = "اطلاعات حساب";
+t['NBO'] = "دفترچه یادداشت";
+t['MNUL'] = "فهرست سمت راست";
+t['STAT'] = "آمار";
+t['RESF'] = "منابع";
+t['VLC'] = "مرکز دهکده";
+t['MAPO'] = "تنظیمات نقشه";
+t['COLO'] = "تنظیمات رنگ";
+t['DBGO'] = "تنظیمات خطا یابی";
 t['HEROSMANSION'] = "امارت قهرمان";
-t['BLACKSMITH'] = 'اسلحه سازی';
-t['ARMOURY'] = 'زره سازی';
-t['NOW'] = 'اکنون';
-t['CLOSE'] = 'بستن';
-t['USE'] = 'استفاده';
-t['USETHEM1H'] = 'استفاده از آنها ( تولید 1 ساعت)';
-t['OVERVIEW'] = 'دید کلی';
-t['FORUM'] = 'تالار گفتمان';
-t['ATTACKS'] = 'حملات';
-t['NEWS'] = 'اخبار';
-t['ADDCRTPAGE'] = 'اضافه کردن همین صفحه به برچسب ها';
-t['SCRPURL'] = 'صفحه TBeyond';
-t['SPACER'] = 'فضاساز (فاصله بندی)';
-t['MEREO'] = 'پیغام ها و گزارشات';
-t['ATTABLES'] = 'جداول لشکریان (فقط در حالت پلاس)';
-t['MTW'] = 'تلف شده';
-t['MTX'] = 'بیش از حد';
-t['MTC'] = 'بار گزاری کنونی';
-t['ALFL'] = 'پیوند به تالار گفتمان خارجی<br>(برای تالار گفتمان داخلی خالی رها شود)';
-t['MTCL'] = 'پاک کردن همه';
-t['CKSORT'] = 'برای مرتب سازی کلیک کنید';
-t['MIN'] = 'حداقل';
-t['SVGL'] = 'سهیم کردن (در دست رس قرار دادن) میان دهکده ها';
-t['VGL'] = 'فهرست دهکده ها';
-t['UPDATEPOP'] = 'بروز رسانی جمعیت';
-t['EDIT'] = 'ویرایش';
-t['NPCO'] = 'تنظیمات دستیار تعدیل منابع';
-t['NEWVILLAGEAV'] = 'روز/زمان';
-t['TIMEUNTIL'] = 'مدت زمان انتظار';
-t['CENTERMAP'] = 'مرکز نقشه برای این دهکده';
-t['SENDTROOPS'] = 'ارسال لشکریان';
+t['BLACKSMITH'] = "اسلحه سازی";
+t['ARMOURY'] = "زره سازی";
+t['NOW'] = "اکنون";
+t['CLOSE'] = "بستن";
+t['USETHEM1H'] = "استفاده از آنها ( تولید 1 ساعت)";
+t['OVERVIEW'] = "دید کلی";
+t['FORUM'] = "تالار گفتمان";
+t['ATTACKS'] = "حملات";
+t['NEWS'] = "اخبار";
+t['ADDCRTPAGE'] = "اضافه کردن همین صفحه به برچسب ها";
+t['SCRPURL'] = "صفحه TBeyond";
+t['SPACER'] = "فضاساز (فاصله بندی)";
+t['MEREO'] = "پیغام ها و گزارشات";
+t['ATTABLES'] = "جداول لشکریان (فقط در حالت پلاس)";
+t['MTW'] = "تلف شده";
+t['MTX'] = "بیش از حد";
+t['MTC'] = "بار گزاری کنونی";
+t['ALFL'] = "پیوند به تالار گفتمان خارجی<br>(برای تالار گفتمان داخلی خالی رها شود)";
+t['MTCL'] = "پاک کردن همه";
+t['CKSORT'] = "برای مرتب سازی کلیک کنید";
+t['MIN'] = "حداقل";
+t['SVGL'] = "سهیم کردن (در دست رس قرار دادن) میان دهکده ها";
+t['VGL'] = "فهرست دهکده ها";
+t['UPDATEPOP'] = "بروز رسانی جمعیت";
+t['EDIT'] = "ویرایش";
+t['NPCO'] = "تنظیمات دستیار تعدیل منابع";
+t['NEWVILLAGEAV'] = "روز/زمان";
+t['TIMEUNTIL'] = "مدت زمان انتظار";
+t['CENTERMAP'] = "مرکز نقشه برای این دهکده";
+t['SENDTROOPS'] = "ارسال لشکریان";
 t['PALACE'] = "قصر";
 t['RESIDENCE'] = "اقامتگاه";
 t['ACADEMY'] = "دارالفنون";
 t['TREASURY'] = "خزانه";
 t['UPGTB'] = "جدول گسترش منابع و ساختمان ها";
 t['RBTT'] = "نوار منابع";
-t['RESIDUE'] = 'پس مانده اگر شما آن را بسازید ';
-t['RESOURCES'] = 'منابع';
+t['USE'] = "استفاده";
+t['RESIDUE'] = "پس مانده اگر شما آن را بسازید ";
+t['RESOURCES'] = "منابع";
 t['SH1'] = "باز کردن پرفایل شما برای بازیابی خودکار پایتخت/مختصات<br>برای نمایان سازی خودکار نژاد سربازخانه بسازید و سپس مرکز دهکده را باز کنید";
 t['RESEND'] = "ارسال دوباره؟";
 t['WSI'] = "شبیه ساز نبرد محیا شده به وسیله بازی";
 t['TTT'] = "تنظیمات عمومی توضیح خطی لشکریان/مصافت";
+t['CROPFINDER'] = "کاوشگر گندمزار";
 break;
-case "dk"://by polle1
-t['8'] = 'Alliance';
-t['SIM'] = 'Kamp simulator';
-t['QSURE'] = 'Er du sikker?';
-t['LOSS'] = 'Tab';
-t['PROFIT'] = 'Profit';
-t['EXTAV'] = 'udvidelse mulig';
-t['PLAYER'] = 'Spiller';
-t['VILLAGE'] = 'By';
-t['POPULATION'] = 'Indbygger';
-t['COORDS'] = 'Koordinater';
-t['MAPTBACTS'] = 'Actions';
-t['SAVED'] = 'Gemt';
-t['YOUNEED'] = 'Du mangler';
-t['TODAY'] = 'i dag';
-t['TOMORROW'] = 'i morgen';
-t['DAYAFTERTOM'] = 'overmorgen';
-t['MARKET'] = 'Markedsplads';
-t['BARRACKS'] = 'Kaserne';
-t['RAP'] = 'Forsamlingsplads';
-t['STABLE'] = 'Stald';
-t['WORKSHOP'] = 'Værksted';
-t['SENDRES'] = 'Send råstoffer';
-t['BUY'] = 'Køb';
-t['SELL'] = 'Sælg';
-t['SENDIGM'] = 'Send IGM';
-t['LISTO'] = 'Tilgænglig';
-t['ON'] = 'on';
-t['AT'] = 'at';
-t['EFICIENCIA'] = 'Effektivit';
-t['NEVER'] = 'Aldrig';
-t['ALDEAS'] = 'By(er)';
-t['TIEMPO'] = 'Tid';
-t['OFREZCO'] = 'Tilbyder';
-t['BUSCO'] = 'Søger';
-t['TIPO'] = 'Type';
-t['DISPONIBLE'] = 'Kun tilgænglig';
-t['CUALQUIERA'] = 'Alle';
-t['YES'] = 'Ja';
-t['NO'] = 'Nej';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Links';
-t['ANYADIR'] = 'Tilføj';
-t['UBU'] = 'Nyt link URL';
-t['UBT'] = 'Nyt link Tekst';
-t['DEL'] = 'Slet';
-t['MAPA'] = 'Kort';
-t['MAXTIME'] = 'Maximum tid';
-t['ARCHIVE'] = 'Arkive';
-t['SUMMARY'] = 'Total';
-t['TROPAS'] = 'Tropper';
-t['CHKSCRV'] = 'Opdater TBeyond';
-t['ACTUALIZAR'] = 'Opdater by information';
-t['VENTAS'] = 'Gemte tilbud';
-t['MAPSCAN'] = 'Skan kortet';
-t['BIC'] = 'Vis udvidet ikoner';
-t['22'] = 'Vis notesbog';
-t['SAVE'] = 'Gem';
-t['49'] = 'Forsamlingsplads standart action';
-t['AT2'] = 'Opbakning';
-t['AT3'] = 'Angreb: Normal';
-t['AT4'] = 'Angreb: Plyndringstogt';
-t['24'] = 'Notesbog størrelse';
-t['NBSA'] = 'Auto';
-t['NBSN'] = 'Normal (lille)';
-t['NBSB'] = 'Stor skærm (Stor)';
-t['25'] = 'Notesbog højde';
-t['NBHAX'] = 'Automatisk udvid højde';
-t['NBHK'] = 'Standart højde';
-t['43'] = 'Vis center nummer';
-t['NPCSAVETIME'] = 'Gem: ';
-t['38'] = 'Vis råstof trin farver';
-t['44'] = 'Vis bygningstrin faver';
-t['65'] = 'Farve opgradering mulig<br>(Default = Empty)';
-t['66'] = 'Farve Fuldt udbygget<br>(Default = Empty)';
-t['67'] = 'Farve opgradering ikke mulig<br>(Default = Empty)';
-t['68'] = 'Farve opgradering via NPC<br>(Default = Empty)';
-t['TOTALTROOPS'] = 'Byens totale troppeantal';
-t['20'] = 'Vis links';
-t['U.2'] = 'Race';
-t['1'] = "Travian v2.x server";
-t['SELECTALLTROOPS'] = "Vælg alle tropper";
-t['PARTY'] = "Fest";
-t['CPPERDAY'] = "KP/dag";
-t['SLOT'] = "Slot";
-t['TOTAL'] = "Total";
-t['SELECTSCOUT'] = "Vælg spioner";
-t['SELECTFAKE'] = "Vælg fake";
-t['NOSCOUT2FAKE'] = "Det er ikke muligt at bruge spioner til fake angreb !";
-t['NOTROOP2FAKE'] = "Der er ingen tropper til sende et fake angreb!";
-t['NOTROOP2SCOUT'] = "Der er ingen spioner tilstede !";
-t['NOTROOPS'] = "Der er ingen tropper i byen !";
-t['ALL'] = "Alle";
-t['SH2'] = "I farve felterne kan du skrive:<br>- <b>green</b> or <b>red</b> or  <b>orange</b>, etc.<br>- the HEX color code like <b>#004523</b><br>- leave empty for the default color";
-t['SOREP'] = "Vis original report (Til visning)";
-t['56'] = "Vis celle type/oase info<br>Hold musen over kortet";
-t['10'] = "Kampsimulator link der skal bruges:<br>(menu venstre)";
-t['WSIMO1'] = "Inten (leveret af spillet)";
-t['WSIMO2'] = "Extern (leveret af kirilloid.ru)";
-t['27'] = "World Analyser der skal bruges";
-t['28'] = "Vis analyser statistic links";
-t['NONEWVER'] = "Du har den seneste version";
-t['BVER'] = "Du må have en beta version";
-t['NVERAV'] = "En ny version af scriptet er tilgænglig";
-t['UPDSCR'] = "Opdater scriptet nu ?";
-t['CHECKUPDATE'] = "Checker for script opdateringer.<br>Vent venligst...";
+
+case 'it': //contributors: IcEye, rosfe y Danielle, Lello, Zippo, Nux, ns65, Acr111, onetmt, matteo466
+t['1'] = "Server Travian v2.x";
+t['2'] = "Rimuovi banner pubblicitari";
+t['3'] = "Forza il calcolo della capacitÃ  di legionari e lancieri gallici<br>come nella versione 3.1<br>(per server con versione mista 3.1 & 3.5 - per adesso solo per server .de)";
+t['4'] = "Mercato";
+t['5'] = "Caserma/Campo d'addestramento/Officina/Scuderia";
+t['6'] = "Municipio/Circolo degli eroi/Armeria/Fabbro";
+t['7'] = "Castello/Residence/Accademia/Camera del tesoro";
+t['8'] = "Alleanza";
+t['9'] = "Mostra links aggiuntivi nel menu di sinistra<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "Simulatore di combattimento da usare:<br>(nel menu a sinistra)";
+t['12'] = "Mostra i collegamenti a 'dorf1.php' e 'dorf2.php'";
+t['13'] = "Mostra l'icona 'Centra la mappa su questo villaggio'";
+t['14'] = "Mostra le icone 'Invia truppe/Invia risorse'";
+t['15'] = "Mostra la produzione oraria di legno, argilla e ferro";
+t['16'] = "Mostra la produzione di grano netta";
+t['17'] = "Mostra la popolazione";
+t['18'] = "Mostra una lista dei villaggi aggiuntiva (su 2 colonne) in una finestra";
+t['19'] = "Mostra informazioni su ampliamenti di costruzioni e movimenti di truppe";
+t['20'] = "Mostra segnalibri";
+t['21'] = "Mostra i segnalibri in una finestra";
+t['22'] = "Mostra blocco note";
+t['23'] = "Mostra il blocco note in una finestra";
+t['24'] = "Larghezza blocco note";
+t['25'] = "Altezza blocco note";
+t['26'] = "Mostra calcoli/links per il Mercato Nero";
+t['27'] = "World Analyser da utilizzare";
+t['28'] = "Mostra link statistiche World Analyser";
+t['29'] = "Map Analyser da usare";
+t['30'] = "Mostra il link alla mappa per gli utenti";
+t['31'] = "Mostra il link alla mappa per le alleanze";
+t['32'] = "Mostra la 'barra di ricerca'";
+t['33'] = "Mostra la 'barra di ricerca' in una finestra";
+t['34'] = "Mostra PC/giorno nelle tabelle";
+t['35'] = "Mostra consumo di grano nelle tabelle";
+t['36'] = "Mostra i calcoli 'Risorse il/Residue' nelle tabelle di ampliamento/addestramento";
+t['37'] = "Mostra tabella ampliamento campi";
+t['38'] = "Mostra colori livelli campi";
+t['39'] = "Mostra grafici a barre delle risorse";
+t['40'] = "Mastra i grafici a barre delle risorse in una finestra";
+t['41'] = "Mostra tabella ampliamento edifici";
+t['42'] = "Ordina le strutture per nome nella tabella di ampliamento";
+t['43'] = "Mostra livelli edifici";
+t['44'] = "Mostra colori livelli edifici";
+t['45'] = "Mostra il livello delle strutture in costruzione lampeggiante";
+t['46'] = "Mostra informazioni aggiuntive sui mercanti in arrivo";
+t['48'] = "Numero di pagine di offerte da precaricare<br>nella pagina 'Mercato => Visualizza offerte'<br>(Default = 1)";
+t['49'] = "Azione predefinita per 'Invia truppe'";
+t['50'] = "Numero di spie per l'invio di spiate";
+t['53'] = "Mostra i tooltip con le informazioni sulle truppe";
+t['54'] = "Mostra tooltip con tempi e distanza dai villaggi";
+t['56'] = "Mostra informazioni sul tipo di terreno/oasi<br>mentre il mouse passa sulla mappa";
+t['57'] = "Mostra distanze e tempi";
+t['58'] = "Mostra tabella dei giocatori/villaggi/oasi occupate";
+t['59'] = "Numero di pagine di messaggi/report da precaricare<br>(Default = 1)";
+t['60'] = "Mostra links per aprire i messaggi in un pop-up";
+t['61'] = "Mostra tabella \"Eliminare\" nella pagina dei report";
+t['62'] = "Mostra l'icona 'Invia messaggio' anche per me";
+t['63'] = "Mostra report avanzati di ";
+t['64'] = "Mostra dettagli nelle statistiche dei Reports";
+t['65'] = "Colore ampliamento disponibile <br>(Vuoto = default)";
+t['66'] = "Colore livello massimo raggiunto <br>(Vuoto = default)";
+t['67'] = "Colore ampliamento non disponibile <br>(Vuoto = default)";
+t['68'] = "Colore ampliamento col mercato nero <br> (Vuoto = default)";
+t['69'] = "Livello di logging della console<br>SOLO PER SVILUPPATORI O PER DEBUGGING<br>(Default = 0)";
+t['82.L'] = "Blocca segnalibri (Nasconde le icone cancella, sposta in alto e sposta in basso)";
+t['82.U'] = "Sblocca segnalibri (Mostra le icone cancella, sposta in alto e sposta in basso)";
+t['U.2'] = "Popolo";
+t['U.3'] = "Nome del villaggio capitale<br><b>Vai alla pagina del tuo Profilo per aggiornare i dati</b>";
+t['U.6'] = "Coordinate del villaggio capitale<br><b>Vai alla pagina del tuo Profilo per aggiornare i dati</b>";
+t['SIM'] = "Simulatore di combattimento";
+t['QSURE'] = "Sei sicuro?";
+t['LOSS'] = "Perdita in materiale";
+t['PROFIT'] = "Guadagno";
+t['EXTAV'] = "Ampliamento disponibile";
+t['PLAYER'] = "Proprietario";
+t['VILLAGE'] = "Villaggio";
+t['POPULATION'] = "Popolazione";
+t['COORDS'] = "Coordinate";
+t['MAPTBACTS'] = "Azioni";
+t['SAVED'] = "Salvato";
+t['YOUNEED'] = "Mancano";
+t['TODAY'] = "oggi";
+t['TOMORROW'] = "domani";
+t['DAYAFTERTOM'] = "dopodomani";
+t['MARKET'] = "Mercato";
+t['BARRACKS'] = "Campo d'addestramento";
+t['RAP'] = "Caserma";
+t['STABLE'] = "Scuderia";
+t['WORKSHOP'] = "Officina";
+t['SENDRES'] = "Invia risorse";
+t['BUY'] = "Compra risorse";
+t['SELL'] = "Vendi risorse";
+t['SENDIGM'] = "Invia messaggio";
+t['LISTO'] = "Disponibile";
+t['ON'] = "il";
+t['AT'] = "alle";
+t['EFICIENCIA'] = "Efficienza";
+t['NEVER'] = "Mai";
+t['ALDEAS'] = "Villaggi";
+t['TIEMPO'] = "Tempo";
+t['OFREZCO'] = "Offerta";
+t['BUSCO'] = "Richiesta";
+t['TIPO'] = "Percentuale di scambio";
+t['DISPONIBLE'] = "Disponibile";
+t['CUALQUIERA'] = "Tutti";
+t['YES'] = "Si";
+t['NO'] = "No";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Segnalibri";
+t['ANYADIR'] = "Aggiungi";
+t['UBU'] = "URL segnalibro";
+t['UBT'] = "Nome segnalibro";
+t['DEL'] = "Eliminare";
+t['MAPA'] = "Mappa";
+t['MAXTIME'] = "Tempo massimo";
+t['ARCHIVE'] = "Archivio";
+t['SUMMARY'] = "Riepilogo";
+t['TROPAS'] = "Truppe";
+t['CHKSCRV'] = "Verifica Aggiornamenti";
+t['ACTUALIZAR'] = "Aggiorna le informazioni sul villaggio";
+t['VENTAS'] = "Offerte salvate";
+t['MAPSCAN'] = "Scansiona la mappa";
+t['BIC'] = "Icone aggiuntive per accesso rapido";
+t['SAVE'] = "Salva";
+t['AT2'] = "Rinforzo";
+t['AT3'] = "Attacco: Normale";
+t['AT4'] = "Attacco: Raid";
+t['NBSA'] = "Automatica";
+t['NBSN'] = "Normale (Piccolo)";
+t['NBSB'] = "Schermi grandi (Grande)";
+t['NBHAX'] = "Adatta l'altezza automaticamente";
+t['NBHK'] = "Altezza predefinita";
+t['NPCSAVETIME'] = "Tempo guadagnato: ";
+t['TOTALTROOPS'] = "Truppe del villaggio complessive";
+t['SELECTALLTROOPS'] = "Seleziona tutte le truppe";
+t['PARTY'] = "Party";
+t['CPPERDAY'] = "PC/giorno";
+t['TOTAL'] = "Totale";
+t['SELECTSCOUT'] = "Spiata";
+t['SELECTFAKE'] = "Fake";
+t['ALL'] = "Tutto";
+t['SH2'] = "Nei campi dei colori puoi inserire:<br>- il nome (in inglese) <b>green</b> o <b>red</b> o <b>orange</b>, etc.<br>- il codice esadecimale del colore <b>#004523</b><br>- lasciare vuoto per usare i colori predefiniti";
+t['SOREP'] = "Mostra report originale (per postare sul forum)";
+t['WSIMO1'] = "Interno (quello presente nel gioco)";
+t['WSIMO2'] = "Esterno (fornito da kirilloid.ru)";
+t['NONEWVER'] = "Ã‰ giÃ  installata l'ultima versione disponibile";
+t['BVER'] = "Potresti avere una versione Beta";
+t['NVERAV'] = "Ã‰ disponibile una nuova versione";
+t['UPDSCR'] = "Aggiornare ora lo script?";
+t['CHECKUPDATE'] = "Controllo dell'ultima versione disponibile.<br>Attendere prego...";
+t['AVPPV'] = "Popolazione media villaggi";
+t['AVPPP'] = "Popolazione media giocatori";
+t['TOTTRTR'] = "Totale truppe in addestramento";
+t['TB3SL'] = "Impostazioni $1";
+t['UPDALLV'] = "Aggiorna tutti i villaggi.  USARE CON CAUTELA, potrebbe comportare il BAN dell`account!";
+t['LARGEMAP'] = "Mappa estesa";
+t['USETHEMPR'] = "Completa proporzionalmente";
+t['USETHEMEQ'] = "Completa equamente";
+t['TOWNHALL'] = "Municipio";
+t['GSRVT'] = "Server di gioco";
+t['ACCINFO'] = "Informazioni Account";
+t['NBO'] = "Blocco note";
+t['MNUL'] = "Menu di sinistra";
+t['STAT'] = "Statistiche";
+t['RESF'] = "Campi di risorse";
+t['VLC'] = "Centro del villaggio";
+t['MAPO'] = "Opzioni mappa";
+t['COLO'] = "Opzioni colori";
+t['DBGO'] = "Opzioni di debug";
+t['HEROSMANSION'] = "Circolo degli eroi";
+t['BLACKSMITH'] = "Fabbro";
+t['ARMOURY'] = "Armeria";
+t['NOW'] = "Adesso";
+t['CLOSE'] = "Chiudi";
+t['USETHEM1H'] = "Completa con la produzione oraria";
+t['OVERVIEW'] = "Riepilogo";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Attacchi";
+t['NEWS'] = "News";
+t['ADDCRTPAGE'] = "Aggiungi pagina corrente";
+t['SPACER'] = "Separatore";
+t['MEREO'] = "Messaggi e Report";
+t['ATTABLES'] = "Tabella truppe";
+t['MTW'] = "Sprecate";
+t['MTX'] = "In eccesso";
+t['MTC'] = "Carico corrente";
+t['ALFL'] = "Link al forum esterno<br>(Lasciare vuoto per il forum interno)";
+t['MTCL'] = "Cancella tutto";
+t['CKSORT'] = "Clicca per ordinare";
+t['MIN'] = "Min";
+t['SVGL'] = "Condivisa tra i villaggi";
+t['VGL'] = "Elenco villaggi";
+t['UPDATEPOP'] = "Aggiorna popolazione";
+t['EDIT'] = "Modifica";
+t['NPCO'] = "Opzioni Mercato Nero";
+t['NEWVILLAGEAV'] = "Data/Ora";
+t['TIMEUNTIL'] = "Tempo di attesa";
+t['CENTERMAP'] = "Centra la mappa su questo villaggio";
+t['SENDTROOPS'] = "Invia truppe";
+t['PALACE'] = "Castello";
+t['RESIDENCE'] = "Residence";
+t['ACADEMY'] = "Accademia";
+t['TREASURY'] = "Camera del tesoro";
+t['UPGTB'] = "Tabella risorse/costruzioni";
+t['RBTT'] = "Grafici a barre delle risorse";
+t['USE'] = "Usa";
+t['RESIDUE'] = "Risorse residue se costruisci";
+t['RESOURCES'] = "Risorse";
+t['SH1'] = "Apri il Profilo per il riconoscimento automatico delle informazioni sulla capitale<br>Costruisci il Campo di addestramento per il riconoscimento automatico del popolo e dopo apri il centro del villaggio";
 t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "Gennemsnitlig antal indbygger per by";
-t['AVPPP'] = "Gennemsnitlig antal indbygger per spiller";
-t['37'] = "Vis råstoffelter opgradringstabel";
-t['41'] = "vis bygnings opgradringstabel";
-t['48'] = "Antallet af sider med tilbud der skal indlæsses<br>Mens du er på markede => køb' side<br>(Default = 1)";
-t['U.3'] = 'Din hovedlandsbys navn<br><b>Visit your Profile for an update</b>';
-t['U.6'] = 'Din hovedlandsbys koordinater<br><b>Visit your Profile for an update</b>';
-t['TOTTRTR'] = 'Totale antal tropper der trænes';
-t['57'] = 'Vis afstand & tider';
-t['UPDALLV'] = 'opdater alle byer.  BRUGS MED STOR FORSIGTIGHED DA DET KAN FØRE TIL EN BANNED KONTO !';
-t['9'] = "Vis extra links i venstre menu<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Stort kort';
-t['USETHEMPR'] = 'Brug dem (proportional)';
-t['USETHEMEQ'] = 'Brug dem (equal)';
-t['TOWNHALL'] = 'Rådhus';
-t['ACCINFO'] = 'Konto Information';
-t['NBO'] = 'Notesblok';
-t['MNUL'] = 'Menu i venstre side';
-t['STAT'] = 'Statestik';
-t['RESF'] = 'Råstoffelter';
-t['VLC'] = 'Landsbycenter';
-t['MAPO'] = 'Kort options';
-t['COLO'] = 'Farve options';
-t['DBGO'] = 'Debug options';
-t['4'] = 'Markedesplads';
-t['5'] = 'Forsamlingsplads/Kaserne/Værksted/Stald';
-t['6'] = "Rådhus/Heltegården/Armoury/Blacksmith";
-t['HEROSMANSION'] = "Hero's mansion";
-t['BLACKSMITH'] = 'våbensmedje';
-t['ARMOURY'] = 'Rustningssmedje';
-t['NOW'] = 'Nu';
-t['CLOSE'] = 'Luk';
-t['USE'] = 'Brug';
-t['USETHEM1H'] = 'brug dem (1 times produktion)';
-t['OVERVIEW'] = 'oversigt';
-t['FORUM'] = 'Forum';
-t['ATTACKS'] = 'Angreb';
-t['NEWS'] = 'Nyheder';
-t['ADDCRTPAGE'] = 'tilføj nuværende';
-t['SCRPURL'] = 'TBeyond page';
-t['50'] = 'Antallet af spioner til<br>"Vælg spioner" funktion';
-t['SPACER'] = 'Mellemrumslinje';
-t['53'] = 'Vis troppe information i tooltips';
-t['MEREO'] = 'Beskeder & Reporter';
-t['59'] = 'antallet af besked/report sider som skal indlæses<br>(Default = 1)';
-t['ATTABLES'] = 'Troppetabel';
-t['MTW'] = 'mistede';
-t['MTX'] = 'overskrider';
-t['MTC'] = 'Nuværende last';
-t['ALFL'] = 'Link til extern forum<br>(Tom for intern forum)';
-t['82.L'] = 'Lock links (Gem slet, flyt op, flyt ned ikoner)';
-t['MTCL'] = 'Clear all';
-t['82.U'] = 'Unlock links (Vis slet, flyt op, flyt ned ikoner)';
-t['CKSORT'] = 'Klik for at sorter';
-t['MIN'] = 'Min';
-t['SVGL'] = 'Del imellem byer';
-t['VGL'] = 'By Liste';
-t['12'] = "Vis 'dorf1.php' and 'dorf2.php' links";
-t['UPDATEPOP'] = 'opdater indbygger';
-t['54'] = 'Vis afstande og tider til byer i tooltips';
-t['EDIT'] = 'Edit';
-t['NPCO'] = 'NPC Assistant options';
-t['26'] = 'Vis NPC Assistant calculations/links';
-t['58'] = 'Vis tabel med spiller/byer/besatte oaser';
-t['NEWVILLAGEAV'] = 'Dato/Tid';
-t['TIMEUNTIL'] = 'Ventetid';
-t['61'] = 'Vis "Slet alle" tabel på Report side';
-t['62'] = 'Vis "Send IGM" ikon for mig, også';
-t['CENTERMAP'] = 'Centré kortet på denne by';
-t['13'] = 'Vis "Centré kortet på denne by" ikon';
-t['SENDTROOPS'] = 'Send tropper';
-t['64'] = 'Vis detaljer in Report Statestik';
-t['7'] = "Palads/Residens/Akademi/Skattekammer";
-t['PALACE'] = "Palads";
-t['RESIDENCE'] = "Residens";
-t['ACADEMY'] = "Akademi";
-t['TREASURY'] = "Skattekammer";
-t['45'] = "Vis blinkende ikoner for bygninger der bliver opgraderet";
-t['14'] = "Vis 'Send tropper/Send råstoffer' ikoner i by listen";
-t['34'] = "Vis kP/dag information i opgradringstabel";
-t['UPGTB'] = "Råstoffelter/Bygnings opgradringstabel";
-t['35'] = "Vis kornforbrug i opgradringstabel";
-t['16'] = "Vis effektiv kornproduktion i by liste";
-t['RBTT'] = "Råstofbar";
-t['39'] = "Vis 'Råstofbar' tabel";
-t['40'] = "vis 'Råstofbar' tabel som flytbar vindue";
-t['21'] = "vis 'Bruger links' som flytbar vindue";
-t['23'] = "Vis 'Notesblok' som flytbar vindue";
-t['17'] = "Vis indbygger i by liste";
-t['29'] = 'Map Analyser der skal bruges';
-t['30'] = 'Vis link til kort over spiller';
-t['31'] = 'Vis link til kort over alliancer';
-t['63'] = 'Vis extra information i kampreporter';
-t['60'] = 'Vis link til at åbne beskeder i et pop-up';
 break;
-case "ph"://by ahuks
-t['8'] = 'Alyansa';
-t['QSURE'] = 'Sigurado ka ba?';
-t['LOSS'] = 'Kawalan';
-t['PROFIT'] = 'Pakinabang';
-t['EXTAV'] = 'Maari ng Gawin';
-t['PLAYER'] = 'Manlalaro';
-t['VILLAGE'] = 'Baryo';
-t['POPULATION'] = 'Populasyon';
-t['COORDS'] = 'Coordinate';
-t['MAPTBACTS'] = 'Aksyon';
-t['SAVED'] = 'Saved';
-t['YOUNEED'] = 'Kailangan mo';
-t['TODAY'] = 'ngayon';
-t['TOMORROW'] = 'bukas';
-t['DAYAFTERTOM'] = 'kinabukasan';
-t['MARKET'] = 'Palengke';
-t['BARRACKS'] = 'Kwartel';
-t['RAP'] = 'Pook Tipunan';
-t['STABLE'] = 'Kuwadra';
-t['WORKSHOP'] = 'Talyer';
-t['SENDRES'] = 'Magpadala ng likas-yaman';
-t['BUY'] = 'Bumili';
-t['SELL'] = 'Alok';
-t['SENDIGM'] = 'Sumulat ng Mensahe';
-t['LISTO'] = 'Maari na';
-t['ON'] = 'ng';
-t['AT'] = 'sa';
-t['EFICIENCIA'] = 'Kahusayan';
-t['NEVER'] = 'Hindi Kailanman';
-t['ALDEAS'] = 'Baryo';
-t['TIEMPO'] = 'Oras';
-t['OFREZCO'] = 'Nag-aalok';
-t['BUSCO'] = 'Naghahanap';
-t['TIPO'] = 'Uri';
+
+case 'jp': //contributors: Jackie Jack, baan
+t['2'] = "広告バナーを削除し、サーバ時間の位置を変更";
+t['3'] = "ファランクス・レジョネアをT3.1として計算する<br>(for mixed T3.1 & T3.5 servers)jp1～jp3";
+t['4'] = "市場";
+t['5'] = "集兵所/兵舎/作業場/馬舎";
+t['6'] = "集会所/英雄の館/防具工場/鍛冶場";
+t['7'] = "宮殿/官邸/学院/金庫";
+t['8'] = "同盟";
+t['9'] = "左側のメニューに追加のリンクを表示<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "戦闘シミュレータリンク設定<br>(メニュー左)";
+t['12'] = "村の概観・村の中心のリンクを表示";
+t['13'] = "「村を中心にマップを表示」アイコンの追加";
+t['14'] = "村の一覧に「兵士・資源を送る」アイコンの追加";
+t['15'] = "村のリストに資源(木・粘土・鉄)の生産量を追加";
+t['16'] = "村の一覧に穀物生産量を表示";
+t['17'] = "村の一覧に人口を表示";
+t['18'] = "村のリストを2列にしてフローティングウィンドウ化する";
+t['19'] = "村のリストに建設している建物の情報を表示";
+t['20'] = "ブックマークを表示する";
+t['21'] = "ブックマークをフローティングウィンドウ化する";
+t['22'] = "メモ帳を表示する";
+t['23'] = "ノートブックををフローティングウィンドウ化する";
+t['24'] = "メモ帳のサイズ";
+t['25'] = "メモ帳の高さ";
+t['26'] = "NPCトレードへのリンクの表示";
+t['27'] = "World Analyserの設定";
+t['28'] = "analyserへのリンクを表示";
+t['29'] = "Map Analyser の設定";
+t['30'] = "ユーザー名にMAPへのリンクアイコンを追加";
+t['31'] = "同盟名にMAPへのリンクアイコンを追加";
+t['32'] = "サーチバーを追加";
+t['33'] = "サーチバーをフローティングウィンドウ化する";
+t['34'] = "アップグレードテーブルにCPの生産量の表示";
+t['35'] = "アップグレードテーブルに穀物消費量を表示";
+t['36'] = "アップグレード/トレーニングテーブルの詳細な計算を表示";
+t['37'] = "資源タイルのアップグレードテーブルを表示する";
+t['38'] = "色でリソースのレベルを表示";
+t['39'] = "リソースバーを追加する";
+t['40'] = "リソースバーテーブルをフローティングウィンドウ化する";
+t['41'] = "建物のアップグレードテーブルを表示する";
+t['42'] = "アップグレードテーブルを名前順に表示";
+t['43'] = "センターの数字を表示";
+t['44'] = "色で建物のレベルを表示";
+t['45'] = "アップグレードを行っている建物のLVを点滅表示";
+t['46'] = "輸送中の物資の詳細を表示";
+t['48'] = "トレードページの同時に読み込むページ数<br>(Default = 1)";
+t['49'] = "集兵所の基本アクション";
+t['50'] = "スカウトを選んだ際、選択する人数";
+t['53'] = "兵士アイコンを選んだ際、詳細情報を表示";
+t['54'] = "村の名前を選んだ際、距離・時間を表示する";
+t['56'] = "グリッドのタイプを表示/オアシスインフォメーション";
+t['57'] = "距離と時間を表示する";
+t['58'] = "プレイヤーリストの表示(村・オアシス)";
+t['59'] = "レポートページの同時に読み込むページ数<br>(Default = 1)";
+t['60'] = "メッセージ/レポートをポップアップで表示するリンクの追加";
+t['61'] = "レポートページに「全て削除」ボタンを追加";
+t['63'] = "戦闘レポートの統計を表示する";
+t['64'] = "戦闘レポートの統計の詳細を表示する";
+t['69'] = "コンソールログレベル<br>プログラマーやデバッグのために<br>(Default = 0)";
+t['82.L'] = "ブックマークのロック (削除,編集,上移動,下移動アイコンを隠す)";
+t['82.U'] = "ブックマークのアンロック (削除,編集,上移動,下移動アイコンの表示)";
+t['U.3'] = "あなたの村の名前<br><b>Visit your Profile for an update</b>";
+t['U.6'] = "あなたの村の座標<br><b>Visit your Profile for an update</b>";
+t['SIM'] = "戦闘シミュレータ";
+t['QSURE'] = "ホントに良いですか？";
+t['LOSS'] = "損失";
+t['PROFIT'] = "利益";
+t['EXTAV'] = "準備完了";
+t['PLAYER'] = "プレイヤー";
+t['VILLAGE'] = "村名";
+t['POPULATION'] = "人口";
+t['COORDS'] = "座標";
+t['MAPTBACTS'] = "アクション";
+t['SAVED'] = "保存しました";
+t['YOUNEED'] = "不足";
+t['TODAY'] = "今日";
+t['TOMORROW'] = "明日";
+t['DAYAFTERTOM'] = "明後日";
+t['MARKET'] = "市場";
+t['BARRACKS'] = "兵舎";
+t['RAP'] = "集兵所";
+t['STABLE'] = "馬舎";
+t['WORKSHOP'] = "作業場";
+t['SENDRES'] = "資源の送付";
+t['BUY'] = "売方";
+t['SELL'] = "買方";
+t['SENDIGM'] = "メッセージの送付";
+t['LISTO'] = "準備完了予定";
+t['ON'] = "on";
+t['AT'] = "at";
+t['EFICIENCIA'] = "効率";
+t['NEVER'] = "容量不足";
+t['ALDEAS'] = "村";
+t['TIEMPO'] = "時間";
+t['OFREZCO'] = "売方";
+t['BUSCO'] = "買方";
+t['TIPO'] = "タイプ";
+t['DISPONIBLE'] = "取引可能";
+t['CUALQUIERA'] = "全て";
+t['YES'] = "はい";
+t['NO'] = "いいえ";
+t['LOGIN'] = "ログイン";
+t['MARCADORES'] = "ブックマーク";
+t['ANYADIR'] = "ブックマークへ追加";
+t['UBU'] = "追加するブックマークのURL";
+t['UBT'] = "追加するブックマークのタイトル";
+t['DEL'] = "削除";
+t['MAPA'] = "TravMap";
+t['MAXTIME'] = "最大時間";
+t['ARCHIVE'] = "アーカイブ";
+t['SUMMARY'] = "要約";
+t['TROPAS'] = "兵士";
+t['CHKSCRV'] = "最新バージョンのチェック";
+t['MAPSCAN'] = "マップをスキャン";
+t['BIC'] = "拡張アイコンを表示する";
+t['SAVE'] = "保存";
+t['AT2'] = "援兵";
+t['AT3'] = "通常攻撃";
+t['AT4'] = "奇襲";
+t['NPCSAVETIME'] = "時間を節約:";
+t['TOTALTROOPS'] = "全村の兵士";
+t['SELECTALLTROOPS'] = "すべての兵士を選択";
+t['SELECTSCOUT'] = "スカウトを選択";
+t['SELECTFAKE'] = "フェイクを選択";
+t['SOREP'] = "オリジナルレポートを見る";
+t['NONEWVER'] = "あなたは最新バージョンを持っています。";
+t['NVERAV'] = "最新バージョン";
+t['UPDSCR'] = "スクリプトをアップデートしますか?";
+t['CHECKUPDATE'] = "アップデートが無いか確認しています...";
+t['AVPPV'] = "村当たりの平均人口";
+t['AVPPP'] = "プレイヤー当たりの平均人口";
+t['MAX'] = "最大";
+t['TB3SL'] = "$1をセットアップ";
+t['LARGEMAP'] = "地図を大きくする";
+t['USETHEMPR'] = "比例";
+t['USETHEMEQ'] = "均等";
+t['TOWNHALL'] = "集会所";
+t['GSRVT'] = "ゲームサーバー";
+t['ACCINFO'] = "アカウント情報";
+t['NBO'] = "ノートブック";
+t['MNUL'] = "左メニューのリンク設定";
+t['STAT'] = "統計";
+t['RESF'] = "リソースフィールド";
+t['VLC'] = "村の中心";
+t['MAPO'] = "地図オプション";
+t['COLO'] = "文字色オプション";
+t['DBGO'] = "デバッグオプション";
+t['HEROSMANSION'] = "英雄の館";
+t['BLACKSMITH'] = "鍛冶場";
+t['ARMOURY'] = "防具工場";
+t['CLOSE'] = "閉じる";
+t['USETHEM1H'] = "1時間生産量";
+t['OVERVIEW'] = "概要";
+t['FORUM'] = "フォーラム";
+t['ATTACKS'] = "戦闘";
+t['NEWS'] = "ニュース";
+t['ADDCRTPAGE'] = "このページをブックマークに追加する";
+t['SPACER'] = "スペーサー";
+t['MEREO'] = "メッセージ・レポート";
+t['ATTABLES'] = "配備一覧";
+t['MTW'] = "余剰輸送量";
+t['MTX'] = "不足輸送量";
+t['MTC'] = "総輸送量";
+t['ALFL'] = "外部のフォーラムへのリンク<br>(内部フォーラムを使う場合は書かないでください。)";
+t['MTCL'] = "すべてを削除";
+t['SVGL'] = "全村で共有する";
+t['VGL'] = "村のリスト";
+t['UPDATEPOP'] = "最新の情報に更新";
+t['EDIT'] = "編集";
+t['NPCO'] = "NPCトレードオプション";
+t['NEWVILLAGEAV'] = "日付/時刻";
+t['TIMEUNTIL'] = "待ち時間";
+t['CENTERMAP'] = "村を中心にMAP表示";
+t['SENDTROOPS'] = "兵士を送る";
+t['PALACE'] = "宮殿";
+t['RESIDENCE'] = "官邸";
+t['ACADEMY'] = "学院";
+t['TREASURY'] = "金庫";
+t['UPGTB'] = "アップグレードテーブル";
+t['RESIDUE'] = "実行後";
+t['RESOURCES'] = "実行可能時";
+break;
+
+case 'kr': //contributors: Daniel Cliff, Sapziller
+t['1'] = "Travian v2.x 서버";
+t['2'] = "광고 배너 제거";
+t['3'] = "Force T3.1 Legionnaire & Phalanx capacity calculation<br>(for mixed T3.1 & T3.5 servers)";
+t['4'] = "시장";
+t['5'] = "집결지/병영/공방/마구간";
+t['6'] = "마을회관/영웅 저택/병기고/대장간";
+t['7'] = "궁전/저택/연구소/보물창고";
+t['8'] = "동맹";
+t['9'] = "왼쪽 메뉴에 추가 링크 보이기 <br>(Traviantoolbox, World Analyser, Travilog, Map, 등.)";
+t['10'] = "사용할 전투 시뮬레이터:<br>(왼쪽메뉴)";
+t['11'] = "글 쓰기를 위해 사용할 보고서 사이트";
+t['12'] = "'dorf1.php(마을 둘러보기)' 과 'dorf2.php(마을 중심)' 링크 보이기";
+t['13'] = "중앙 지도 아이콘 보이기";
+t['14'] = "마을 목록에 '부대 보내기/자원 보내기' 아이콘 보이기";
+t['15'] = "마을 목록에 시간당 자원 생산량 보이기";
+t['16'] = "마을 목록에 실제 농작물 생산량 보이기";
+t['17'] = "마을 목록에 인구 수 보이기";
+t['18'] = "마을 목록 창을 이동 가능한 창으로 보이기";
+t['19'] = "마을 목록에 건물 짓기 상황과 부대 이동 상황 보이기";
+t['20'] = "북마크 보이기";
+t['21'] = "'북마크'를 이동 가능한 창으로 보이기";
+t['22'] = "노트 보이기";
+t['23'] = "'노트'를 이동 가능한 창으로 보이기";
+t['24'] = "노트 크기";
+t['25'] = "노트 높이";
+t['26'] = "NPC 교역 링크 및 계산값 보이기";
+t['27'] = "사용할 World Analyser";
+t['28'] = "World Analyser 통계 링크 보이기";
+t['29'] = "사용할 Map Analyser";
+t['30'] = "사용자의 지도 상 위치 링크 보이기";
+t['31'] = "동맹원의 지도 상 위치 링크 보이기";
+t['32'] = "'찾기 바' 보이기";
+t['33'] = "'찾기 바'를 이동 가능한 창으로 보이기";
+t['34'] = "업그레이드 테이블에 하루 당 문화점수 획득 정보 보이기";
+t['35'] = "업그레이드 테이블에 작물 소비량 증가 보이기";
+t['36'] = "업그레이드/훈련 테이블에 예상 자원과 건축/업그레이드 후 남는 예상 자원 표시";
+t['37'] = "자원 필드에 업그레이드 테이블 보이기";
+t['38'] = "자원필드 레벨 색 보이기";
+t['39'] = "'자원 바' 테이블 보이기";
+t['40'] = "'자원 바' 테이블을 이동 가능한 창으로 보이기";
+t['41'] = "건물에 업그레이드 테이블 보이기";
+t['42'] = "업그레이드 테이블의 건물 정보를 이름순으로 정렬";
+t['43'] = "마을 건물에 레벨 보이기";
+t['44'] = "빌딩 레벨 색 보이기";
+t['45'] = "업그레이드 중인 건물의 레벨 깜빡이기";
+t['46'] = "상인이 도착했을 때 총 자원 정보 보이기";
+t['47'] = "마지막으로 운반한 자원량 보이기";
+t['48'] = "'장터 => 구입' 선택시 미리 읽어들일 제안 페이지 수 (기본값 = 1)";
+t['49'] = "집결지 기본 행동 설정";
+t['50'] = "정찰병 선택에 사용할 수 있는 정찰병의 수";
+t['51'] = "마지막 공격 설정 보이기";
+t['52'] = "마지막 공격 대상 좌표 보이기/사용하기";
+t['53'] = "툴팁에 부대 정보 보이기";
+t['54'] = "툴팁에 마을까지의 거리와 시간 보이기";
+t['55'] = "내장 전투 시뮬레이터에 사용 가능한 부대 내역을 자동으로 채우기";
+t['56'] = "지도 위에 마우스를 올리면 지역의 종류와 오아시스 정보 보이기";
+t['57'] = "거리와 시간 보이기";
+t['58'] = "사용자/마을/차지한 오아시스에 대한 목록 보이기";
+t['59'] = "미리 읽어들일 메시지와 보고서 페이지의 수 (기본값 = 1)";
+t['60'] = "메시지/리포트를 팝업창으로 보기 위한 아이콘 보이기";
+t['61'] = "보고서 페이지에 \"모두보기 삭제\" 보이기";
+t['62'] = "자기 자신에게도 \"메시지 보내기\" 아이콘 표시";
+t['63'] = " 확장 전투보고서 보이기";
+t['64'] = "보고서 통계에 세부 사항 보이기";
+t['65'] = "색 : 업그레이드 가능(기본값 = 빈 칸)";
+t['66'] = "색 : 최고 레벨 (기본값 = 빈 칸)";
+t['67'] = "색 : 업그레이드 불가능(기본값 = 빈 칸)";
+t['68'] = "색 : NPC거래 후 업그레이드 가능(기본값 = 빈 칸)";
+t['69'] = "Console Log 표시 등급 설정<br>주의: 개발자나 디버깅 용도로만 사용해야 함(기본값 = 0)";
+t['82.L'] = "북마크 잠금(삭제, 위로 이동, 아래로 이동 아이콘 숨김)";
+t['82.U'] = "북마크 잠금 해제(삭제, 위로 이동, 아래로 이동 아이콘 보이기)";
+t['U.2'] = "종족";
+t['U.3'] = "수도 이름<br>업데이트를 위해 프로필 페이지를 방문해 주세요";
+t['U.6'] = "수도의 좌표<br>업데이트를 위해 프로필 페이지를 방문해 주세요";
+t['SIM'] = "전투 시뮬레이터";
+t['QSURE'] = "확실합니까?";
+t['LOSS'] = "손실";
+t['PROFIT'] = "이득";
+t['EXTAV'] = "확장 가능";
+t['PLAYER'] = "플레이어";
+t['VILLAGE'] = "마을";
+t['POPULATION'] = "인구";
+t['COORDS'] = "좌표";
+t['MAPTBACTS'] = "행동";
+t['SAVED'] = "저장됨";
+t['YOUNEED'] = "필요";
+t['TODAY'] = "오늘";
+t['TOMORROW'] = "내일";
+t['DAYAFTERTOM'] = "모레";
+t['MARKET'] = "시장";
+t['BARRACKS'] = "병영";
+t['RAP'] = "집결지";
+t['STABLE'] = "마구간";
+t['WORKSHOP'] = "공방";
+t['SENDRES'] = "자원 보내기";
+t['BUY'] = "구입";
+t['SELL'] = "판매";
+t['SENDIGM'] = "메시지 보내기";
+t['LISTO'] = "가능한";
+t['ON'] = "날짜";
+t['AT'] = "시간";
+t['EFICIENCIA'] = "효율";
+t['NEVER'] = "불가능";
+t['ALDEAS'] = "마을(들)";
+t['TIEMPO'] = "시간";
+t['OFREZCO'] = "제안";
+t['BUSCO'] = "검색";
+t['TIPO'] = "종류";
+t['DISPONIBLE'] = "가능한 거래만 표시";
+t['CUALQUIERA'] = "모두";
+t['YES'] = "네";
+t['NO'] = "아니오";
+t['LOGIN'] = "로그인";
+t['MARCADORES'] = "북마크";
+t['ANYADIR'] = "추가";
+t['UBU'] = "새 북마크 주소";
+t['UBT'] = "새 북마크 이름";
+t['DEL'] = "삭제";
+t['MAPA'] = "지도";
+t['MAXTIME'] = "최대 시간";
+t['ARCHIVE'] = "보관";
+t['SUMMARY'] = "요약";
+t['TROPAS'] = "부대";
+t['CHKSCRV'] = "TBeyond 업데이트";
+t['ACTUALIZAR'] = "마을 정보 업데이트";
+t['VENTAS'] = "저장된 판매리스트";
+t['MAPSCAN'] = "지도 검색";
+t['BIC'] = "상단 메뉴 추가 아이콘 보이기";
+t['SAVE'] = "저장";
+t['AT2'] = "지원";
+t['AT3'] = "공격: 통상";
+t['AT4'] = "공격: 약탈";
+t['NBSA'] = "자동";
+t['NBSN'] = "보통 (작음)";
+t['NBSB'] = "큰 스크린 (큼)";
+t['NBHAX'] = "높이 자동 설정";
+t['NBHK'] = "기본 높이";
+t['NPCSAVETIME'] = "저장: ";
+t['TOTALTROOPS'] = "모든 마을 병력 총합";
+t['SELECTALLTROOPS'] = "부대 모두 선택";
+t['PARTY'] = "잔치";
+t['CPPERDAY'] = "문화점수/일";
+t['SLOT'] = "슬롯";
+t['TOTAL'] = "총합";
+t['SELECTSCOUT'] = "정찰병 선택";
+t['SELECTFAKE'] = "위장 공격";
+t['ALL'] = "모두";
+t['SH2'] = "색상 필드에 입력할 수 있는 값:<br>- green, red 혹은 orange 등의 영어 색상 단어.<br>- #004523 같은 HEX 색상 코드<br>- 빈 칸으로 두면 기본 색상 적용";
+t['SOREP'] = "원래의 보고서 형식으로 보이기(글쓰기용)";
+t['WSIMO1'] = "내부 (게임에서 제공)";
+t['WSIMO2'] = "외부 (kirilloid.ru 에서 제공)";
+t['NONEWVER'] = "이미 최신 버젼이 설치되어 있습니다.";
+t['BVER'] = "베타 버젼이 설치되어 있습니다.";
+t['NVERAV'] = "새 버젼의 스크립트를 사용하실 수 있습니다.";
+t['UPDSCR'] = "지금 스크립트를 업그레이드 하시겠습니까?";
+t['CHECKUPDATE'] = "스크립트 업데이트를 확인하고 있습니다.<br> 기다려 주십시오...";
+t['AVPPV'] = "마을 당 평균 인구 수";
+t['AVPPP'] = "사용자 당 평균 인구 수";
+t['MAX'] = "최대";
+t['TOTTRTR'] = "훈련 중인 병사 수";
+t['TB3SL'] = "$1 설정";
+t['UPDALLV'] = "모든 마을 정보 갱신. <br>경고: 이 명령어 사용시 밴 당할 수 있으므로 주의해야 합니다!";
+t['LARGEMAP'] = "큰 지도";
+t['USETHEMPR'] = "비율";
+t['USETHEMEQ'] = "동일한 양";
+t['TOWNHALL'] = "마을회관";
+t['GSRVT'] = "게임 서버";
+t['ACCINFO'] = "결제 정보";
+t['NBO'] = "노트";
+t['MNUL'] = "왼쪽 메뉴";
+t['STAT'] = "통계";
+t['RESF'] = "자원 필드";
+t['VLC'] = "마을 중심";
+t['MAPO'] = "지도 옵션";
+t['COLO'] = "색상 옵션";
+t['DBGO'] = "디버그 옵션";
+t['HEROSMANSION'] = "영웅 저택";
+t['BLACKSMITH'] = "대장간";
+t['ARMOURY'] = "병기고";
+t['NOW'] = "지금";
+t['CLOSE'] = "Close";
+t['USETHEM1H'] = "1시간 생산량";
+t['OVERVIEW'] = "정보";
+t['FORUM'] = "포럼";
+t['ATTACKS'] = "전투 기록";
+t['NEWS'] = "소식";
+t['ADDCRTPAGE'] = "지금 페이지를 추가";
+t['SCRPURL'] = "TBeyond 홈페이지";
+t['SPACER'] = "구분자 추가";
+t['MEREO'] = "메시지 & 보고서";
+t['ATTABLES'] = "부대 테이블";
+t['MTW'] = "낭비";
+t['MTX'] = "초과";
+t['MTC'] = "현재 운반양";
+t['ALFL'] = "외부 포럼에 연결<br>(빈 칸으로 두면 내부 포럼에 연결)";
+t['MTCL'] = "모두 초기화";
+t['CKSORT'] = "정렬";
+t['MIN'] = "최소";
+t['SVGL'] = "마을간 공유";
+t['VGL'] = "마을 목록";
+t['UPDATEPOP'] = "인구 업데이트";
+t['EDIT'] = "편집";
+t['NPCO'] = "NPC 교역 옵션";
+t['NEWVILLAGEAV'] = "날짜/시간";
+t['TIMEUNTIL'] = "대기 시간";
+t['CENTERMAP'] = "중앙 지도";
+t['SENDTROOPS'] = "부대 보내기";
+t['PALACE'] = "궁전";
+t['RESIDENCE'] = "저택";
+t['ACADEMY'] = "연구소";
+t['TREASURY'] = "보물창고";
+t['UPGTB'] = "자원 필드/건물 업그레이드 테이블";
+t['RBTT'] = "자원 바";
+t['USE'] = "사용";
+t['RESIDUE'] = "건축 명령 후 남게 될 예상 자원 ";
+t['RESOURCES'] = "예상 획득 자원";
+t['SH1'] = "수도 및 각 마을 좌표 자동 인식을 위해 프로필을 확인해 주세요<br>종족 자동 인식을 위해 병영을 지은 후 마을 중심을 열어 주세요";
+t['RESEND'] = "다시 보내기";
+t['WSI'] = "게임에서 제공하는 전투 시뮬레이터";
+t['TTT'] = "General troops/distance tooltips";
+t['CROPFINDER'] = "Crop finder";
+break;
+
+case 'lt': //contributors: Domas, Zrip, Vykintas
+t['1'] = "Travian v2.x serveris";
+t['4'] = "Turgavietė";
+t['5'] = "Susibūrimo vieta/Kareivinės/Dirbtuvės/Arklidė";
+t['6'] = "Rotušė/Karžygio namai/Šarvų kalvė/Ginklų kalvė";
+t['7'] = "Valdomų rūmai/Rezidencija/Akademija/Iždinė";
+t['8'] = "Aljansas";
+t['9'] = "Rodyti papildomas nuorodas kairiajame meniu<br>(Traviantoolbox, World Analyser, Travilog, žemėlapis ir t.t.)";
+t['10'] = "Naudojama nuoroda kovos simuliatoriui:<br>(kairiajame meniu)";
+t['12'] = "Rodyti 'dorf1.php' ir 'dorf2.php' nuorodas";
+t['13'] = "Rodyti nuorodą \"Centruoti šią gyvenvietę žemėlapyje\"";
+t['14'] = "Rodyti 'Siųsti karius/Siųsti resursus' nuorodas";
+t['16'] = "Rodyti efektyvią grūdų gamybą";
+t['20'] = "Rodyti žymas";
+t['22'] = "Rodyti užrašų knygelę";
+t['24'] = "Užrašų knygelės dydis";
+t['25'] = "Užrašų knygelės aukštis";
+t['26'] = "Rodyti NPC asistento skaičiavimus/nuorodas";
+t['27'] = "Naudojamas statistikos tiekėjas";
+t['28'] = "Rodyti statistikos nuorodas";
+t['34'] = "Lygių kėlimo lentelėse rodyti KT per dieną";
+t['35'] = "Rodyti grūdų sunaudojimą";
+t['37'] = "Rodyti resursų laukų lygių kėlimo lentelę";
+t['38'] = "Rodyti resursų lygių spalvas";
+t['39'] = "Rodyti resursų lentelę";
+t['41'] = "Rodyti pastatų lygių kėlimo lentelę";
+t['43'] = "Rodyti gyvenvietės centro lygius";
+t['44'] = "Rodyti pastatų lygių spalvas";
+t['45'] = "Rodyti mirksinčius statomų pastatų lygius";
+t['48'] = "Pasiūlymų puslapių skaičius užkrovimui<br>esant puslapyje 'Turgavietė => Pirkti'<br>(Numatyta = 1)";
+t['49'] = "Susibūrimo vietos pagrindinis veiksmas";
+t['50'] = "Žvalgų kiekis<br>Funkcijai \"Pasirinkti žvalgus\"";
+t['53'] = "Pranešimų lentelėje rodyti karių informaciją";
+t['54'] = "Atstumą ir laikus iki gyvenvietės rodyti pranešimų lentelėje";
+t['56'] = "Rodyti laukų/oazių informaciją,<br>kai pelė rodo į žemėlapio laukelį";
+t['57'] = "Rodyti atstumą ir laiką";
+t['58'] = "Rodyti žaidėjų/gyvenviečių/oazių lentelę";
+t['59'] = "Užkraunamų pranešimų/ataskaitų puslapių skaičius<br>(Numatyta = 1)";
+t['60'] = "Rodyti nuorodas laiškų atidarymui iškylančiajame lange";
+t['61'] = "Rodyti \"Trinti viską\" lentelę ataskaitų puslapyje";
+t['62'] = "Rodyti \"Siųsti IGM\" piktogramą ir man";
+t['64'] = "Ataskaitų statistikoje rodyti detales";
+t['65'] = "Galimo lygio kėlimo spalva<br>(Tuščia = pradinė)";
+t['66'] = "Aukščiausio lygio spalva<br>(Tuščia = pradinė)";
+t['67'] = "Negalimo lygio kėlimo spalva<br>(Tuščia = pradinė)";
+t['68'] = "Galimo lygio kėlimo per NPC prekeivį spalva<br>(Tuščia = pradinė)";
+t['69'] = "Konsolės registro lygis<br>TIK PROGRAMUOTOJAMS ARBA KLAIDŲ PAIEŠKAI<br>(Numatyta = 0)";
+t['82.L'] = "Fiksuoti žymas (nerodyti trynimo, perkėlimo aukštyn bei žemyn ikonų)";
+t['82.U'] = "Nefiksuoti žymų (rodyti trynimo, perkėlimo aukštyn bei žemyn ikonas)";
+t['U.2'] = "Gentis";
+t['U.3'] = "Jūsų sostinės pavadinimas";
+t['U.6'] = "Jūsų sostinės koordinatės";
+t['SIM'] = "Mūšių simuliat.";
+t['QSURE'] = "Tikrai pašalinti?";
+t['LOSS'] = "Nuostoliai";
+t['PROFIT'] = "Pelnas";
+t['EXTAV'] = "Galima kelti lygį";
+t['PLAYER'] = "Žaidėjas";
+t['VILLAGE'] = "Gyvenvietės pavadinimas";
+t['POPULATION'] = "Populiacija";
+t['COORDS'] = "Koordinatės";
+t['MAPTBACTS'] = "Veiksmai";
+t['SAVED'] = "Išsaugota";
+t['YOUNEED'] = "Jums reikia";
+t['TODAY'] = "šiandien";
+t['TOMORROW'] = "rytoj";
+t['DAYAFTERTOM'] = "poryt";
+t['MARKET'] = "Turgavietė";
+t['BARRACKS'] = "Kareivinės";
+t['RAP'] = "Susibūrimo vieta";
+t['STABLE'] = "Arklidė";
+t['WORKSHOP'] = "Dirbtuvės";
+t['SENDRES'] = "Siųsti resursus";
+t['BUY'] = "Pirkti";
+t['SELL'] = "Parduoti";
+t['SENDIGM'] = "Siųsti žinutę";
+t['LISTO'] = "Resursų bus";
+t['ON'] = "";
+t['AT'] = "";
+t['EFICIENCIA'] = "Efektyvumas";
+t['NEVER'] = "Niekada";
+t['ALDEAS'] = "Gyvenvietė(-s)";
+t['TIEMPO'] = "Laikas";
+t['OFREZCO'] = "Siūloma";
+t['BUSCO'] = "Ieškoma";
+t['TIPO'] = "Santykis";
+t['DISPONIBLE'] = "Tik įmanomi";
+t['CUALQUIERA'] = "Nesvarbu";
+t['YES'] = "Taip";
+t['NO'] = "Ne";
+t['LOGIN'] = "Prisijungti";
+t['MARCADORES'] = "Žymos";
+t['ANYADIR'] = "Pridėti";
+t['UBU'] = "Nauja URL nuoroda";
+t['UBT'] = "Nauja tekstinė nuoroda";
+t['DEL'] = "Ištrinti";
+t['MAPA'] = "Žemėlapis";
+t['MAXTIME'] = "Gabenimo laikas (iki)";
+t['ARCHIVE'] = "Archyvas";
+t['SUMMARY'] = "Santrauka";
+t['TROPAS'] = "Kariai";
+t['CHKSCRV'] = "Atnaujinti TB";
+t['ACTUALIZAR'] = "Atnaujinti gyvenvietės informaciją";
+t['VENTAS'] = "Išsaugoti pasiūlymai";
+t['MAPSCAN'] = "Skanuoti žemėlapį";
+t['BIC'] = "Išplėsti naršymo juostą";
+t['SAVE'] = "Išsaugoti";
+t['AT2'] = "Pastiprinimas";
+t['AT3'] = "Puolimas: ataka";
+t['AT4'] = "Puolimas: reidas";
+t['NBSA'] = "Automatinis";
+t['NBSN'] = "Normalus (maža)";
+t['NBSB'] = "Dideliems ekranams (didelė)";
+t['NBHAX'] = "Automatiškai išsiplečianti";
+t['NBHK'] = "Fiksuoto dydžio";
+t['NPCSAVETIME'] = "Bus sukaupta po: ";
+t['TOTALTROOPS'] = "Visi gyvenvietės kariai";
+t['SELECTALLTROOPS'] = "Pasirinkti visus karius";
+t['PARTY'] = "Taškai";
+t['CPPERDAY'] = "KT per dieną";
+t['SLOT'] = "Vietos";
+t['TOTAL'] = "Iš viso";
+t['SELECTSCOUT'] = "Pasirinkti žvalgus";
+t['SELECTFAKE'] = "Pasirinkti netikrą ataką";
+t['ALL'] = "Visi";
+t['SH2'] = "Spalvų laukuose galite įvesti:<br>- green arba red arba orange, ir t.t.<br>- taip pat HEX spalvų kodą, pvz.: #004523<br>- jei norite palikti standartinę spalvą, laukelį palikite tuščią";
+t['SOREP'] = "Rodyti originalią ataskaitą (kopijavimui)";
+t['WSIMO1'] = "Vidinė (siūloma žaidimo)";
+t['WSIMO2'] = "Išorinė (siūloma kirilloid.ru)";
+t['NONEWVER'] = "Jūs turite naujausią versiją";
+t['BVER'] = "Jūs galite turėti beta versiją";
+t['NVERAV'] = "Dabartinė versija";
+t['UPDSCR'] = "Atnaujinti dabar?";
+t['CHECKUPDATE'] = "Ieškoma atnaujinimų.<br>Prašome palaukti...";
+t['AVPPV'] = "Gyventojų vidurkis gyvenvietei";
+t['AVPPP'] = "Gyventojų vidurkis žaidėjui";
+t['MAX'] = "Daugiausiai";
+t['TOTTRTR'] = "Iš viso treniruojamų karių";
+t['TB3SL'] = "$1 nustatymai";
+t['UPDALLV'] = "Atnaujinti visas gyvenvietes.  NAUDOTI ITIN ATSARGIAI, NES DĖL TO GALI BŪTITE BŪTI UŽBLOKUOTAS !";
+t['LARGEMAP'] = "Didelis žemėlapis";
+t['USETHEMPR'] = "Naudoti (proporcingai)";
+t['USETHEMEQ'] = "Naudoti (lygiai)";
+t['TOWNHALL'] = "Rotušė";
+t['GSRVT'] = "Žaidimo serveris";
+t['ACCINFO'] = "Registracijos informacija";
+t['NBO'] = "Užrašinė";
+t['MNUL'] = "Meniu kairėje pusėje";
+t['STAT'] = "Statistika";
+t['RESF'] = "Resursų laukai";
+t['VLC'] = "Gyvenvietės centras";
+t['MAPO'] = "Žemėlapio parinktys";
+t['COLO'] = "Spalvų parinktys";
+t['DBGO'] = "Debug'inimo parinktys";
+t['HEROSMANSION'] = "Karžygio namai";
+t['BLACKSMITH'] = "Ginklų kalvė";
+t['ARMOURY'] = "Šarvų kalvė";
+t['NOW'] = "Dabar";
+t['CLOSE'] = "Atšaukti";
+t['USETHEM1H'] = "Naudoti (1 valandos produkcija)";
+t['OVERVIEW'] = "Apžvalga";
+t['FORUM'] = "Forumas";
+t['ATTACKS'] = "Puolimai";
+t['NEWS'] = "Naujienos";
+t['ADDCRTPAGE'] = "Pridėti šį puslapį";
+t['SCRPURL'] = "TB puslapis";
+t['SPACER'] = "Pridėti skirtuką";
+t['MEREO'] = "Pranešimai ir ataskaitos";
+t['ATTABLES'] = "Karių lentelė";
+t['MTW'] = "Neišnaudota";
+t['MTX'] = "Viršyta";
+t['MTC'] = "Esamas pakrovimas";
+t['ALFL'] = "Nuoroda į įšorini forumą<br>(jei naudojate vidinį, nerašykite nieko)";
+t['MTCL'] = "Viską išvalyti";
+t['CKSORT'] = "Rūšiuoti";
+t['MIN'] = "Mažiausiai";
+t['SVGL'] = "Visose gyvenvietėse";
+t['VGL'] = "Gyvenviečių sąrašas";
+t['UPDATEPOP'] = "Atnaujinti populiaciją";
+t['EDIT'] = "Redaguoti";
+t['NPCO'] = "NPC asistentas";
+t['NEWVILLAGEAV'] = "Data/Laikas";
+t['TIMEUNTIL'] = "Laukimo laikas";
+t['CENTERMAP'] = "Centruoti šią gyvenvietę žemėlapyje";
+t['SENDTROOPS'] = "Siųsti karius";
+t['PALACE'] = "Valdovų rūmai";
+t['RESIDENCE'] = "Rezidencija";
+t['ACADEMY'] = "Akademija";
+t['TREASURY'] = "Iždinė";
+t['UPGTB'] = "Resursų laukų ir pastatų lygių kėlimo lentelės";
+t['RBTT'] = "Resursų lentelė";
+t['USE'] = "Naudoti";
+t['CROPFINDER'] = "Crop Finder";
+break;
+
+case 'lv': //contributors: anonymous
+t['1'] = "Travian v2.x server";
+t['4'] = "Tirgus";
+t['5'] = "Mītiņa vieta/Kazarmas/Darbnīca/Stallis";
+t['6'] = "Rātsnams/Varoņu Savrupmāja/Ieroču kaltuve/Bruņu kaltuve";
+t['8'] = "Alianse";
+t['9'] = "Rādīt papildus saites kreisajā izvēlnes joslā<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "Kaujas simulatora saite:<br>(kreisā izvēlnes josla)";
+t['12'] = "Rādīt 'dorf1.php' un 'dorf2.php' saites";
+t['20'] = "Rādīt saglabātās saites";
+t['22'] = "Rādīt pierakstu blociņu";
+t['24'] = "Piezīmju blociņa izmērs";
+t['25'] = "Pierakstu blociņa augstums";
+t['27'] = "Pasaules analīze";
+t['28'] = "Rādīt analīzes ikonu pie saitēm";
+t['37'] = "Rādīt resursu līmeņu tabulu";
+t['38'] = "Rādīt resursu līmeņu krāsas";
+t['41'] = "Rādīt celtņu līmeņu tabulu";
+t['43'] = "Numurus rādīt centrētus";
+t['44'] = "Rādīt celtņu līmeņu krāsas";
+t['48'] = "Piedāvājumu lapu skaits <br>kamēr ‘Tirgus => Pirkt' page<br>(Noklusētais = 1)";
+t['49'] = "Mītiņa vietas noklusētā darbība";
+t['50'] = "Skautu skaits priekš <br>\"Izvēlēties skautus\" funkcijas";
+t['53'] = "Rādīt karaspēka informāciju Tooltip’os";
+t['56'] = "Rādīt sūnas tipu/oāzes informācijuShow <br>while kamēr peles kursors ir uz kartes";
+t['57'] = "Rādīt distanci un laiku";
+t['59'] = "Ziņojumu skaits <br>(Noklusētais = 1)";
+t['65'] = "Krāsa: Iespējams uzlabot<br>(Noklusētais = Tukšs)";
+t['66'] = "Krāsa: Maksimālā līmeņa krāsa l<br>(Noklusētais = Tukšs)";
+t['67'] = "Krāsa: Līmeni nevar uzlabot<br>( Noklusētais = Tukšs)";
+t['68'] = "Krāsa: Uzlabošana caur NPC<br>( Noklusētais = Tukšs)";
+t['69'] = "Konsules Log līmenis<br>TIKAI PRIEKŠ PROGRAMĒTĀJIEM  VAI KĻŪDU NOVĒRŠANAS<br>(Noklusētais = 0)";
+t['82.L'] = "Slēgt saites (Slēpt dzēst, pārvietot uz augšu, uz leju ikonas)";
+t['82.U'] = "Atslēgt saites ( Rādīt dzēst, pārvietot uz augšu, uz leju ikonas)";
+t['U.2'] = "Rase";
+t['U.3'] = "Galvaspilsētas nosaukums<br><b>Apmeklē savu profilu</b>";
+t['U.6'] = "Galvaspilsētas koordinātes<br><b> Apmeklē savu profilu</b>";
+t['SIM'] = "Kaujas simulātors";
+t['QSURE'] = "Vai esi pārliecināts?";
+t['LOSS'] = "Zaudējumi";
+t['PROFIT'] = "Guvums";
+t['EXTAV'] = "Celšana pieejama";
+t['PLAYER'] = "Spēlētājs";
+t['VILLAGE'] = "Ciems";
+t['POPULATION'] = "Populācija";
+t['COORDS'] = "Koordinātes";
+t['MAPTBACTS'] = "Notikumi";
+t['SAVED'] = "Saglabāts";
+t['YOUNEED'] = "Nepieciešams";
+t['TODAY'] = "šodien";
+t['TOMORROW'] = "rītdien";
+t['DAYAFTERTOM'] = "aizparīt";
+t['MARKET'] = "Tirgus";
+t['BARRACKS'] = "Kazarmas";
+t['RAP'] = "Mītiņa vieta";
+t['STABLE'] = "Stallis";
+t['WORKSHOP'] = "Darbnīca";
+t['SENDRES'] = "Sūtīt resursus";
+t['BUY'] = "Pirkt";
+t['SELL'] = "Pārdot";
+t['SENDIGM'] = "Sūtīt ziņu";
+t['LISTO'] = "Pieejams";
+t['ON'] = "ap";
+t['AT'] = "ap";
+t['EFICIENCIA'] = "Lietderība";
+t['NEVER'] = "Ne tagad";
+t['ALDEAS'] = "Ciemi";
+t['TIEMPO'] = "Laiks";
+t['OFREZCO'] = "Piedāvājumi";
+t['BUSCO'] = "Meklē";
+t['TIPO'] = "Tips";
+t['DISPONIBLE'] = "Tikai pieejamos";
+t['CUALQUIERA'] = "Jebkurš";
+t['YES'] = "Jā";
+t['NO'] = "Nē";
+t['LOGIN'] = "Ieiet";
+t['MARCADORES'] = "Saglabātās saites";
+t['ANYADIR'] = "Pievienot";
+t['UBU'] = "Jaunās saites URL";
+t['UBT'] = "Jaunās saites nosaukums";
+t['DEL'] = "Dzēst";
+t['MAPA'] = "Karte";
+t['MAXTIME'] = "Maksimālais laiks";
+t['ARCHIVE'] = "Arhīvs";
+t['SUMMARY'] = "Pārskats";
+t['TROPAS'] = "Karavīri";
+t['CHKSCRV'] = "Atjaunot versiju";
+t['ACTUALIZAR'] = "Atjaunot ciema informāciju";
+t['VENTAS'] = "Saglabātie piedāvājumi";
+t['MAPSCAN'] = "Meklēt kartē";
+t['BIC'] = "Rādīt papildus ikonas";
+t['SAVE'] = "Saglabāt";
+t['AT2'] = "Papildspēki";
+t['AT3'] = "Uzbrukums: Parasts";
+t['AT4'] = "Uzbrukums: Iebrukums";
+t['NBSA'] = "Automātisks";
+t['NBSN'] = "Normāls (mazais)";
+t['NBSB'] = "Platiem ekrāniem (lielais)";
+t['NBHAX'] = "Automātiski izstiepts augstums";
+t['NBHK'] = "Noklusētais augstums";
+t['NPCSAVETIME'] = "Saglabāt:";
+t['TOTALTROOPS'] = "Kopējais karaspēka skaits";
+t['SELECTALLTROOPS'] = "Izvēlēties visu karaspēku";
+t['PARTY'] = "Svinības";
+t['CPPERDAY'] = "Kultūras punkti/Dienā";
+t['SLOT'] = "Vieta";
+t['TOTAL'] = "Kopā";
+t['SELECTSCOUT'] = "Izvēlieties izlūku";
+t['SELECTFAKE'] = "Izvēlieties ne-īsto";
+t['ALL'] = "Visi";
+t['SH2'] = "Krāsu laukumos varat ievadīt šādas krāsas:<br>- <b>green</b> vai <b>red</b> vai  <b>orange</b>, utt.<br>- kā arī krāsu kodus <b>#004523</b><br>- vai arī atstājat tukšu, lai izmantotu noklusētās krāsas";
+t['SOREP'] = "Rādīt oriģinālo ziņojumu (priekš kopēšanas utt)";
+t['WSIMO1'] = "Iekšējais (nodrošinājusi spēle)";
+t['WSIMO2'] = "Ārējais (nodršinājis kirilloid.ru)";
+t['NONEWVER'] = "Jūs jau lietojat pēdējo versiju";
+t['BVER'] = "Jūs varat lietot arī Beta versiju";
+t['NVERAV'] = "Jaunākā skripta versija ir pieejama";
+t['UPDSCR'] = "Atjaunot skriptu tagad?";
+t['CHECKUPDATE'] = "Meklēju skripta jauninājumu.<br>Lūdzu uzgaidiet...";
+t['AVPPV'] = "Vidējā populācija pret ciemu";
+t['AVPPP'] = "Vidējā populācija pret spēlētāju";
+t['MAX'] = "Maksimālais";
+t['TOTTRTR'] = "Kopējais karaspēka skaits, kas tiek trenēts";
+t['TB3SL'] = "$1 opcijas";
+t['UPDALLV'] = "Uzlabot visus ciemus. ŠO LABĀK NEIZMANTOT, JO TAS VAR NOVEST PIE KONTA BLOĶĒŠANAS";
+t['LARGEMAP'] = "Lielā karte";
+t['USETHEMPR'] = "Lietot tos (proporcionāli)";
+t['USETHEMEQ'] = "Lietot tos (vienlīdzīgi)";
+t['TOWNHALL'] = "Rātsnams";
+t['GSRVT'] = "Spēles serveris";
+t['NBO'] = "Pierakstu blociņs";
+t['MNUL'] = "Kreisās puses izvēles josla";
+t['STAT'] = "Statistika";
+t['RESF'] = "Resursu lauki";
+t['VLC'] = "Ciema centrs";
+t['MAPO'] = "Kastes iestatījumi";
+t['COLO'] = "Krāsu iestatījumi";
+t['DBGO'] = "Kļūdu ziņojumu iestatījumi";
+t['HEROSMANSION'] = " Varoņu Savrupmāja";
+t['BLACKSMITH'] = " Ieroču kaltuve ";
+t['ARMOURY'] = "Bruņu kaltuve ";
+t['NOW'] = "Tagad";
+t['CLOSE'] = "Aizvērt";
+t['USETHEM1H'] = "Lietot tos (1 stundas produkcija)";
+t['OVERVIEW'] = "Pārskats";
+t['FORUM'] = "Forums";
+t['ATTACKS'] = "Uzbrukumi";
+t['NEWS'] = "Ziņojumi";
+t['ADDCRTPAGE'] = "Pievienot atvērto lapu";
+t['SCRPURL'] = "TBeyond mājaslapa";
+t['SPACER'] = "Starp";
+t['MEREO'] = "Saņemtās ziņas un ziņojumi";
+t['ATTABLES'] = "Karaspēka saraksti";
+t['MTW'] = "Izniekots";
+t['MTX'] = "Pārmērīgs";
+t['MTC'] = "Pašreizējā krava";
+t['ALFL'] = "Saite uz ārējo Travian forumu<br>(atstāj tukšu, lai saite būtu uz starptautisko forumu)";
+t['MTCL'] = "Nodzēst visu";
+t['VGL'] = "Ciemu saraksts";
+t['USE'] = "Lietot";
+t['CROPFINDER'] = "Labības lauku meklētajs";
+break;
+
+case 'my': //contributors: Light@fei, dihaz06-47
+t['1'] = "Server Travian v2.x";
+t['4'] = "Pasar";
+t['5'] = "Titik perhimpunan/Berek/Bengkel/Kandang kuda";
+t['6'] = "Dewan perbandaran/Rumah agam wira/Kedai perisai/Kedai senjata";
+t['7'] = "Istana/Residen/Akademi/Perbendaharaan";
+t['8'] = "Persekutuan";
+t['9'] = "Tunjukkan link tambahan di menu sebelah kiri<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "Link simulator peperangan untuk digunakan:<br>(menu disebelah kiri)";
+t['12'] = "Tunjukkan link 'dorf1.php' and 'dorf2.php'";
+t['13'] = "Tunjukkan ikon \"Ketengahkan peta untuk kampung ini\" ";
+t['14'] = "Tunjukkan ikon 'Hantar askar-askar/Hantar sumber-sumber' didalam list kampung";
+t['16'] = "Tunjukkan produksi tanaman efektif di dalam list kampung";
+t['20'] = "Tunjukkan bookmarks";
+t['22'] = "Tunjukkan blok nota";
+t['24'] = "Saiz blok nota";
+t['25'] = "Ketinggian blok nota";
+t['26'] = "Tunjukkan pengiraan/link Pembantu NPC";
+t['27'] = "World Analyser untuk digunakan";
+t['28'] = "Tunjukkan link penganalisa statistik";
+t['34'] = "Tunjukkan informasi MB/Hari di dalam jadual naiktaraf";
+t['35'] = "Tunjukkan penggunaan makanan didalam jadual naik taraf";
+t['37'] = "Tunjukkan jadual naiktaraf tapak sumber";
+t['38'] = "Tunjukkan warna-warna tahap sumber";
+t['39'] = "Tunjukkan jadual bar sumber";
+t['41'] = "Tunjukkan jadual naiktaraf bangunan";
+t['43'] = "Tunjukkan nombor-nombor di pusat kampung";
+t['44'] = "Tunjukkan warna-warna tahap bangunan";
+t['45'] = "Tunjukkan level berkedip untuk bangunan yang sedang dinaiktaraf";
+t['48'] = "Jumlah mukasurat tawaran untuk dipreload<br>Semasa di 'Pasar => Mukasurat beli' <br>(Default = 1)";
+t['49'] = "Aksi Titik perhimpunan";
+t['50'] = "Bilangan peninjau untuk fungsi<br>\"Pilihkan peninjau\"";
+t['53'] = "Tunjukkan informasi askar-askar di tooltips";
+t['54'] = "Tunjukkan jarak dan masa kepada sesuatu kampung di tooltips";
+t['56'] = "Tunjukkan informasi jenis petak/oasis <br>semasa meletakkan cursor diatas peta";
+t['57'] = "Tunjukkan jarak & masa";
+t['58'] = "Tunjukkan jadual pemain/kampung/oasis berpenduduk";
+t['59'] = "Bilangan mukasurat mesej/laporan untuk dipreload<br>(Default = 1)";
+t['60'] = "Tunjukkan link untuk membuka mesej sebagai pop-up";
+t['61'] = "Tunjukkan jadual \"Padam semua\" di mukasurat laporan";
+t['62'] = "Tunjukkan ikon \"Hantar IGM\" kepada saya juga";
+t['64'] = "Tunjukkan detail di dalam Statistic Laporan";
+t['65'] = "Warna naiktaraf ada<br>(Default = Kosong)";
+t['66'] = "Warna tahap maksimum<br>(Default = Kosong)";
+t['67'] = "Warna naiktaraf tak mungkin<br>(Default = Kosong)";
+t['68'] = "Warna naiktaraf menggunakan NPC<br>(Default = Kosong)";
+t['82.L'] = "Kunci bookmark (Sorokkan ikon padam, keatas, kebawah)";
+t['82.U'] = "Buka kunci bookmark (Tunjukkan ikon padam, keatas, kebawah)";
+t['U.2'] = "Puak";
+t['U.3'] = "Namakan ibukota anda<br><b>Lawat Profile anda untuk kemaskini</b>";
+t['U.6'] = "Koordinat ibukota<br><b>Lawat Profile anda untuk kemaskini</b>";
+t['SIM'] = "Simulator Peperangan";
+t['QSURE'] = "Adakah anda pasti?";
+t['LOSS'] = "Kerugian";
+t['PROFIT'] = "Keuntungan";
+t['EXTAV'] = "Boleh dibesarkan";
+t['PLAYER'] = "Pemain";
+t['VILLAGE'] = "Kampung";
+t['POPULATION'] = "Populasi";
+t['COORDS'] = "Koordinat";
+t['MAPTBACTS'] = "Aksi";
+t['SAVED'] = "Disimpan";
+t['YOUNEED'] = "Anda Perlu";
+t['TODAY'] = "Hari ini";
+t['TOMORROW'] = "Esok";
+t['DAYAFTERTOM'] = "Lusa";
+t['MARKET'] = "Pasar";
+t['BARRACKS'] = "Berek";
+t['RAP'] = "Titik Perhimpunan";
+t['STABLE'] = "Kandang Kuda";
+t['WORKSHOP'] = "Bengkel";
+t['SENDRES'] = "Hantarkan Sumber-sumber";
+t['BUY'] = "Beli";
+t['SELL'] = "Tawar";
+t['SENDIGM'] = "Hantar IGM";
+t['LISTO'] = "Ada";
+t['ON'] = "pada";
+t['AT'] = "di";
+t['EFICIENCIA'] = "Kecekapan";
+t['NEVER'] = "Tidak pernah";
+t['ALDEAS'] = "Kampung(-kampung)";
+t['TIEMPO'] = "Masa";
+t['OFREZCO'] = "Menawar";
+t['BUSCO'] = "Mencari";
+t['TIPO'] = "Jenis";
+t['DISPONIBLE'] = "Hanya Ada";
+t['CUALQUIERA'] = "Mana-mana";
+t['YES'] = "Ya";
+t['NO'] = "Tidak";
+t['LOGIN'] = "Log Masuk";
+t['MARCADORES'] = "Bookmark";
+t['ANYADIR'] = "Tambah";
+t['UBU'] = "URL Bookmark Baru";
+t['UBT'] = "Teks Bookmark Baru";
+t['DEL'] = "Padam";
+t['MAPA'] = "Peta";
+t['MAXTIME'] = "Masa Maksimum";
+t['ARCHIVE'] = "Arkib";
+t['SUMMARY'] = "Rumusan";
+t['TROPAS'] = "Askar-askar";
+t['CHKSCRV'] = "Kemaskini TBeyond";
+t['ACTUALIZAR'] = "Kemaskini informasi kampung";
+t['VENTAS'] = "Tawaran tersimpan";
+t['MAPSCAN'] = "Imbaskan Peta";
+t['BIC'] = "Tunjukkan lebih ikon";
+t['SAVE'] = "Simpan";
+t['AT2'] = "Bantuan";
+t['AT3'] = "Serangan: Normal";
+t['AT4'] = "Serangan: Serbuan";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normal (kecil)";
+t['NBSB'] = "Skrin besar (besar)";
+t['NBHAX'] = "Laras Tinggi Automatik";
+t['NBHK'] = "Ketinggian Default";
+t['NPCSAVETIME'] = "Jimat: ";
+t['TOTALTROOPS'] = "Jumlah askar-askar dalam kampung";
+t['SELECTALLTROOPS'] = "Pilihkan semua askar";
+t['PARTY'] = "Perayaan";
+t['CPPERDAY'] = "MB/hari";
+t['SLOT'] = "Slot";
+t['TOTAL'] = "Jumlah";
+t['SELECTSCOUT'] = "Pilihkan peninjau";
+t['SELECTFAKE'] = "Pilihkan fake";
+t['ALL'] = "Semua";
+t['SH2'] = "Didalam ruang warna anda boleh memasuskkan:<br>- <b>green</b> or <b>red</b> or  <b>orange</b>, etc.<br>-  Kod warna HEX seperti<b>#004523</b><br>- Tinggalkan kosong untuk warna default";
+t['SOREP'] = "Tunjukkan laporan original (untuk dipost)";
+t['WSIMO1'] = "Dalaman (disediakan oleh permainan)";
+t['WSIMO2'] = "Luaran (disediakan oleh kirilloid.ru)";
+t['NONEWVER'] = "Anda mempunyai versi yang terbaru";
+t['BVER'] = "Anda mempunyai versi beta";
+t['NVERAV'] = "A Terdapat versi skrip yang lebih baru";
+t['UPDSCR'] = "Kemaskini skrip sekarang ?";
+t['CHECKUPDATE'] = "Memeriksa untuk kemaskini skrip.<br>Sila tunggu...";
+t['AVPPV'] = "Populasi purata per kampung";
+t['AVPPP'] = "Populasi purata per pemain";
+t['MAX'] = "Maksimum";
+t['TOTTRTR'] = "Jumlah askar sedang dilatih";
+t['TB3SL'] = "Setup $1";
+t['UPDALLV'] = "Kemaskini semua kampung.  GUNAKAN DENGAN BERHATI-HATI KERANA INI BOLEH MEMBAWA KEPADA PEMBEKUAN AKAUN ANDA !";
+t['LARGEMAP'] = "Peta Besar";
+t['USETHEMPR'] = "Guna (Dalam Peratus)";
+t['USETHEMEQ'] = "Guna (Samarata)";
+t['TOWNHALL'] = "Dewan Perbandaran";
+t['GSRVT'] = "Server dunia permainan";
+t['ACCINFO'] = "Informasi Akaun";
+t['NBO'] = "Tiadablok";
+t['MNUL'] = "Menu di sebelah kiri";
+t['STAT'] = "Statistik";
+t['RESF'] = "Tapak sumber";
+t['VLC'] = "Pusat Kampung";
+t['MAPO'] = "Pilihan peta";
+t['COLO'] = "Pilihan warna";
+t['DBGO'] = "Pilihan debug";
+t['HEROSMANSION'] = "Rumah Agam Wira";
+t['BLACKSMITH'] = "Kedai Senjata";
+t['ARMOURY'] = "Kedai Perisai";
+t['NOW'] = "Sekarang";
+t['CLOSE'] = "Tutup";
+t['USETHEM1H'] = "Guna (Produksi sejam)";
+t['OVERVIEW'] = "Keseluruhan";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Serangan";
+t['NEWS'] = "Berita";
+t['ADDCRTPAGE'] = "Tambahkan mukasurat sekarang";
+t['SCRPURL'] = "Mukasurat TBeyond";
+t['SPACER'] = "Penambah jarak";
+t['MEREO'] = "Mesej & Laporan";
+
+t['ATTABLES'] = "Jadual askar-askar";
+t['MTW'] = "Dibazirkan";
+t['MTX'] = "Melebihi";
+t['MTC'] = "Kapasiti sekarang";
+t['ALFL'] = "Linkkan ke forum luaran<br>(Tinggalkan kosong untuk forum dalaman)";
+t['MTCL'] = "Padamkan semua";
+t['CKSORT'] = "Klikkan untuk membahagi";
+t['MIN'] = "Minimum";
+t['SVGL'] = "Kongsikan antara kampung";
+t['VGL'] = "List kampung-kampung";
+t['UPDATEPOP'] = "Kemaskini populasi";
+t['EDIT'] = "Edit";
+t['NPCO'] = "Pilihan Pembantu NPC";
+t['NEWVILLAGEAV'] = "Tarikh/Masa";
+t['TIMEUNTIL'] = "Masa untuk menunggu";
+t['CENTERMAP'] = "Ketengahkan peta untuk kampung ini";
+t['SENDTROOPS'] = "Hantarkan askar-askar";
+t['PALACE'] = "Istana";
+t['RESIDENCE'] = "Residen";
+t['ACADEMY'] = "Akademi";
+t['TREASURY'] = "Perbendaharaan";
+t['UPGTB'] = " Jadual naiktaraf Tapak sumber/Bangunan";
+t['RBTT'] = "Bar Sumber";
+t['USE'] = "Guna";
+t['CROPFINDER'] = "Crop finder";
+break;
+
+case 'nl': //contributors: anonymous author, Boeruh, TforAgree, Dakkie
+t['1'] = "Travian v2.x server";
+t['3'] = "Forceer T3.1 Phalanx en Legionair Capaciteits berekening.<br>(Voor gemixte T3.1 & T3.5 servers - meestal .de servers)";
+t['4'] = "Marktplaats";
+t['5'] = "Verzamelplaats/Barakken/Werkplaatsen/Stal";
+t['6'] = "Raadhuis/Heldenhof/Uitrustingssmederij/Wapensmid";
+t['7'] = "Paleis/Residentie/Academie/Schatkamer";
+t['8'] = "Alliantie";
+t['9'] = "Extra link laten zien in linker menu<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "Veldslagsimulator link gebruiken:<br>(in menu links)";
+t['12'] = "Laat de 'dorf1.php' en 'dorf2.php' links zien";
+t['13'] = "Icoon voor \"Centreer map op dit dorp\" laten zien";
+t['14'] = "Laat \"Stuur troepen/Stuur Handelaren\" Icoon zien in de dorpen lijst";
+t['16'] = "Laat netto graanproductie zien in de dorpen lijst zien";
+t['17'] = "Laat de Populatie zien in de dorpen lijst zien";
+t['18'] = "Laat extra (2 Kolommen) dorpenlijst zien als zwevend venster";
+t['20'] = "Links laten zien";
+t['21'] = "Laat \"Gebruikers Links\" als zwevend venster zien";
+t['22'] = "Kladblok zichtbaar";
+t['23'] = "Laat \"Kladblok\" als zwevend venster zien";
+t['24'] = "Kladblok grote";
+t['25'] = "Kladblok hoogte";
+t['26'] = "NPC Handelaar links en info laten zien";
+t['27'] = "World Analyser gebruiken";
+t['28'] = "Laat Analyser statistieken links zien";
+t['29'] = "Welke map analyser te gebruiken:";
+t['30'] = "Laat links naar de kaart zien voor spelers";
+t['31'] = "Laat links naar de kaart zien voor allianties";
+t['34'] = "Laat CP/dag zien in de uitbreidingstabel";
+t['35'] = "Laat graanverbruik zien in de uitbreidingstabel";
+t['37'] = "Grondstofvelden uitbreidings tabel weergeven";
+t['38'] = "Grondstof kleur niveau weergeven";
+t['39'] = "Laat het \"Grondstof productie venster\" zien";
+t['40'] = "Laat het \"Grondstof productie venster\" als zwevend venster zien";
+t['41'] = "Gebouwen uitbereidings tabel weergeven";
+t['43'] = "Dorp nummers weergeven";
+t['44'] = "Gebouwen kleur niveau weergeven";
+t['45'] = "Laat knipperend icoon zien voor gebouwen die worden gebouwd";
+t['48'] = "Aantal pagina's voorladen<br>bij 'Marktplaats => kopen'<br>(Standaard = 1)";
+t['49'] = "Verzamelplaats standaard aktie";
+t['50'] = "Aantal scouts voor de<br>\"Selecteer verkenners\" functie";
+t['53'] = "Troepen info laten zien bij muis op plaatjes.";
+t['54'] = "Afstand en tijd laten zien naar dorp in tooltip";
+t['55'] = "Automatisch aanwezige troepen invullen";
+t['56'] = "Laat veld type/oase info zien<br>bij muisover het veld";
+t['57'] = "Afstanden en tijden laten zien";
+t['58'] = "Laat de tabel zien van Spelers/Dorpen/Oases";
+t['59'] = "Aantal paginas voorladen<br>(Standaard = 1)";
+t['61'] = "Tabel met \"Verwijder\" laten zien op raporten pagina";
+t['62'] = "Ook mijn \"Stuur IGM\" icoon laten zien";
+t['63'] = "Laat .5 Uitgebreide Aanvalsrapporten zien";
+t['64'] = "Laat uitgebreide details zien in de statistieken";
+t['65'] = "Kleur voor uitbreidbaar<br>(Standaard leeg)";
+t['66'] = "Kleur max level<br>(Standaard leeg)";
+t['67'] = "Kleur niet uitbreidbaar<br>(Standaard leeg)";
+t['68'] = "Kleur uitbreidbaar via NPC<br>(Standaard leeg)";
+t['69'] = "Console Log Niveau (Standaard = 0)<br>(alleen voor programeurs of debugging)";
+t['82.L'] = "Bladwijzers vast zetten (Verberg de verwijder en verplaats iconen)";
+t['U.2'] = "Ras";
+t['U.3'] = "Naam van hoofddorp<br><b>Niet bewerken, ga hiervoor naar je profiel</b>";
+t['U.6'] = "Coordinaten van hoofddorp<br><b>Niet bewerken, ga hiervoor naar je profiel</b>";
+t['SIM'] = "Gevecht simulator";
+t['QSURE'] = "Weet je het zeker?";
+t['LOSS'] = "Verlies";
+t['PROFIT'] = "Winst";
+t['EXTAV'] = "Uitbreiding beschikbaar";
+t['PLAYER'] = "Speler";
+t['VILLAGE'] = "Dorp";
+t['POPULATION'] = "Populatie";
+t['COORDS'] = "Co&ouml;rd";
+t['MAPTBACTS'] = "Acties";
+t['SAVED'] = "Bewaard";
+t['YOUNEED'] = "Nog nodig";
+t['TODAY'] = "vandaag";
+t['TOMORROW'] = "morgen";
+t['DAYAFTERTOM'] = "overmorgen";
+t['MARKET'] = "Marktplaats";
+t['BARRACKS'] = "Barakken";
+t['RAP'] = "Verzamelpunt";
+t['STABLE'] = "Stal";
+t['WORKSHOP'] = "Werkplaats";
+t['SENDRES'] = "Stuur grondstoffen";
+t['BUY'] = "Koop";
+t['SELL'] = "Verkoop";
+t['SENDIGM'] = "Stuur IGM";
+t['LISTO'] = "Uitbreiding beschikbaar";
+t['ON'] = "om";
+t['AT'] = "om";
+t['EFICIENCIA'] = "Effici&euml;ntie";
+t['NEVER'] = "Nooit";
+t['ALDEAS'] = "Dorp(en)";
+t['TIEMPO'] = "Tijd";
+t['OFREZCO'] = "Bieden";
+t['BUSCO'] = "Zoeken";
+t['TIPO'] = "Type";
+t['DISPONIBLE'] = "Alleen beschikbaar";
+t['CUALQUIERA'] = "Elke";
+t['YES'] = "Ja";
+t['NO'] = "Nee";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Links";
+t['ANYADIR'] = "Toevoegen";
+t['UBU'] = "Nieuwe link URL";
+t['UBT'] = "Nieuwe link Text";
+t['DEL'] = "Verwijder";
+t['MAPA'] = "Map";
+t['MAXTIME'] = "Max. tijd";
+t['ARCHIVE'] = "Archiveer";
+t['SUMMARY'] = "Samenvatting";
+t['TROPAS'] = "Troepen";
+t['CHKSCRV'] = "Update TBeyond";
+t['ACTUALIZAR'] = "Update dorp informatie";
+t['VENTAS'] = "Opgeslagen verkopen";
+t['MAPSCAN'] = "Scan de map";
+t['BIC'] = "Uitgebreide iconen zichtbaar";
+t['SAVE'] = "Opslaan";
+t['AT2'] = "Versterking";
+t['AT3'] = "Aanval";
+t['AT4'] = "Overval";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normaal (klein)";
+t['NBSB'] = "Groot";
+t['NBHAX'] = "Automatisch groter maken";
+t['NBHK'] = "Standaard hoogte";
+t['NPCSAVETIME'] = "Bespaar: ";
+t['TOTALTROOPS'] = "Totaal dorp troepen";
+t['SELECTALLTROOPS'] = "Selecteer alle troepen";
+t['PARTY'] = "Feest";
+t['CPPERDAY'] = "CP/dag";
+t['SLOT'] = "Slot";
+t['TOTAL'] = "Totaal";
+t['SELECTSCOUT'] = "Selecteer verkenners";
+t['SELECTFAKE'] = "Selecteer fake";
+t['ALL'] = "Alles";
+t['SH2'] = "In de kleur velen mag je invullen:<br>- <b>green</b>, <b>red</b> or <b>orange</b>, etc.<br>- de HEX kleur code zoals <b>#004523</b><br>- leeg laten voor standaard kleur";
+t['SOREP'] = "Laat orgineel bericht zien (voor verzenden)";
+t['WSIMO1'] = "Die van het spel";
+t['WSIMO2'] = "Externe (door kirilloid.ru)";
+t['NONEWVER'] = "Je hebt de laatste versie";
+t['BVER'] = "Je hebt waarschijnlijk een beta versie";
+t['NVERAV'] = "Er is een nieuwe versie beschikbaar";
+t['UPDSCR'] = "Update script nu ?";
+t['CHECKUPDATE'] = "Voor updates controleren... Een moment.";
+t['AVPPV'] = "Gemiddelde populatie per dorp";
+t['AVPPP'] = "Gemiddelde populatie per speler";
+t['TOTTRTR'] = "Totaal aantal troepen";
+t['UPDALLV'] = "Update alle dorpen. LETOP: Bij vaak gebruik kan dit lijden tot een ban van travain!";
+t['LARGEMAP'] = "Grote map";
+t['USETHEMPR'] = "Verdeel (procentueel)";
+t['USETHEMEQ'] = "Verdeel (Gelijkmatig)";
+t['TOWNHALL'] = "Raadhuis";
+t['GSRVT'] = "Server versie";
+t['ACCINFO'] = "Account info";
+t['NBO'] = "Kladblok";
+t['MNUL'] = "Linker menu";
+t['STAT'] = "Statistieken";
+t['RESF'] = "Grondstof velden";
+t['VLC'] = "Dorp centrum";
+t['MAPO'] = "Map opties";
+t['COLO'] = "Kleur opties";
+t['DBGO'] = "Debug opties";
+t['HEROSMANSION'] = "Heldenhof";
+t['BLACKSMITH'] = "Wapensmid";
+t['ARMOURY'] = "Uitrustingssmederij";
+t['NOW'] = "Nu";
+t['CLOSE'] = "Sluit";
+t['USETHEM1H'] = "Verdeel (1 uur productie)";
+t['OVERVIEW'] = "Overzicht";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Aanvallen";
+t['NEWS'] = "Nieuws";
+t['ADDCRTPAGE'] = "Huidige pagina";
+t['SCRPURL'] = "TBeyond pagina";
+t['SPACER'] = "Scheidingsteken";
+t['MEREO'] = "Berichten & Raportages";
+t['ATTABLES'] = "Troepen tabellen";
+t['MTW'] = "Ruimte over";
+t['MTX'] = "Te veel";
+t['MTC'] = "Huidige lading";
+t['ALFL'] = "Link naar extern forum<br>(Leeg laten voor intern forum)";
+t['MTCL'] = "Leeg alle velden";
+t['CKSORT'] = "Klik voor sorteren";
+t['SVGL'] = "Voor elk dorp gebruiken";
+t['VGL'] = "Dorpen lijst";
+t['EDIT'] = "Bewerk";
+t['NPCO'] = "NPC Handel opties";
+t['NEWVILLAGEAV'] = "Datum/Tijd";
+t['TIMEUNTIL'] = "Wacht tijd";
+t['CENTERMAP'] = "Centreer map op dit dorp";
+t['USE'] = "Verdeel het";
+t['WSI'] = "In-game gevechts simulator";
+t['CROPFINDER'] = "Graanvelden zoeker";
+break;
+
+case 'no': //contributors: ThePirate
+t['1'] = "Travian v2.x server";
+t['8'] = "Allianse";
+t['9'] = "Vis flere lenker i menyen til venstre<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "Kampsimulator link:<br>(menyen til venstre)";
+t['20'] = "Vis bokmerker";
+t['22'] = "Vis notatblokk";
+t['24'] = "Notisblokk størrelse";
+t['25'] = "Notisblokk høyde";
+t['28'] = "Show analyser statistic links";
+t['37'] = "Vis utvidelseshjelp for ressursfelt";
+t['38'] = "Vi farge på ressurs nivået";
+t['41'] = "Vis utvidelseshjelp for bygninger";
+t['43'] = "Vis bygnings nivå";
+t['44'] = "Vis bygnings nivå farger";
+t['48'] = "Mengde av 'tilbyr' sider som skal lastes<br>i 'Marked => Kjøp' side<br>(Standard = 1)";
+t['49'] = "Møteplass standard handling ";
+t['56'] = "Vis rute/oase type<br>ved musepekeren over kartet";
+t['57'] = "Vis avstand og tid";
+t['65'] = "Farge utvidelse tilgjengelig<br>(Standard = Tom)";
+t['66'] = "Farge maksimalt nivål<br>(Standard = Tom)";
+t['67'] = "Farge utvidelse ikke tilgjengelig<br>(Standard = Tom)";
+t['68'] = "Farge utvidelse via NPC<br>(Standard = Tom)";
+t['69'] = "Console Log Level<br>ONLY FOR PROGRAMMERS OR DEBUGGING<br>(Default = 0)";
+t['U.2'] = "Stamme";
+t['U.3'] = "Navn på din hovedby<br><b>Ikke endre på dette, besøk profilen din!</b>";
+t['U.6'] = "Koordinater til hovedbyen din<br><b>Ikke endre på dette, besøk profilen din!</b>";
+t['SIM'] = "Kamp-simulator";
+t['QSURE'] = "Er du sikker?";
+t['LOSS'] = "Tap";
+t['PROFIT'] = "Profit";
+t['EXTAV'] = "Utvidelse tilgjengelig";
+t['PLAYER'] = "Spiller";
+t['VILLAGE'] = "By";
+t['POPULATION'] = "Befolknong";
+t['COORDS'] = "Koordinater";
+t['MAPTBACTS'] = "Handlinger";
+t['SAVED'] = "Lagret";
+t['YOUNEED'] = "Du trenger";
+t['TODAY'] = "idag";
+t['TOMORROW'] = "imorgen";
+t['DAYAFTERTOM'] = "dagen etter imorgen";
+t['MARKET'] = "Markedsplass";
+t['BARRACKS'] = "Kaserne";
+t['RAP'] = "Møteplass";
+t['STABLE'] = "Stall";
+t['WORKSHOP'] = "Verksted";
+t['SENDRES'] = "Send ressurser";
+t['BUY'] = "Kjøp";
+t['SELL'] = "Selg";
+t['SENDIGM'] = "Send IGM";
+t['LISTO'] = "Kan bygges";
+t['ON'] = "den";
+t['AT'] = "klokken";
+t['EFICIENCIA'] = "Effektivitet";
+t['NEVER'] = "Aldri";
+t['ALDEAS'] = "By(er)";
+t['TIEMPO'] = "Tid";
+t['OFREZCO'] = "Tilbyr";
+t['BUSCO'] = "Leter etter";
+t['TIPO'] = "Type";
+t['DISPONIBLE'] = "Kun tigjengelig";
+t['CUALQUIERA'] = "Alle";
+t['YES'] = "Ja";
+t['NO'] = "Nei";
+t['LOGIN'] = "Logg inn";
+t['MARCADORES'] = "Bokmerker";
+t['ANYADIR'] = "Legg til";
+t['UBU'] = "Nytt bokmerke URL";
+t['UBT'] = "Nytt nokmerke Text";
+t['DEL'] = "Slett";
+t['MAPA'] = "Kart";
+t['MAXTIME'] = "Maximum tid";
+t['ARCHIVE'] = "Arkiv";
+t['SUMMARY'] = "Resume";
+t['TROPAS'] = "Tropper";
+t['CHKSCRV'] = "Oppdater TBeyond";
+t['ACTUALIZAR'] = "Oppdater by-informasjon";
+t['VENTAS'] = "Lagrede tilbud";
+t['MAPSCAN'] = "Scan Kartet";
+t['BIC'] = "Vis utvidede iconer";
+t['SAVE'] = "Lagre";
+t['AT2'] = "Forsterkninger";
+t['AT3'] = "Angrep: Normalt";
+t['AT4'] = "Angrep: Plyndringstokt";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normal (Liten)";
+t['NBSB'] = "Større";
+t['NBHAX'] = "Automatisk utvid høyde";
+t['NBHK'] = "Standard høyde";
+t['NPCSAVETIME'] = "Lagre: ";
+t['TOTALTROOPS'] = "Totale tropper i byen";
+t['SELECTALLTROOPS'] = "Velg alle tropper";
+t['PARTY'] = "Fester";
+t['CPPERDAY'] = "KP/dag";
+t['SLOT'] = "Utvidelse";
+t['TOTAL'] = "Totalt";
+t['SELECTSCOUT'] = "Velg scout";
+t['SELECTFAKE'] = "Velg fake";
+t['ALL'] = "Alle";
+t['SH2'] = "I farge-felt kan du skrive:<br>- <b>green</b> eller <b>red</b> eller  <b>orange</b>, etc.<br>- the HEX color code like <b>#004523</b><br>- leave empty for the default color";
+t['SOREP'] = "Vis orginal rapport (for posting)";
+t['NONEWVER'] = "Du har den siste versjonen tilgjengelig";
+t['BVER'] = "Du har kansje en beta versjon";
+t['NVERAV'] = "En ny versjon er tilgjengelig";
+t['UPDSCR'] = "Oppdatere nå ?";
+t['CHECKUPDATE'] = "Leter etter script oppdatering.<br>Venligst vent...";
+t['AVPPV'] = "Gjennomsnittlig befolkning per by";
+t['AVPPP'] = "Gjennomsnittlig befolkning per spiller";
+t['TOTTRTR'] = "Total troppe utviklings tid";
+t['UPDALLV'] = "Oppdater alle byer.  USE WITH MAXIMUM CARE AS THIS CAN LEAD TO A BANNED ACCOUNT !";
+t['LARGEMAP'] = "Stort kart";
+t['CROPFINDER'] = "Crop finder";
+break;
+
+case 'ph': //contributors: ahuks
+t['5'] = "Pook Tipunan/Kwartel/Talyer/Kuwadra";
+t['6'] = "Bulwagan ng Baryo/Mansyon ng Bayani/Balutian/Pandayan";
+t['7'] = "Palasyo/Residensya/Akademya/Kaban-yaman";
+t['8'] = "Alyansa";
+t['13'] = "Show \"Gitnang Mapa ng Baryo\" icon";
+t['37'] = "Show resource fields upgrade table";
+t['41'] = "Show buildings upgrade table";
+t['50'] = "Bilang ng Scout para sa<br>\"Piliin Scout\" function";
+t['U.2'] = "Lahi";
+t['QSURE'] = "Sigurado ka ba?";
+t['LOSS'] = "Kawalan";
+t['PROFIT'] = "Pakinabang";
+t['EXTAV'] = "Maari ng Gawin";
+t['PLAYER'] = "Manlalaro";
+t['VILLAGE'] = "Baryo";
+t['POPULATION'] = "Populasyon";
+t['COORDS'] = "Coordinate";
+t['MAPTBACTS'] = "Aksyon";
+t['SAVED'] = "Saved";
+t['YOUNEED'] = "Kailangan mo";
+t['TODAY'] = "ngayon";
+t['TOMORROW'] = "bukas";
+t['DAYAFTERTOM'] = "kinabukasan";
+t['MARKET'] = "Palengke";
+t['BARRACKS'] = "Kwartel";
+t['RAP'] = "Pook Tipunan";
+t['STABLE'] = "Kuwadra";
+t['WORKSHOP'] = "Talyer";
+t['SENDRES'] = "Magpadala ng likas-yaman";
+t['BUY'] = "Bumili";
+t['SELL'] = "Alok";
+t['SENDIGM'] = "Sumulat ng Mensahe";
+t['LISTO'] = "Maari na";
+t['ON'] = "ng";
+t['AT'] = "sa";
+t['EFICIENCIA'] = "Kahusayan";
+t['NEVER'] = "Hindi Kailanman";
+t['ALDEAS'] = "Baryo";
+t['TIEMPO'] = "Oras";
+t['OFREZCO'] = "Nag-aalok";
+t['BUSCO'] = "Naghahanap";
+t['TIPO'] = "Uri";
 t['DISPONIBLE'] = "Ito'y Maari lamang";
-t['CUALQUIERA'] = 'Kahit Ano';
-t['YES'] = 'Oo';
-t['NO'] = 'Hindi';
-t['MAPA'] = 'Mapa';
-t['MAXTIME'] = 'Pinakamatagal na Oras';
-t['SUMMARY'] = 'Ulat';
-t['TROPAS'] = 'Mga Hukbo';
-t['AT2'] = 'Dagdag ng Hukbo';
-t['AT3'] = 'Salakay: Normal';
-t['AT4'] = 'Salakay: Pagnakaw';
-t['TOTALTROOPS'] = 'Kubuuan ng Hukbo';
-t['U.2'] = 'Lahi';
+t['CUALQUIERA'] = "Kahit Ano";
+t['YES'] = "Oo";
+t['NO'] = "Hindi";
+t['MAPA'] = "Mapa";
+t['MAXTIME'] = "Pinakamatagal na Oras";
+t['SUMMARY'] = "Ulat";
+t['TROPAS'] = "Mga Hukbo";
+t['AT2'] = "Dagdag ng Hukbo";
+t['AT3'] = "Salakay: Normal";
+t['AT4'] = "Salakay: Pagnakaw";
+t['TOTALTROOPS'] = "Kubuuan ng Hukbo";
 t['SELECTALLTROOPS'] = "Piliin lahat ng Hukbo";
 t['PARTY'] = "Kasiyahan";
 t['CPPERDAY'] = "Pananim/Araw";
 t['TOTAL'] = "Kabuuan";
 t['SELECTSCOUT'] = "Piliin ang Scout";
 t['SELECTFAKE'] = "Piliin ang Pekeng Atake";
-t['NOSCOUT2FAKE'] = "Hindi maaari gamitin ang Scout para sa Pekeng Atake!";
-t['NOTROOP2FAKE'] = "Walang Hukbo para sa Pekeng Atake!";
-t['NOTROOP2SCOUT'] = "Walang Hukbo para pang Scout!";
-t['NOTROOPS'] = "Walang Hukbo sa iyong Baryo!";
 t['ALL'] = "Lahat";
 t['SOREP'] = "Ipakita ang Orihinal na Ulat";
 t['AVPPV'] = "Average na Population sa bawat Baryo";
 t['AVPPP'] = "Average na Population sa bawat Manlalaro";
-t['37'] = "Show resource fields upgrade table";
-t['41'] = "Show buildings upgrade table";
-t['TOWNHALL'] = 'Bulwagan ng Baryo';
-t['STAT'] = 'Mga Estatistika';
-t['RESF'] = 'Likas-yaman';
-t['VLC'] = 'Gitna ng Baryo';
-t['5'] = 'Pook Tipunan/Kwartel/Talyer/Kuwadra';
-t['6'] = "Bulwagan ng Baryo/Mansyon ng Bayani/Balutian/Pandayan";
+t['TOWNHALL'] = "Bulwagan ng Baryo";
+t['STAT'] = "Mga Estatistika";
+t['RESF'] = "Likas-yaman";
+t['VLC'] = "Gitna ng Baryo";
 t['HEROSMANSION'] = "Mansyon ng Bayani";
-t['BLACKSMITH'] = 'Pandayan';
-t['ARMOURY'] = 'Balutian';
-t['OVERVIEW'] = 'Pananaw';
-t['FORUM'] = 'Porum';
-t['ATTACKS'] = 'Atake';
-t['NEWS'] = 'Ulat';
-t['50'] = 'Bilang ng Scout para sa<br>"Piliin Scout" function';
-t['CENTERMAP'] = 'Gitnang Mapa ng Baryo';
-t['13'] = 'Show "Gitnang Mapa ng Baryo" icon';
-t['SENDTROOPS'] = 'Magpadala ng Hukbo';
-t['7'] = "Palasyo/Residensya/Akademya/Kaban-yaman";
+t['BLACKSMITH'] = "Pandayan";
+t['ARMOURY'] = "Balutian";
+t['OVERVIEW'] = "Pananaw";
+t['FORUM'] = "Porum";
+t['ATTACKS'] = "Atake";
+t['NEWS'] = "Ulat";
+t['CENTERMAP'] = "Gitnang Mapa ng Baryo";
+t['SENDTROOPS'] = "Magpadala ng Hukbo";
 t['PALACE'] = "Palasyo";
 t['RESIDENCE'] = "Residensya";
 t['ACADEMY'] = "Akademya";
 t['TREASURY'] = "Kaban-yaman";
 break;
-case "fi"://by Syanidi, Haukka
-t['8'] = 'Liittouma';
-t['SIM'] = 'Taistelusimulaattori';
-t['QSURE'] = 'Oletko varma?';
-t['LOSS'] = 'Menetys';t['PROFIT'] = 'Hyöty';
-t['EXTAV'] = 'Päivitys mahdollista ';
-t['PLAYER'] = 'Pelaaja';
-t['VILLAGE'] = 'Kylä';
-t['POPULATION'] = 'Asukasluku';
-t['COORDS'] = 'Koordinaatit';
-t['MAPTBACTS'] = 'Toiminnot';
-t['SAVED'] = 'Tallennettu';
-t['YOUNEED'] = 'Tarvitset';
-t['TODAY'] = 'tänään';
-t['TOMORROW'] = 'huomenna';
-t['DAYAFTERTOM'] = 'ylihuomenna';
-t['MARKET'] = 'Tori';
-t['BARRACKS'] = 'Kasarmi';
-t['RAP'] = 'Kokoontumispiste';
-t['STABLE'] = 'Talli';
-t['WORKSHOP'] = 'Työpaja';
-t['SENDRES'] = 'Lähetä resursseja';
-t['COMPRAR'] = 'Osta';
-t['SELL'] = 'Myy';
-t['SENDIGM'] = 'Lähetä viesti';
-t['LISTO'] = 'Saatavilla';
-t['ON'] = 'Saatavilla';
-t['AT'] = 'kello';
-t['EFICIENCIA'] = 'Hyötysuhde';
-t['NEVER'] = 'Ei koskaan';
-t['ALDEAS'] = 'Kylä(t)';
-t['TIEMPO'] = 'Aika';
-t['OFREZCO'] = 'Tarjonnut minulle';
-t['BUSCO'] = 'Pyytänyt minulta';
-t['TIPO'] = 'Suhde';
-t['DISPONIBLE'] = 'Vain saatavilla olevat';
-t['CUALQUIERA'] = 'Mikä tahansa';
-t['YES'] = 'Kyllä';
-t['NO'] = 'Ei';
-t['LOGIN'] = 'Kirjaudu sisään';
-t['MARCADORES'] = 'Kirjanmerkit';
-t['ANYADIR'] = 'Lisää';
-t['UBU'] = 'Uusi kirjanmerkin URL';
-t['UBT'] = 'Uusi kirjanmerkkiteksti';
-t['DEL'] = 'Poista';
-t['MAPA'] = 'Kartta';
-t['MAXTIME'] = 'Enimmäisaika';
-t['ARCHIVE'] = 'Arkisto';
-t['SUMMARY'] = 'Yhteenveto';
-t['TROPAS'] = 'Joukot';
-t['CHECKVERSION'] = 'Päivitä TBeyond';
-t['ACTUALIZAR'] = 'Päivitä kylän tiedot';
-t['VENTAS'] = 'Tallennetut tarjoukset';
-t['MAPSCAN']  = 'Tutki kartta';
-t['BIC'] = 'Näytä laajennetut kuvakkeet';
-t['22'] = 'Näytä muistilappu';
-t['SAVE'] = 'Tallenna';
-t['49'] = 'Kokoontumispisteen oletustoiminto';
-t['AT2'] = 'Vahvistus';
-t['AT3'] = 'Hyökkäys: Normaali';
-t['AT4'] = 'Hyökkäys: Ryöstö';
-t['24'] = 'Muistilapun koko';
-t['NBSA'] = 'Automaattinen';
-t['NBSN'] = 'Normaali';
-t['NBSB'] = 'Laaja';
-t['25'] = 'Muistilapun korkeus';
-t['NBHAX'] = 'Automaattinen korkeuden säätö';
-t['NBHK'] = 'Oletus korkeus';
-t['43'] = 'Näytä rakennuksien tasonumerot';
-t['NPCSAVETIME'] = 'Säästä: ';
-t['38'] = 'Näytä resurssipeltojen tasovärit';
-t['44'] = 'Näytä rakennuksien tasovärit';
-t['65'] = '"Päivitys mahdollinen" väri<br />(Oletus = Tyhjä)';
-t['66'] = '"Korkein mahdollinen taso" väri<br />(Oletus = Tyhjä)';
-t['67'] = '"Päivitys ei mahdollista" väri<br />(Oletus = Tyhjä)';
-t['68'] = '"Päivitys mahdollinen NPC:llä" väri<br />(Oletus = Tyhjä)';
-t['TOTALTROOPS'] = 'Kylän joukkojen kokonaismäärä';
-t['20'] = 'Näytä kirjanmerkit';
-t['U.2'] = 'Rotu';
-t['1'] = "Travian v2.x serveri";
-t['SELECTALLTROOPS'] = "Valitse kaikki joukot";
-t['PARTY'] = "Juhlat";
-t['CPPERDAY'] = "KP/päivä";
-t['SLOT'] = "Kyliä";
-t['TOTAL'] = "Yhteensä";
-t['SELECTSCOUT'] = "Valitse tiedustelija";
-t['SELECTFAKE'] = "Valitse hämy";
-t['NOSCOUT2FAKE'] = "Ei ole tiedustelijoita hämyyn!";
-t['NOTROOP2FAKE'] = "Ei ole joukkoja hämyyn!";
-t['NOTROOP2SCOUT'] = "Ei ole joukkoja tiedusteluun!";
-t['NOTROOPS'] = "Kylässä ei ole joukkoja!";
-t['ALL'] = "Kaikki";
-t['SH2'] = "Värikentissä voit käyttää:<br />- <b>Green</b> , <b>red</b> , <b>orange</b> jne.<br />- HEX värikoodeja kuten <b>#004523</b><br />- Oletus: tyhjä";
-t['SOREP'] = "Näytä alkuperäinen raportti";
-t['56'] = "Näytä kylätyypit ja keitaat<br />liikutellessasi hiirtä kartalla";
-t['10'] = "Taistelusimulaattorilinkki käytössä:<br />(Vasemmanpuoleinen valikko)";
-t['WSIMO1'] = "Sisäinen (Pelin tarjoama)";
-t['WSIMO2'] = "Ulkoinen (kirilloid.ru tarjoama)";
-t['27'] = "Valitse World Analyser";
-t['28'] = "Näytä analyysitilastot linkkeinä";
-t['NONEWVER'] = "Sinulla on uusin saatavilla oleva versio";
-t['BVER'] = "Sinulla saattaa olla beta-versio";
-t['NVERAV'] = "Scriptistä on saatavilla uusi versio";
-t['UPDSCR'] = "Päivitä scripti nyt ?";
-t['CHECKUPDATE'] = "Tarkistetaan päivitystä scriptille.<br />Odota hetki...";
-t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "Kylien keskimääräinen asukasluku";
-t['AVPPP'] = "Pelaajien keskimääräinen asukasluku";
-t['37'] = "Näytä resurssikenttien päivitystaulukko";
-t['41'] = "Näytä rakennusten päivitystaulukko";
-t['69'] = "Kirjautumistaso konsoliin<br>VAIN OHJELMOIJILLE JA TESTAAJILLE<br>(Oletus = 0)";
-t['48'] = "Tarjoussivujen latautumismäärä<br />ollessasi torilla => Osta sivu<br />(Oletus = 1)";
-t['U.3'] = 'Pääkaupunkisi nimi<br /><b>Käy profiilissa päivittääksesi</b>';
-t['U.6'] = 'Pääkaupunkisi koordinaatit<br /><b>Käy profiilissa päivittääksesi</b>';
-t['MAX'] = 'Enintään';
-t['TOTTRTR'] = 'Koulutuksessa olevien joukkojen kokonaismäärä';
-t['57'] = 'Näytä matkat ja ajat';
-t['TB3SL'] = TB3O.shN + ' Asetukset';
-t['UPDALLV'] = 'Päivitä kaikki kylät. HUOMIOI: SAATTAA JOHTAA TILIN JÄÄDYTTÄMISEEN!!';
-t['9'] = "Näytä lisälinkit vasemmanpuoleisessa valikossa<br />(Traviantoolbox, World Analyser, Travilog, Map, jne.)";
-t['LARGEMAP'] = 'Iso kartta';
-t['USETHEMPR'] = 'Käytä ne (Prosentuaalisesti)';
-t['USETHEMEQ'] = 'Käytä ne (tasaisesti)';
-t['TOWNHALL'] = 'Kaupungintalo';
-t['GSRVT'] = 'Serveri';
-t['ACCINFO'] = 'Tilin tiedot';
-t['NBO'] = 'Muistilappu';
-t['MNUL'] = 'Vasemmanpuoleinen valikko';
-t['STAT'] = 'Tilastot';
-t['RESF'] = 'Resurssikentät';
-t['VLC'] = 'Kylän keskusta';
-t['MAPO'] = 'Kartta asetukset';
-t['COLO'] = 'Väri asetukset';
-t['DBGO'] = 'Debug asetukset';
-t['4'] = 'Tori';
-t['5'] = 'Kokoontumispiste/Kasarmi/Työpaja/Talli';
-t['6'] = "Kaupungintalo/Sankarinkartano/Haarniskapaja/Aseseppä";
-t['HEROSMANSION'] = "Sankarinkartano";
-t['BLACKSMITH'] = 'Aseseppä';
-t['ARMOURY'] = 'Haarniskapaja';
-t['NOW'] = 'Nyt';
-t['CLOSE'] = 'Sulje';
-t['USE'] = 'Käytä';
-t['USETHEM1H'] = 'Käytä ne (Tunnin tuotto)';
-t['OVERVIEW'] = 'Yleiskatsaus';
-t['FORUM'] = 'Foorumi';
-t['ATTACKS'] = 'Hyökkäykset';
-t['NEWS'] = 'Uutiset';
-t['ADDCRTPAGE'] = 'Lisää nykyinen';
-t['SCRIPTPRESURL'] = 'TBeyond kotisivu';
-t['50'] = 'Tiedustelijoiden määrä<br />"Valitse tiedustelija" ominaisuudelle';
-t['SPACER'] = 'Väliviiva';
-t['53'] = 'Näytä joukkotiedot vihjeissä';
-t['MEREO'] = 'Viestit ja Raportit';
-t['59'] = 'Esiladattujen viesti- ja raporttisivujen määrä<br />(Oletus = 1)';
-t['ATTABLES'] = 'Joukko taulukot';
-t['MTW'] = 'Tuhlattu';
-t['MTX'] = 'Ylittää';
-t['MTC'] = 'Nykyinen määrä';
-t['ALFL'] = 'Linkki pelin ulkopuoliselle foorumille<br />(Jätä tyhjäksi kun käytät pelinsisäistä foorumia)';
-t['82.L'] = 'Lukitse kirjanmerkit (Piilottaa: poista, siirrä ylös, siirrä alas ja muokkaa -painikkeet)';
-t['MTCL'] = 'Tyhjennä kaikki';
-t['82.U'] = 'Avaa kirjanmerkit (Näyttää: poista, siirrä ylös, siirrä alas ja muokkaa -painikkeet)';
-t['CKSORT'] = 'Klikkaa järjestääksesi';
-t['MIN'] = 'Vähintään';
-t['SVGL'] = 'Jaa kylien välillä';
-t['VGL'] = 'Kylälista';
-t['12'] = "Näytä 'dorf1.php' ja 'dorf2.php' linkit";
-t['UPDATEPOP'] = 'Päivitä asukasluku';
-t['54'] = 'Näytä välimatka ja ajat vihjeissä';
-t['EDIT'] = 'Muokkaa';
-t['NPCO'] = 'NPC Avustajan asetukset';
-t['26'] = 'Näytä NPC Avustajan laskelmat ja linkit';
-t['58'] = 'Näytä taulukko pelaajista/kylistä/varatuista keitaista';
-t['NEWVILLAGEAV'] = 'Päivä ja aika';
-t['TIMEUNTIL'] = 'Aikaa jäljellä';
-t['61'] = 'Näytä "Poista kaikki"-painike raporttisivulla';
-t['62'] = 'Näytä "Lähetä viesti" kuvake myös itselleni';
-t['CENTERMAP'] = 'Keskitä kartta tähän kylään';
-t['13'] = 'Näytä "Keskitä kartta tähän kylään" kuvake';
-t['SENDTROOPS'] = 'Lähetä joukkoja';
-t['64'] = 'Näytä yksityiskohdat raporttitilastoissa';
-t['7'] = "Palatsi/Virka-asunto/Akatemia/Aarrekammio";
-t['PALACE'] = "Palatsi";
-t['RESIDENCE'] = "Virka-asunto";
-t['ACADEMY'] = "Akatemia";
-t['TREASURY'] = "Aarrekammio";
-t['45'] = "Näytä rakennuksien tasot vilkkuvina, kun niitä päivitetään";
-t['14'] = "Näytä 'Lähetä joukkoja/Lähetä resursseja' kuvakkeet kylälistassa";
-t['34'] = "Näytä KP/päivä päivitystaulukoissa";
-t['UPGTB'] = "Resurssikentät/Rakennukset";
-t['35'] = "Näytä viljan kulutus päivitystaulukoissa";
-t['16'] = "Näytä viljantuotanto kylälistassa";
-t['RBTT'] = "Resurssipalkki";
-t['39'] = "Näytä 'Resurssipalkki'";
-t['40'] = "Näytä 'Resurssipalkki' siirrettävänä ikkunana";
-t['21'] = "Näytä 'kirjanmerkit' siirrettävänä ikkunana";
-t['23'] = "Näytä 'Muistilappu' siirrettävänä ikkunana";
-t['17'] = "Näytä asukasluku kylälistassa";
-t['29'] = 'Mitä kartta-analysoijaa käytetään';
-t['30'] = 'Näytä pelaajien linkit karttaan';
-t['31'] = 'Näytä liittojen linkit karttaan';
-t['63'] = 'Näytä  parannellut taisteluraportit';
-t['18'] = 'Näytä lisäksi kahden palstan kylälista siirrettävänä ikkunana';
-t['60'] = 'Näytä linkki ponnahdusikkunaan';
-t['42'] = 'Järjestä rakennukset päivityslistassa nimen perusteella';
-t['19'] = 'Näytä tiedot valmistuvista rakennuksista ja joukkojen liikkeistä <br />kylälistassa';
-t['32'] = "Näytä Hakupalkki";
-t['3'] = 'Pakota T3.1 Legioonalaisten ja Falangien kantomäärälaskenta<br />(sekoitetuille T3.1 ja T3.5 servereille)';
-t['33'] = "Näytä 'Hakupalkki' siirrettävänä ikkunana";
-t['36'] = "Näytä 'Siihen mennessä/Ylijäävät' laskelma, päivitys ja koulutus taulukoissa";
-t['RESIDUE'] = 'Ylijäävät resurssit jos rakennat';
-t['RESOURCES'] = 'Resurssit';
-t['SH1'] = "Automaattinen kaupunki ja koordinaatti tunnistus, kun käyt profiilissasi<br />Automaattinen rotu tunnistus, kun rakennat ja avaat kasarmin";
-t['46'] = "Näytä lisätiedot kaikille saapuville kauppiaille";
-t['2'] = 'Poista mainosbannerit';
-t['15'] = "Näytä puun, saven ja raudan tuntituotannot kylälistassa";
-t['11'] = "Valitse sivu mitä käytetään raporttien lähettämiseen";
-t['RESEND'] = "Lähetä uudelleen?"
-t['WSI'] = "Pelin sisäinen taistelusimulaattori";
-t['TTT'] = "Yleiset joukko ja matka vihjeet";
-t['47'] = "Näytä viimeisin resurssilähetys";
-t['51'] = "Näytä viimeisin hyökkäykseni";
-t['52'] = "Näytä/käytä viimeisimmän hyökkäyksen koordinaatteja";
-t['55'] = "Täytä simulaattori automaattisesti kylässä olevien joukkojen perusteella";
-break;
-case "il":
-//by zZzMichel & BlueShark & yabash & removesoul & DMaster
-t['8'] = 'ברית';
-t['SIM'] = 'סימולטור קרב ';
-t['QSURE'] = 'האם אתה בטוח?';
-t['LOSS'] = 'הפסד';
-t['PROFIT'] = 'רווח';
-t['EXTAV'] = 'שידרוג זמין';
-t['PLAYER'] = 'שחקן';
-t['VILLAGE'] = 'כפר';
-t['POPULATION'] = 'אוכלוסייה';
-t['COORDS'] = 'קואורדינטות';
-t['MAPTBACTS'] = 'פעולות';
-t['SAVED'] = 'נשמר';
-t['YOUNEED'] = 'את/ה צריכ/ה';
-t['TODAY'] = 'היום';
-t['TOMORROW'] = 'מחר';
-t['DAYAFTERTOM'] = 'מחרתיים';
-t['MARKET'] = 'שוק';
-t['BARRACKS'] = 'מגורי חיילים';
-t['RAP'] = 'נקודת מפגש';
-t['STABLE'] = 'אורווה';
-t['WORKSHOP'] = 'בית מלאכה';
-t['SENDRES'] = 'שלח משאבים';
-t['BUY'] = 'קנה';
-t['SELL'] = 'מכור';
-t['SENDIGM'] = 'שלח הודעה';
-t['LISTO'] = 'זמין';
-t['ON'] = 'זמין';
-t['AT'] = 'ב';
-t['EFICIENCIA'] = 'יעילות';
-t['NEVER'] = 'אף פעם';
-t['ALDEAS'] = 'כפר(ים)';
-t['TIEMPO'] = 'זמן';
-t['OFREZCO'] = 'מציע';
-t['BUSCO'] = 'מחפש';
-t['TIPO'] = 'יחס ההחלפה';
-t['DISPONIBLE'] = 'רק עסקאות אפשריות ?';
-t['CUALQUIERA'] = 'כל סוג';
-t['YES'] = 'כן';
-t['NO'] = 'לא';
-t['LOGIN'] = 'התחבר';
-t['MARCADORES'] = 'מועדפים';
-t['ANYADIR'] = 'הוסף';
-t['UBU'] = 'לינק';
-t['UBT'] = 'שם';
-t['DEL'] = 'מחק';
-t['MAPA'] = 'מפה';
-t['MAXTIME'] = 'מקסימום זמן שליחה';
-t['ARCHIVE'] = 'ארכיון';
-t['SUMMARY'] = 'סיכום';
-t['TROPAS'] = 'כוחות';
-t['CHKSCRV'] = 'עדכן TBeyond';
-t['ACTUALIZAR'] = 'עדכן מידע על הכפר';
-t['VENTAS'] = 'הצעות שמורות';
-t['MAPSCAN'] = 'סרוק מפה';
-t['BIC'] = 'הצג אייקונים מורחבים';
-t['22'] = 'הצג פנקס הערות';
-t['SAVE'] = 'שמור';
-t['49'] = 'פעולת ברירת מחדל בנקודת המפגש';
-t['AT2'] = 'תגבורת';
-t['AT3'] = 'התקפה רגילה';
-t['AT4'] = 'התקפת פשיטה';
-t['24'] = 'גודל פנקס הערות';
-t['NBSA'] = 'אוטומאטי';
-t['NBSN'] = 'רגיל (קטן)';
-t['NBSB'] = 'מסך רחב';
-t['25'] = 'גובה פנקס הערות';
-t['NBHAX'] = 'הרחב גובה אוטומאטית';
-t['NBHK'] = 'גובה ברירת מחדל';
-t['43'] = 'הצג רמות מבנים';
-t['NPCSAVETIME'] = 'שמור: ';
-t['38'] = 'הצג רמת שדות משאבים בצבע';
-t['44'] = 'הצג רמת מבנים בצבע';
-t['65'] = 'צבע שדרוג זמין (ברירת מחדל = ריק)';
-t['66'] = 'צבע שלב מקסימאלי (ברירת מחדל = ריק)';
-t['67'] = 'צבע כאשר שדרוג לא אפשרי (ברירת מחדל = ריק)';
-t['68'] = 'צבע שדרוג ע"י NPC (ברירת מחדל = ריק)';
-t['TOTALTROOPS'] = 'סה"כ כוחות שיש לכפר זה';
-t['20'] = 'הראה מועדפים';
-t['U.2'] = '<b>גזע</b><br>אם מופיעה שגיאה/ריק, אנא הכנס למגורי החיילים';
-t['1'] = "שרת טרוויאן גירסה 2.x";
-t['SELECTALLTROOPS'] = "בחר את כל החיילים";
-t['PARTY'] = "חגיגות";
-t['CPPERDAY'] = "נקודות תרבות ליום";
-t['SLOT'] = "מקום פנוי";
-t['TOTAL'] = 'סה"כ';
-t['SELECTSCOUT'] = "בחר סייר";
-t['SELECTFAKE'] = "התקפה מזויפת";
-t['NOSCOUT2FAKE'] = "אי אפשר להשתמש בסיירים להתקפה מזויפת!";
-t['NOTROOP2FAKE'] = "אין חיילים להתקפה מזויפת!";
-t['NOTROOP2SCOUT'] = "אין סיירים לריגול!";
-t['NOTROOPS'] = "אין חיילים בכפר!";
-t['ALL'] = "הכל";
-t['SH2'] = "בשורות הצבעים אתה יכול להכניס:<br>- <b>green</b> או <b>red</b> או  <b>orange</b> וכו'<br>- קוד HEX  כמו <b>#004523</b><br>- השאר ריק בשביל ברירת המחדל";
-t['SOREP'] = "הראה דוח רגיל (לפרסום)";
-t['56'] = "הראה סוג עמק נטוש/נווה מדבר בזמן העברת העכבר מעליו במפה";
-t['10'] = "סימולטור קרב לשימוש (בתפריט הימני)";
-t['WSIMO1'] = "פנימי (מסופק על ידי המשחק)";
-t['WSIMO2'] = "חיצוני (מסופק על ידי kirilloid.ru)";
-t['27'] = "מאגר נתונים לשימוש";
-t['28'] = "הצג לינקים סטטיסטיים ממאגר נתונים";
-t['NONEWVER'] = "יש לך את הגירסה העדכנית ביותר";
-t['BVER'] = "אתה יכול להוריד את גירסת הבטא";
-t['NVERAV'] = "קיימת גירסה חדשה לסקריפט";
-t['UPDSCR'] = "עדכן את הסקיפט עכשיו?";
-t['CHECKUPDATE'] = "בודק עדכונים לסקריפט. אנא המתן...";
-t['CROPFINDER'] = "מוצא קרופרים";
-t['AVPPV'] = "ממוצע אוכלוסייה לכפר";
-t['AVPPP'] = "ממוצע אוכלוסייה לשחקן";
-t['37'] = "הראה טבלת שדרוג שדות משאבים";
-t['41'] = "הראה טבלת שדרוג מבנים";
-t['69'] = "Console Log Level<br>רק בשביל מתכנתים או בודקי באגים, (ברירת מחדל = 0)";
-t['48'] = "מספר דפי הצעות לטעינה בזמן שנמצאים בעמוד 'שוק => הצעות'<br>(ברירת מחדל = 1)";
-t['U.3'] = '<b>שם הבירה</b><br>אם מופיעה שגיאה/ריק, אנא הכנס לדף הפרופיל';
-t['U.6'] = '<b>קואורדינטות הבירה</b><br>אם מופיעה שגיאה/ריק, אנא הכנס לדף הפרופיל';
-t['MAX'] = 'מקס';
-t['TOTTRTR'] = 'סה"כ חיילים באימון';
-t['57'] = 'הצג מרחקים וזמנים';
-t['TB3SL'] = 'הגדרות ' + TB3O.shN;
-t['UPDALLV'] = 'עדכן מידע על כל הכפרים. השתמשו בזהירות כי הדבר יכול להוביל לקבלת באן!';
-t['9'] = "הראה לינקים נוספים בתפריט הימני<br>(Traviantoolbox, World Analyser, Travilog, מפה, וכו')";
-t['LARGEMAP'] = 'מפה גדולה';
-t['USETHEMPR'] = 'חלק משאבים (באופן פרופורציוני)';
-t['USETHEMEQ'] = 'חלק משאבים (באופן שווה)';
-t['TOWNHALL'] = 'בניין העירייה';
-t['GSRVT'] = 'סוג השרת';
-t['ACCINFO'] = 'מידע חשבון';
-t['NBO'] = 'פנקס הרשימות';
-t['MNUL'] = 'תוספות התפריט שבצד ימין';
-t['STAT'] = 'סטטיסטיקות';
-t['RESF'] = 'שדות משאבים';
-t['VLC'] = 'מרכז הכפר';
-t['MAPO'] = 'אפשרויות מפה';
-t['COLO'] = 'אפשרויות צבעים';
-t['DBGO'] = 'מסוף שגיאות';
-t['4'] = 'שוק';
-t['5'] = 'נקודת מפגש/מגורי חיילים/בית-מלאכה/אורווה ';
-t['6'] = "בניין העירייה/אחוזת הגיבור/חרש שריון/חרש נשק";
-t['HEROSMANSION'] = "אחוזת הגיבור";
-t['BLACKSMITH'] = "חרש נשק";
-t['ARMOURY'] = "חרש שריון";
-t['NOW'] = 'כעת';
-t['CLOSE'] = 'סגור';
-t['USE'] = 'השתמש';
-t['USETHEM1H'] = 'חלק משאבים (תוצר של שעה)';
-t['OVERVIEW'] = 'מבט-על';
-t['FORUM'] = 'פורום';
-t['ATTACKS'] = 'התקפות';
-t['NEWS'] = 'חדשות';
-t['ADDCRTPAGE'] = 'הוסף דף נוכחי';
-t['SCRPURL'] = 'אתר הסקריפט';
-t['SPACER'] = 'קו הפרדה';
-t['50'] = "מספר הסיירים שירשם בשימוש בפונקציה 'שלח סייר'";
-t['53'] = 'הצג מידע על החיילים בהצבעת העכבר על תמונותיהם';
-t['MEREO'] = 'הודעות ודוחות';
-t['59'] = 'מספר דפי ההודעות/דוחות שברצונך לטעון<br>(ברירת-מחדל = 1)';
-t['ATTABLES'] = 'טבלאות חיילים';
-t['MTW'] = 'מקום פנוי';
-t['MTX'] = 'לא ניתן לשלוח';
-t['MTC'] = 'סה"כ משאבים';
-t['ALFL'] = 'קישור לפורום ברית חיצוני (השאר ריק כדי להשתמש בפורום שמספק המשחק)';
-t['82.L'] = 'נעל מועדפים (מסתיר את סמלי המחיקה וההזזה)';
-t['MTCL'] = 'נקה הכל';
-t['82.U'] = 'בטל נעילת מועדפים (מציג את סמלי המחיקה וההזזה)';
-t['CKSORT'] = 'לחץ כדי למיין';
-t['MIN'] = 'מינימום';
-t['SVGL'] = 'שתף את ההצעה השמורה בכל הכפרים שלי';
-t['VGL'] = 'רשימת הכפרים';
-t['12'] = "הצג קישוריי 'dorf1.php' ו- 'dorf2.php' ברשימת הכפרים";
-t['UPDATEPOP'] = 'עדכן אוכלוסייה';
-t['54'] = 'הצג מרחקים וזמנים בהצבעת העכבר על שמות כפרים';
-t['NPCO'] = 'אפשרויות מְסַיֵּעַ ה- NPC';
-t['26'] = 'הצג חישובים ולינקים של מְסַיֵּעַ ה- NPC';
-t['NEWVILLAGEAV'] = 'מתי ?';
-t['58'] = 'הצג טבלה של שחקנים/כפרים/עמקים תפוסים';
-t['TIMEUNTIL'] = 'עוד כמה זמן ?';
-t['61'] = 'הצג את טבלת כפתורי המחיקה בדפי הדוחות';
-t['62'] = "הצג את סמל 'שליחת הודעה' גם ליד שם המשתמש שלי";
-t['CENTERMAP'] = 'מַרְכֵּז כפר זה במפה';
-t['13'] = 'הצג סמל "מַרְכֵּז כפר זה במפה" ברשימת הכפרים';
-t['SENDTROOPS'] = 'שלח כוחות';
-t['64'] = 'הצג פרטי סטטיסטיקה נוספים בדפי הדוחות';
-t['7'] = "ארמון/מגורים/אקדמיה/משרד-האוצר";
-t['PALACE'] = "ארמון";
-t['RESIDENCE'] = "מגורים מלכותיים";
-t['ACADEMY'] = "אקדמיה";
-t['TREASURY'] = "משרד-האוצר";
-t['45'] = "הצג מספרים מהבהבים למבנים שעוברים שידרוג";
-t['14'] = "הצג את הסמלים 'שליחת כוחות/משאבים' ברשימת הכפרים";
-t['34'] = "הצג נקודות תרבות ליום בטבלאת השידרוגים";
-t['UPGTB'] = "טבלאות שידרוג משאבים/מבנים";
-t['35'] = "הצג צריכת יבול בטבלאת השידרוגים";
-t['16'] = "הצג נטו ייצור יבול של כל כפר ברשימת הכפרים";
-t['39'] = "הצג טבלאת 'גרף בארים'";
-t['RBTT'] = "סרגל משאבים";
-t['21'] = "הצג את ה'מועדפים' כחלון מרחף";
-t['23'] = "הצג את 'פנקס הרשימות' כחלון צף";
-t['17'] = "הצג אוכלוסייה ברשימת הכפרים";
-t['29'] = 'מנתח מפה לשימוש';
-t['30'] = 'הצג לינקים למפה - למיקומי שחקנים';
-t['31'] = 'הצג לינקים למפה - למיקומי בריתות';
-t['40'] = "הצג טבלאת 'גרף בארים' כחלון צף";
-t['63'] = 'הצג סטטיסטיקה בסיסית בדפי הדוחות';
-t['3'] = 'שנה חישובי יכולת נשיאה של ליגיונר ופלנקס בשרתי T3.1<br>(מיועד לשרתי T3.1 ו- T3.5 משולבים - מופיע בעיקר בשרתי .de)';
-t['18'] = 'הצג טבלאת רשימת כפרים נוספת כחלון צף (יוצג בשני טורים)';
-t['60'] = 'הצג קישור לפתיחת הודעות בחלון מוקפץ';
-t['42'] = 'סדר את המבנים בטבלת שידרוג המבנים לפי שמות';
-t['19'] = 'הצג סמל מידע אודות תנועת כוחות ובניינים בתהליכי שידרוג/בנייה ברשימת הכפרים';
-t['32'] = "הצג מסגרת חיפוש'";
-t['33'] = "הצג 'מסגרת חיפוש' כחלון צף";
-t['36'] = "הצג חישוביי זמנים ומשאבים נחוצים בטבלאות שידרוג מבנים וייצור חיילים";
-t['RESIDUE'] = 'משאבים שישארו לך אם תבנה ';
-t['RESOURCES'] = 'משאבים';
-t['SH1'] = "פתח את הפרופיל שלך לזיהוי עיר בירה/קוארדינטות<br>בנה מגורי חיילים בשביל זיהוי גזע אוטומטי ואז כנס למרכז הכפר";
-t['46'] = "הצג מידע נוסף אצל כל סוחר שמגיע";
-t['2'] = 'הסר באנרים';
-break;
-case "vn":
-//Bao Bao
-t['8'] = 'Liên minh';
-t['SIM'] = 'Trận giả';
-t['QSURE'] = 'Bạn có chắc chắn không?';
-t['LOSS'] = 'Thất bại';
-t['PROFIT'] = 'Tiền lãi';
-t['EXTAV'] = 'Mở rộng';
-t['PLAYER'] = 'Người chơi';
-t['VILLAGE'] = 'Làng';
-t['POPULATION'] = 'Dân số';
-t['COORDS'] = 'Tọa độ';
-t['MAPTBACTS'] = 'Công việc';
-t['SAVED'] = 'Đã ghi';
-t['YOUNEED'] = 'Bạn cần';
-t['TODAY'] = 'hôm nay';
-t['TOMORROW'] = 'ngày mai';
-t['DAYAFTERTOM'] = 'ngày kia';
-t['MARKET'] = 'Chợ';
-t['BARRACKS'] = 'Doanh trại';
-t['RAP'] = 'Gửi lính';
-t['STABLE'] = 'Chuồng ngựa';
-t['WORKSHOP'] = 'Xưởng';
-t['SENDRES'] = 'Gửi tài nguyên';
-t['COMPRAR'] = 'Mua';
-t['SELL'] = 'Bán';
-t['SENDIGM'] = 'Gửi IGM';
-t['LISTO'] = 'Có sẵn';
-t['ON'] = 'bật';
-t['AT'] = 'lúc';
-t['EFICIENCIA'] = 'Efficiency';
-t['NEVER'] = 'Never';
-t['ALDEAS'] = 'Làng';
-t['TIEMPO'] = 'Thời gian';
-t['OFREZCO'] = 'Tặng';
-t['BUSCO'] = 'Tìm kiếm';
-t['TIPO'] = 'Loại';
-t['DISPONIBLE'] = 'Chỉ có sẵn';
-t['CUALQUIERA'] = 'Bất kỳ';
-t['YES'] = 'Có';
-t['NO'] = 'Không';
-t['LOGIN'] = 'Login';
-t['MARCADORES'] = 'Bookmarks';
-t['ANYADIR'] = 'Thêm';
-t['UBU'] = 'New Bookmark URL';
-t['UBT'] = 'New Bookmark Text';
-t['DEL'] = 'Xóa';
-t['MAPA'] = 'Bản đồ';
-t['MAXTIME'] = 'Thời gian tối đa';
-t['ARCHIVE'] = 'Lưu trữ';
-t['SUMMARY'] = 'Tóm tắt';
-t['TROPAS'] = 'Lính';
-t['CHKSCRV'] = 'Cập nhật TBeyond';
-t['ACTUALIZAR'] = 'Cập  nhật thông tin làng';
-t['VENTAS'] = 'Đề nghị đã lưu';
-t['MAPSCAN']  = 'Tìm bản đồ';
-t['BIC'] = 'Hiện thị các biểu tượng mở rộng';
-t['22'] = 'Hiện bảng ghi chú';
-t['SAVE'] = 'Ghi';
-t['49'] = 'Hoạt động mặc định của binh trường';
-t['AT2'] = 'Tiếp viện';
-t['AT3'] = 'Tấn công: Bình thường';
-t['AT4'] = 'Tấn công: Cướp bóc';
-t['24'] = 'Kích thước bảng ghi chú';
-t['NBSA'] = 'Tự động';
-t['NBSN'] = 'Bình thường (nhỏ)';
-t['NBSB'] = 'Màn hình lớn (lớn)';
-t['25'] = 'Chiều cao bảng ghi chú';
-t['NBHAX'] = 'Chiều cao mở rộng tự động';
-t['NBHK'] = 'Chiều cao mặc định';
-t['43'] = 'Hiện thị số ở giữa';
-t['NPCSAVETIME'] = 'Ghi: ';
-t['38'] = 'Hiện thị màu cấp của tài nguyên';
-t['44'] = 'Hiện thị màu cấp của kiến trúc';
-t['65'] = 'Màu nâng cấp<br>(Mặc định = Rỗng)';
-t['66'] = 'Màu cấp lớn nhất<br>(Mặc định = Rỗng)';
-t['67'] = 'Màu nâng cấp chưa khi chưa đủ<br>(Mặc định = Rỗng)';
-t['68'] = 'Màu nâng cấp bằng NPC<br>(Mặc định = Rỗng)';
-t['TOTALTROOPS'] = 'Tổng lính trong làng';
-t['20'] = 'Hiện thị bookmarks';
-t['U.2'] = 'Chủng tộc';
+
+case 'pl': //contributors: Dzikuska, Signum, llameth
 t['1'] = "Travian v2.x server";
-t['SELECTALLTROOPS'] = "Chọn tất cả lính";
-t['PARTY'] = "Lễ";
-t['CPPERDAY'] = "CP/ngày";
-t['SLOT'] = "Vị trí";
-t['TOTAL'] = "Tổng";
-t['SELECTSCOUT'] = "Lựa chọn trinh thám";
-t['SELECTFAKE'] = "Lựa chọn giả";
-t['NOSCOUT2FAKE'] = "Không thể sử dụng trinh thám cho trận giả !";
-t['NOTROOP2FAKE'] = "Không có lính cho trận giả!";
-t['NOTROOP2SCOUT'] = "Không có lính để do thám !";
-t['NOTROOPS'] = "Không có lính trong làng !";
-t['ALL'] = "Tất cả";
-t['SH2'] = "Trong các trường màu, bạn có thể chọn:<br>- <b>xanh lá cây</b> or <b>đỏ</b> or  <b>da cam</b>, etc.<br>- mã HEX giống như <b>#004523</b><br>- leave empty for the default color";
-t['SOREP'] = "Hiện thị báo cáo gốc (cho thông báo)";
-t['56'] = "Hiện thị ô thông tin loại/ốc đảo<br>khi di chuột qua bản đồ";
-t['10'] = "Liên kết trận giả để sử dụng:";
-t['WSIMO1'] = "Nội địa (do game cung cấp)";
-t['WSIMO2'] = "Bên ngoài (do kirilloid.ru cung cấp)";
-t['27'] = "Sử dụng bộ phân tích thế giới";
-t['28'] = "Hiện thị liên kết thông kê bộ phân tích";
-t['NONEWVER'] = "Phiên bản mới đã có";
-t['BVER'] = "Bạn có thể sử dụng bảng beta";
-t['NVERAV'] = "Phiên bản mới của script đã có";
-t['UPDSCR'] = "Bạn có muốn cập nhật phiên bản mới không ?";
-t['CHECKUPDATE'] = "Đang kiểm tra phiên bản mới.<br>Xin chờ...";
-t['CROPFINDER'] = "Crop finder";
-t['AVPPV'] = "Bình quân dân số trên một làng";
-t['AVPPP'] = "Bình quân dân số trên một người chơi";
-t['37'] = "Hiện thị bảng nâng cấp tài nguyên";
-t['41'] = "Hiện thị bảng nâng cấp kiến trúc";
+t['3'] = "Wymuś obliczanie liczby Legionistów i Falang wg. wersji T3.1<br>(dla mieszanych serwerów T3.1 & T3.5 – zwykle tylko serwery .de)";
+t['4'] = "Rynek";
+t['5'] = "Miejsce zbiórki/koszary/Warsztat/Stajnia";
+t['6'] = "Ratusz/Dwór bohaterów/Kuźnia/Zbrojownia";
+t['7'] = "Pałac/Rezydencja/Akademia/Skarbiec";
+t['8'] = "Sojusz";
+t['9'] = "Pokaż dodatkowe linki w menu po lewej stronie<br>(Traviantoolbox, World Analyser, Travilog, Map, itp.)";
+t['10'] = "Symulator walki link do:<br>(menu z lewej strony)";
+t['12'] = "Pokaż 'dorf1.php' i 'dorf2.php' linki";
+t['13'] = "Pokaż ikonkę \"Centruj mapę na tej osadzie\"";
+t['14'] = "W spisie osad pokaż ikonki 'Wyślij jednostki/Wyślij surowce'";
+t['16'] = "Pokaż rzeczywistą produkcję zboża na liście osad";
+t['17'] = "Pokaż liczbę ludnosci na liście osad";
+t['18'] = "Pokaż dodatkową (2-kolumnową) listę osad jako 'pływające okno'";
+t['20'] = "Pokaż zakładki";
+t['21'] = "Pokaż 'Zakładki' jako 'pływające' okno";
+t['22'] = "Pokaż notatnik";
+t['23'] = "Pokaż 'Notatnik' jako 'pływające' okno";
+t['24'] = "Notatnik - Rozmiar";
+t['25'] = "Notatnik - wysokość";
+t['26'] = "Pokaż kalkulacje handlarza NPC /linki";
+t['27'] = "Używany World Analyser ";
+t['28'] = "Pokaż linki statystyki analysera";
+t['29'] = "Jakiego analizatora map chcesz używać";
+t['30'] = "Pokaż odwołania do mapy dla graczy";
+t['31'] = " Pokaż odwołania do mapy dla sojuszy";
+t['34'] = "Pokaż PK/dzień w tabelce rozbudowy";
+t['35'] = "Pokaż zjadane zboże w tabelce rozbudowy";
+t['37'] = "Pokaż tabelkę rozbudowy surowców";
+t['38'] = "Pokaż kolory poziomu surowców";
+t['39'] = "Pokaż 'Tabelę surowców'";
+t['40'] = "Pokaż 'Tabelę surowców' jako 'pływające' okno";
+t['41'] = "Pokaż tabelkę rozbudowy budynków";
+t['42'] = "Sortowanie budynków wg. nazwy w tabeli rozbudowy osady";
+t['43'] = "Pokaż centrum osady";
+t['44'] = "Pokaż kolory poziomu budynków";
+t['45'] = "Pokaż poziom budynku który jest aktualnie budowany jako migający";
+t['46'] = "Wyświetl dodatkowe informacje dla każdego przybywającego handlarza";
+t['47'] = "Pokaż ostatni transport na rynku";
+t['48'] = "Liczba stron ofert na rynku <br>w zakładce 'Rynek => Kupowanie' Stron<br>(Domyślnie = 1)";
+t['49'] = "Miejsce zbiórki, domyślna akcja";
+t['50'] = "Ilość zwiadowców dla funkcji<br>\"Wybierz zwiadowców\"";
+t['51'] = "Pokaż ostatni atak";
+t['52'] = "Pokaż/użyj współrzędnych ostatniego ataku";
+t['53'] = "Pokaż informację o jednostkach w podpowiedziach";
+t['54'] = "Pokaż odległość i czas dojścia do osady w podpowiedziach";
+t['55'] = "Automatycznie użyj dostępnych jednostek w wewnętrznym symulatorze bitwy";
+t['56'] = "Pokaż zawartość i typ doliny<br>kiedy wskażesz myszką";
+t['57'] = "Pokaż odległości i czasy dojścia jednostek";
+t['58'] = "Pokaż tabelkę graczy/osad/zdobytych dolin";
+t['59'] = "Liczba wiadomości/raportów na stronie  <br>(Domyslnie = 1)";
+t['60'] = "Pokaż ikonkę pozwalającą otwierać wiadomości/raporty<br>w osobnym okienku (pop-up)";
+t['61'] = "Pokaż tabelę 'Usuń wszystko' na stronie z raportami";
+t['62'] = "Pokaż ikonkę \"Wyślij PW\" również dla mnie";
+t['63'] = "Pokaz rozszerzone Raporty Bitewne ";
+t['64'] = "Pokaż szczegóły statystyk w raporcie";
+t['65'] = "Kolor: rozbudowa możliwa<br>(Domyślnie  = Brak)";
+t['66'] = "Kolor: poziomu maksymalnego<br>(Domyślnie  = Brak)";
+t['67'] = "Kolor: rozbudowa niemożliwa<br>(Domyślnie  = Brak)";
+t['68'] = "Kolor: rozbudowa przy pomocy NPC<br>(Domyślnie  = Brak)";
 t['69'] = "Console Log Level<br>ONLY FOR PROGRAMMERS OR DEBUGGING<br>(Default = 0)";
-t['48'] = "Số lượng trang được tải đặt trước<br>trong khi giao dịch trên trang 'Chợ => Mua'<br>(Mặc định = 1)";
-t['U.3'] = 'Tên thủ đô<br><b>Xem Profile cho cập nhật</b>';
-t['U.6'] = 'Tọa độ thủ đô<br><b>Xem Profile cho cập nhật</b>';
-t['MAX'] = 'Lớn nhất';
-t['TOTTRTR'] = 'Tổng lính đang huấn luyện';
-t['57'] = 'Hiện thị khoảng cách và thời gian';
-t['TB3SL'] = TB3O.shN + ' Cài đặt';
-t['UPDALLV'] = 'Cập nhật tất cả các làng.  USE WITH MAXIMUM CARE AS THIS CAN LEAD TO A BANNED ACCOUNT !';
-t['9'] = "Hiện thị các liên kết mở rộng bên menu trái<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
-t['LARGEMAP'] = 'Bản đồ lớn';
-t['USETHEMPR'] = 'Sử dụng chúng (tỷ lệ)';
-t['USETHEMEQ'] = 'Sử dụng (bằng)';
-t['TOWNHALL'] = 'Tòa thị chính';
-t['GSRVT'] = 'Game server';
-t['ACCINFO'] = 'Thông tin tài khoản';
-t['NBO'] = 'Bảng ghi chú';
-t['MNUL'] = 'Menu hiện thị bên trái';
-t['STAT'] = 'Thống kê';
-t['RESF'] = 'Ruộng tài nguyên';
-t['VLC'] = 'Trung tâm làng';
-t['MAPO'] = 'Tùy chỉnh bản đồ';
-t['COLO'] = 'Tùy chỉnh màu';
-t['DBGO'] = 'Debug options';
-t['4'] = 'Chợ';
-t['5'] = 'Binh trường/Doanh trại/Xưởng/Chuồng ngựa';
-t['6'] = "Tòa thị chính/Lâu đài tướng/Lò luyện giáp/Lò rèn";
-t['HEROSMANSION'] = "Lâu đài tướng";
-t['BLACKSMITH'] = 'Lò rèn';
-t['ARMOURY'] = 'Lò luyện giáp';
-t['NOW'] = 'Bây giờ';
-t['CLOSE'] = 'Đóng';
-t['USE'] = 'Sử dụng';
-t['USETHEM1H'] = 'Sử dụng (1 giờ sản lượng)';
-t['OVERVIEW'] = 'Tổng quát';
-t['FORUM'] = 'Diễn đàn';
-t['ATTACKS'] = 'Tấn công';
-t['NEWS'] = 'Tin tức';
-t['ADDCRTPAGE'] = 'Thêm trang đang xem vào bookmarks';
-t['SCRPURL'] = 'TBeyond trang';
-t['50'] = 'Số lượng trinh sát sử dụng cho chức năng<br>"Lựa chọn trinh sát"';
-t['SPACER'] = 'Dấu cách';
-t['53'] = 'Hiện thị thông tinh lính trong tooltips';
-t['MEREO'] = 'Tin nhắn & Báo cáo';
-t['59'] = 'Số tin nhắn/trang báo cáo để tải trước<br>(Default = 1)';
-t['ATTABLES'] = 'Các bảng lính';
-t['MTW'] = 'Wasted';
-t['MTX'] = 'Exceeding';
-t['MTC'] = 'Tải hiện tại';
-t['ALFL'] = 'Liên kết tới diễn đàn ngoài<br>(Để trống là mặc định diễn đàn của game)';
-t['82.L'] = 'Khóa bookmarks (Ẩn các biểu tưởng xóa, di chuyển lên, di chuyển xuống)';
-t['MTCL'] = 'Xóa tất cả';
-t['82.U'] = 'Mở khóa bookmarks (Hiện các biểu tưởng xóa, di chuyển lên, di chuyển xuống)';
-t['CKSORT'] = 'Click để sắp xếp';
-t['MIN'] = 'Ít nhất';
-t['SVGL'] = 'Chia sẽ các làng ở giữa';
-t['VGL'] = 'Danh sách làng';
-t['12'] = "Hiện các liên kết 'dorf1.php' and 'dorf2.php'";
-t['UPDATEPOP'] = 'Cập nhật dân số';
-t['54'] = 'Hiện thị khoảng cách và thời gian tới làng trong tooltips';
-t['EDIT'] = 'Sửa';
-t['NPCO'] = 'Tùy chỉnh NPC trợ giúp';
-t['26'] = 'Hiện thị các liên kết/tính toán NPC trợ giúp';
-t['58'] = 'Hiện thị bảng người chơi/làng/ốc đảo đầy';
-t['NEWVILLAGEAV'] = 'Ngày/Thời gian';
-t['TIMEUNTIL'] = 'Thời gian chờ';
-t['61'] = 'Hiện thị bảng "Xóa tất cả" trên trang Báo cáo';
-t['62'] = 'Cũng hiện thị biểu tưởng "Gửi IGM"';
-t['CENTERMAP'] = 'Trung tâm bản đồ';
-t['13'] = 'Hiện thị biểu tưởng "Trung tâm bản đồ"';
-t['SENDTROOPS'] = 'Gửi lính';
-t['64'] = 'Hiện thị chi tiết trong Thống kê';
-t['7'] = "Cung điện/Dinh thự/Học viện/Kho bạc";
-t['PALACE'] = "Cung điện";
-t['RESIDENCE'] = "Dinh thự";
-t['ACADEMY'] = "Học viện";
-t['TREASURY'] = "Kho bạc";
-t['45'] = "Hiện thị nhấp nháy cấp độ kiến trúc đang được nâng cấp";
-t['14'] = "Hiện thị biểu tượng 'Gửi lính/Gửi tài nguyên' trong danh sách làng";
-t['34'] = "Hiện thị thông tin CP/ngày trong bảng nâng cấp";
-t['UPGTB'] = "Bảng nâng cấp Ruộng tài nguyên/kiến trúc";
-t['35'] = "Hiện thị tiêu thụ trong bảng nâng cấp";
-t['16'] = "Hiện thị sản lượng thực sự trong danh sách làng";
-t['RBTT'] = "Tóm tắt tài nguyên";
-t['39'] = "Hiện thị bảng 'Tóm tắt tài nguyên'";
-t['40'] = "Hiện thị bảng 'Tóm tắt tài nguyên' như là cửa sổ có thể di chuyển được";
-t['21'] = "Hiện thị 'User Bookmarks' như là cửa sổ di chuyển được";
-t['23'] = "Hiện thị 'Bảng ghi chú' như là cửa sổ di chuyển được";
-t['17'] = "Hiện thị dân số trong danh sách làng";
-t['29'] = 'Bộ phân tích bản đồ để sử dụng';
-t['30'] = 'Hiện thị các liên kết tới bản đồ cho các user';
-t['31'] = 'Hiện thị các liên kết tới bản đồ cho các liên minh';
-t['63'] = 'Hiện thị Báo cáo trận đánh tăng cường ';
-t['18'] = 'Hiện thị thêm danh sách  làng (2 cột) như là cửa sổ di chuyển được';
-t['60'] = 'Hiện thị liên kết để mở tin nhắn/báo cáo trong cửa sổ pop-up';
-t['42'] = 'Sắp xếp kiến trúc theo tên trong bảng nâng cấp';
-t['19'] = 'Hiện thị thông tin về tiến độ xây dựng kiến trúc và di chuyển lính <br>ở danh sách làng';
-t['32'] = "Hiện thị 'Thanh tìm kiếm'";
-t['3'] = 'Force T3.1 Legionnaire & Phalanx capacity calculation<br>(for mixed T3.1 & T3.5 servers)';
-t['33'] = "Hiện thị 'Thanh tìm kiếm' như là cửa sổ di chuyển được";
-t['36'] = "Hiện thị tính toán 'Đến khi/Còn lại' trong bảng nâng cấp/huấn luyện";
-t['RESIDUE'] = 'Còn lại nếu bạn xây dựng kiến trúc này';
-t['RESOURCES'] = 'Tài nguyên';
-t['SH1'] = "Mở profile của bạn để tự động phát hiện thủ đô/tọa độ<br>Xây dựng doanh trại để tự động phát hiện chủng tộc và sau đó mở trung tâm làng";
-t['46'] = "Hiển thị thông tin bổ sung cho tất cả các thương gia đến";
-t['2'] = 'Hủy bỏ quảng cáo biểu ngữ';
-t['15'] = "Hiển thị gỗ, đất sét, sắt sản xuất cho mỗi giờ trong danh sách làng";
-t['11'] = "Liên kết để sử dụng cho các trang web đăng tải các báo cáo";
+t['82.L'] = "Zablokuj zakładki (Ukryj usuń, do góry, na dół ikonki)";
+t['82.U'] = "Odblokuj zakładki (Ukryj usuń, do góry, na dół ikonki)";
+t['U.2'] = "Rasa";
+t['U.3'] = "Nazwa Twojej stolicy<br><b>Wejdź do swojego profilu w ustawieniach aby zaktualizować</b>";
+t['U.6'] = "Współrzędne Twojej stolicy<br><b>Wejdź do swojego profilu w ustawieniach aby zaktualizować</b>";
+t['SIM'] = "Symulator Walki";
+t['QSURE'] = "Jesteś pewien?";
+t['LOSS'] = "Strata";
+t['PROFIT'] = "Zysk";
+t['EXTAV'] = "Rozbudowa możliwa";
+t['PLAYER'] = "Gracz";
+t['VILLAGE'] = "Osada";
+t['POPULATION'] = "Populacja";
+t['COORDS'] = "Koordynaty";
+t['MAPTBACTS'] = "Akcje";
+t['SAVED'] = "Zapisane";
+t['YOUNEED'] = "Potrzebujesz";
+t['TODAY'] = "Dzisiaj";
+t['TOMORROW'] = "Jutro";
+t['DAYAFTERTOM'] = "Pojutrze";
+t['MARKET'] = "Rynek";
+t['BARRACKS'] = "Koszary";
+t['RAP'] = "Miejsce Zbiórki";
+t['STABLE'] = "Stajnia";
+t['WORKSHOP'] = "Warsztat";
+t['SENDRES'] = "Wyślij surowce";
+t['BUY'] = "Kup";
+t['SELL'] = "Sprzedaj";
+t['SENDIGM'] = "Wyślij PW";
+t['LISTO'] = "Możliwe";
+t['ON'] = "na";
+t['AT'] = "o";
+t['EFICIENCIA'] = "Efektywność";
+t['NEVER'] = "Nigdy";
+t['ALDEAS'] = "Osada(y)";
+t['TIEMPO'] = "Czas";
+t['OFREZCO'] = "Oferuję";
+t['BUSCO'] = "Szukam";
+t['TIPO'] = "Rodzaj";
+t['DISPONIBLE'] = "Tylko możliwe";
+t['CUALQUIERA'] = "Jakikolwiek";
+t['YES'] = "Tak";
+t['NO'] = "Nie";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Zakładki";
+t['ANYADIR'] = "Dodaj";
+t['UBU'] = "Nowa zakładka URL";
+t['UBT'] = "Nowa zakładka Text";
+t['DEL'] = "Usuń";
+t['MAPA'] = "Mapa";
+t['MAXTIME'] = "Maksimum czasu";
+t['ARCHIVE'] = "Archiwum";
+t['SUMMARY'] = "Razem";
+t['TROPAS'] = "Jednostki";
+t['CHKSCRV'] = "Uaktualnij TBeyond";
+t['ACTUALIZAR'] = "Aktualizuj informacje o osadzie";
+t['VENTAS'] = "Zapisz ofertę";
+t['MAPSCAN'] = "Skanuj mapę";
+t['BIC'] = "Pokaż rozszerzone ikony";
+t['SAVE'] = "Zapisz";
+t['AT2'] = "Posiłki";
+t['AT3'] = "Atak: Normalny";
+t['AT4'] = "Atak: Grabież";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normalny (mały)";
+t['NBSB'] = "Duży obraz (duży)";
+t['NBHAX'] = "Automatycznie ustaw wysokość";
+t['NBHK'] = "Domyślna wysokość";
+t['NPCSAVETIME'] = "Zapisz: ";
+t['TOTALTROOPS'] = "Wszystkie jednostki";
+t['SELECTALLTROOPS'] = "Wybierz wszystkie jednostki";
+t['PARTY'] = "Święto";
+t['CPPERDAY'] = "PK/dzień";
+t['SLOT'] = "Miejsce";
+t['TOTAL'] = "Razem";
+t['SELECTSCOUT'] = "Wybierz zwiadowców";
+t['SELECTFAKE'] = "Wybierz fejka";
+t['ALL'] = "Wszystko";
+t['SH2'] = "Jako kolor pól możesz wpisać:<br>- <b>green</b> or <b>red</b> or  <b>orange</b>, etc.<br>- lub kod koloru w HEX np. <b>#004523</b><br>- zostaw puste dla domyślnych kolorów";
+t['SOREP'] = "Pokaż oryginalny raport (do publikacji)";
+t['WSIMO1'] = "Wewnętrzny (wbudowany w grę)";
+t['WSIMO2'] = "Zewnętrzny (zrobiony przez kirilloid.ru)";
+t['NONEWVER'] = "Masz najnowszą wersję";
+t['BVER'] = "Masz wersję beta";
+t['NVERAV'] = "Nowa wersja skryptu jest możliwa do pobrania";
+t['UPDSCR'] = "Uaktualnić skrypt teraz? ?";
+t['CHECKUPDATE'] = "Sprawdzam aktualizację skryptu.<br>Proszę czekać...";
+t['AVPPV'] = "Średnia populacja wg osady";
+t['AVPPP'] = "Średnia populacja wg gracza";
+t['MAX'] = "Maks.";
+t['TOTTRTR'] = "Suma szkolonych jednostek";
+t['UPDALLV'] = "Uaktualnij wszystkie osady. UŻYWAJ TEGO Z MAKSYMALNĄ ROZWAGĄ. MOŻE DOPROWADZIĆ DO ZABLOKOWANIA KONTA !";
+t['LARGEMAP'] = "Duża mapa";
+t['USETHEMPR'] = "Użyj je  (proporcjonalnie)";
+t['USETHEMEQ'] = "Użyj je (równe)";
+t['TOWNHALL'] = "Ratusz";
+t['GSRVT'] = "Serwer gry";
+t['ACCINFO'] = "Informacje o koncie";
+t['NBO'] = "Notatnik";
+t['MNUL'] = "Menu po lewej stronie";
+t['STAT'] = "Statystyki";
+t['RESF'] = "Pola surowców";
+t['VLC'] = "Centrum osady";
+t['MAPO'] = "Opcje mapy";
+t['COLO'] = "Opcje kolorów";
+t['DBGO'] = "Debug options";
+t['HEROSMANSION'] = "Dwór bohaterów";
+t['BLACKSMITH'] = "Zbrojownia";
+t['ARMOURY'] = "Kuźnia";
+t['NOW'] = "Teraz";
+t['CLOSE'] = "Zamknij";
+t['USETHEM1H'] = "Użyj je (1 godzinna  produkcja)";
+t['OVERVIEW'] = "Ogólne";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Ataki";
+t['NEWS'] = "Nowości";
+t['ADDCRTPAGE'] = "Dodaj bieżącą";
+t['SCRPURL'] = "Strona TBeyond";
+t['SPACER'] = "Odstęp";
+t['MEREO'] = "Wiadomości i raporty";
+t['ATTABLES'] = "Tabela jednostek";
+t['MTW'] = "Niewykorzystane";
+t['MTX'] = "Przekroczenie";
+t['MTC'] = "Bierząca ładowność";
+t['ALFL'] = "Link do zewnętrznego forum<br>(Zostaw puste dla wewnętrznego forum)";
+t['MTCL'] = "Wyczyść wszystko";
+t['CKSORT'] = "Kliknij aby posortować";
+t['MIN'] = "Min";
+t['SVGL'] = "Zapisz również dla innych osad";
+t['VGL'] = "Lista Osad";
+t['UPDATEPOP'] = "Aktualizuj populację";
+t['EDIT'] = "Edytuj";
+t['NPCO'] = "Opcje handlarza NPC";
+t['NEWVILLAGEAV'] = "Data/Czas";
+t['TIMEUNTIL'] = "Pozostało czasu";
+t['CENTERMAP'] = "Centruj mapę na tej osadzie";
+t['SENDTROOPS'] = "Wyślij jednostki";
+t['PALACE'] = "Pałac";
+t['RESIDENCE'] = "Rezydencja";
+t['ACADEMY'] = "Akademia";
+t['TREASURY'] = "Skarbiec";
+t['UPGTB'] = "Tabelka rozbudowy Pola surowców/budynków";
+t['RBTT'] = "Tabela surowców";
+t['USE'] = "Użyj";
+t['RESIDUE'] = "Pozostałe surowce (jeśli wybudujesz)";
+t['RESOURCES'] = "Surowce";
+t['SH1'] = "Otwórz swój profil w celu automatycznego rozpoznania stolicy<br>Wybuduj koszary w celu rozpoznania nacji i przejdź do centrum osady";
+t['RESEND'] = "Wysłać ponownie?";
+t['WSI'] = "Symulator bitwy wbudowany w grę";
+t['TTT'] = "Ogólne podpowiedzi n.t. jednostek/odległości";
+t['CROPFINDER'] = "Crop finder";
 break;
-case "th":
-t['8'] = 'พันธมิตร';
-t['SIM'] = 'จำลองการต่อสู้';
-t['QSURE'] = 'แน่ใจนะ?';
-t['LOSS'] = 'ความเสียหาย';
-t['PROFIT'] = 'กำไร';
-t['EXTAV'] = 'พร้อมขยาย';
-t['PLAYER'] = 'ผู้เล่น';
-t['VILLAGE'] = 'หมู่บ้าน';
-t['POPULATION'] = 'ประชากร';
-t['COORD'] = 'พิกัด';
-t['MAPTBACTS'] = 'การดำเนินการ';
-t['SAVED'] = 'Saved';
-t['YOUNEED'] = 'คุณต้องการ';
-t['TODAY'] = 'วันนี้';
-t['TOMORROW'] = 'วันพรุ่งนี้';
-t['DAYAFTERTOM'] = 'วันมะรืนนี้';
-t['MARKET'] = 'ตลาดสินค้า';
-t['BARRACKS'] = 'ค่ายทหาร';
-t['RAP'] = 'จุดรวมกำลังพล';
-t['STABLE'] = 'โรงม้า';
-t['WORKSHOP'] = 'ห้องเครื่อง';
-t['SENDRES'] = 'ส่งทรัพยากร';
-t['BUY'] = 'ซื้อ';
-t['SELL'] = 'ขาย';
-t['SENDIGM'] = 'ส่ง IGM';
-t['LISTO'] = 'พร้อม';
-t['ON'] = 'วันที่';
-t['AT'] = 'ณ เวลา';
-t['EFICIENCIA'] = 'ประสิทธิผล';
-t['NEVER'] = 'ไม่มีทาง';
-t['ALDEAS'] = 'หมู่บ้าน';
-t['TIEMPO'] = 'เวลา';
-t['OFREZCO'] = 'สิ่งที่เสนอ';
-t['BUSCO'] = 'สิ่งที่ต้องการ';
-t['TIPO'] = 'รูปแบบ';
-t['DISPONIBLE'] = 'พร้อมเท่านั้น';
-t['CUALQUIERA'] = 'ทั้งหมด';
-t['YES'] = 'ใช่';
-t['NO'] = 'ไม่ใช่';
-t['LOGIN'] = 'เข้าสู่ระบบ';
-t['MARCADORES'] = 'บุ๊คมาร์ค';
-t['ANYADIR'] = 'เพิ่ม';
-t['UBU'] = 'URL บุ๊คมาร์คใหม่';
-t['UBT'] = 'ข้อความบุ๊คมาร์คใหม่';
-t['DEL'] = 'ลบ';
-t['MAPA'] = 'แผนที่';
-t['MAXTIME'] = 'เวลาสูงสุด';
-t['ARCHIVE'] = 'เอกสารสำคัญ';
-t['SUMMARY'] = 'สรุป';
-t['TROPAS'] = 'กองกำลัง';
-t['CHKSCRV'] = 'ปรับปรุง TBeyond';
-t['ACTUALIZAR'] = 'ปรังปรุงข้อมูลหมู่บ้าน';
-t['VENTAS'] = 'Saved Offers';
-t['MAPSCAN'] = 'Scan แผนที่';
-t['BIC'] = 'แสดง extended icons';
-t['22'] = 'แสดงกล่องข้อความ';
-t['SAVE'] = 'บันทึก';
-t['AT2'] = 'ส่งกองกำลังเสริม';
-t['AT3'] = 'โจมตี: ปกติ';
-t['AT4'] = 'โจมตี: ปล้น';
-t['24'] = 'ขนาดกล่องข้อความ';
-t['NBSA'] = 'อัตโนมัติ';
-t['NBSN'] = 'ปกติ (เล็ก)';
-t['NBSB'] = 'จอขนาดใหญ่ (ใหญ่)';
-t['25'] = 'กล่องข้อความ height';
-t['NBHAX'] = 'ขยายความสูงอัตโนมัติ';
-t['NBHK'] = 'ความสูงปกติ';
-t['NPCSAVETIME'] = 'ประหยัดเวลา: ';
-t['65'] = 'Color upgrade available<br>(ปกติ = ว่าง)';
-t['66'] = 'Color max level<br>(ปกติ = ว่าง)';
-t['67'] = 'Color upgrade not possible<br>(ปกติ = ว่าง)';
-t['68'] = 'Color upgrade via NPC<br>(ปกติ = ว่าง)';
-t['TOTALTROOPS'] = 'กองกำลังของหมู่บ้านทั้งหมด';
-t['20'] = 'แสดงบุ๊คมาร์ค';
-t['U.2'] = 'เผ่า';
+
+case 'pt': //contributors: sepacavi, Fujis, VicSilveira
+t['1'] = "Travian v2.x server";
+t['2'] = "Remover ad banners";
+t['3'] = "Forçar cálculo da capacidade Legionário & Falange T3.1 <br>(para servers mistos T3.1 & T3.5)";
+t['4'] = "Mercado";
+t['5'] = "Ponto de Reunião Militar/Quartel/Oficina/Cavalariça";
+t['6'] = "Casa do Povo/Mansão do Herói/Fábrica de Armaduras/Ferreiro";
+t['7'] = "Palácio/Residência/Academia/Tesouraria";
+t['8'] = "Aliança";
+t['9'] = "Mostrar links adicionais no Menu à Esquerda<br>(Traviantoolbox, World Analyser, Travilog, Mapa, etc.)";
+t['10'] = "Link para Simulador de Combates<br>(Menu Esquerdo)";
+t['11'] = "Link para o site indicado para postar relatórios";
+t['12'] = "Mostrar links 'dorf1.php' e 'dorf2.php'";
+t['13'] = "Mostrar icon \"Centralizar Mapa nesta Aldeia\"";
+t['14'] = "Mostrar icons 'Envio de Tropas' e 'Envio de Recursos' na Lista de Aldeias";
+t['15'] = "Mostrar a produção por hora de madeira, de barro e de ferro na Lista de Aldeias";
+t['16'] = "Mostrar Produção de Cereais na Lista de Aldeias";
+t['17'] = "Mostrar População na Lista de Aldeias";
+t['18'] = "Mostrar adicional (2 colunas) na Lista de Aldeias como janela flutuante";
+t['19'] = "Mostrar informação sobre Edifícios a Evoluir e Movimentos de Tropas na Lista de Aldeias";
+t['20'] = "Mostrar Favoritos";
+t['21'] = "Mostrar 'Favoritos' como janela flutuante";
+t['22'] = "Mostrar Bloco de Notas";
+t['23'] = "Mostrar 'Bloco de Notas' como janela flutuante";
+t['24'] = "Tamanho do Bloco de Notas";
+t['25'] = "Altura do Bloco de Notas";
+t['26'] = "Mostrar Assistente de Cálculos/Links do NPC";
+t['27'] = "World Analyser";
+t['28'] = "Mostrar links para Analisador de Estatísticas";
+t['29'] = "Analisador de Mapa";
+t['30'] = "Mostrar links para Mapa para Jogadores";
+t['31'] = "Mostrar links para Mapa para Alianças";
+t['32'] = "Mostrar 'Barra de Pesquisas (Estatísticas)'";
+t['33'] = "Mostrar 'Barra de Pesquisas (Estatísticas)' como janela flutuante";
+t['34'] = "Mostrar informação PsC/dia nas tabelas de evolução";
+t['35'] = "Mostrar Consumo de Cereais na Tabela de Evolução de Edifícios";
+t['36'] = "Mostrar o cálculo 'Até então/Excedente' nas Tabelas de Evolução/Treino";
+t['37'] = "Mostrar Tabela de Evolução de Campos de Recursos";
+t['38'] = "Mostrar Cores dos Níveis de Recursos";
+t['39'] = "Mostrar 'Barra de Recursos'";
+t['40'] = "Mostrar 'Barra de Recursos' como janela flutuante";
+t['41'] = "Mostrar Tabela de Evolução de Edifícios";
+t['42'] = "Ordenar Edifícios por nome na Tabela de Evolução de Edifícios";
+t['43'] = "Mostrar Números no centro";
+t['44'] = "Mostrar Cores dos Níveis dos Edifícios";
+t['45'] = "Mostrar os níveis a piscar quando os Edifícios estão a evoluir";
+t['46'] = "Mostrar informação adicional para cada chegada de mercadores";
+t['47'] = "Mostrar o último transporte de Mercado";
+t['48'] = "N.º de Páginas de Ofertas para Pré-Carregar enquanto 'Mercado => Comprar'<br>(Defeito = 1)";
+t['49'] = "Acção por Defeito no Ponto de Reunião Militar";
+t['50'] = "N.º de Espiões para a Função<br>\"Seleccionar Espiões\"";
+t['51'] = "Mostrar o último ataque";
+t['52'] = "Mostrar/usar as coordenadas do último ataque";
+t['53'] = "Mostrar Informação de Tropas em Tooltips";
+t['54'] = "Mostrar Distâncias e Tempos entre as Aldeias";
+t['55'] = "Auto-preencher com as Tropas disponíveis para o Simulador de Combates interno";
+t['56'] = "Mostrar Informação do Tipo de Vale/Oásis<br>quando o Rato passar por cima";
+t['57'] = "Mostrar Distâncias e Tempos";
+t['58'] = "Mostrar Tabela de Jogadores/Aldeias/Oásis ocupados";
+t['59'] = "N.º Páginas de Relatórios/Mensagens para Pré-Carregar<br>(Defeito = 1)";
+t['60'] = "Mostrar links para abrir as Mensagens e Relatórios numa janela pop-up";
+t['61'] = "Mostrar \"Excluir tudo\" na Tabela da página Relatórios";
+t['62'] = "Mostrar icon \"Enviar IGM\", também para mim";
+t['63'] = "Mostrar Relatório de Batalhas  desenvolvido";
+t['64'] = "Mostrar detalhes no Relatório Estatísticas";
+t['65'] = "Cor de Elevação de Nível Disponível<br>(Defeito = Vazio)";
+t['66'] = "Cor do Nível Máximo<br>(Defeito = Vazio)";
+t['67'] = "Cor de Elevação de Nível Impossível<br>(Defeito = Vazio)";
+t['68'] = "Cor de Elevação de Nível via NPC<br>(Defeito = Vazio)";
+t['69'] = "Console Log Level<br>APENAS PARA PROGRAMADORES OU DEBBUGING<br>(Defeito = 1)";
+t['82.L'] = "Bloquear Favoritos (Mostrar icons: Esconder, Apagar, Mover Acima, Mover Abaixo)";
+t['82.U'] = "Desbloquear Favoritos (Mostrar icons: Apagar, Mover Acima, Mover Abaixo)";
+t['85'] = "Mostrar icons 'Enviar Tropas/Enviar Recursos'";
+t['87'] = "Lembrar a última opção 1x/2x/3x de envio de Mercado (se disponível)";
+t['U.2'] = "Tribo";
+t['U.3'] = "Nome da tua Capital<br><b>Acede ao teu Perfil para actualizar</b>";
+t['U.6'] = "Coordenadas da tua Capital<br><b>Acede ao teu Perfil para actualizar</b>";
+t['SIM'] = "Simulador de Combates";
+t['QSURE'] = "Tens a Certeza?";
+t['LOSS'] = "Perdas";
+t['PROFIT'] = "Lucro";
+t['EXTAV'] = "Podes subir de nível";
+t['PLAYER'] = "Jogador";
+t['VILLAGE'] = "Aldeia";
+t['POPULATION'] = "População";
+t['COORDS'] = "Coordenadas";
+t['MAPTBACTS'] = "Acções";
+t['SAVED'] = "Guardado";
+t['YOUNEED'] = "Precisa de";
+t['TODAY'] = "Hoje";
+t['TOMORROW'] = "Amanhã";
+t['DAYAFTERTOM'] = "Depois de Amanhã";
+t['MARKET'] = "Mercado";
+t['BARRACKS'] = "Quartel";
+t['RAP'] = "Ponto de Reunião Militar";
+t['STABLE'] = "Cavalariça";
+t['WORKSHOP'] = "Oficina";
+t['SENDRES'] = "Enviar Recursos";
+t['BUY'] = "Comprar";
+t['SELL'] = "Vender";
+t['SENDIGM'] = "Enviar IGM";
+t['LISTO'] = "Disponível";
+t['ON'] = "em";
+t['AT'] = "às";
+t['EFICIENCIA'] = "Eficiência";
+t['NEVER'] = "Nunca";
+t['ALDEAS'] = "Aldeia(s)";
+t['TIEMPO'] = "Tempo";
+t['OFREZCO'] = "Ofereço";
+t['BUSCO'] = "Procuro";
+t['TIPO'] = "Tipo";
+t['DISPONIBLE'] = "Apenas Disponíveis";
+t['CUALQUIERA'] = "Qualquer";
+t['YES'] = "Sim";
+t['NO'] = "Não";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Favoritos";
+t['ANYADIR'] = "Adicionar";
+t['UBU'] = "URL de Novo Marcador";
+t['UBT'] = "Novo Marcador de Texto";
+t['DEL'] = "Apagar";
+t['MAPA'] = "Mapa";
+t['MAXTIME'] = "Tempo Máximo";
+t['ARCHIVE'] = "Arquivo";
+t['SUMMARY'] = "Resumo";
+t['TROPAS'] = "Tropas";
+t['CHKSCRV'] = "Actualizar TBeyond";
+t['ACTUALIZAR'] = "Actualizar Informação da Aldeia";
+t['VENTAS'] = "Ofertas Guardadas";
+t['MAPSCAN'] = "Procurar no Mapa";
+t['BIC'] = "Mostrar Icons Avançados";
+t['SAVE'] = "Guardar";
+t['AT2'] = "Reforços";
+t['AT3'] = "Ataque: Normal";
+t['AT4'] = "Ataque: Assalto";
+t['NBSA'] = "Automático";
+t['NBSN'] = "Normal (pequeno)";
+t['NBSB'] = "Ecrã Grande (largo)";
+t['NBHAX'] = "Expandir Altura automaticamente";
+t['NBHK'] = "Altura por defeito";
+t['NPCSAVETIME'] = "Guardar: ";
+t['TOTALTROOPS'] = "Total de Tropas da Aldeia";
+t['SELECTALLTROOPS'] = "Seleccionar Todas as Tropas";
+t['PARTY'] = "Celebrações";
+t['CPPERDAY'] = "PsC/Dia";
+t['SLOT'] = "Slot";
+t['TOTAL'] = "Total";
+t['SELECTSCOUT'] = "Seleccionar Espião";
+t['SELECTFAKE'] = "Seleccionar Fake";
+t['ALL'] = "Todas";
+t['SH2'] = "Nas Cores de Campos pode utilizar:<br>- green or red or orange, etc.<br>- Código de Cor HEX#004523<br>- deixar Vazio para cor por defeito";
+t['SOREP'] = "Mostrar Relatório Original (para postar)";
+t['WSIMO1'] = "Interno (fornecido pelo Jogo)";
+t['WSIMO2'] = "Externo (fornecido por kirilloid.ru)";
+t['NONEWVER'] = "Tens a última Versão disponível";
+t['BVER'] = "Talvez tenhas uma versão Beta";
+t['NVERAV'] = "Uma Nova Versão do Script Está Disponível";
+t['UPDSCR'] = "Actualizar Script Agora?";
+t['CHECKUPDATE'] = "A procurar actualização para o Script.<br>Por Favor Esperar...";
+t['AVPPV'] = "População Média por Aldeia";
+t['AVPPP'] = "População Média por Jogador";
+t['MAX'] = "Máx";
+t['TOTTRTR'] = "Total de Tropas em Treino";
+t['UPDALLV'] = "Actualizar todas as Aldeias. MUITA ATENÇÃO: UTILIZAR COM A MÁXIMA PRECAUÇÃO. PODE LEVAR AO BAN DA CONTA!";
+t['LARGEMAP'] = "Mapa Grande";
+t['USETHEMPR'] = "Usar (Proporcional)";
+t['USETHEMEQ'] = "Usar (Igual)";
+t['TOWNHALL'] = "Casa do Povo";
+t['GSRVT'] = "Servidor do Jogo";
+t['ACCINFO'] = "Informação da Conta";
+t['NBO'] = "Bloco de Notas";
+t['MNUL'] = "Menu Esquerdo";
+t['STAT'] = "Estatísticas";
+t['RESF'] = "Campos de Recursos";
+t['VLC'] = "Centro da Aldeia";
+t['MAPO'] = "Opções do Mapa";
+t['COLO'] = "Opções de Cores";
+t['DBGO'] = "Opções de Debug";
+t['HEROSMANSION'] = "Mansão do Herói";
+t['BLACKSMITH'] = "Ferreiro";
+t['ARMOURY'] = "Fábrica de Armaduras";
+t['NOW'] = "Agora";
+t['CLOSE'] = "Fechar";
+t['USETHEM1H'] = "Usar (1 Hora de Produção)";
+t['OVERVIEW'] = "Vista Geral";
+t['FORUM'] = "Fórum";
+t['ATTACKS'] = "Ataques";
+t['NEWS'] = "Notícias";
+t['ADDCRTPAGE'] = "Adicionar Página Actual";
+t['SCRPURL'] = "Página TBeyond";
+t['SPACER'] = "Spacer";
+t['MEREO'] = "Mensagens e Relatórios";
+t['ATTABLES'] = "Tabelas de Tropas";
+t['MTW'] = "Carga desperdiçada";
+t['MTX'] = "Carga em excesso";
+t['MTC'] = "Carga Actual";
+t['ALFL'] = "Link para Fórum Externo<br>(Deixar vazio para Fórum Interno)";
+t['MTCL'] = "Limpar Tudo";
+t['CKSORT'] = "Clique para Ordenar";
+t['MIN'] = "Min";
+t['SVGL'] = "Partilhar Entre Aldeias";
+t['VGL'] = "Lista de Aldeias";
+t['UPDATEPOP'] = "Actualizar População";
+t['EDIT'] = "Editar";
+t['NPCO'] = "Assistente de Opções do NPC";
+t['NEWVILLAGEAV'] = "Data/Hora";
+t['TIMEUNTIL'] = "Tempo de Espera";
+t['CENTERMAP'] = "Centralizar Mapa nesta Aldeia";
+t['SENDTROOPS'] = "Enviar Tropas";
+t['PALACE'] = "Palácio";
+t['RESIDENCE'] = "Residência";
+t['ACADEMY'] = "Academia";
+t['TREASURY'] = "Tesouraria";
+t['UPGTB'] = "Tabelas de Evolução de Campos de Recursos/Edifícios";
+t['RBTT'] = "Barra de Recursos";
+t['USE'] = "Usar";
+t['RESIDUE'] = "O Excedente se o construíres ";
+t['RESOURCES'] = "Recursos";
+t['SH1'] = "Abrir o Perfil para detectar automaticamente as coordenadas da Capital<br>Construir o Quartel para detectar a Tribo automaticamente e então abrir o Centro da Aldeia";
+t['RESEND'] = "Enviar outra vez ?";
+t['WSI'] = "Simulador de Combates fornecido pelo jogo";
+t['TTT'] = "Tooltips geral para Tropas/Distância";
+t['CROPFINDER'] = "Crop Finder";
+break;
+
+case 'ro': //contributors: ms99
+t['1'] = "Server Travian v2.x";
+t['2'] = "Elimină banere reclame";
+t['3'] = "Utilizează capacitatea de transport din T3.1 (legionari & scutieri)<br>(servere mixte T3.1 & T3.5)";
+t['4'] = "Târg";
+t['5'] = "Adunare/Cazarmă/Atelier/Grajd";
+t['6'] = "Casa de cultură/Reşedinţa eroului/Armurărie/Fierărie";
+t['7'] = "Palat/Vilă/Academie/Trezorerie";
+t['8'] = "Alianţă";
+t['9'] = "Afişează link-uri adiţionale în meniul din stânga<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "Link către simulator luptă<br>";
+t['11'] = "Link către site-ul pentru postat rapoarte";
+t['12'] = "Afişează icoanele pentru 'dorf1.php' şi 'dorf2.php'";
+t['13'] = "Afişează icon-ul \"Centrează harta pe acest sat\"";
+t['14'] = "Afişează icoanele 'Trimite trupe' si 'Trimite resurse'<br>în lista satelor";
+t['15'] = "Afişează producţia de lemn, lut, fier pe oră în lista satelor";
+t['16'] = "Afişează producţia efectivă de hrană în lista satelor";
+t['17'] = "Afişează populaţia în lista satelor";
+t['18'] = "Afişează o listă adiţională a satelor (2 coloane)<br> ca fereastră separată (floating)";
+t['19'] = "Afişează informaţii despre clădirile în extindere şi<br>mişcarile de trupe în lista satelor";
+t['20'] = "Afişează link-uri";
+t['21'] = "Afişează 'Link-uri' ca fereastră separată (floating)";
+t['22'] = "Afişează bloc-notes";
+t['23'] = "Afişează 'Bloc-notes' ca fereastră separată (floating)";
+t['24'] = "Lăţime bloc-notes";
+t['25'] = "Înălţime bloc-notes";
+t['26'] = "Afişează calcule/link-uri NPC Assistant";
+t['27'] = "Utilizează World Analyser";
+t['28'] = "Afişează link-uri către World Anlyser";
+t['29'] = "Utilizează \"Map Analyser\"";
+t['30'] = "Afişează link-uri către hartă - jucători";
+t['31'] = "Afişează link-uri către hartă - alianţe";
+t['32'] = "Afişează 'Bară căutare'";
+t['33'] = "Afişează 'Bară căutare' ca fereastră separată (floating)";
+t['34'] = "Afişează PC/zi în tabelele de upgrade";
+t['35'] = "Afişează consumul de hrană în tabelele de upgrade";
+t['36'] = "Afişează calcule 'Resurse la/Rest' în tabelele de <br>upgrade/instruire trupe";
+t['37'] = "Afişează tabel upgrade câmpuri de resurse";
+t['38'] = "Afişează culori nivel câmpuri resurse";
+t['39'] = "Afişează tabela 'Bară resurse'";
+t['40'] = "Afişează 'Bară resurse' ca fereastră separată (floating)";
+t['41'] = "Afişează tabel upgrade clădiri";
+t['42'] = "Sortează după nume clădirile în tabelul upgrade clădiri";
+t['43'] = "Afişează nivel clădiri";
+t['44'] = "Afişează culori nivel clădiri";
+t['45'] = "Nivelul clădirilor aflate în construcţie clipeşte";
+t['46'] = "Afişează informaţii suplimentare pentru fiecare negustor care soseşte";
+t['48'] = "Numărul paginilor de oferte pre-încărcate pe pagina 'Târg => Cumpără'<br>(Standard = 1)";
+t['49'] = "Acţiune standard adunare";
+t['50'] = "Număr de spioni pentru funcţia \"Selectează spioni\"";
+t['53'] = "Afişează informaţii despre trupe în tooltips";
+t['54'] = "Afişează distanţe/timpi către sate în tooltips";
+t['56'] = "Afişează tip celula/info vale părăsită (mousing over)";
+t['57'] = "Afişează distanţe şi timpi de deplasare";
+t['58'] = "Afişează tabel jucători/sate/oaze ocupate";
+t['59'] = "Numărul paginilor de mesaje/rapoarte pre-încărcate<br>(Standard = 1)";
+t['60'] = "Afişează icoane pentru a deschide mesajele/rapoartele într-un pop-up";
+t['61'] = "Afişează tabela \"Sterge toate\" pe pagina de rapoarte";
+t['62'] = "Afişează icon-ul \"Trimite IGM\" şi pentru mine";
+t['63'] = "Afişează rapoarte extinse ";
+t['64'] = "Afişează detalii in statistica raport";
+t['65'] = "Culoare upgrade posibil (Nimic = standard)";
+t['66'] = "Culoare nivel maxim (Nimic = standard)";
+t['67'] = "Culoare upgrade imposibil (Nimic = standard)";
+t['68'] = "Culoare upgrade posibil via NPC (Nimic = standard)";
+t['69'] = "Log level consolă (DOAR PENTRU PROGRAMATORI)<br>(Standard = 0)";
+t['82.L'] = "Ascunde icoanele \"Sterge\", \"în sus\", \"în jos\"";
+t['82.U'] = "Afişează icoanele \"Sterge\", \"în sus\", \"în jos\"";
+t['U.2'] = "Rasă";
+t['U.3'] = "Numele capitalei<br><b>Deschide Profilul pentru actualizare automată</b>";
+t['U.6'] = "Coordonatele capitalei<br><b>Deschide Profilul pentru actualizare automată</b>";
+t['SIM'] = "Simulator luptă";
+t['QSURE'] = "Eşti sigur?";
+t['LOSS'] = "Pierderi";
+t['PROFIT'] = "Profit";
+t['EXTAV'] = "Upgrade posibil acum";
+t['PLAYER'] = "Jucător";
+t['VILLAGE'] = "Sat";
+t['POPULATION'] = "Populaţie";
+t['COORDS'] = "Coordonate";
+t['MAPTBACTS'] = "Acţiuni";
+t['SAVED'] = "Salvat";
+t['YOUNEED'] = "Ai nevoie de";
+t['TODAY'] = "azi";
+t['TOMORROW'] = "mâine";
+t['DAYAFTERTOM'] = "poimâine";
+t['MARKET'] = "Târg";
+t['BARRACKS'] = "Cazarmă";
+t['RAP'] = "Adunare";
+t['STABLE'] = "Grajd";
+t['WORKSHOP'] = "Atelier";
+t['SENDRES'] = "Trimite resurse";
+t['BUY'] = "Cumpară";
+t['SELL'] = "Vinde";
+t['SENDIGM'] = "Trimite mesaj";
+t['LISTO'] = "Upgrade posibil";
+t['ON'] = "în";
+t['AT'] = "la";
+t['EFICIENCIA'] = "Eficienţă";
+t['NEVER'] = "Niciodată";
+t['ALDEAS'] = "Sat(e)";
+t['TIEMPO'] = "Timp";
+t['OFREZCO'] = "Oferă";
+t['BUSCO'] = "Caută";
+t['TIPO'] = "Tip";
+t['DISPONIBLE'] = "Doar cele disponibile";
+t['CUALQUIERA'] = "Oricare";
+t['YES'] = "Da";
+t['NO'] = "Nu";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Link-uri";
+t['ANYADIR'] = "Adaugă";
+t['UBU'] = "URL";
+t['UBT'] = "Text";
+t['DEL'] = "Şterge";
+t['MAPA'] = "Hartă";
+t['MAXTIME'] = "Timp maxim";
+t['ARCHIVE'] = "Arhivă";
+t['SUMMARY'] = "Rezumat";
+t['TROPAS'] = "Trupe";
+t['CHKSCRV'] = "Update TBeyond";
+t['ACTUALIZAR'] = "Actualizează informaţie sat";
+t['VENTAS'] = "Oferte salvate";
+t['MAPSCAN'] = "Scanează harta";
+t['BIC'] = "Afişează icoane suplimentare";
+t['SAVE'] = "Salvează";
+t['AT2'] = "Întăriri";
+t['AT3'] = "Atac: Normal";
+t['AT4'] = "Atac: Raid";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normal (ingust)";
+t['NBSB'] = "Ecran lat (lat)";
+t['NBHAX'] = "Măreşte inălţimea automat";
+t['NBHK'] = "Înălţime normală";
+t['NPCSAVETIME'] = "Timp economisit";
+t['TOTALTROOPS'] = "Total trupe sat";
+t['SELECTALLTROOPS'] = "Selectează toate trupele";
+t['PARTY'] = "Festivităţi";
+t['CPPERDAY'] = "PC/zi";
+t['SLOT'] = "Slot";
+t['TOTAL'] = "Total";
+t['SELECTSCOUT'] = "Selectează spioni";
+t['SELECTFAKE'] = "Selectează trupe fake";
+t['ALL'] = "Tot";
+t['SH2'] = "În câmpurile de culori puteţi introduce:<br>- <b>green</b> sau <b>red</b> sau <b>orange</b>, etc.<br>- codul HEX al culorii, ex. <b>#004523</b><br>- loc liber = culoare standard";
+t['SOREP'] = "Afişează raport original (pentru forumuri)";
+t['WSIMO1'] = "Intern (inclus in joc)";
+t['WSIMO2'] = "Extern (pus la dispoziţie de către kirilloid.ru)";
+t['NONEWVER'] = "Ultima versiune disponibilă este instalată";
+t['BVER'] = "Se poate să aveţi o versiune beta instalată";
+t['NVERAV'] = "O versiune nouă a scriptului este disponibilă";
+t['UPDSCR'] = "Doriţi să actualizaţi acum ?";
+t['CHECKUPDATE'] = "Verific existenţa unei versiuni noi a scriptului...";
+t['AVPPV'] = "Populaţie medie/sat";
+t['AVPPP'] = "Populaţie medie/jucător";
+t['TOTTRTR'] = "Total trupe antrenate";
+t['TB3SL'] = "Opţiuni $1";
+t['UPDALLV'] = "Actualizează toate satele.  Utilizează cu maximă atenţie.  Urmarea ar putea fi un cont banat !";
+t['LARGEMAP'] = "Harta mare";
+t['USETHEMPR'] = "Use them (proportional)";
+t['USETHEMEQ'] = "Use them (egal)";
+t['TOWNHALL'] = "Casa de cultură";
+t['ACCINFO'] = "Informaţii cont";
+t['NBO'] = "Bloc-notes";
+t['MNUL'] = "Meniu stânga";
+t['STAT'] = "Statistică";
+t['RESF'] = "Câmpuri resurse";
+t['VLC'] = "Centrul satului";
+t['MAPO'] = "Opţiuni hartă";
+t['COLO'] = "Opţiuni culori";
+t['DBGO'] = "Opţiuni Debug";
+t['HEROSMANSION'] = "Reşedinţa eroului";
+t['BLACKSMITH'] = "Fierărie";
+t['ARMOURY'] = "Armurărie";
+t['NOW'] = "Acum";
+t['CLOSE'] = "Inchide";
+t['USETHEM1H'] = "Use them (producţia/ora)";
+t['OVERVIEW'] = "Perspectivă";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Atacuri";
+t['NEWS'] = "Stiri";
+t['ADDCRTPAGE'] = "Pagina curentă";
+t['SCRPURL'] = "Pagina TBeyond";
+t['SPACER'] = "Delimitator";
+t['MEREO'] = "Mesaje & Rapoarte";
+t['ATTABLES'] = "Tabele trupe";
+t['MTW'] = "Risipă";
+t['MTX'] = "Excedent";
+t['MTC'] = "Transport actual";
+t['ALFL'] = "Link către forum extern (Forum intern = loc liber)";
+t['MTCL'] = "Sterge tot";
+t['CKSORT'] = "Click pentru sortare";
+t['SVGL'] = "Valabilă în toate satele";
+t['VGL'] = "Lista satelor";
+t['UPDATEPOP'] = "Actualizează populaţia satelor";
+t['EDIT'] = "Modifică";
+t['NPCO'] = "Opţiuni NPC Assistant";
+t['NEWVILLAGEAV'] = "Data/Ora";
+t['TIMEUNTIL'] = "Timp de aşteptare";
+t['CENTERMAP'] = "Centrează harta pe acest sat";
+t['SENDTROOPS'] = "Trimite trupe";
+t['PALACE'] = "Palat";
+t['RESIDENCE'] = "Vilă";
+t['ACADEMY'] = "Academie";
+t['TREASURY'] = "Trezorerie";
+t['UPGTB'] = "Tabele Upgrade campuri de resurse/clădiri";
+t['RBTT'] = "Bară resurse";
+t['USE'] = "Use";
+t['RESIDUE'] = "Rest în cazul construcţiei ";
+t['RESOURCES'] = "Resurse";
+t['SH1'] = "Deschide Profilul pentru recunoaşterea automată a capitalei/coordonatelor<br>Construieşte cazarma şi deschide centrul satului pentru recunoaşterea automată a rasei";
+t['CROPFINDER'] = "Crop finder";
+break;
+
+case 'rs': //contributors: David Maćej, rsinisa
+t['1'] = "Травиан 2.x сервер";
+t['4'] = "Пијаца";
+t['5'] = "Место окупљања/Касарна/радионица/Штала";
+t['6'] = "Општина/Дворац хероја/Ковачница оклопа/Ковачница оружја";
+t['7'] = "Палата/Резиденција/Академија/Ризница";
+t['8'] = "Савез";
+t['9'] = "Прикажи додатне линкове у менију лево<br>(Traviantoolbox, World Analyser, Travilog, Map, итд.)";
+t['10'] = "Користи следећи симулатор борбе:<br>(у менију лево)";
+t['12'] = "Прикажи линкове до 'dorf1.php' и 'dorf2.php'";
+t['13'] = "Прикажи \"Центритрај мапу на овом селу\" икону";
+t['20'] = "Прикажи линкове";
+t['22'] = "Прикажи бележницу";
+t['24'] = "Величина бележнице";
+t['25'] = "Висина бележнице";
+t['26'] = "Прикажи NPC помоћника";
+t['27'] = "Травиан анализатор";
+t['28'] = "Прикажи анализатор као линк";
+t['37'] = "Прикажи табелу унапређења ресурса";
+t['38'] = "Прикажи нивое ресурса у боји";
+t['41'] = "Прикажи табелу унапређења грађевина";
+t['43'] = "Прикажи бројеве у центру села";
+t['44'] = "Прикажи нивое грађевина у боји";
+t['48'] = "Број страна са понудама ѕа приказ<br>на пијаци => страна ѕа куповину<br>(Основно = 1)";
+t['49'] = "Основна акција на месту окупљања";
+t['50'] = "Број извиђача за<br>\"Извиђање\" функцију";
+t['53'] = "Прикажи информације о јединици кад миш пређе преко ње";
+t['54'] = "Прикажи даљине и времена до села кад миш пређе преко";
+t['56'] = "Прикажи тип поља/информацију о оази<br>док се миш креће преко мапе";
+t['57'] = "Прикази даљине и времена";
+t['58'] = "Прикажи табелу играча/села/освојених долина";
+t['59'] = "Број страна порука/извештаја за приказ<br>(Основно = 1)";
+t['60'] = "Прикажи линк за отварање порука у посебном прозору";
+t['61'] = "Прикажи \"Обриши све\" табелу у извештајима";
+t['62'] = "Прикажи \"Пошаљи поруку\" икону и за мој налог";
+t['64'] = "Прикажи статистику у извештајима";
+t['65'] = "Боја за унапређење могуће<br>(Основна = празно)";
+t['66'] = "Боја за максимални ниво<br>(Основна = празно)";
+t['67'] = "Боја за унапређење није могуће<br>(Основна = празно)";
+t['68'] = "Боја за унапређење помоћу НПЦ<br>(Основна = празно)";
+t['69'] = "Console Log Level<br>САМО ЗА ПРОГРАМЕРЕ или ТРАЖЕЊЕ ГРЕШАКА<br>(Основно = 0)";
+t['82.L'] = "Закључај линкове (Уклони, обриши, горе, доле иконе)";
+t['82.U'] = "Откључај линкове (Уклони, обриши, горе, доле иконе)";
+t['U.2'] = "Племе";
+t['U.3'] = "Назив главног града<br>Идите у профил";
+t['U.6'] = "Координате главног града<br>Идите у профил";
+t['SIM'] = "Симулатор борбе";
+t['QSURE'] = "Да ли сте сигурни?";
+t['LOSS'] = "Губитак";
+t['PROFIT'] = "Добит";
+t['EXTAV'] = "Надоградња могућа";
+t['PLAYER'] = "Играч";
+t['VILLAGE'] = "Село";
+t['POPULATION'] = "Популација";
+t['COORDS'] = "Координате";
+t['MAPTBACTS'] = "Акције";
+t['SAVED'] = "Сачувано";
+t['YOUNEED'] = "Потребно је";
+t['TODAY'] = "данас";
+t['TOMORROW'] = "сутра";
+t['DAYAFTERTOM'] = "прекосутра";
+t['MARKET'] = "Пијаца";
+t['BARRACKS'] = "Касарна";
+t['RAP'] = "Место окупљања";
+t['STABLE'] = "Штала";
+t['WORKSHOP'] = "Радионица";
+t['SENDRES'] = "Пошаљи ресурсе";
+t['BUY'] = "Купи";
+t['SELL'] = "Продај";
+t['SENDIGM'] = "Пошаљи поруку";
+t['LISTO'] = "Доступно";
+t['ON'] = "";
+t['AT'] = "у";
+t['EFICIENCIA'] = "Ефикасност";
+t['NEVER'] = "Никада";
+t['ALDEAS'] = "Село(а)";
+t['TIEMPO'] = "Време";
+t['OFREZCO'] = "Нуди";
+t['BUSCO'] = "Тражи";
+t['TIPO'] = "Однос";
+t['DISPONIBLE'] = "Само доступно";
+t['CUALQUIERA'] = "Све";
+t['YES'] = "Да";
+t['NO'] = "Не";
+t['LOGIN'] = "Пријави се";
+t['MARCADORES'] = "Линкови";
+t['ANYADIR'] = "Додај";
+t['UBU'] = "Адреса новог линка";
+t['UBT'] = "Назив новог линка";
+t['DEL'] = "Обриши";
+t['MAPA'] = "Мапа";
+t['MAXTIME'] = "Максимално време";
+t['ARCHIVE'] = "Архива";
+t['SUMMARY'] = "Збир";
+t['TROPAS'] = "Војска";
+t['CHKSCRV'] = "Унапреди TBeyond";
+t['ACTUALIZAR'] = "Освежи информације о селима";
+t['VENTAS'] = "Сачувај понуду";
+t['MAPSCAN'] = "Претражи мапу";
+t['BIC'] = "Прикажи додатне иконе";
+t['SAVE'] = "Сачувај";
+t['AT2'] = "Појачање";
+t['AT3'] = "Напад";
+t['AT4'] = "Пљачка";
+t['NBSA'] = "Аутоматски";
+t['NBSN'] = "Нормална";
+t['NBSB'] = "Велика";
+t['NBHAX'] = "Аутоматски повећај висину";
+t['NBHK'] = "Основна висина";
+t['NPCSAVETIME'] = "Убрзај за: ";
+t['TOTALTROOPS'] = "Сва војска из села";
+t['SELECTALLTROOPS'] = "Сва војска";
+t['PARTY'] = "Забаве";
+t['CPPERDAY'] = "КП/дан";
+t['SLOT'] = "Место за проширење";
+t['TOTAL'] = "Укупно";
+t['SELECTSCOUT'] = "Извиђање";
+t['SELECTFAKE'] = "Лажни напад";
+t['ALL'] = "Све";
+t['SH2'] = "У поље за избор боје можете унети:<br>- green или red или orange, итд.<br>- или HEX колорни код нпр. #004523<br>- оставите празно за основне боје.";
+t['SOREP'] = "Прикажи оригинални извештај (за постовање)";
+t['WSIMO1'] = "Из игре";
+t['WSIMO2'] = "Са сајта kirilloid.ru";
+t['NONEWVER'] = "Имате последњу верзију скрипта!";
+t['BVER'] = "Можда имате бетаверзију скрипта";
+t['NVERAV'] = "Постоји нова верзија скрипта";
+t['UPDSCR'] = "Да ли унапредим скрипту сада?";
+t['CHECKUPDATE'] = "Проверавам да ли постоји нова верзија.<br>Молим сачекајте...";
+t['AVPPV'] = "Просечна популација по селу";
+t['AVPPP'] = "Просечна популација по играчу";
+t['MAX'] = "Максимум";
+t['TOTTRTR'] = "Укупна број јединица на обуци";
+t['TB3SL'] = "$1 подешавање";
+t['UPDALLV'] = "Освежи сва села. КОРИСТИТИ СА ОПРЕЗОМ, МОГУЋЕ ЈЕ БУДЕТЕ БАНОВАНИ!!!";
+t['LARGEMAP'] = "Велика мапа";
+t['USETHEMPR'] = "Пропорционална подела";
+t['USETHEMEQ'] = "Једнака подела";
+t['TOWNHALL'] = "Општина";
+t['GSRVT'] = "Сервер";
+t['NBO'] = "Бележница";
+t['MNUL'] = "Мени са леве стране";
+t['STAT'] = "Статистика";
+t['RESF'] = "Ресурсна поља";
+t['VLC'] = "Центар села";
+t['MAPO'] = "Мапа";
+t['COLO'] = "Боје";
+t['DBGO'] = "Тражење грешака";
+t['HEROSMANSION'] = "Дворац хероја";
+t['BLACKSMITH'] = "Ковачница оружја";
+t['ARMOURY'] = "Ковачница оклопа";
+t['NOW'] = "Сада";
+t['CLOSE'] = "Затвори";
+t['USETHEM1H'] = "Једночасовна производња";
+t['OVERVIEW'] = "Преглед";
+t['FORUM'] = "Форум";
+t['ATTACKS'] = "Напади";
+t['NEWS'] = "Вести";
+t['ADDCRTPAGE'] = "Додај тренутну страну као линк";
+t['SCRPURL'] = "TBeyond сајт";
+t['SPACER'] = "Размак";
+t['MEREO'] = "Поруке и извештаји";
+t['ATTABLES'] = "Преглед војске";
+t['MTW'] = "Неискоришћено";
+t['MTX'] = "Има више";
+t['MTC'] = "Тренутно се шаље";
+t['ALFL'] = "Линк до спољног форума<br>(Оставити празно за форум из игре)";
+t['MTCL'] = "Обриши све";
+t['CKSORT'] = "Кликни за сортирање";
+t['MIN'] = "Минимум";
+t['SVGL'] = "Важи за сва села";
+t['VGL'] = "Списак села";
+t['UPDATEPOP'] = "Освежи популацију";
+t['EDIT'] = "Уреди";
+t['NPCO'] = "NPC помоћник";
+t['NEWVILLAGEAV'] = "Датум/Време";
+t['TIMEUNTIL'] = "Време чекања";
+t['CENTERMAP'] = "Центритрај мапу на овом селу";
+t['SENDTROOPS'] = "Пошаљи војску";
+t['PALACE'] = "Палата";
+t['RESIDENCE'] = "Резиденција";
+t['ACADEMY'] = "Академија";
+t['TREASURY'] = "Ризница";
+t['USE'] = "Користи";
+t['CROPFINDER'] = "Нађи житнице";
+break;
+
+case 'ru': //contributors: millioner,MMIROSLAV,EXEMOK,AHTOH,d00mw01f,npocmu
+t['1'] = "Travian сервер версии v2.x";
+t['2'] = "Убрать рекламу";
+t['3'] = "Заменить расчеты грузоподьемности Легионера и Фаланги T3.1<br>(Для T3.1 и T3.5 серверов)";
+t['4'] = "Рынок";
+t['5'] = "Пункт сбора/Казарма/Мастерская/Конюшня";
+t['6'] = "Ратуша/Таверна/Кузница доспехов/Кузница оружия";
+t['7'] = "Дворец/Резиденция/Академия/Сокровищница";
+t['8'] = "Альянс";
+t['9'] = "Показывать дополнительные ссылки в левом меню<br>(Traviantoolbox, World Analyser, Travilog, Map и т.д.)";
+t['10'] = "Использовать симулятор боя:<br>(левое меню)";
+t['11'] = "Сайт для отправки отчётов";
+t['12'] = "Показывать ссылки на 'dorf1.php' и 'dorf2.php'";
+t['13'] = "Показывать иконку \"Центрировать деревню на карте\"";
+t['14'] = "Показывать иконки 'Отправить войска', 'Отправить ресурсы' в списке деревень";
+t['15'] = "Показывать производство дерева, глины и железа в час в списке деревень";
+t['16'] = "Показывать прибыль зерна в списке деревень";
+t['17'] = "Показывать население в списке деревень";
+t['18'] = "Показывать дополнительно список деревень (2 колонки) в плавающем окне";
+t['19'] = "Показывать информацию о зданиях, которые развиваются в данный момент<br>и войска, которые сейчас в походе в списке деревень";
+t['20'] = "Показывать закладки";
+t['21'] = "Показывать закладки в плавающем окне";
+t['22'] = "Показывать блок заметок";
+t['23'] = "Показывать заметки в плавающем окне";
+t['24'] = "Размер поля заметок";
+t['25'] = "Высота поля заметок";
+t['26'] = "Показывать расчёты для NPC помощника / ссылки на NPC помощника";
+t['27'] = "Какой анализатор мира использовать";
+t['28'] = "Показывать ссылки на статистику анализатора";
+t['29'] = "Используемый анализатор карты";
+t['30'] = "Показывать ссылку на карту для игроков";
+t['31'] = "Показывать ссылку на карту для альянсов";
+t['32'] = "Показывать 'Поиск'";
+t['33'] = "Показывать 'Поиск' в плавающем окне";
+t['34'] = "Показывать Единиц Культуры(ЕК)/день в таблицах развития";
+t['35'] = "Показывать потребление зерна в таблицах развития";
+t['36'] = "Показывать расчёты 'К тому времени/Остатки' в таблице развития построек";
+t['37'] = "Показыть таблицу развития ресурсных полей";
+t['38'] = "Показывать уровни ресурсных полей цветами";
+t['39'] = "Показывать таблицу ресурсов";
+t['40'] = "Показывать таблицу ресурсов в плавающем окне";
+t['41'] = "Показывать таблицу развития зданий";
+t['42'] = "Упорядочить здания по названию в таблицах развития";
+t['43'] = "Показывать уровни зданий в центре";
+t['44'] = "Показывать уровни зданий цветами";
+t['45'] = "Уровень строящегося здания будет мигать";
+t['46'] = "Показывать дополнительную информацию для каждого прибывающего торговца";
+t['47'] = "Показывать последний маршрут";
+t['48'] = "количество страниц отображаемых в разделе<br>'Рынок => Покупка' страниц<br>(по умолчанию =1)";
+t['49'] = "Действие пункта сбора, по умолчанию:";
+t['50'] = "Количество разведчиков для функции<br>\"Разведать\"";
+t['51'] = "Показывать последнюю атаку";
+t['52'] = "Показывать/использовать координаты для последней атаки";
+t['53'] = "Показывать информацию о войсках в подсказках";
+t['54'] = "Показывать расстояние и время до поселения в подсказках";
+t['55'] = "Автоподстановка имеющихся войск для встроенного симулятора сражений";
+t['56'] = "Показывать тип клетки<br>во время передвижения мышки над картой ";
+t['57'] = "Показывать расстояния и время";
+t['58'] = "Показать таблицу игроков / деревень / захваченых оазисов";
+t['59'] = "Количество одновременно отображаемых страниц<br>(Стандартно = 1)";
+t['60'] = "Показывать ссылки для открытия в новом окне";
+t['61'] = "Показывать \"Удалить все\" на странице отчётов";
+t['62'] = "Для меня также показывать иконку \"Отправить сообщение\"";
+t['63'] = "Показывать расширенные отчеты боев ()";
+t['64'] = "Показывать подробности в статистике отчетов";
+t['65'] = "Цвет, если развитие возможно<br>(по умолчанию = пусто)";
+t['66'] = "Цвет максимального уровня развития<br>(по умолчанию = пусто)";
+t['67'] = "Цвет, если развитие невозможно из-за нехватки ресурсов<br>(по умолчанию = пусто)";
+t['68'] = "Цвет, когда доступно развитие посредством NPC помощника<br>(по умолчанию = пусто)";
+t['69'] = "Console Log Level<br>ТОЛЬКО ДЛЯ ПРОГРАММИСТОВ И ОТЛАДЧИКОВ<br>(по умолчанию = 0)";
+t['82.L'] = "Заблокировать закладки (спрятать иконки 'Удалить', 'Переместить вверх', 'Переместить вниз)'";
+t['82.U'] = "Разблокировать закладки (показать иконки 'Удалить', 'Переместить вверх', 'Переместить вниз)'";
+t['85'] = "Показывать иконки 'Послать войска/Послать торговцев'";
+t['87'] = "Запоминать последний выбор 1x/2x/3x (если доступно)";
+t['91'] = "Разрешить менять порядок деревень в списке и свойства их отображения";
+t['92.L'] = "Заблокировать список деревень (спрятать иконки 'Переместить вверх', 'Переместить вниз)'";
+t['92.U'] = "Разблокировать список деревень (показать иконки 'Переместить вверх', 'Переместить вниз)'";
+t['U.2'] = "Раса";
+t['U.3'] = "Название вашей Столицы<br>Посетите свой профиль для обновления";
+t['U.6'] = "Координаты вашей Столицы<br>Посетите свой профиль для обновления";
+t['SIM'] = "Симулятор боя";
+t['QSURE'] = "Вы уверены?";
+t['LOSS'] = "Потери";
+t['PROFIT'] = "Прибыль";
+t['EXTAV'] = "Возможно развитие";
+t['PLAYER'] = "Игрок";
+t['VILLAGE'] = "Деревня";
+t['POPULATION'] = "Население";
+t['COORDS'] = "Координаты";
+t['MAPTBACTS'] = "Действия";
+t['SAVED'] = "Сохранено";
+t['YOUNEED'] = "Не хватает";
+t['TODAY'] = "Сегодня";
+t['TOMORROW'] = "Завтра";
+t['DAYAFTERTOM'] = "Послезавтра";
+t['MARKET'] = "Рынок";
+t['BARRACKS'] = "Казарма";
+t['RAP'] = "Пункт сбора";
+t['STABLE'] = "Конюшня";
+t['WORKSHOP'] = "Мастерская";
+t['SENDRES'] = "Послать ресурсы";
+t['BUY'] = "Купить";
+t['SELL'] = "Продать";
+t['SENDIGM'] = "Послать сообщение";
+t['LISTO'] = "Развитие будет возможно";
+t['ON'] = "на";
+t['AT'] = "в";
+t['EFICIENCIA'] = "Эффективность";
+t['NEVER'] = "Никогда";
+t['ALDEAS'] = "Деревни";
+t['TIEMPO'] = "Время";
+t['OFREZCO'] = "Продажа";
+t['BUSCO'] = "Покупка";
+t['TIPO'] = "Соотношение";
+t['DISPONIBLE'] = "Только доступные для покупки";
+t['CUALQUIERA'] = "Все";
+t['YES'] = "Да";
+t['NO'] = "Нет";
+t['LOGIN'] = "Логин";
+t['MARCADORES'] = "Закладки";
+t['ANYADIR'] = "Добавить";
+t['UBU'] = "Добавить адрес (Http://***) в закладки";
+t['UBT'] = "Название закладки";
+t['DEL'] = "Удалить";
+t['MAPA'] = "Карта";
+t['MAXTIME'] = "Макс. время";
+t['ARCHIVE'] = "Архив";
+t['SUMMARY'] = "Суммарно";
+t['TROPAS'] = "Войска";
+t['CHKSCRV'] = "Проверить, не появилась ли новая версия TBeyond";
+t['ACTUALIZAR'] = "Обновить информацию о деревне";
+t['VENTAS'] = "Сохраненные предложения";
+t['MAPSCAN'] = "Сканировать карту";
+t['BIC'] = "Отображение дополнительных иконок";
+t['SAVE'] = "Сохранить";
+t['AT2'] = "Подкрепление";
+t['AT3'] = "Нападение: обычное";
+t['AT4'] = "Нападение: набег";
+t['NBSA'] = "Автоматически";
+t['NBSN'] = "Нормальный (маленький)";
+t['NBSB'] = "Во весь экран (большой)";
+t['NBHAX'] = "Автоподбор высоты";
+t['NBHK'] = "По умолчанию";
+t['NPCSAVETIME'] = "Время: ";
+t['TOTALTROOPS'] = "Собственные войска в деревне";
+t['SELECTALLTROOPS'] = "Выбрать все войска";
+t['PARTY'] = "Праздники";
+t['CPPERDAY'] = "ЕК/день";
+t['SLOT'] = "Слот";
+t['TOTAL'] = "Всего";
+t['SELECTSCOUT'] = "Выбрать разведку";
+t['SELECTFAKE'] = "Выбрать спам";
+t['ALL'] = "Все";
+t['SH2'] = "В полях ввода цветов можно ввести одно значение:<br>- green (зеленый), red (красный) или orange (оранжевый), и т.д.<br> - HEX-код цвета #004523<br>- оставить пустым для значения по умолчанию";
+t['SOREP'] = "Убрать описание (для отправки)";
+t['WSIMO1'] = "Внутренний (предлагаемый игрой)";
+t['WSIMO2'] = "Внешний (предлагаемый kirilloid.ru)";
+t['NONEWVER'] = "У вас последняя версия";
+t['BVER'] = "Вероятно у Вас установлена бета версия";
+t['NVERAV'] = "Доступна новая версия скрипта";
+t['UPDSCR'] = "Вы хотите обновить скрипт сейчас ?";
+t['CHECKUPDATE'] = "Поиск обновлений скрипта.<br>Пожалуйста, подождите...";
+t['AVPPV'] = "Среднее население среди деревень";
+t['AVPPP'] = "Среднее население среди игроков";
+t['MAX'] = "Максимум";
+t['TOTTRTR'] = "Общее число обучаемых войск";
+t['TB3SL'] = "Настройка $1";
+t['UPDALLV'] = "Обновить все деревни. ИСПОЛЬЗУЙТЕ С КРАЙНЕЙ ОСТОРОЖНОСТЬЮ. ПОТОМУ ЧТО ЭТО МОЖЕТ ПРИВЕСТИ К БАНУ АККАУНТА !";
+t['LARGEMAP'] = "Большая карта";
+t['USETHEMPR'] = "Загрузить ресурсы пропорционально их количеству на складах/амбарах";
+t['USETHEMEQ'] = "Загрузить ресурсы равномерно";
+t['TOWNHALL'] = "Ратуша";
+t['GSRVT'] = "Игровой сервер";
+t['ACCINFO'] = "Информация аккаунта";
+t['NBO'] = "Блок заметок";
+t['MNUL'] = "Меню с левой стороны";
+t['STAT'] = "Статистика";
+t['RESF'] = "Ресурсные поля";
+t['VLC'] = "Центр деревни";
+t['MAPO'] = "Настройки карты";
+t['COLO'] = "Цветовые настройки";
+t['DBGO'] = "Опции отладки скрипта";
+t['HEROSMANSION'] = "Таверна";
+t['BLACKSMITH'] = "Кузница оружия";
+t['ARMOURY'] = "Кузница доспехов";
+t['NOW'] = "Сейчас";
+t['CLOSE'] = "Закрыть";
+t['USETHEM1H'] = "Загрузить ресурсы пропорционально их часовой прибыли";
+t['OVERVIEW'] = "Обзор";
+t['FORUM'] = "Форум";
+t['ATTACKS'] = "Нападения";
+t['NEWS'] = "Новости";
+t['ADDCRTPAGE'] = "Добавить текущее";
+t['SCRPURL'] = "Страница TBeyond";
+t['SPACER'] = "Разделитель";
+t['MEREO'] = "Сообщения и Отчеты";
+t['ATTABLES'] = "Таблица войск";
+t['MTW'] = "Свободно";
+t['MTX'] = "Перебор";
+t['MTC'] = "Нагружено";
+t['ALFL'] = "Ссылка на внешний форум<br>(Оставить пустым для внутренне-игрового форума)";
+t['MTCL'] = "Очистить все";
+t['CKSORT'] = "Кликните для сортировки";
+t['MIN'] = "Минимум";
+t['SVGL'] = "Общее для всех деревень";
+t['VGL'] = "Список деревень";
+t['UPDATEPOP'] = "Обновить население";
+t['EDIT'] = "Редактировать";
+t['NPCO'] = "Опции NPC помощника";
+t['NEWVILLAGEAV'] = "Дата/Время";
+t['TIMEUNTIL'] = "Осталось времени";
+t['CENTERMAP'] = "Центрировать деревню на карте";
+t['SENDTROOPS'] = "Отправка войск";
+t['PALACE'] = "Дворец";
+t['RESIDENCE'] = "Резиденция";
+t['ACADEMY'] = "Академия";
+t['TREASURY'] = "Сокровищница";
+t['UPGTB'] = "Возможности ресурсов/зданий в таблицах развития";
+t['RBTT'] = "Таблица ресурсов";
+t['USE'] = "Использовать";
+t['RESIDUE'] = "Остатки ресурсов, когда построите это";
+t['RESOURCES'] = "Ресурсы";
+t['SH1'] = "Откройте ваш профиль для автоматического определения столицы и ее координат<br>Постройте казарму для автоматического определения расы, а потом откройте центр деревни";
+t['RESEND'] = "Послать";
+t['WSI'] = "Симулятор сражения предлагаемый игрой";
+t['TTT'] = "Подсказки о войсках/расстоянии";
+t['MTR'] = "Отношение";
+t['MTRMIN'] = "(не должно быть меньше 0.50)";
+t['FINDREP'] = "Найти последние";
+t['IREPORT1'] = "Победы при атаке, без потерь";
+t['IREPORT2'] = "Победы при атаке, с потерями";
+t['IREPORT3'] = "Проигрыши при атаке";
+t['IREPORT4'] = "Победы при защите, без потерь";
+t['IREPORT5'] = "Победы при защите, с потерями";
+t['IREPORT6'] = "Проигрыши при защите, с потерями";
+t['IREPORT7'] = "Проигрыши при защите, без потерь";
+t['VLISTUP'] = "Передвинуть деревню выше в списке";
+t['VLISTDOWN'] = "Передвинуть деревню ниже в списке";
+t['VLISTSEP'] = "Вставить/удалить горизонтальный разделитель над текущей деревней";
+t['VLISTEDIT'] = "Настройки отображения деревни";
+t['VLISTOPTIONS'] = "Настройки показа списка деревень";
+t['REPTT'] = "Показать отчёт в отдельном окне";
+t['WMIN'] = "Минимизировать окно";
+t['WMAX'] = "Восстановить размеры окна";
+t['REFRESHP'] = "Обновить страницу";
+t['1H'] = "час";
+t['GENLNK'] = "Улучшения ссылок";
+t['11.TT'] = "Сайт для отправки отчётов";
+t['27.TT'] = "анализатор мира";
+t['29.TT'] = "Анализатор карты";
+t['WSS'] = "Статистика по серверу";
+t['WSP'] = "Информация по игроку";
+t['WSA'] = "Информация по альянсу";
+t['TRAVIANDOPE'] = "Traviandope";
+t['TRAVIANDOPE.TT'] = "Набор инструментов, нет поддержки ру-зоны";
+t['TOOLBOX'] = "Toolbox";
+t['TOOLBOX.TT'] = "Сравнение юнитов, симулятор боя, калькуляторы, генератор подписей для игроков и альянсов";
+t['CRYTOOLS'] = "Cry's Tools";
+t['CRYTOOLS.TT'] = "Аналитика по серверам, альянсам и игрокам. Есть статистика по фарму для закончившихся серверов!";
+t['KIRILLOID'] = "Кириллоид";
+t['KIRILLOID.TT'] = "Куча полезных таблиц и калькуляторов, самый лучший симулятор боя";
+t['CROPFINDER'] = "Поиск зерна";
+t['CROPFINDER.TT'] = "Инструмент для поиска зерновых клеток";
+t['ERRUPDATE'] = "Ошибка при поиске новой версии скрипта!";
+t['TRADEBAL.TT'] = "Узнать баланс торговли с этим игроком";
+t['100'] = "Показывать ссылки на статистику баланса торговли для игроков";
+t['101'] = "Цвет, если развитие невозможно из-за недостаточной вместимости амбаров и/или складов<br>(по умолчанию = пусто)";
+t['102'] = "Показывать количество ресурсных полей в таблице ресурсов";
+t['RESNEED'] = "Для нормального развития не хватает:";
+t['NPCNEED'] = "Для развития через NPC не хватает:";
+t['RESREQ_TT'] = "Для развития требуется: $1";
+t['NPCLNK'] = "&raquo; К NPC-торговцу";
+t['USERES_TT'] = "Разрешить/запретить изменение ресурса '$1' при операциях над всеми ресурсами одновременно";
+t['USETRADERS_TT'] = "При автоматическом распределении ресурсов будет использоваться не более указанного количества торговцев. По умолчанию используются все доступные торговцы.";
+t['USEUNIRES_TT'] = "При автоматическом распределении ресурсов будет загружено не более указанного количества ресурсов. По умолчанию используются все доступные ресурсы.";
+t['USEPPH_TT'] = "Использовать ЧВР этой деревни в качестве максимального количества ресурсов.";
+t['USEPPHALL_TT'] = "Использовать ЧВР всех деревень в качестве максимального количества ресурсов.";
+t['STAT_DISMISS'] = "Статистика по отпускаемым войскам";
+t['STAT_REMAINS'] = "Статистика по остающимся войскам";
+t['SELECTALL'] = "Отметить все";
+break;
+
+case 'si': //contributors: BmW
+t['1'] = "Travian v2.x server";
+t['2'] = "Odstrani reklame";
+t['3'] = "Vsili T3.1 kapaciteto za Legionarje in Falange<br>(za različne T3.1 in T3.5 serverje)";
+t['4'] = "Tržnica";
+t['5'] = "Zbirališče/Barake/Konjušnica/Izdelovalec oblegovalnih naprav";
+t['6'] = "Mestna hiša/Herojeva residenca<br>Izdelovalec oklepov/Izdelovalec orožja";
+t['7'] = "Palača/Rezidenca/Akademija/Zakladnica";
+t['8'] = "Aliansa";
+t['9'] = "Dodatne povezave v levem meniju<br>(Traviantoolbox, World Analyser, Travilog, Map.)";
+t['10'] = "Simulator bitk:<br>(levi meni)";
+t['12'] = "Prikaži 'dorf1' in 'dorf2' povezave";
+t['13'] = "\"Centriraj zemljevid\" ikona";
+t['14'] = "Prikaži ikone 'Pošlji enote/Pošlji surovine' v tabeli naselij";
+t['16'] = "Efektivna proizvodnja žita v tabeli naselij";
+t['17'] = "Populacija v listi naselij";
+t['18'] = "Dodatna (stolpca) v listi naselij kot plavajoče okno";
+t['19'] = "Prikaži informacije o zgradbah in premikanju enot<br>v listi naselij";
+t['20'] = "Prikaži povezave";
+t['21'] = "'Zaznamki' kot kot plavajoče okno";
+t['22'] = "Prikaži beležko";
+t['23'] = "'Beležka' as kot plavajoče okno";
+t['24'] = "Velikost";
+t['25'] = "Višina";
+t['26'] = "NPC izračune/povezave";
+t['27'] = "Uporabi World Analyser";
+t['28'] = "Povezave Analyser statistike";
+t['29'] = "Uporabi Map Analyser";
+t['30'] = "Povezave do mape za uporabnike";
+t['31'] = "Povezave do mape za alianse";
+t['32'] = "Prikaži 'Iskanje'";
+t['33'] = "'Iskalnik' kot plavajoče okno";
+t['34'] = "Prikaži KT/Dan v tabeli nadgradenj";
+t['35'] = "Poraba žita v tabeli nadgradenj";
+t['36'] = "'Dokler/Ostanek' v tabelah nadgradi/uri";
+t['37'] = "Tabela nadgradenj";
+t['38'] = "Barvne stopnje";
+t['39'] = "'Diagram surovin' tabela";
+t['40'] = "'Diagram surovin' tabela kot plavajoče okno";
+t['41'] = "Tabela nadgradenj";
+t['42'] = "Razporedi zgradbe po imenu v tabeli nadgradenj";
+t['43'] = "Stopnje";
+t['44'] = "Barvne stopnje";
+t['45'] = "Utripanje stopenj zgradb, ki se nadgrajujejo";
+t['46'] = "Dodatne informacije za vsakega prihajajočega trgovca";
+t['48'] = "Število strani ponudb, ki se naj naložijo:<br>medtem ko ste na \"Tržnici => Kupi\" strani<br>(Privzeto = 1)";
+t['49'] = "Privzeta izbira Zbirališča";
+t['50'] = "Število skavtov za \"Skavti\" funkcijo";
+t['53'] = "Prikaži informacije o enoti, ki je v vasi<br>(Ko greste z miško na enoto)";
+t['54'] = "Razdalje in časi do vasi";
+t['56'] = "Prikaži tip polja/info oaze<br>med premikanjem miške po mapi";
+t['57'] = "Razdalje in časi";
+t['58'] = "Tabela Igralcev/Vasi/Okupiranih pokrajin";
+t['59'] = "Število strani Sporočil/Poročil, ki se naj naložijo<br>(Privzeto = 1)";
+t['60'] = "Ikona za odpiranje sporočil v novem oknu (Pop-up)";
+t['61'] = "\"Izbriši Vse\" tabela na strani poročil";
+t['62'] = "\"Pošlji IGM\" ikona tudi za mene";
+t['63'] = "Napredna  poročila";
+t['64'] = "Podrobnosti pri poročilih";
+t['65'] = "Barva: Nadgradnja možna<br>(Prazno = privzeto)";
+t['66'] = "Barva: Najvišja stopnja<br>(Prazno = privzeto)";
+t['67'] = "Barva: Nadgradnja ni možna<br>(Prazno = privzeto)";
+t['68'] = "Barva: Nadgradnja možna preko NPC Trgovanja<br>(Prazno = privzeto)";
+t['69'] = "Konzola (Za stopnje)<br>SAMO ZA PROGRAMERJE ALI RAZHROŠČEVANJE<br>(Privzeto = 0)";
+t['82.L'] = "Zakleni povezave";
+t['82.U'] = "Odkleni povezave";
+t['U.2'] = "Pleme";
+t['U.3'] = "Ime metropole";
+t['U.6'] = "Koordinate metropole";
+t['SIM'] = "Simulator bitk";
+t['QSURE'] = "Ali ste prepričani?";
+t['LOSS'] = "Izguba";
+t['PROFIT'] = "Profit";
+t['EXTAV'] = "Nadgradnja možna";
+t['PLAYER'] = "Igralec";
+t['VILLAGE'] = "Naselbine";
+t['POPULATION'] = "Populacija";
+t['COORDS'] = "Koordinate";
+t['MAPTBACTS'] = "Možnosti";
+t['SAVED'] = "Shranjeno";
+t['YOUNEED'] = "Manjka";
+t['TODAY'] = "Danes";
+t['TOMORROW'] = "Jutri";
+t['DAYAFTERTOM'] = "Pojutrišnjem";
+t['MARKET'] = "Tržnica";
+t['BARRACKS'] = "Barake";
+t['RAP'] = "Zbirališče";
+t['STABLE'] = "Konjušnica";
+t['WORKSHOP'] = "Izdelovalec oblegovalnih naprav";
+t['SENDRES'] = "Pošlji surovine";
+t['BUY'] = "Kupi";
+t['SELL'] = "Ponudi";
+t['SENDIGM'] = "Pošlji sporočilo";
+t['LISTO'] = "Dovolj";
+t['ON'] = "";
+t['AT'] = "ob";
+t['EFICIENCIA'] = "Izkoristek";
+t['NEVER'] = "Nikoli";
+t['ALDEAS'] = "Vas(i)";
+t['TIEMPO'] = "Čas";
+t['OFREZCO'] = "Ponuja";
+t['BUSCO'] = "Išče";
+t['TIPO'] = "Tip";
+t['DISPONIBLE'] = "Samo možne ponudbe";
+t['CUALQUIERA'] = "Karkoli";
+t['YES'] = "Da";
+t['NO'] = "Ne";
+t['LOGIN'] = "Prijava";
+t['MARCADORES'] = "Povezave";
+t['ANYADIR'] = "Dodaj";
+t['UBU'] = "Cilj povezave";
+t['UBT'] = "Ime povezave";
+t['DEL'] = "Izbriši";
+t['MAPA'] = "Zemljevid";
+t['MAXTIME'] = "Maksimalen čas";
+t['ARCHIVE'] = "Arhiv";
+t['SUMMARY'] = "Pregled";
+t['TROPAS'] = "Enote";
+t['CHKSCRV'] = "Posodobi skripto";
+t['ACTUALIZAR'] = "Posodobi informacije o naseljih";
+t['VENTAS'] = "Shranjene ponudbe";
+t['MAPSCAN'] = "Preglej mapo";
+t['BIC'] = "Dodatne ikone";
+t['SAVE'] = "Shrani";
+t['AT2'] = "Okrepitve";
+t['AT3'] = "Napad:  Polni napad";
+t['AT4'] = "Napad:  Roparski pohod";
+t['NBSA'] = "Auto";
+t['NBSN'] = "Normalna (majhna)";
+t['NBSB'] = "Velik zaslon (velika)";
+t['NBHAX'] = "Samodejno prilagajaj velikost";
+t['NBHK'] = "Privzeta višina";
+t['NPCSAVETIME'] = "Prihrani: ";
+t['TOTALTROOPS'] = "Skupno število enot";
+t['SELECTALLTROOPS'] = "Vse enote";
+t['PARTY'] = "Festivali";
+t['CPPERDAY'] = "KT/Dan";
+t['SLOT'] = "Reže";
+t['TOTAL'] = "Vsota";
+t['SELECTSCOUT'] = "Skavti";
+t['SELECTFAKE'] = "Fake";
+t['ALL'] = "Vse";
+t['SH2'] = "V polja za barvo lahko vnesete:<br>- npr. green(zelena) ali red(rdeča) ali orange(oranžna)<br>- HEX kodo kot #004523<br>- pustite prazno za privzete barve";
+t['SOREP'] = "Prikaži originalno poročilo (za pošiljanje)";
+t['WSIMO1'] = "Notranji (ponujen v igri)";
+t['WSIMO2'] = "Zunanji (ponujen pri kirilloid.ru)";
+t['NONEWVER'] = "Skripte ni treba posodobiti";
+t['BVER'] = "Lahko, da imate beta različico";
+t['NVERAV'] = "Nova različica skripte je na voljo";
+t['UPDSCR'] = "Posodobi skripto";
+t['CHECKUPDATE'] = "Preverjam za posodobitev.<br>Prosim počakajte...";
+t['AVPPV'] = "Povprečna populacija naselja";
+t['AVPPP'] = "Povprečna populacija igralca";
+t['MAX'] = "Maksimalno";
+t['TOTTRTR'] = "Skupno število enot v postopku";
+t['TB3SL'] = "$1 Nastavitve";
+t['UPDALLV'] = "Osveži vsa naselja.";
+t['LARGEMAP'] = "Velik zemljevid";
+t['USETHEMPR'] = "Uporabi (izmenično)";
+t['USETHEMEQ'] = "Uporabi (enako)";
+t['TOWNHALL'] = "Mestna hiša";
+t['GSRVT'] = "Tip Serverja";
+t['ACCINFO'] = "Informacije o računu";
+t['NBO'] = "Beležka";
+t['MNUL'] = "Meni na levi strani";
+t['STAT'] = "Statistika";
+t['RESF'] = "Surovinska polja";
+t['VLC'] = "Center naselja";
+t['MAPO'] = "Možnosti zemljevida";
+t['COLO'] = "Barve";
+t['DBGO'] = "Možnosti razhroščevanja";
+t['HEROSMANSION'] = "Herojeva residenca";
+t['BLACKSMITH'] = "Izdelovalec orožja";
+t['ARMOURY'] = "Izdelovalec oklepov";
+t['NOW'] = "Sedaj";
+t['CLOSE'] = "Zapri";
+t['USETHEM1H'] = "Uporabi (1 urna proizvodnja)";
+t['OVERVIEW'] = "Pregled";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Napadi";
+t['NEWS'] = "Novice";
+t['ADDCRTPAGE'] = "Dodaj trenutno stran";
+t['SCRPURL'] = "TBeyond stran";
+t['SPACER'] = "Ločilna črta";
+t['MEREO'] = "Sporočila in Poročila";
+t['ATTABLES'] = "Tabela enot";
+t['MTW'] = "Ostane";
+t['MTX'] = "Preseženo";
+t['MTC'] = "Skupaj";
+t['ALFL'] = "Povezava do zunanjega Foruma<br>(Pusti prazno za notranji Forum)";
+t['MTCL'] = "Počisti vse";
+t['CKSORT'] = "Razvrsti";
+t['MIN'] = "Minimalno";
+t['SVGL'] = "Shrani za vse vasi";
+t['VGL'] = "Naselja";
+t['UPDATEPOP'] = "Posodobi populacijo";
+t['EDIT'] = "Uredi";
+t['NPCO'] = "Možnosti NPC trgovanja";
+t['NEWVILLAGEAV'] = "Datum/Čas";
+t['TIMEUNTIL'] = "Čas čakanja";
+t['CENTERMAP'] = "Centriraj zemljevid";
+t['SENDTROOPS'] = "Pošlji enote";
+t['PALACE'] = "Palača";
+t['RESIDENCE'] = "Rezidenca";
+t['ACADEMY'] = "Akademija";
+t['TREASURY'] = "Zakladnica";
+t['UPGTB'] = "Tabele surovinskih polj/zgradb";
+t['RBTT'] = "Diagram surovin";
+t['USE'] = "Uporabi";
+t['RESIDUE'] = "Ostanek, če zgradiš";
+t['RESOURCES'] = "Surovine";
+t['SH1'] = "Odpri Profil za samodejno odkrvanje metropole/koordinat<br>Zgradite Barake za samodejno odkrivanje plemena in potem odprite Center naselja";
+t['CROPFINDER'] = "Iskalec Žita";
+break;
+
+case 'sk': //contributors: NeWbie (a.k.a. Matthew-PoP), kupony
+t['1'] = "Travian v2.x server";
+t['2'] = "Vymazať reklamné bannery";
+t['3'] = "Vypočitať kapacitu vojakov T3.1 Legionárov & Falangov<br>(pre mixované T3.1 & T3.5 servery)";
+t['4'] = "Trhovisko";
+t['5'] = "Zhromaždisko/Kasárne/Dielňa/Stájňa";
+t['6'] = "Radnica/Hrdinský dvor/Výzbroj/Kováč";
+t['7'] = "Palác/Rezidencia/Akadémia/Pokladnica";
+t['8'] = "Aliancia";
+t['9'] = "Ukáž prídavné linky v ľavom menu<br>(Traviantoolbox, World Analyser, Travilog, Mapu, atď.)";
+t['10'] = "Link na bojový simulátor:<br>(ľavé menu)";
+t['11'] = "Link na poslanie spravodajských správ";
+t['12'] = "Ukáž 'dorf1.php' a 'dorf2.php' linky";
+t['13'] = "Ukáž ikonu\" vycentruj mapu na dedinu ";
+t['14'] = "Ukáž 'Poslať vojakov/Poslať suroviny' ikonky v zozname dedín";
+t['15'] = "Ukáž produkciu drevo, hliny, železo v zozname dedín";
+t['16'] = "Ukáž produkciu obilia v zozname dedín";
+t['17'] = "Zobraziť populaciu v zozname dedín";
+t['18'] = "Ukáž dalšie 2 stĺpy zoznamu dedín posuvne ";
+t['19'] = "Ukáž informácie o budovách vo výstavbe a a pohybe jednotie<br>v zozname dedín";
+t['20'] = "Ukáž záložky";
+t['21'] = "Zobraziť 'záložky' ako posuvne okno";
+t['22'] = "Zobraziť ikony 'poslať jednotky/suroviny' v zoznamu dediny";
+t['23'] = "Zobraziť 'poznámkový blok' ako posuvne okno";
+t['24'] = "Zobraziť produkciu obilia v zozname dedine";
+t['25'] = "Výška poznamkového bloku";
+t['26'] = "Ukáž kalkulačku/linky NPC asistenta";
+t['27'] = "Analyzátor";
+t['28'] = "Ukaž link na analyzátor ";
+t['29'] = "Mapy k použitiu";
+t['30'] = "Zobraziť odkazy na mapu pre hráča";
+t['31'] = "Zobraziť odkazy na mapu pre alianciu";
+t['32'] = "Ukáž 'Tabuľku vyhľadavanie'";
+t['33'] = "Ukáž 'Tabuľku vyhľadavanie' ako posuvne okno";
+t['34'] = "Ukáž KB/deň v tabuľkách upgradu";
+t['35'] = "Ukáž spotrebu obilia v upgrade tabuľkách";
+t['36'] = "Ukáž výpočet 'Do/Zostáva' vupgrade/trénovacích tabuľká";
+t['37'] = "Ukáž tabuľku pre upgrade surovinových poli";
+t['38'] = "Ukáž úroveň surovinových polí farebne";
+t['39'] = "Ukáž 'Tabuľku surovin'";
+t['40'] = "Zobraziť 'Tabuľku surovin' ako posuvne okno";
+t['41'] = "Ukáž tabuľku pre upgrade budov";
+t['42'] = "Zobraziť KB/den v tabuľke stavieb";
+t['43'] = "Zobraziť spotrebu obilia v tabuľke stavieb";
+t['44'] = "Ukáž úroveň budov farebne";
+t['45'] = "Ukázať blikajúc budovy ktoré sa upgradujú?";
+t['46'] = "Ukáž rozširujúce informácie pri každom príchode obchodníka";
+t['47'] = "Ukáž posledný transport obchodníkom";
+t['48'] = "Počet kontrolovaných stránok na trhovovisku => Nákupných stránok<br>(Prednastavené = 1)";
+t['49'] = "Prednastavená akcia zhromaždištia";
+t['50'] = "Niesu špehovia<br>\"Vyberte funkciu špeha";
+t['51'] = "Ukáž posledný útok";
+t['52'] = "Ukáž/použi súradnice posledného útoku";
+t['53'] = "Ukáž informácie o vojakoch v bublinách";
+t['54'] = "Ukáž zdialenosť a čas od dediny v bublinách";
+t['55'] = "Vo vojnovom simulátory automatcky doplň";
+t['56'] = "Ukaž typ bunky/oázy info<br>keď chodiš myšou po mape";
+t['57'] = "Ukáž zdialenosť a čas";
+t['58'] = "Ukáž tabuľku s hráčmy/dedinamy/okupovaými oázami";
+t['59'] = "Počet správ/hlásení stránka na preload<br>(Prednastavené = 1)";
+t['60'] = "Ukáž link na otvorenie správy v pop-up";
+t['61'] = "Ukáž \"Vymazať všetký\" tabuľky na stránke s hláseniami";
+t['62'] = "Ukáž \" v pošli správu\" ikonu aj pre mňa";
+t['63'] = "Ukáž  rozšírené Hlásenie vojny";
+t['64'] = "Ukáž detaily v štatistikách hlásení";
+t['65'] = "Farba, upgradu<br>(Prednastavené = Prázdne)";
+t['66'] = "Farba, maximálnej úrovne<br>(Prednastavené = Prázdne)";
+t['67'] = "Farba, nemožného upgradu<br>(Prednastavené = Prázdne)";
+t['68'] = "Farba, upgradu cez NPC<br>(Prednastavené = Prázdne)";
+t['69'] = "Úroveň konzoly. Len pre programátorov alebo na odstránenie chýb.<br>(Prednastavené = 0)";
+t['82.L'] = "Zamkni záložku (Skry vymaž, posuň hore/dole ikony)";
+t['82.U'] = "Odomkni záložky (Ukáž vymaž, posuň hore/dole ikony)";
+t['85'] = "Ukáž ikonky 'Poslať jednotky/suroviny'";
+t['87'] = "Zapamätať si 1x/2x/3x nastavenia obchodu (pokiaľ je dostupne)";
+t['U.2'] = "Kmeň";
+t['U.3'] = "Meno tvojej hlavnej dediny<br>Pozry si svoj profil pre opravu";
+t['U.6'] = "Súradnice hlavnej dediny.<br>Pozri svôj profil";
+t['SIM'] = "Bojový simulátor";
+t['QSURE'] = "Naozaj?";
+t['LOSS'] = "Strata";
+t['PROFIT'] = "Zisk";
+t['EXTAV'] = "Môžeš stavať";
+t['PLAYER'] = "Hráč;";
+t['VILLAGE'] = "Dedina";
+t['POPULATION'] = "Populácia";
+t['COORDS'] = "Súradnice";
+t['MAPTBACTS'] = "Akcie";
+t['SAVED'] = "Uložené";
+t['YOUNEED'] = "Potrebuješ";
+t['TODAY'] = "dnes";
+t['TOMORROW'] = "zajtra";
+t['DAYAFTERTOM'] = "pozajtra";
+t['MARKET'] = "Trh";
+t['BARRACKS'] = "Kasárne";
+t['RAP'] = "Zhromaždište";
+t['STABLE'] = "Stajňa";
+t['WORKSHOP'] = "Dielňa";
+t['SENDRES'] = "Pošli suroviny";
+t['BUY'] = "Kúpiť";
+t['SELL'] = "Predať";
+t['SENDIGM'] = "Pošli správu";
+t['LISTO'] = "Môžeš stavať";
+t['ON'] = "Dňa";
+t['AT'] = "o";
+t['EFICIENCIA'] = "Efektivnosť";
+t['NEVER'] = "Nikdy";
+t['ALDEAS'] = "Počet dedín";
+t['TIEMPO'] = "Čas";
+t['OFREZCO'] = "Ponuka";
+t['BUSCO'] = "Vyhľadať";
+t['TIPO'] = "Typ";
+t['DISPONIBLE'] = "Len dostupné";
+t['CUALQUIERA'] = "Hociaká";
+t['YES'] = "ÁNO";
+t['NO'] = "NIE";
+t['LOGIN'] = "Prihlásiť";
+t['MARCADORES'] = "Záložka";
+t['ANYADIR'] = "Pridať;";
+t['UBU'] = "Url adresa";
+t['UBT'] = "Názov záložky";
+t['DEL'] = "Vymazať;";
+t['MAPA'] = "Mapa";
+t['MAXTIME'] = "Maximálny čas";
+t['ARCHIVE'] = "Archivovať";
+t['SUMMARY'] = "Hlásenie";
+t['TROPAS'] = "Vojsko";
+t['CHKSCRV'] = "Aktualizuj";
+t['ACTUALIZAR'] = "Aktualizovať informácie o dedine";
+t['VENTAS'] = "Uložiť ponuky";
+t['MAPSCAN'] = "Skenovať mapu";
+t['BIC'] = "Ukáž rozširujúce ikony";
+t['SAVE'] = "Uložené";
+t['AT2'] = "Podpora";
+t['AT3'] = "Normálny útok ";
+t['AT4'] = "Lúpež";
+t['NBSA'] = "Automatická";
+t['NBSN'] = "Normálna (malá)";
+t['NBSB'] = "veľká";
+t['NBHAX'] = "Automatické rozšírenie výšky";
+t['NBHK'] = "Prednastavená výška";
+t['NPCSAVETIME'] = "Ušetrite:";
+t['TOTALTROOPS'] = "Všetky jednotky vycvičené v tejto dedine";
+t['SELECTALLTROOPS'] = "Vybrať všetky jednotky";
+t['PARTY'] = "Oslavy";
+t['CPPERDAY'] = "KB/denne";
+t['SLOT'] = "Slot";
+t['TOTAL'] = "Spolu";
+t['SELECTSCOUT'] = "Vyber počet špehov";
+t['SELECTFAKE'] = "Vyber jednotky na fake";
+t['ALL'] = "Všetko";
+t['SH2'] = "Môžeš vložiť farby :<br>- green alebo red alebo orange, atď. Farby zadávajte len v Anglištine.<br>- Napríklad HEX farba #004523.<br>- Nechajte prázdne ak chcete mať prednastavené farby";
+t['SOREP'] = "Ukáž originálne správy";
+t['WSIMO1'] = "Interný (poskytovaný hrou)";
+t['WSIMO2'] = "Externý (poskytnutý kirilloid.ru)";
+t['NONEWVER'] = "Máte poslednú verziu";
+t['BVER'] = "Máte beta verziu";
+t['NVERAV'] = "Je novšia verzia";
+t['UPDSCR'] = "Aktualizovať script teraz?";
+t['CHECKUPDATE'] = "Kontrolujem aktualizácie...";
+t['AVPPV'] = "Priemerná populácia na dedinu";
+t['AVPPP'] = "Priemerná populácia na hráča";
+t['MAX'] = "Maximum";
+t['TOTTRTR'] = "Všetci vojaci vo výcviku";
+t['TB3SL'] = "$1 nastavenia";
+t['UPDALLV'] = "Updatuj všetký dediny. POUŽIVAJTE S MAXIMÁLNOU STAROSTLIVOSŤOU<br>LEBO TO MôžE VIESŤ K ZRUŠENIU ÚČTU !";
+t['LARGEMAP'] = "Veľká mapa";
+t['USETHEMPR'] = "Použí ich (proporčne)";
+t['USETHEMEQ'] = "Použí ich (rovným dielom)";
+t['TOWNHALL'] = "Radnica";
+t['GSRVT'] = "Server hry";
+t['ACCINFO'] = "Informácie o účte";
+t['NBO'] = "Poznámkový blok";
+t['MNUL'] = "Menu na ľavom boku";
+t['STAT'] = "Štatistika";
+t['RESF'] = "Surovinové polia";
+t['VLC'] = "Centrum dediny";
+t['MAPO'] = "Nastavenia mapy";
+t['COLO'] = "Nastavenia farieb";
+t['DBGO'] = "Nastavenia v ladení";
+t['HEROSMANSION'] = "Hrdinský dvor";
+t['BLACKSMITH'] = "Kováč";
+t['ARMOURY'] = "Zbrojnica";
+t['NOW'] = "Teraz";
+t['CLOSE'] = "Zavrieť";
+t['USETHEM1H'] = "Použiť (1 h. produkcia)";
+t['OVERVIEW'] = "Náhľad";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Útok;";
+t['NEWS'] = "Noviny";
+t['ADDCRTPAGE'] = "Pridať túto stránku";
+t['SCRPURL'] = "TBeyond stránka";
+t['SPACER'] = "Odeľovač";
+t['MEREO'] = "Správy & Hlásenia";
+t['ATTABLES'] = "Tabuľka jednotiek";
+t['MTW'] = "Obchodníci ešte unesú";
+t['MTX'] = "Presahuje o";
+t['MTC'] = "Zaťaženie obchodníka";
+t['ALFL'] = "Link na externé forum<br>(Nechaj prázdne pre interné forum)";
+t['MTCL'] = "Vyčistiť všetko";
+t['CKSORT'] = "Klikni roztiediť";
+t['MIN'] = "Minimum";
+t['SVGL'] = "Pre všetky dediny";
+t['VGL'] = "Zoznam dedin";
+t['UPDATEPOP'] = "Updatuj populáciu";
+t['EDIT'] = "Edituj";
+t['NPCO'] = "Nastavenia NPC asistenta";
+t['NEWVILLAGEAV'] = "Dátum/čaš";
+t['TIMEUNTIL'] = "Čas vyčkávania";
+t['CENTERMAP'] = "Vycentruj mapu na túto dedinu ";
+t['SENDTROOPS'] = "Poslať jednotky";
+t['PALACE'] = "Palác";
+t['RESIDENCE'] = "Rezidencia";
+t['ACADEMY'] = "Akadémia";
+t['TREASURY'] = "Pokladnica";
+t['UPGTB'] = "Tabuľka vylepšení surovinových polí/budou";
+t['RBTT'] = "Tabuľka surovin";
+t['USE'] = "Použiť";
+t['RESIDUE'] = "Ak vybuduješ zostane ti ";
+t['RESOURCES'] = "Suroviny";
+t['SH1'] = "Otvoriť tvoj Profil pre automaticke zistenie Hlavnej dediny/súradníc<br>Vybuduj kasárne pree automaticke zistetie kmeňa a otvor stred dediny";
+t['RESEND'] = "Poslať znova ?";
+t['WSI'] = "Vojnový simulátor prevádzkovaný hrou";
+t['TTT'] = "Všeobecné vojsko/bublinky o vzdialenosti";
+t['CROPFINDER'] = "Vyhľadávač obilia";
+break;
+
+case 'th': //contributors: anonymous
+t['4'] = "ตลาด";
+t['5'] = "จุดระดมพล/ค่ายทหาร/ห้องเครื่อง/โรงม้า";
+t['6'] = "ศาลากลาง/คฤหาสน์ของฮีโร่/คลังแสง/ช่างตีเหล็ก";
+t['7'] = "พระราชวัง/ที่พักอาศัย/สถานศึกษา/คลังสมบัติ";
+t['8'] = "พันธมิตร";
+t['10'] = "ใช้ลิ้งค์จำลองการต่อสู้:<br>(เมนูด้านซ้าย)";
+t['12'] = "แสดงลิ้งค์ 'dorf1.php' และ 'dorf2.php'";
+t['13'] = "แสดงไอคอน \"ไปยังกลางแผนที่\"";
+t['20'] = "แสดงบุ๊คมาร์ค";
+t['22'] = "แสดงกล่องข้อความ";
+t['24'] = "ขนาดกล่องข้อความ";
+t['25'] = "กล่องข้อความ height";
+t['27'] = "ใช้ World Analyser";
+t['28'] = "แสดงลิ้งค์ analyser statistic";
+t['48'] = "Number of offer pages to preload<br>while on the 'Market => Buy' page<br>(ปกติ = 1)";
+t['50'] = "จำนวนของหน่วยสอดแนมสำหรับ<br>ฟังก์ชัน \"เลือกหน่วยสอดแนม\"";
+t['53'] = "แสดงข้อมูลกองกำลังใน tooltips";
+t['54'] = "แสดงระยะทางและเวลาไปถึงหมู่บ้านใน tooltips";
+t['56'] = "แสดงข้อมูล ประเภทของcellหรือโอเอซิส<br>ขณะที่เมาส์อยู่บนแผนที่";
+t['57'] = "แสดงระยะทางและเวลา";
+t['59'] = "Number of message/report pages to preload<br>(Default = 1)";
+t['61'] = "แสดงตาราง \"ลบทั้งหมด\" บนหน้ารายงาน";
+t['62'] = "แสดงไอคอน \"ส่ง IGM\"";
+t['65'] = "Color upgrade available<br>(ปกติ = ว่าง)";
+t['66'] = "Color max level<br>(ปกติ = ว่าง)";
+t['67'] = "Color upgrade not possible<br>(ปกติ = ว่าง)";
+t['68'] = "Color upgrade via NPC<br>(ปกติ = ว่าง)";
+t['69'] = "Console Log Level<br>สำหรับ PROGRAMMERS หรือ DEBUGGING เท่านั้น<br>(ปกติ = 0)";
+t['82.L'] = "ล็อคบุ๊คมาร์ค (ซ่อนปุ่ม ลบ, เลื่อนขึ้น, เลื่อนลง, แก้ไข)";
+t['82.U'] = "ปลดล็อคบุ๊คมาร์ค (แสดงปุ่ม ลบ, เลื่อนขึ้น, เลื่อนลง, แก้ไข)";
+t['U.2'] = "เผ่า";
+t['U.3'] = "ชื่อเมืองหลวงของคุณ<br>Visit your Profile for an update";
+t['U.6'] = "พิกัดของเมืองหลวง<br>Visit your Profile for an update";
+t['SIM'] = "จำลองการต่อสู้";
+t['QSURE'] = "แน่ใจนะ?";
+t['LOSS'] = "ความเสียหาย";
+t['PROFIT'] = "กำไร";
+t['EXTAV'] = "พร้อมขยาย";
+t['PLAYER'] = "ผู้เล่น";
+t['VILLAGE'] = "หมู่บ้าน";
+t['POPULATION'] = "ประชากร";
+t['MAPTBACTS'] = "การดำเนินการ";
+t['SAVED'] = "Saved";
+t['YOUNEED'] = "คุณต้องการ";
+t['TODAY'] = "วันนี้";
+t['TOMORROW'] = "วันพรุ่งนี้";
+t['DAYAFTERTOM'] = "วันมะรืนนี้";
+t['MARKET'] = "ตลาดสินค้า";
+t['BARRACKS'] = "ค่ายทหาร";
+t['RAP'] = "จุดรวมกำลังพล";
+t['STABLE'] = "โรงม้า";
+t['WORKSHOP'] = "ห้องเครื่อง";
+t['SENDRES'] = "ส่งทรัพยากร";
+t['BUY'] = "ซื้อ";
+t['SELL'] = "ขาย";
+t['SENDIGM'] = "ส่ง IGM";
+t['LISTO'] = "พร้อม";
+t['ON'] = "วันที่";
+t['AT'] = "ณ เวลา";
+t['EFICIENCIA'] = "ประสิทธิผล";
+t['NEVER'] = "ไม่มีทาง";
+t['ALDEAS'] = "หมู่บ้าน";
+t['TIEMPO'] = "เวลา";
+t['OFREZCO'] = "สิ่งที่เสนอ";
+t['BUSCO'] = "สิ่งที่ต้องการ";
+t['TIPO'] = "รูปแบบ";
+t['DISPONIBLE'] = "พร้อมเท่านั้น";
+t['CUALQUIERA'] = "ทั้งหมด";
+t['YES'] = "ใช่";
+t['NO'] = "ไม่ใช่";
+t['LOGIN'] = "เข้าสู่ระบบ";
+t['MARCADORES'] = "บุ๊คมาร์ค";
+t['ANYADIR'] = "เพิ่ม";
+t['UBU'] = "URL บุ๊คมาร์คใหม่";
+t['UBT'] = "ข้อความบุ๊คมาร์คใหม่";
+t['DEL'] = "ลบ";
+t['MAPA'] = "แผนที่";
+t['MAXTIME'] = "เวลาสูงสุด";
+t['ARCHIVE'] = "เอกสารสำคัญ";
+t['SUMMARY'] = "สรุป";
+t['TROPAS'] = "กองกำลัง";
+t['CHKSCRV'] = "ปรับปรุง TBeyond";
+t['ACTUALIZAR'] = "ปรังปรุงข้อมูลหมู่บ้าน";
+t['VENTAS'] = "Saved Offers";
+t['MAPSCAN'] = "Scan แผนที่";
+t['BIC'] = "แสดง extended icons";
+t['SAVE'] = "บันทึก";
+t['AT2'] = "ส่งกองกำลังเสริม";
+t['AT3'] = "โจมตี: ปกติ";
+t['AT4'] = "โจมตี: ปล้น";
+t['NBSA'] = "อัตโนมัติ";
+t['NBSN'] = "ปกติ (เล็ก)";
+t['NBSB'] = "จอขนาดใหญ่ (ใหญ่)";
+t['NBHAX'] = "ขยายความสูงอัตโนมัติ";
+t['NBHK'] = "ความสูงปกติ";
+t['NPCSAVETIME'] = "ประหยัดเวลา: ";
+t['TOTALTROOPS'] = "กองกำลังของหมู่บ้านทั้งหมด";
 t['SELECTALLTROOPS'] = "เลือกกองกำลังทั้งหมด";
 t['PARTY'] = "การเฉลิมฉลอง";
 t['CPPERDAY'] = "CP/วัน";
@@ -9430,95 +8628,707 @@ t['SLOT'] = "ช่อง";
 t['TOTAL'] = "รวม";
 t['SELECTSCOUT'] = "เลือกหน่วยสอดแนม";
 t['SELECTFAKE'] = "เลือกโจมตีหลอก";
-t['NOSCOUT2FAKE'] = "มันเป็นไปไม่ได้ที่จะใช้หน่วยสอดแนมสำหรับการโจมตีหลอก !";
-t['NOTROOP2FAKE'] = "ไม่มีกองกำลังสำหรับสิ่งที่โจมตี!";
-t['NOTROOP2SCOUT'] = "ไม่มีหน่วยสอดแนม !";
-t['NOTROOPS'] = "ไม่มีกองกำลังในหมู่บ้าน !";
 t['ALL'] = "ทั้งหมด";
 t['SOREP'] = "แสดงรายงานแบบเดิม (for posting)";
-t['56'] = "แสดงข้อมูล ประเภทของcellหรือโอเอซิส<br>ขณะที่เมาส์อยู่บนแผนที่";
-t['10'] = "ใช้ลิ้งค์จำลองการต่อสู้:<br>(เมนูด้านซ้าย)";
 t['WSIMO1'] = "ภายใน (provided by the game)";
 t['WSIMO2'] = "ภายนอก (provided by kirilloid.ru)";
-t['27'] = "ใช้ World Analyser";
-t['28'] = "แสดงลิ้งค์ analyser statistic";
 t['UPDSCR'] = "ปรับปรุง script เดี๋ยวนี้?";
 t['CHECKUPDATE'] = "กำลังปรับปรุง script. กรุณารอสักครู่...";
-t['CROPFINDER'] = "Crop finder";
 t['AVPPV'] = "ประชากรเฉลี่ยต่อหมู่บ้าน";
 t['AVPPP'] = "ประชากรเฉลี่ยต่อผู้เล่น";
-t['69'] = "Console Log Level<br>สำหรับ PROGRAMMERS หรือ DEBUGGING เท่านั้น<br>(ปกติ = 0)";
-t['48'] = "Number of offer pages to preload<br>while on the 'Market => Buy' page<br>(ปกติ = 1)";
-t['U.3'] = 'ชื่อเมืองหลวงของคุณ<br>Visit your Profile for an update';
-t['U.6'] = 'พิกัดของเมืองหลวง<br>Visit your Profile for an update';
-t['MAX'] = 'สูงสุด';
-t['57'] = 'แสดงระยะทางและเวลา';
-t['LARGEMAP'] = 'แผนที่ขนาดใหญ่';
-t['TOWNHALL'] = 'ศาลากลาง';
-t['ACCINFO'] = 'ข้อมูลบัญชี';
-t['NBO'] = 'กล่องข้อความ';
-t['MNUL'] = 'เมนูด้านซ้าย';
-t['STAT'] = 'สถิติ';
-t['RESF'] = 'พื้นที่ทรัพยากร';
-t['VLC'] = 'ศูนย์กลางหมู่บ้าน';
-t['4'] = 'ตลาด';
-t['5'] = 'จุดระดมพล/ค่ายทหาร/ห้องเครื่อง/โรงม้า';
-t['6'] = "ศาลากลาง/คฤหาสน์ของฮีโร่/คลังแสง/ช่างตีเหล็ก";
+t['MAX'] = "สูงสุด";
+t['LARGEMAP'] = "แผนที่ขนาดใหญ่";
+t['TOWNHALL'] = "ศาลากลาง";
+t['ACCINFO'] = "ข้อมูลบัญชี";
+t['NBO'] = "กล่องข้อความ";
+t['MNUL'] = "เมนูด้านซ้าย";
+t['STAT'] = "สถิติ";
+t['RESF'] = "พื้นที่ทรัพยากร";
+t['VLC'] = "ศูนย์กลางหมู่บ้าน";
 t['HEROSMANSION'] = "คฤหาสน์ของฮีโร่";
-t['BLACKSMITH'] = 'ช่างตีเหล็ก';
-t['ARMOURY'] = 'คลังแสง';
-t['NOW'] = 'เดี๋ยวนี้';
-t['CLOSE'] = 'ปิด';
-t['USE'] = 'ใช้';
-t['OVERVIEW'] = 'ภาพรวม';
-t['FORUM'] = 'ฟอรัม';
-t['ATTACKS'] = 'โจมตี';
-t['NEWS'] = 'ข่าว';
-t['ADDCRTPAGE'] = 'เพิ่มหน้าปัจจุบัน';
-t['SCRPURL'] = 'หน้า TBeyond';
-t['50'] = 'จำนวนของหน่วยสอดแนมสำหรับ<br>ฟังก์ชัน "เลือกหน่วยสอดแนม"';
-t['SPACER'] = 'คั่น';//Spacer
-t['53'] = 'แสดงข้อมูลกองกำลังใน tooltips';
-t['MEREO'] = 'ข่าวสาร & รายงาน';
-t['59'] = 'Number of message/report pages to preload<br>(Default = 1)';
-t['ATTABLES'] = 'Troop tables';
-t['MTW'] = 'ไร้ประโยชน์';
-t['MTX'] = 'มากมาย';
-t['MTC'] = 'Current load';
-t['ALFL'] = 'Link to external forum<br>(Leave empty for internal forum)';
-t['82.L'] = 'ล็อคบุ๊คมาร์ค (ซ่อนปุ่ม ลบ, เลื่อนขึ้น, เลื่อนลง, แก้ไข)';
-t['MTCL'] = 'ล้างทั้งหมด';
-t['82.U'] = 'ปลดล็อคบุ๊คมาร์ค (แสดงปุ่ม ลบ, เลื่อนขึ้น, เลื่อนลง, แก้ไข)';
-t['CKSORT'] = 'คลิกเพื่อจัดเรียง';
-t['MIN'] = 'ต่ำสุด';
-t['SVGL'] = 'แบ่งระหว่างหมู่บ้าน';
-t['VGL'] = 'รายชื่อหมู่บ้าน';
-t['12'] = "แสดงลิ้งค์ 'dorf1.php' และ 'dorf2.php'";
-t['UPDATEPOP'] = 'ปรับปรุงประชากร';
-t['54'] = 'แสดงระยะทางและเวลาไปถึงหมู่บ้านใน tooltips';
-t['EDIT'] = 'แก้ไข';
-t['NEWVILLAGEAV'] = 'วันที่/เวลา';
-t['TIMEUNTIL'] = 'เวลาที่รอ';
-t['61'] = 'แสดงตาราง "ลบทั้งหมด" บนหน้ารายงาน';
-t['62'] = 'แสดงไอคอน "ส่ง IGM"';
-t['CENTERMAP'] = 'ไปยังกลางแผนที่';
-t['13'] = 'แสดงไอคอน "ไปยังกลางแผนที่"';
-t['SENDTROOPS'] = 'ส่งกองกำลัง';
-t['7'] = "พระราชวัง/ที่พักอาศัย/สถานศึกษา/คลังสมบัติ";
+t['BLACKSMITH'] = "ช่างตีเหล็ก";
+t['ARMOURY'] = "คลังแสง";
+t['NOW'] = "เดี๋ยวนี้";
+t['CLOSE'] = "ปิด";
+t['OVERVIEW'] = "ภาพรวม";
+t['FORUM'] = "ฟอรัม";
+t['ATTACKS'] = "โจมตี";
+t['NEWS'] = "ข่าว";
+t['ADDCRTPAGE'] = "เพิ่มหน้าปัจจุบัน";
+t['SCRPURL'] = "หน้า TBeyond";
+t['SPACER'] = "คั่น";
+t['MEREO'] = "ข่าวสาร & รายงาน";
+t['ATTABLES'] = "Troop tables";
+t['MTW'] = "ไร้ประโยชน์";
+t['MTX'] = "มากมาย";
+t['MTC'] = "Current load";
+t['ALFL'] = "Link to external forum<br>(Leave empty for internal forum)";
+t['MTCL'] = "ล้างทั้งหมด";
+t['CKSORT'] = "คลิกเพื่อจัดเรียง";
+t['MIN'] = "ต่ำสุด";
+t['SVGL'] = "แบ่งระหว่างหมู่บ้าน";
+t['VGL'] = "รายชื่อหมู่บ้าน";
+t['UPDATEPOP'] = "ปรับปรุงประชากร";
+t['EDIT'] = "แก้ไข";
+t['NEWVILLAGEAV'] = "วันที่/เวลา";
+t['TIMEUNTIL'] = "เวลาที่รอ";
+t['CENTERMAP'] = "ไปยังกลางแผนที่";
+t['SENDTROOPS'] = "ส่งกองกำลัง";
 t['PALACE'] = "พระราชวัง";
 t['RESIDENCE'] = "ที่พักอาศัย";
 t['ACADEMY'] = "สถานศึกษา";
 t['TREASURY'] = "คลังสมบัติ";
+t['USE'] = "ใช้";
+t['CROPFINDER'] = "Crop finder";
 break;
-}
-}
 
-//additional setup items
-if ( !t['80'] )  { t['80']  = t['53']; }
-if ( !t['81'] )  { t['81']  = t['54']; }
-if ( !t['86'] )  { t['86']  = t['28'] + " &<br>" + t['30']; }
-if ( !t['99'] )  { t['99']  = t['85']; }
-if ( !t['103'] ) { t['103'] = t['26']; }
+case 'tr': //contributors: greench, alinafiz, LeventT
+t['1'] = "Travian v2.x sunucusu";
+t['3'] = "T3.1 Lejyoner & Phalanx kapasite hesaplayıcıyı zorla<br>(karışık T3.1 & T3.5 sunucuları için)";
+t['4'] = "Pazar yeri";
+t['5'] = "Askeri Üs/Kışla/Tamirhane/Ahır";
+t['6'] = "Belediye/Kahraman Kışlası/Silah Dökümhanesi/Zırh Dökümhanesi";
+t['7'] = "Saray/Köşk/Akademi/Hazine Binası";
+t['8'] = "Birlik";
+t['9'] = "Sol menüde ek bağlantılar göster<br>(Traviantoolbox, World Analyser, Travilog, Map, benzeri.)";
+t['10'] = "Savaş simülatörü kullanımı:<br>(sol menü)";
+t['12'] = "'dorf1.php' ve 'dorf2.php' bağlantılarını göster";
+t['13'] = "\"Bu köyü haritada ortala\" simgesini göster";
+t['14'] = "Köy listesinde 'Destek gönder/Hammadde gönder' simgelerini göster";
+t['15'] = "Saatlik odun, tuğla, demir üretimini köy listesinde göster";
+t['16'] = "Köy listesinde net tahıl üretimini göster";
+t['17'] = "Köy listesinde nüfusu göster";
+t['18'] = "Kayan pencere olarak ek köy listesini göster (2 sütunlu)";
+t['19'] = "Köy listesinde asker hareketleri ve inşaat bilgilerini göster";
+t['20'] = "Yerimlerini göster";
+t['21'] = "'Kullanıcı Yerimleri'ni kayan pencere olarak göster";
+t['22'] = "Not defterini göster";
+t['23'] = "'Not Defteri'ni kayan pencere olarak göster";
+t['24'] = "Not defteri boyutu";
+t['25'] = "Not defteri yüksekliği";
+t['26'] = "NPC Asistanı hesaplayıcısını/bağlantılarını göster";
+t['27'] = "İstatistik sitesi kullanımı";
+t['28'] = "Bağlantılarda istatistik bağlantısını göster";
+t['29'] = "Kullanıcılacak harita analizi sitesi";
+t['30'] = "Oyuncular için harita bağlantısını göster";
+t['31'] = "Birlikler için harita bağlantısını göster";
+t['32'] = "'Arama Çubuğu'nu göster";
+t['33'] = "'Arama Çubuğu'nu kayan pencere olarak göster ";
+t['34'] = "Geliştirme tablosunda KP/gün bilgisini göster";
+t['35'] = "Geliştirme tablosunda tahıl tüketimini göster";
+t['37'] = "Kaynak alanlarını geliştirme tablosunu göster";
+t['38'] = "Kaynak düzeyleri renklerini göster";
+t['39'] = "'Hammadde Grafiği'ni göster";
+t['40'] = "'Hammadde Grafiği'ni kayan pencere olarak göster";
+t['41'] = "Binaların geliştirme tablosunu göster";
+t['42'] = "Geliştirme tablosunda binaları isme göre sırala";
+t['43'] = "Orta numaraları göster";
+t['44'] = "Bina düzeyleri renklerini göster";
+t['45'] = "Binalar için yükseltilen seviyeyi parlat";
+t['46'] = "Her pazarcı gelişi için ilave bilgi göster";
+t['47'] = "Son pazar naklini göster";
+t['48'] = "'Pazar Yeri=> Satın al' sayfasındayken<br>önyüklenen sayfa sayısı<br>(Varsayılan= 1 ya da Boş ; Maks = 5)";
+t['49'] = "Askeri üs varsayılan eylemi";
+t['50'] = "\"Casus seç\" işlevi için<br> casus sayısı";
+t['53'] = "Araç ipuçları bölümünde asker bilgisini göster";
+t['54'] = "Araç ipuçlarında köye ulaşım süresini ve uzaklığı göster";
+t['56'] = "Haritada fare ile üzerine gelindiğinde<br>köy türünü göster/vadi bilgisini göster";
+t['57'] = "Mesafe ve süreyi göster";
+t['58'] = "Haritada oyuncu/köy/fethedilmiş vahalar tablosunu göster";
+t['59'] = "Önyüklenen Mesaj/Rapor sayfası sayısı<br>(Default = 1)";
+t['60'] = "Açılır pencerede mesaj/rapor açma bağlantısını göster";
+t['61'] = "Raporlar sayfasına \"Tümünü sil\" tablosu ekle";
+t['62'] = "\"IGM Gönder\" simgesini benim için de göster";
+t['63'] = " geliştirilmiş Savaş Raporlarını göster";
+t['64'] = "Rapor İstatistiklerinde detayları göster";
+t['65'] = "Geliştirme olanaklı rengi<br>(Varsayılan = Boş)";
+t['66'] = "En üst düzey rengi<br>(Varsayılan = Boş)";
+t['67'] = "Geliştirme olanaklı değil rengi<br>(Varsayılan = Boş)";
+t['68'] = "NPC üzerinden geliştirme rengi<br>(Varsayılan = Boş)";
+t['69'] = "Konsolun Kayıt Düzeyi<br>PROGRAMCILAR VE SORUN GİDERME İÇİN<br>(Varsayılan = 0)";
+t['82.L'] = "Yerimlerini kitle (Sil, yukarı taşı, aşağı taşı simgelerini gizler)";
+t['82.U'] = "Yerimleri kilidini aç (Sil, yukarı taşı, aşağı taşı simgelerini gösterir)";
+t['U.2'] = "Irk";
+t['U.3'] = "Merkez Köyün Adı<br>Değiştirmeyin,onun yerine Profilinizi ziyaret edin";
+t['U.6'] = "Merkez Köyün koordinatları<br>Değiştirmeyin,onun yerine Profilinizi ziyaret edin";
+t['SIM'] = "Savaş Simülatörü";
+t['QSURE'] = "Emin misiniz?";
+t['LOSS'] = "Kayıp";
+t['PROFIT'] = "Kazanç";
+t['EXTAV'] = "Geliştirilebilir";
+t['PLAYER'] = "Oyuncu";
+t['VILLAGE'] = "Köy";
+t['POPULATION'] = "Nüfus";
+t['COORDS'] = "Koordinatlar";
+t['MAPTBACTS'] = "Eylemler";
+t['SAVED'] = "Kaydedildi";
+t['YOUNEED'] = "İhtiyacınız olan";
+t['TODAY'] = "bugün";
+t['TOMORROW'] = "yarın";
+t['DAYAFTERTOM'] = "ertesi gün";
+t['MARKET'] = "Pazar yeri";
+t['BARRACKS'] = "Kışla";
+t['RAP'] = "Askeri üs";
+t['STABLE'] = "Ahır";
+t['WORKSHOP'] = "Tamirhane";
+t['SENDRES'] = "Hammdde gönder";
+t['BUY'] = "Satın al";
+t['SELL'] = "Sat";
+t['SENDIGM'] = "Genel mesaj gönder";
+t['LISTO'] = "Mümkün";
+t['ON'] = "";
+t['AT'] = "";
+t['EFICIENCIA'] = "Verimlilik";
+t['NEVER'] = "Hiç bir zaman";
+t['ALDEAS'] = "Köy(ler)";
+t['TIEMPO'] = "Süre";
+t['OFREZCO'] = "Önerilen";
+t['BUSCO'] = "İstenilen";
+t['TIPO'] = "Oran";
+t['DISPONIBLE'] = "Sadece olanaklı olanlar";
+t['CUALQUIERA'] = "Hiçbiri";
+t['YES'] = "Evet";
+t['NO'] = "Hayır";
+t['LOGIN'] = "Giriş";
+t['MARCADORES'] = "Yerimleri";
+t['ANYADIR'] = "Ekle";
+t['UBU'] = "Yeni yerimi adresi";
+t['UBT'] = "Yeni yerimi yazısı";
+t['DEL'] = "Sil";
+t['MAPA'] = "Harita";
+t['MAXTIME'] = "En fazla süre";
+t['ARCHIVE'] = "Arşiv";
+t['SUMMARY'] = "Özet";
+t['TROPAS'] = "Destekler";
+t['CHKSCRV'] = "TBeyond u güncelle";
+t['ACTUALIZAR'] = "Köy bilgisini güncelle";
+t['VENTAS'] = "Kayıtlı Teklifler";
+t['MAPSCAN'] = "Haritayı Tara";
+t['BIC'] = "Ek simgeleri göster";
+t['SAVE'] = "Kaydet";
+t['AT2'] = "Destek";
+t['AT3'] = "Saldırı: Normal";
+t['AT4'] = "Saldırı: Yağma";
+t['NBSA'] = "Oto";
+t['NBSN'] = "Normal (küçük)";
+t['NBSB'] = "geniş ekran (büyük)";
+t['NBHAX'] = "Yüksekliği otomatik genişlet";
+t['NBHK'] = "Varsayılan yükseklik";
+t['NPCSAVETIME'] = "Kazanılan zaman: ";
+t['TOTALTROOPS'] = "Köydeki toplam asker";
+t['SELECTALLTROOPS'] = "Tüm askerleri seç";
+t['PARTY'] = "Festivaller";
+t['CPPERDAY'] = "KP/gün";
+t['SLOT'] = "Boşluk";
+t['TOTAL'] = "Toplam";
+t['SELECTSCOUT'] = "Casus seç";
+t['SELECTFAKE'] = "Sahte saldırı seç";
+t['ALL'] = "Tümü";
+t['SH2'] = "renk alanına şunları girebilirsiniz:<br>- green ya da red ya da orange, vb.<br>- HEX renk kodları, örneğin #004523<br>- varsayılan renkler için boş bırakın";
+t['SOREP'] = "Özgün raporu göster (foruma aktarmak için)";
+t['WSIMO1'] = "Oyunun kendi hesaplayıcısı (oyun tarafından sağlanan)";
+t['WSIMO2'] = "Harici (kirilloid.ru tarafından sağlanan)";
+t['NONEWVER'] = "Son sürüme sahipsiniz";
+t['BVER'] = "Beta sürümüne sahip olabilirsiniz";
+t['NVERAV'] = "Betiğin(script) yeni sürümü var";
+t['UPDSCR'] = "Betik şimdi güncellensin mi ?";
+t['CHECKUPDATE'] = "Betik güncellemesi denetleniyor.<br>Lütfen bekleyin...";
+t['AVPPV'] = "Köy başına ortalama nüfus";
+t['AVPPP'] = "Oyuncu başına ortalama  nüfus";
+t['MAX'] = "En fazla";
+t['TOTTRTR'] = "Eğitimdeki asker sayısı";
+t['TB3SL'] = "$1 Ayarları";
+t['UPDALLV'] = "Tüm köyleri güncelle. DİKKATLİ KULLANIN, HESABINIZ CEZA ALABİLİR!";
+t['LARGEMAP'] = "Büyük harita";
+t['USETHEMPR'] = "Bunları kullan (oransal)";
+t['USETHEMEQ'] = "Bunları kullan (eş miktarda)";
+t['TOWNHALL'] = "Belediye";
+t['GSRVT'] = "Oyun sunucusu";
+t['ACCINFO'] = "Hesap Bilgisi";
+t['NBO'] = "Not defteri";
+t['MNUL'] = "Soldaki menü";
+t['STAT'] = "İstatistikler";
+t['RESF'] = "Hammadde alanları";
+t['VLC'] = "Köy merkezi";
+t['MAPO'] = "Harita ayarları";
+t['COLO'] = "Renk seçenekleri";
+t['DBGO'] = "Sorun giderme seçenekleri";
+t['HEROSMANSION'] = "Kahraman kışlası";
+t['BLACKSMITH'] = "Silah dökümhanesi";
+t['ARMOURY'] = "Zırh dökümhanesi";
+t['NOW'] = "Şimdi";
+t['CLOSE'] = "Kapat";
+t['USETHEM1H'] = "Bunları Kullan (1 saatlik üretim)";
+t['OVERVIEW'] = "Genel bakış";
+t['FORUM'] = "Forum";
+t['ATTACKS'] = "Saldırılar";
+t['NEWS'] = "Haberler";
+t['ADDCRTPAGE'] = "Bu sayfayı yerimine ekle";
+t['SCRPURL'] = "TBeyond sayfası";
+t['SPACER'] = "Ayırıcı";
+t['MEREO'] = "Mesajlar & Raporlar";
+t['ATTABLES'] = "Asker tablosu";
+t['MTW'] = "Artan";
+t['MTX'] = "Aşan";
+t['MTC'] = "Güncel yük";
+t['ALFL'] = "Harici forumun adresi<br>(Dahili forum için boş bırakın)";
+t['MTCL'] = "Tümünü temizle";
+t['CKSORT'] = "Sıralamak için tıklayın";
+t['MIN'] = "En az";
+t['SVGL'] = "Köyler arasında paylaştır";
+t['VGL'] = "Köy Listesi";
+t['UPDATEPOP'] = "Nüfusu güncelle";
+t['EDIT'] = "Düzenle";
+t['NPCO'] = "NPC Asistanı ayarları";
+t['NEWVILLAGEAV'] = "Tarih/Zaman";
+t['TIMEUNTIL'] = "Bekleme süresi";
+t['CENTERMAP'] = "Bu köyü haritada ortala";
+t['SENDTROOPS'] = "Asker gönder";
+t['PALACE'] = "Saray";
+t['RESIDENCE'] = "Köşk";
+t['ACADEMY'] = "Akademi";
+t['TREASURY'] = "Hazine Binası";
+t['UPGTB'] = "Hammadde alanlarını ve binaları geliştirme tablosu";
+t['RBTT'] = "Hammadde Grafiği";
+t['USE'] = "Kullan";
+t['RESIDUE'] = "İnşa edilmesi halinde kalan";
+t['RESOURCES'] = "Kaynaklar";
+t['CROPFINDER'] = "Tarla bulucu";
+break;
+
+case 'ua': //contributors: jin
+t['1'] = "Сервер Travian 2.x версії";
+t['4'] = "Ринок";
+t['5'] = "Пункт збору/Казарма/Майстерня/Стайня";
+t['6'] = "Ратуша/Таверна/Кузня обладунків/Кузня зброї";
+t['7'] = "Палац/Резиденція/Академія/Скарбниця";
+t['8'] = "Альянс";
+t['9'] = "Показувати додаткові посилання в лівому меню<br>(Traviantoolbox, World Analyser, Travilog, Map і т.д.)";
+t['10'] = "Використовувати симулятор бою:<br>(ліве меню)";
+t['12'] = "Показувати посилання на 'dorf1.php' и 'dorf2.php'";
+t['13'] = "Показувати іконку \"Центрувати поселення на карті\"";
+t['14'] = "Показувати іконку 'Відправити війська/Відправити ресурси' в списку поселень";
+t['16'] = "Показувати прибуток зерна у списку поселень";
+t['17'] = "Показувати населення в списку поселень";
+t['18'] = "Показати додатковий (2 колонки) список поселень у плаваючому вікні";
+t['19'] = "Показувати інформацію про будівлі, що розвиваються в даний час<br> і війська, які зараз у поході в списку поселень";
+t['20'] = "Показувати закладки";
+t['21'] = "Показувати \"Закладки\" в плаваючому вікні";
+t['22'] = "Показувати поле заміток";
+t['23'] = "Показувати \"Замітки\" в плаваючому вікні";
+t['24'] = "Розмір поля заміток";
+t['25'] = "Висота поля заміток";
+t['26'] = "Показувати розрахунки NPC-асистента/ посилання";
+t['27'] = "Який аналізатор світу використовувати?";
+t['28'] = "Показувати посилання на статистику аналізатора";
+t['29'] = "Використати аналізатор карти";
+t['30'] = "Показувати посилання на карту для користувачів";
+t['31'] = "Показувати посилання до карти для альянсів";
+t['32'] = "Показати \"Пошук\"";
+t['33'] = "Показувати \"Пошук\" в плаваючому вікні";
+t['34'] = "Показувати одиниці культури/день в таблиці модернізації";
+t['35'] = "Показувати споживання зерна у таблиці модернізації";
+t['36'] = "Показувати \"До тих пір/Залишок\" підрахунок в таблицях модернізації";
+t['37'] = "Показувати таблицю розвитку ресурсних полів";
+t['38'] = "Показувати рівні ресурсних полів кольорами";
+t['39'] = "Показувати таблицю \"Ресурси\"";
+t['40'] = "Показувати таблицю \"Ресурси\" у плаваючому вікні";
+t['41'] = "Показувати таблицю развитку споруд";
+t['42'] = "Сортувати за назвою будівлі у таблиці модернізації";
+t['43'] = "Показувати рівні споруд в центрі";
+t['44'] = "Показувати рівні споруд кольорами";
+t['45'] = "Блимання рівня споруди, що будується";
+t['48'] = "Кількість сторінок, які відображатимуться в розділі<br>'Ринок => Купівля' сторінок<br>(за замовчуванням =1)";
+t['49'] = "Дії пункту збору за замовчуванням:";
+t['50'] = "Кількість розвідників для функції<br>\"Розвідка\"";
+t['53'] = "Показувати інформацію про війска в підказках";
+t['54'] = "Показувати відстань і час до поселення у підказках";
+t['56'] = "Показувати тип клітинки <br>під час пересування мишки над картою ";
+t['57'] = "Показувати відстань і час";
+t['58'] = "Показати таблицю гравців / поселень / захоплених оазисів";
+t['59'] = "Кількість сторінок для перезавантаження <br>(за замовчуванням = 1)";
+t['60'] = "Показувати посилання для відкриття в новому вікні";
+t['61'] = "Показувати \"Видалити всі\" на сторінці звітів";
+t['62'] = "Для мене також показувати іконку \"Відправити повідомлення\"";
+t['63'] = "Показувати розширені звіти боїв ()";
+t['64'] = "Показувати подробиці в статистиці звітів";
+t['65'] = "Колір, коли доступний розвиток<br>(за замовчуванням = порожнє)";
+t['66'] = "Колір максимального рівня<br>(за замовчуванням = порожнє)";
+t['67'] = "Колір, коли розвиток не доступний<br>(за замовчуванням = порожнє)";
+t['68'] = "Колір, коли доступний розвиток за допомогою NPC-асистента<br>(за замовчуванням = порожнє)";
+t['69'] = "Console Log Level<br>ТІЛЬКИ ДЛЯ ПРОГРАМІСТІВ ЧИ ВІДЛАДЧИКІВ<br>(за замовчуванням = 0)";
+t['82.L'] = "Заблокувати закладки (Приховати видалити, рухати вверх, рухати вниз іконки)";
+t['82.U'] = "Розблокувати закладки (Приховати видалити, рухати вверх, рухати вниз іконки)";
+t['U.2'] = "Раса";
+t['U.3'] = "Назва твоєї столиці<br>Відвідай свій профіль для обновлення";
+t['U.6'] = "Координати твоєї столиці<br>Відвідай свій профіль для обновлення";
+t['SIM'] = "Симулятор бою";
+t['QSURE'] = "Ви впевнені?";
+t['LOSS'] = "Втрати";
+t['PROFIT'] = "Прибуток";
+t['EXTAV'] = "Розвиток доступний";
+t['PLAYER'] = "Гравець";
+t['VILLAGE'] = "Поселення";
+t['POPULATION'] = "Населення";
+t['COORDS'] = "Координати";
+t['MAPTBACTS'] = "Дії";
+t['SAVED'] = "Збережено";
+t['YOUNEED'] = "Не вистачає";
+t['TODAY'] = "сьогодні";
+t['TOMORROW'] = "завтра";
+t['DAYAFTERTOM'] = "післязавтра";
+t['MARKET'] = "Ринок";
+t['BARRACKS'] = "Казарма";
+t['RAP'] = "Пункт збору";
+t['STABLE'] = "Стайня";
+t['WORKSHOP'] = "Майстерня";
+t['BUY'] = "Купити";
+t['SELL'] = "Продати";
+t['SENDIGM'] = "Відправити повідомлення";
+t['LISTO'] = "Доступний";
+t['ON'] = "на";
+t['AT'] = "о";
+t['EFICIENCIA'] = "Ефективність";
+t['NEVER'] = "Ніколи";
+t['ALDEAS'] = "Поселення";
+t['TIEMPO'] = "Час";
+t['OFREZCO'] = "Продаж";
+t['BUSCO'] = "Купівля";
+t['TIPO'] = "Співвідношення";
+t['DISPONIBLE'] = "Лише доступні";
+t['CUALQUIERA'] = "Всі";
+t['YES'] = "Так";
+t['NO'] = "Ні";
+t['LOGIN'] = "Логін";
+t['MARCADORES'] = "Закладки";
+t['ANYADIR'] = "Додати";
+t['UBU'] = "Додати адресу (http://***) в закладки";
+t['UBT'] = "Назва закладки";
+t['DEL'] = "Видалити";
+t['MAPA'] = "Карта";
+t['MAXTIME'] = "Максимальний час";
+t['ARCHIVE'] = "Архів";
+t['SUMMARY'] = "Сумарно";
+t['TROPAS'] = "Відправити  військо";
+t['CHKSCRV'] = "Оновити TBeyond";
+t['ACTUALIZAR'] = "Оновити інформацію про поселення";
+t['VENTAS'] = "Збережені пропозиції";
+t['MAPSCAN'] = "Сканувати карту";
+t['BIC'] = "Відображення іконок";
+t['SAVE'] = "Зберегти";
+t['AT2'] = "Підкріплення";
+t['AT3'] = "Напад: звичайний";
+t['AT4'] = "Напад: розбійницький набіг";
+t['NBSA'] = "Автоматично";
+t['NBSN'] = "Нормальний (маленький)";
+t['NBSB'] = "Великий екран (великий)";
+t['NBHAX'] = "Автоматичне збільшення висоти";
+t['NBHK'] = "Висота за замовчуванням";
+t['NPCSAVETIME'] = "Час: ";
+t['TOTALTROOPS'] = "Власні війська в поселенні";
+t['SELECTALLTROOPS'] = "Вибрати все військо";
+t['PARTY'] = "Свята";
+t['CPPERDAY'] = "Од.культ./день";
+t['SLOT'] = "Комірка";
+t['TOTAL'] = "Загалом";
+t['SELECTSCOUT'] = "Відправити розвідника";
+t['SELECTFAKE'] = "Відправити спам";
+t['ALL'] = "Всі";
+t['SH2'] = "В полях введення кольорів можна ввести:<br>- green(зелений) чи red(червоний) чи  orange(оранжевий), і т.д.<br>- HEX-код кольору #004523<br>- залишити порожнім для значення за замовчуванням";
+t['SOREP'] = "Прибрати опис(для відправлення)";
+t['WSIMO1'] = "Внутрішній (travian.com.ua)";
+t['WSIMO2'] = "Зовнішній (kirilloid.ru)";
+t['NONEWVER'] = "В тебе остання версія";
+t['BVER'] = "Ви можете мати бета-версію";
+t['NVERAV'] = "Доступна нова версія скрипта";
+t['UPDSCR'] = "Ви хочече обновити скрипт зараз?";
+t['CHECKUPDATE'] = "Пошук обновлень скрипта.<br>Будь ласка, зачекайте...";
+t['AVPPV'] = "Середня кількість населення на поселення";
+t['AVPPP'] = "Середня кількість населення на гравця";
+t['MAX'] = "Максимум";
+t['TOTTRTR'] = "Загальна кількість військ для навчання";
+t['TB3SL'] = "Налаштування $1";
+t['UPDALLV'] = "Оновити всі поселення";
+t['LARGEMAP'] = "Велика карта";
+t['USETHEMPR'] = "Використовувати (пропорційно). ";
+t['USETHEMEQ'] = "Використовувати (рівномірно).";
+t['TOWNHALL'] = "Ратуша";
+t['GSRVT'] = "Ігровий сервер";
+t['ACCINFO'] = "Інформація про акаунт";
+t['NBO'] = "Поле заміток";
+t['MNUL'] = "Меню з лівого боку";
+t['STAT'] = "Статистика";
+t['RESF'] = "Ресурсні поля";
+t['VLC'] = "Центр поселення";
+t['MAPO'] = "Налаштування карти";
+t['COLO'] = "Опції кольорів";
+t['DBGO'] = "Опції відладки";
+t['HEROSMANSION'] = "Таверна";
+t['BLACKSMITH'] = "Кузня зброї";
+t['ARMOURY'] = "Кузня обладунків";
+t['NOW'] = "Вже";
+t['CLOSE'] = "Закрити";
+t['USETHEM1H'] = "Використовувати (годинний видобуток).";
+t['OVERVIEW'] = "Огляд";
+t['FORUM'] = "Форум";
+t['ATTACKS'] = "Напади";
+t['NEWS'] = "Новини";
+t['ADDCRTPAGE'] = "Додати поточну";
+t['SCRPURL'] = "Сторінка TBeyond";
+t['SPACER'] = "Spacer";
+t['MEREO'] = "Повідомлення і Звіти";
+t['ATTABLES'] = "Таблиці військ";
+t['MTW'] = "Марнування";
+t['MTX'] = "Перевищення";
+t['MTC'] = "Завантажено";
+t['ALFL'] = "Посилання на зновнішній форум<br>(Залишити порожнім для внутрішнього форуму)";
+t['MTCL'] = "Очистити все";
+t['CKSORT'] = "Сортування";
+t['MIN'] = "Мінімум";
+t['SVGL'] = "Розподілити між поселеннями";
+t['VGL'] = "Список поселень";
+t['UPDATEPOP'] = "Оновити населення";
+t['EDIT'] = "Редагувати";
+t['NPCO'] = "Опції NPC-асистента";
+t['NEWVILLAGEAV'] = "Дата/Час";
+t['TIMEUNTIL'] = "Час очікування";
+t['CENTERMAP'] = "Центрувати карту на цьому поселенні";
+t['SENDTROOPS'] = "Відправлення війск";
+t['ACADEMY'] = "Академія";
+t['TREASURY'] = "Скарбниця";
+t['UPGTB'] = "Можливості полів/будівель в таблицях модернізації";
+t['RBTT'] = "Таблиця \"Ресурси\"";
+t['USE'] = "Використати";
+t['RESIDUE'] = "Залишок після розвитку ";
+t['RESOURCES'] = "Ресурси";
+t['CROPFINDER'] = "Пошук зерна";
+break;
+
+case 'vn': //contributors: Bao Bao
+t['1'] = "Travian v2.x server";
+t['2'] = "Hủy bỏ quảng cáo biểu ngữ";
+t['3'] = "Force T3.1 Legionnaire & Phalanx capacity calculation<br>(for mixed T3.1 & T3.5 servers)";
+t['4'] = "Chợ";
+t['5'] = "Binh trường/Doanh trại/Xưởng/Chuồng ngựa";
+t['6'] = "Tòa thị chính/Lâu đài tướng/Lò luyện giáp/Lò rèn";
+t['7'] = "Cung điện/Dinh thự/Học viện/Kho bạc";
+t['8'] = "Liên minh";
+t['9'] = "Hiện thị các liên kết mở rộng bên menu trái<br>(Traviantoolbox, World Analyser, Travilog, Map, etc.)";
+t['10'] = "Liên kết trận giả để sử dụng:";
+t['11'] = "Liên kết để sử dụng cho các trang web đăng tải các báo cáo";
+t['12'] = "Hiện các liên kết 'dorf1.php' and 'dorf2.php'";
+t['13'] = "Hiện thị biểu tưởng \"Trung tâm bản đồ\"";
+t['14'] = "Hiện thị biểu tượng 'Gửi lính/Gửi tài nguyên' trong danh sách làng";
+t['15'] = "Hiển thị gỗ, đất sét, sắt sản xuất cho mỗi giờ trong danh sách làng";
+t['16'] = "Hiện thị sản lượng thực sự trong danh sách làng";
+t['17'] = "Hiện thị dân số trong danh sách làng";
+t['18'] = "Hiện thị thêm danh sách  làng (2 cột) như là cửa sổ di chuyển được";
+t['19'] = "Hiện thị thông tin về tiến độ xây dựng kiến trúc và di chuyển lính <br>ở danh sách làng";
+t['20'] = "Hiện thị bookmarks";
+t['21'] = "Hiện thị 'User Bookmarks' như là cửa sổ di chuyển được";
+t['22'] = "Hiện bảng ghi chú";
+t['23'] = "Hiện thị 'Bảng ghi chú' như là cửa sổ di chuyển được";
+t['24'] = "Kích thước bảng ghi chú";
+t['25'] = "Chiều cao bảng ghi chú";
+t['26'] = "Hiện thị các liên kết/tính toán NPC trợ giúp";
+t['27'] = "Sử dụng bộ phân tích thế giới";
+t['28'] = "Hiện thị liên kết thông kê bộ phân tích";
+t['29'] = "Bộ phân tích bản đồ để sử dụng";
+t['30'] = "Hiện thị các liên kết tới bản đồ cho các user";
+t['31'] = "Hiện thị các liên kết tới bản đồ cho các liên minh";
+t['32'] = "Hiện thị 'Thanh tìm kiếm'";
+t['33'] = "Hiện thị 'Thanh tìm kiếm' như là cửa sổ di chuyển được";
+t['34'] = "Hiện thị thông tin CP/ngày trong bảng nâng cấp";
+t['35'] = "Hiện thị tiêu thụ trong bảng nâng cấp";
+t['36'] = "Hiện thị tính toán 'Đến khi/Còn lại' trong bảng nâng cấp/huấn luyện";
+t['37'] = "Hiện thị bảng nâng cấp tài nguyên";
+t['38'] = "Hiện thị màu cấp của tài nguyên";
+t['39'] = "Hiện thị bảng 'Tóm tắt tài nguyên'";
+t['40'] = "Hiện thị bảng 'Tóm tắt tài nguyên' như là cửa sổ có thể di chuyển được";
+t['41'] = "Hiện thị bảng nâng cấp kiến trúc";
+t['42'] = "Sắp xếp kiến trúc theo tên trong bảng nâng cấp";
+t['43'] = "Hiện thị số ở giữa";
+t['44'] = "Hiện thị màu cấp của kiến trúc";
+t['45'] = "Hiện thị nhấp nháy cấp độ kiến trúc đang được nâng cấp";
+t['46'] = "Hiển thị thông tin bổ sung cho tất cả các thương gia đến";
+t['48'] = "Số lượng trang được tải đặt trước<br>trong khi giao dịch trên trang 'Chợ => Mua'<br>(Mặc định = 1)";
+t['49'] = "Hoạt động mặc định của binh trường";
+t['50'] = "Số lượng trinh sát sử dụng cho chức năng<br>\"Lựa chọn trinh sát\"";
+t['53'] = "Hiện thị thông tinh lính trong tooltips";
+t['54'] = "Hiện thị khoảng cách và thời gian tới làng trong tooltips";
+t['56'] = "Hiện thị ô thông tin loại/ốc đảo<br>khi di chuột qua bản đồ";
+t['57'] = "Hiện thị khoảng cách và thời gian";
+t['58'] = "Hiện thị bảng người chơi/làng/ốc đảo đầy";
+t['59'] = "Số tin nhắn/trang báo cáo để tải trước<br>(Default = 1)";
+t['60'] = "Hiện thị liên kết để mở tin nhắn/báo cáo trong cửa sổ pop-up";
+t['61'] = "Hiện thị bảng \"Xóa tất cả\" trên trang Báo cáo";
+t['62'] = "Cũng hiện thị biểu tưởng \"Gửi IGM\"";
+t['63'] = "Hiện thị Báo cáo trận đánh tăng cường ";
+t['64'] = "Hiện thị chi tiết trong Thống kê";
+t['65'] = "Màu nâng cấp<br>(Mặc định = Rỗng)";
+t['66'] = "Màu cấp lớn nhất<br>(Mặc định = Rỗng)";
+t['67'] = "Màu nâng cấp chưa khi chưa đủ<br>(Mặc định = Rỗng)";
+t['68'] = "Màu nâng cấp bằng NPC<br>(Mặc định = Rỗng)";
+t['69'] = "Console Log Level<br>ONLY FOR PROGRAMMERS OR DEBUGGING<br>(Default = 0)";
+t['82.L'] = "Khóa bookmarks (Ẩn các biểu tưởng xóa, di chuyển lên, di chuyển xuống)";
+t['82.U'] = "Mở khóa bookmarks (Hiện các biểu tưởng xóa, di chuyển lên, di chuyển xuống)";
+t['U.2'] = "Chủng tộc";
+t['U.3'] = "Tên thủ đô<br><b>Xem Profile cho cập nhật</b>";
+t['U.6'] = "Tọa độ thủ đô<br><b>Xem Profile cho cập nhật</b>";
+t['SIM'] = "Trận giả";
+t['QSURE'] = "Bạn có chắc chắn không?";
+t['LOSS'] = "Thất bại";
+t['PROFIT'] = "Tiền lãi";
+t['EXTAV'] = "Mở rộng";
+t['PLAYER'] = "Người chơi";
+t['VILLAGE'] = "Làng";
+t['POPULATION'] = "Dân số";
+t['COORDS'] = "Tọa độ";
+t['MAPTBACTS'] = "Công việc";
+t['SAVED'] = "Đã ghi";
+t['YOUNEED'] = "Bạn cần";
+t['TODAY'] = "hôm nay";
+t['TOMORROW'] = "ngày mai";
+t['DAYAFTERTOM'] = "ngày kia";
+t['MARKET'] = "Chợ";
+t['BARRACKS'] = "Doanh trại";
+t['RAP'] = "Gửi lính";
+t['STABLE'] = "Chuồng ngựa";
+t['WORKSHOP'] = "Xưởng";
+t['SENDRES'] = "Gửi tài nguyên";
+t['SELL'] = "Bán";
+t['SENDIGM'] = "Gửi IGM";
+t['LISTO'] = "Có sẵn";
+t['ON'] = "bật";
+t['AT'] = "lúc";
+t['EFICIENCIA'] = "Efficiency";
+t['NEVER'] = "Never";
+t['ALDEAS'] = "Làng";
+t['TIEMPO'] = "Thời gian";
+t['OFREZCO'] = "Tặng";
+t['BUSCO'] = "Tìm kiếm";
+t['TIPO'] = "Loại";
+t['DISPONIBLE'] = "Chỉ có sẵn";
+t['CUALQUIERA'] = "Bất kỳ";
+t['YES'] = "Có";
+t['NO'] = "Không";
+t['LOGIN'] = "Login";
+t['MARCADORES'] = "Bookmarks";
+t['ANYADIR'] = "Thêm";
+t['UBU'] = "New Bookmark URL";
+t['UBT'] = "New Bookmark Text";
+t['DEL'] = "Xóa";
+t['MAPA'] = "Bản đồ";
+t['MAXTIME'] = "Thời gian tối đa";
+t['ARCHIVE'] = "Lưu trữ";
+t['SUMMARY'] = "Tóm tắt";
+t['TROPAS'] = "Lính";
+t['CHKSCRV'] = "Cập nhật TBeyond";
+t['ACTUALIZAR'] = "Cập  nhật thông tin làng";
+t['VENTAS'] = "Đề nghị đã lưu";
+t['MAPSCAN'] = "Tìm bản đồ";
+t['BIC'] = "Hiện thị các biểu tượng mở rộng";
+t['SAVE'] = "Ghi";
+t['AT2'] = "Tiếp viện";
+t['AT3'] = "Tấn công: Bình thường";
+t['AT4'] = "Tấn công: Cướp bóc";
+t['NBSA'] = "Tự động";
+t['NBSN'] = "Bình thường (nhỏ)";
+t['NBSB'] = "Màn hình lớn (lớn)";
+t['NBHAX'] = "Chiều cao mở rộng tự động";
+t['NBHK'] = "Chiều cao mặc định";
+t['NPCSAVETIME'] = "Ghi: ";
+t['TOTALTROOPS'] = "Tổng lính trong làng";
+t['SELECTALLTROOPS'] = "Chọn tất cả lính";
+t['PARTY'] = "Lễ";
+t['CPPERDAY'] = "CP/ngày";
+t['SLOT'] = "Vị trí";
+t['TOTAL'] = "Tổng";
+t['SELECTSCOUT'] = "Lựa chọn trinh thám";
+t['SELECTFAKE'] = "Lựa chọn giả";
+t['ALL'] = "Tất cả";
+t['SH2'] = "Trong các trường màu, bạn có thể chọn:<br>- <b>xanh lá cây</b> or <b>đỏ</b> or  <b>da cam</b>, etc.<br>- mã HEX giống như <b>#004523</b><br>- leave empty for the default color";
+t['SOREP'] = "Hiện thị báo cáo gốc (cho thông báo)";
+t['WSIMO1'] = "Nội địa (do game cung cấp)";
+t['WSIMO2'] = "Bên ngoài (do kirilloid.ru cung cấp)";
+t['NONEWVER'] = "Phiên bản mới đã có";
+t['BVER'] = "Bạn có thể sử dụng bảng beta";
+t['NVERAV'] = "Phiên bản mới của script đã có";
+t['UPDSCR'] = "Bạn có muốn cập nhật phiên bản mới không ?";
+t['CHECKUPDATE'] = "Đang kiểm tra phiên bản mới.<br>Xin chờ...";
+t['AVPPV'] = "Bình quân dân số trên một làng";
+t['AVPPP'] = "Bình quân dân số trên một người chơi";
+t['MAX'] = "Lớn nhất";
+t['TOTTRTR'] = "Tổng lính đang huấn luyện";
+t['TB3SL'] = "$1 Cài đặt";
+t['UPDALLV'] = "Cập nhật tất cả các làng.  USE WITH MAXIMUM CARE AS THIS CAN LEAD TO A BANNED ACCOUNT !";
+t['LARGEMAP'] = "Bản đồ lớn";
+t['USETHEMPR'] = "Sử dụng chúng (tỷ lệ)";
+t['USETHEMEQ'] = "Sử dụng (bằng)";
+t['TOWNHALL'] = "Tòa thị chính";
+t['GSRVT'] = "Game server";
+t['ACCINFO'] = "Thông tin tài khoản";
+t['NBO'] = "Bảng ghi chú";
+t['MNUL'] = "Menu hiện thị bên trái";
+t['STAT'] = "Thống kê";
+t['RESF'] = "Ruộng tài nguyên";
+t['VLC'] = "Trung tâm làng";
+t['MAPO'] = "Tùy chỉnh bản đồ";
+t['COLO'] = "Tùy chỉnh màu";
+t['DBGO'] = "Debug options";
+t['HEROSMANSION'] = "Lâu đài tướng";
+t['BLACKSMITH'] = "Lò rèn";
+t['ARMOURY'] = "Lò luyện giáp";
+t['NOW'] = "Bây giờ";
+t['CLOSE'] = "Đóng";
+t['USETHEM1H'] = "Sử dụng (1 giờ sản lượng)";
+t['OVERVIEW'] = "Tổng quát";
+t['FORUM'] = "Diễn đàn";
+t['ATTACKS'] = "Tấn công";
+t['NEWS'] = "Tin tức";
+t['ADDCRTPAGE'] = "Thêm trang đang xem vào bookmarks";
+t['SCRPURL'] = "TBeyond trang";
+t['SPACER'] = "Dấu cách";
+t['MEREO'] = "Tin nhắn & Báo cáo";
+t['ATTABLES'] = "Các bảng lính";
+t['MTW'] = "Wasted";
+t['MTX'] = "Exceeding";
+t['MTC'] = "Tải hiện tại";
+t['ALFL'] = "Liên kết tới diễn đàn ngoài<br>(Để trống là mặc định diễn đàn của game)";
+t['MTCL'] = "Xóa tất cả";
+t['CKSORT'] = "Click để sắp xếp";
+t['MIN'] = "Ít nhất";
+t['SVGL'] = "Chia sẽ các làng ở giữa";
+t['VGL'] = "Danh sách làng";
+t['UPDATEPOP'] = "Cập nhật dân số";
+t['EDIT'] = "Sửa";
+t['NPCO'] = "Tùy chỉnh NPC trợ giúp";
+t['NEWVILLAGEAV'] = "Ngày/Thời gian";
+t['TIMEUNTIL'] = "Thời gian chờ";
+t['CENTERMAP'] = "Trung tâm bản đồ";
+t['SENDTROOPS'] = "Gửi lính";
+t['PALACE'] = "Cung điện";
+t['RESIDENCE'] = "Dinh thự";
+t['ACADEMY'] = "Học viện";
+t['TREASURY'] = "Kho bạc";
+t['UPGTB'] = "Bảng nâng cấp Ruộng tài nguyên/kiến trúc";
+t['RBTT'] = "Tóm tắt tài nguyên";
+t['USE'] = "Sử dụng";
+t['RESIDUE'] = "Còn lại nếu bạn xây dựng kiến trúc này";
+t['RESOURCES'] = "Tài nguyên";
+t['SH1'] = "Mở profile của bạn để tự động phát hiện thủ đô/tọa độ<br>Xây dựng doanh trại để tự động phát hiện chủng tộc và sau đó mở trung tâm làng";
+t['CROPFINDER'] = "Crop finder";
+break;
+
+}}}
+function repairLanguage()
+{
+   //additional setup items
+   if ( !t['80'] )  { t['80']  = t['53']; }
+   if ( !t['81'] )  { t['81']  = t['54']; }
+   if ( !t['86'] )  { t['86']  = t['28'] + " &<br>" + t['30']; }
+   if ( !t['99'] )  { t['99']  = t['85']; }
+   if ( !t['103'] ) { t['103'] = t['26']; }
 }
 
 	function dummy() {return;};//does nothing. Used when there is no other choice but need to use a function
@@ -9530,20 +9340,17 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 	function arrayAdd(a, b) {if (!a) return arrayClone(b); if (!b) return arrayClone(a); var c = new Array(); for (var i = 0; i < Math.max(a.length,b.length); c[i] = a[i] + b[i++]); return c;};
 	function arrayToInt(arr) {var h = 0; for (var i in arr) {h += arr[i];}; return h;};//Sum all the values of the arr array
 	function $ls(aX) {return aX.toLocaleString();};//convert a number to local string
-	function xy2id(x, y) {return (1 + (parseInt(x) + 400) + (801 * Math.abs(parseInt(y) - 400)));};//get the vID of the cell having the x,y coordinates
+	function xy2id(x, y) {return (1 + (parseInt10(x) + 400) + (801 * Math.abs(parseInt10(y) - 400)));};//get the vID of the cell having the x,y coordinates
 	function log(level, msg) {if (console != undefined && level <= TB3O.O[69]) console.log(msg);};//Custom log function (log level, message to log)
 	function getNewdidFromLink(aLink) {aLink.search(/\?newdid=(\d+)/);return RegExp.$1;};
-	function getOrigBRTable() {var oT = $xf("//table[@class='tbg'] | //table[@class='std reports_read'] | //table[@class='reports std']"); if (!oT) oT = $g("report_surround"); return oT;};
 	function getDR(race) {var tt = 1;switch (race) {case "Teutons" : tt = 11; break; case "Gauls" : tt = 21; break;}; return tt;};
 	function setOfferFilter(aOffer, aFilter) {$at(aOffer, [['style', 'display:none;'], ["filtro" + aFilter, "on"]]);};
 	function isPostNPC() {return $xf('//p/following-sibling::*/img[starts-with(@class,"r")] | //p[@class="txt_menue"]/following-sibling::*/img[starts-with(@class,"r")] | //p[@class="txt_menue"]/following-sibling::*/img[@class="res"]', 'r').snapshotLength == 8;};//check if we are on the page where the NPC trade has been finished
 	function toJSvoid() {aX = $xf("//a[@href='#']", 'l'); for (var i = 0; i < aX.snapshotLength; i++) aX.snapshotItem(i).href = jsVoid;};//convert # links to jsVoid
-	function toNumber(aValue) {return parseInt(aValue.replace(/\W/g, "").replace(/\s/g, ""));};
-	function reloadMapFunctions() {TB3O.origMap = false; mapFunctions();};
-	function id2xy(vid) {var arrXY = new Array; var ivid = parseInt(vid); arrXY[0] = (ivid%801?(ivid%801)-401:400); arrXY[1] = 400 - (ivid - 401 - arrXY[0]) / 801; return arrXY;};//Inverse function for xy2id(x,y) => id2xy(vid) - fr3nchlover
+	function id2xy(vid) {var arrXY = new Array; var ivid = parseInt10(vid); arrXY[0] = (ivid%801?(ivid%801)-401:400); arrXY[1] = 400 - (ivid - 401 - arrXY[0]) / 801; return arrXY;};//Inverse function for xy2id(x,y) => id2xy(vid) - fr3nchlover
 	function addFillTimeRow() {var tbe = $g('l4').parentNode.parentNode; var tbecn1 = tbe.childNodes[0]; var aRow = getFillTimeRow(); tbe.insertBefore(aRow, tbecn1);};//add the fill time row
 	function getBootyCellInfo(booty) {iHTML = ''; for (var i = 0; i < 4; i++) {iHTML += gIc["r" + (i + 1)] + booty[i] + (i < 3 ? ' + ' : ' = ' + booty[4]);}; return iHTML;};
-	function getRPDefAction() {switch (parseInt(TB3O.O[49])) {case 1: dRPA = 'att_all_1'; break; case 2: dRPA = 'att_all_2'; break; default: dRPA = 'def1_1'; break;}; return dRPA;};
+	function getRPDefAction() {switch (parseInt10(TB3O.O[49])) {case 1: dRPA = 'att_all_1'; break; case 2: dRPA = 'att_all_2'; break; default: dRPA = 'def1_1'; break;}; return dRPA;};
 	function showDeleteAccount(){var aP = $xf("//*[@class='deltimer'] | //p[parent::div[@id='" + ID_LEFT + "'] and @style]"); if (aP) {moveElement(aP, document.body); $at(aP, [['class', 'delacc']]);};};
 	function insertNPCHistoryLink() {var bname = getQueryParameters(urlNow, NPCbacklinkName); if (!bname) bname = "Go back"; var div = $g(ID_MID2); div.innerHTML += '<p>&nbsp;<a href="#" onclick="window.history.go(-2)"> &laquo; ' + bname + '</a></p>';};//insert the NPC assistant back link
 	function pauseScript(ms) {var ms1 = getRndTime(ms); var aDate = new Date(); var crtDate = new Date(); do {crtDate = new Date();} while (crtDate - aDate < ms1);};
@@ -9619,8 +9426,8 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 			locXx = $xf("//span[@id='x']");
 			locXy = $xf("//span[@id='y']");
 
-			if (locXx) TB3O.xCrt = parseInt(locXx.textContent);
-			if (locXy) TB3O.yCrt = parseInt(locXy.textContent);
+			if (locXx) TB3O.xCrt = parseInt10(locXx.textContent);
+			if (locXy) TB3O.yCrt = parseInt10(locXy.textContent);
 
 			if (locX && !locXx && !locXy) {
 				aH = new Array();
@@ -9637,8 +9444,8 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 					if (aH.length > 1) {
 						strXY = aH[1].replace(")", "").replace(" ", "").replace(" ", "");
 						aCoord = strXY.split("|");
-						TB3O.xCrt = parseInt(aCoord[0]);
-						TB3O.yCrt = parseInt(aCoord[1]);
+						TB3O.xCrt = parseInt10(aCoord[0]);
+						TB3O.yCrt = parseInt10(aCoord[1]);
 						crtLocTitle += " (" + TB3O.xCrt + "|" + TB3O.yCrt + ")";
 					} else {
 						TB3O.xCrt = actV.vx;
@@ -9695,299 +9502,6 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 		};
 	};
 
-	function battleReportV2(aFrom){
-		var origT = getOrigBRTable();
-		if (!origT) return;
-		var txtorigT = origT.innerHTML;
-		if (TB3O.O[63] != '1') return;
-
-		var tx = $xf("//table[@class='std reports_read']//table[@class='std'] | //table[@class='tbg']//table[@class='tbg']", 'l');
-		if (tx.snapshotLength < 2) tx = $xf("//table[@class='std reports_read']//table[@class='tbg']", 'l');
-		if (tx.snapshotLength < 2) tx = $xf("//table[starts-with(@id, 'attacker') or starts-with(@class, 'defender')]", 'l');
-		if (tx.snapshotLength < 2) return;
-
-		if (aFrom == "orig") {
-			var neworigT = origT.cloneNode(true);
-			var divlmid2 = $g(ID_MID2);
-			divlmid2.removeChild(origT);
-			//add a paragraph, a table with a text and a checkbox
-			var input = $i([['type', 'checkbox'], ['id', 'tb_battlereport']]);
-			input.addEventListener("click", function() { shoBR(p1, neworigT, origT); }, false);
-
-			var p2 = $e("P", "");
-			var ptable = $t([['style', 'background-color:' + TB3O.DFc[1] + '; width:auto;']]);
-			var aRow = $r([['class', 'tb3rnb']]);
-			var aCell = $c(T('SOREP') + ":", [['class', 'tb3cnb'], ['style', 'text-align:'+ docDir[0] + ';']]);
-			aRow.appendChild(aCell);
-			var bCell = $c("", [['class', 'tb3cnb'], ['style', 'text-align:' + docDir[0] + ';']]);
-			bCell.appendChild(input);
-			aRow.appendChild(bCell);
-			ptable.appendChild(aRow);
-			p2.appendChild(ptable);
-			divlmid2.appendChild(p2);
-			//second paragraph (for displaying the tables)
-			var p1 = $e("P", "");
-			//append the paragraph to the divlmid2
-			p1.appendChild(origT);
-			divlmid2.appendChild(p1);
-		};
-
-		//get the total booty info (PLUS accounts)
-		var gBooty = $xf("//div[@class='carry']");
-		var bgBooty = null;
-		if (gBooty) bgBooty = gBooty.cloneNode(true);
-
-		//get the total booty
-		var booty = 0;
-		var labelReward = gIc["capacity"];
-		var imgRes = new Array;
-		for (var i = 0; i < 4; i++) {imgRes[i] = gIc["r" + (i + 1)];};
-		var stBooty = [0, 0, 0, 0];
-
-		if (TB3O.T35 == false) {
-			var aX = $xf("//tr[@class='cbg1'] | //table[@class='tbg']//tr", 'l');
-			if (aX.snapshotLength >= 3){
-				var intToProcess = -1;
-				for (var i = 0; i < aX.snapshotLength; i++) {if (aX.snapshotItem(i).childNodes.length == 4) intToProcess = i;};
-				if (intToProcess > -1) {
-					var b = aX.snapshotItem(intToProcess).childNodes[3];
-				} else {
-					var b = aX.snapshotItem(1).childNodes[1];
-					if (b.innerHTML.indexOf('class="res"') == -1) b = aX.snapshotItem(2).childNodes[1];
-				};
-				if (b.childNodes.length == 8){
-					var qBooty = new Array();
-					var infoBooty = '';
-					for (var i = 0; i < 4; i++) {
-						qBooty[i] = parseInt(b.childNodes[i*2 + 1].nodeValue);
-						infoBooty += imgRes[i];
-						infoBooty += qBooty[i];
-						infoBooty += (i < 3 ? ' + ' : ' = ');
-						stBooty[i] = qBooty[i];
-					};
-					booty = arrayToInt(qBooty);
-					infoBooty += booty;
-					b.innerHTML = infoBooty;
-					if (bgBooty != null) b.appendChild(bgBooty);
-				};
-			};
-		} else {
-			var aX = tx.snapshotItem(0);
-			var infoBooty = '';
-			//var b1Table = aX.snapshotItem(0).parentNode;
-			var b1Table = aX;
-			if (!b1Table.rows[4]) return;
-			var xi = 4;
-			var gata = false;
-			while (xi < b1Table.rows.length && !gata) {
-				var bootyCell = b1Table.rows[xi].cells[1];
-				if (bootyCell.textContent.indexOf("|") != -1) gata = true;
-				xi += 1;
-			};
-			if (gata) {
-				var resInfo = bootyCell;
-				for (var xi = 0; xi < bootyCell.childNodes.length; xi++) {
-					var aChild = bootyCell.childNodes[xi];
-					if (aChild.className == "goods" || aChild.className == "res") resInfo = aChild;
-				};
-				var aqBooty = resInfo.textContent.split("|");
-				if (aqBooty.length > 1) {
-					var qBooty = new Array();
-					for (var i = 0; i < 4; i++) {
-						qBooty[i] = parseInt(aqBooty[i].replace(" ", "").replace(" ", ""));
-						infoBooty += imgRes[i];
-						infoBooty += qBooty[i];
-						if (i < 3) infoBooty += ' + '; else infoBooty += ' = ';
-						stBooty[i] = qBooty[i];
-					};
-					booty = arrayToInt(qBooty);
-					infoBooty += booty;
-					bootyCell.innerHTML = infoBooty;
-					if (bgBooty != null) bootyCell.appendChild(bgBooty);
-				};
-			};
-		};
-
-		var arrLoss = new Array();
-		var arrCarry = new Array();
-		//there are more tables for the attack (1 = attacker, 1 = attacked and x = reinforcements)
-		//tadPower => 0 = attack power; 1 = def_i power; 2 = def_c power; 3 = total loss; 4 = loss res 1; 5 = loss res 2; 6 = loss res 3; 7 = loss ress 4; 8 = crop consumption of killed troops; 9 = hero no.; 10 = crop consumption of initial troops
-		var tadPower = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
-		var atkLabelCell;
-		var defLabelCell;
-		var brCell = tx.snapshotItem(0).parentNode;
-
-		for (var g = 0; g < tx.snapshotLength; g++){
-			arrCarry[g] = 0;
-			tTable = tx.snapshotItem(g);
-			attdefPower = [0,0,0];
-			intNoOfCells = tTable.rows[1].cells.length - 1;
-			if (intNoOfCells == 11) {
-				//corrected by JOPS
-				if (g == 0) tadPower[0][9] += 1; else tadPower[1][9] += parseInt(tTable.rows[2].cells[11].textContent);
-			};
-			if (g == 0) atkLabelCell = tTable.rows[0].cells[0].textContent; else defLabelCell = tTable.rows[0].cells[0].textContent;
-			for(var j = 1; j < 11; j++){
-				tImg = tTable.rows[1].cells[j].getElementsByTagName('img')[0];
-				tInd = getTroopIndexTitleFromImg(tImg)[0];
-				tNo = parseInt(tTable.rows[2].cells[j].textContent);
-				tNoLost = 0;
-				if (tTable.rows[3]) tNoLost = parseInt(tTable.rows[3].cells[j].textContent);
-				if (!isNaN(tNo)) {
-					if (g == 0) {
-						attdefPower[0] += uc[tInd][5] * tNo;
-						tadPower[0][0] += uc[tInd][5] * tNo;
-						tadPower[0][1] += uc[tInd][6] * tNo;
-						tadPower[0][2] += uc[tInd][7] * tNo;
-						tadPower[0][8] += uc[tInd][9] * tNoLost;
-						tadPower[0][10] += uc[tInd][9] * tNo;
-					} else {
-						attdefPower[0] += uc[tInd][5] * tNo;
-						attdefPower[1] += uc[tInd][6] * tNo;
-						attdefPower[2] += uc[tInd][7] * tNo;
-						tadPower[1][0] += uc[tInd][5] * tNo;
-						tadPower[1][1] += uc[tInd][6] * tNo;
-						tadPower[1][2] += uc[tInd][7] * tNo;
-						tadPower[1][8] += uc[tInd][9] * tNoLost;
-						tadPower[1][10] += uc[tInd][9] * tNo;
-					};
-				};
-				u = uc[tInd];
-				p = tTable.rows[3] ? tTable.rows[3].cells[j].innerHTML : 0;
-				ptu = arrayByN(u, p);
-				arrLoss[g] = arrayAdd(arrLoss[g], ptu.slice(0, 4));
-				arrCarry[g] += (tTable.rows[2] ? tTable.rows[2].cells[j].innerHTML - p : 0) * u[4];
-			};
-			//add the attack/def power to the row[1].cells[0]
-			var attdefCell = tTable.rows[1].cells[0];
-			if (g == 0) {
-				//the attacking power
-				$at(attdefCell, [['style', 'font-size:8pt; color:#FF8000; text-align:center;']]);
-				attdefCell.innerHTML = $ls(attdefPower[0]) + " " + gIc["att_all"];
-			} else {
-				//the defense power of the defender (per table)
-				$at(attdefCell, [['style', 'font-size:8pt; color:green; text-align:center;']]);
-				attdefCell.innerHTML = $ls(attdefPower[1]) + " " + gIc["def_i"] + "<br>" + $ls(attdefPower[2]) + " " + gIc["def_c"];
-			};
-
-			//add the loss row to the att/def table
-			var iHTML = '';
-			for (var i = 0; i < 4; i++){
-				iHTML += imgRes[i];
-				iHTML += arrLoss[g][i];
-				if (i < 3) iHTML += ' + '; else iHTML += ' = ';
-				if (g == 0) tadPower[0][4 + i] += arrLoss[g][i]; else tadPower[1][4 + i] += arrLoss[g][i];
-			};
-			var lossTotal = arrayToInt(arrLoss[g]);
-			if (g == 0) tadPower[0][3] += lossTotal; else tadPower[1][3] += lossTotal;
-			if (lossTotal > 0) iHTML += " <b><font color='red'>" + lossTotal + "</font></b>"; else iHTML += lossTotal;
-			var informe = $c(iHTML, [['colspan', intNoOfCells]]);
-			var aRow = $r();
-			aRow.appendChild($c(T('LOSS'), [['style', 'text-align:left;']]));
-			aRow.appendChild(informe);
-			tTable.appendChild(aRow);
-
-			//For the attacker we'll compute the profit and efficiency of the attack
-			if (g == 0){
-				//Profit compared to lossTotal
-				var profit = 0;
-				if (arrCarry[g] == 0) {booty = 0; for (var i = 0; i < 4; i++) {stBooty[i] = 0;};} else  {profit = ((booty - lossTotal) * 100 / booty).toFixed(2);};
-				if (booty == 0)	if (lossTotal == 0) profit = 0; else profit = -100;
-				var bCell = $c(profit + "%", [['colspan', intNoOfCells]]);
-				var pRow = $r();
-				pRow.appendChild($c(T('PROFIT'), [['style', 'text-align:left;']]));
-				pRow.appendChild(bCell);
-				tTable.appendChild(pRow);
-
-				//Efficiency -> the entire booty compared to how much the attacker can carry back (considering only the troops that survived)
-				var efficiency = 100 - ((arrCarry[g] - booty) * 100 / arrCarry[g]);
-				if (arrCarry[g] == 0) efficiency = 0;
-				var bCell = $c(efficiency.toFixed(2) + "% (" + booty + "/" + arrCarry[g] + ")", [['colspan', intNoOfCells]]);
-				var eRow = $r();
-				eRow.appendChild($c(T('EFICIENCIA'), [['style', 'text-align:left;']]));
-				eRow.appendChild(bCell);
-				tTable.appendChild(eRow);
-			};
-		};
-
-		//add a simple statistics table
-		var sTable = $t([['id', 'br_table']]);
-		//add the title row
-		var sTitleRow = $r();
-		sTitleRow.appendChild($c(T('STAT'), [['class', 'tb3cbrh1']]));
-		sTitleRow.appendChild($c(atkLabelCell, [['class', 'tb3cbrh2']]));
-		sTitleRow.appendChild($c(defLabelCell, [['class', 'tb3cbrh3']]));
-		sTable.appendChild(sTitleRow);
-		//attack power row
-		var atkRow = $r();
-		atkRow.appendChild($c(gIc["att_all"], [['class', 'tb3cbrc']]));
-		atkRow.appendChild($c($ls(tadPower[0][0])));
-		atkRow.appendChild($c($ls(tadPower[1][0])));
-		sTable.appendChild(atkRow);
-		//def power rows
-		var defiRow = $r();
-		defiRow.appendChild($c(gIc["def_i"], [['class', 'tb3cbrc']]));
-		defiRow.appendChild($c($ls(tadPower[0][1])));
-		defiRow.appendChild($c($ls(tadPower[1][1])));
-		sTable.appendChild(defiRow);
-		var defcRow = $r();
-		defcRow.appendChild($c(gIc["def_c"], [['class', 'tb3cbrc']]));
-		defcRow.appendChild($c($ls(tadPower[0][2])));
-		defcRow.appendChild($c($ls(tadPower[1][2])));
-		sTable.appendChild(defcRow);
-		//reward row (for the attacker only)
-		var rewATotal = $c($ls(booty) + (TB3O.O[64] == '1' ? " " + T('TOTAL') : ''), [['class', 'tb3cbrbg']]);
-		var rewRow1 = $r();
-		var intDetailRowSpan = 1 + parseInt(TB3O.O[64]);
-		var rewLabelCell = $c(labelReward, [['class', 'tb3cbrc'], ['rowspan', intDetailRowSpan]]);
-		rewRow1.appendChild(rewLabelCell);
-		if (TB3O.O[64] == '1') {var rewA = ''; for (var i = 1; i < 5; i++) {rewA += $ls(stBooty[i - 1]) + " " + imgRes[i - 1] + "<br>";}; rewADetail = $c(rewA, [['class', 'tb3cbrg']]);rewRow1.appendChild(rewADetail);} else rewRow1.appendChild(rewATotal);
-		rewRow1.appendChild($c('-', [['class', 'tb3cbrb'], ['rowspan', intDetailRowSpan]]));
-		sTable.appendChild(rewRow1);
-		if (TB3O.O[64] == '1') {var rewRow2 = $r(); rewRow2.appendChild($c($ls(booty) + " " + T('TOTAL'), [['class', 'tb3cbrbg']])); sTable.appendChild(rewRow2);};
-		//loss row
-		var strLossATotal = $ls(tadPower[0][3]) + (TB3O.O[64] == '1' ? " " + T('TOTAL') : '');
-		var lossATotal = $c(strLossATotal, [['class', 'tb3cbrb']]);
-		if (tadPower[0][3] > 0) $at(lossATotal, [['class', 'tb3cbrbr']]);
-		var strLossDTotal = $ls(tadPower[1][3] + booty) + (TB3O.O[64] == '1' ? " " + T('TOTAL') : '');
-		lossDTotal = $c(strLossDTotal, [['class', 'tb3cbrb']]);
-		if (tadPower[1][3] + booty > 0) $at(lossDTotal, [['class', 'tb3cbrbr']]);
-		var lossRow1 = $r();
-		lossRow1.appendChild($c(T('LOSS'), [['class', 'tb3cbrc'], ['rowspan', intDetailRowSpan]]));
-		if (TB3O.O[64] == '1') {
-			var iLossA = '';
-			var iLossD = '';
-			for (var i = 1; i < 5; i++) {iLossA += $ls(tadPower[0][i + 3]) + " " + imgRes[i - 1] + "<br>"; iLossD += $ls(tadPower[1][i + 3] + stBooty[i - 1]) + " " + imgRes[i - 1] + "<br>";};
-			var lossADetail = $c(iLossA);
-			if (tadPower[0][3] > 0) $at(lossADetail,[['class', 'tb3cbrr']]);
-			lossRow1.appendChild(lossADetail);
-			var lossDDetail = $c(iLossD);
-			if (tadPower[1][3] + booty > 0) $at(lossDDetail, [['class', 'tb3cbrr']]);
-			lossRow1.appendChild(lossDDetail);
-		} else {lossRow1.appendChild(lossATotal); lossRow1.appendChild(lossDTotal);};
-		sTable.appendChild(lossRow1);
-		if (TB3O.O[64] == '1') {var lossRow2 = $r(); lossRow2.appendChild(lossATotal); lossRow2.appendChild(lossDTotal); sTable.appendChild(lossRow2);};
-		//crop consumption of initial troops
-		var ccRow = $r();
-		ccRow.appendChild($c(gIc["r5"], [['class', 'tb3cbrc']]));
-		ccRow.appendChild($c(tadPower[0][10] + " (-" + tadPower[0][8] + ")"));
-		ccRow.appendChild($c(tadPower[1][10] + " (-" + tadPower[1][8] + ")"));
-		sTable.appendChild(ccRow);
-		//hero row
-		var heroRow = $r();
-		heroRow.appendChild($c(gIc["hero"], [['class', 'tb3cbrc']]));
-		var accA = (tadPower[0][9] > 0 ? tadPower[1][8] : 0);
-		var accD = (tadPower[1][9] > 0 ? Math.floor(tadPower[0][8] / tadPower[1][9]) : 0);
-		heroRow.appendChild($c(accA, [['class', 'tb3cbrb']]));
-		heroRow.appendChild($c(accD, [['class', 'tb3cbrb']]));
-		sTable.appendChild(heroRow);
-		//simple paragraph
-		brCell.appendChild($e("P"));
-		brCell.appendChild(sTable);
-
-		function shoBR(aP, nT, oT) {var iC = $g("tb_battlereport"); if (iC) {if (iC.checked == true) {aP.removeChild(oT); aP.appendChild(nT);} else {aP.removeChild(nT); aP.appendChild(oT);};};};
-	};
-
 	function sortTable(sTableID, iCol, sDataType) {
 		return function(){
 			var oTb = $g(sTableID);
@@ -10006,7 +9520,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 
 	function convert(aE, sDataType) {
 		switch(sDataType) {
-			case "int": return ((aE.nodeValue == null) || !aE.nodeValue.match(/\d+/)) ? 0 : parseInt(aE.nodeValue);
+			case "int": return ((aE.nodeValue == null) || !aE.nodeValue.match(/\d+/)) ? 0 : parseInt10(aE.nodeValue);
 			case "float": return ((aE.nodeValue == null) || !aE.nodeValue.match(/\d+/)) ? 0 : parseFloat(aE.nodeValue);
 			default: return (aE == null) ? '' : aE.textContent.toLowerCase();
 		};
@@ -10022,7 +9536,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 
 	function getTroopsDetails(qDist, xRace, evTS) {
 		arX = [qDist, 0, 0, 1, 1];
-		if (evTS == true) {if (TB3O.d2spB[6] != 0) {arX[2] = parseInt(TB3O.d2spB[6]); if (qDist > 30) {arX[0] = 30; arX[1] = qDist - 30;};};};//get the tournament square level
+		if (evTS == true) {if (TB3O.d2spB[6] != 0) {arX[2] = parseInt10(TB3O.d2spB[6]); if (qDist > 30) {arX[0] = 30; arX[1] = qDist - 30;};};};//get the tournament square level
 		arX[3] = getDR(xRace);//troop image ZERO index
 		arX[4] = TB3O.nTroopSpeedFactor[TB3O.nServerType]; //multiplier for speed servers
 		return arX;
@@ -10058,369 +9572,6 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 		};
 	};
 	
-
-	function selectFakeTroopsCell(boolShowAll) {
-		aCell = null;
-		if (TB3O.U[1] != '') {
-			aCell = $c("", [['id', 'selectfaketroopscell']]);
-			for (var xi = 0; xi < 8; xi++) {
-				if ((TB3O.U[1] != 'Gauls' && xi != 4) || (TB3O.U[1] == 'Gauls' && xi != 3)) {
-					tAv = $g("troopsav_" + xi);
-					if (tAv || boolShowAll) {
-						aCell.appendChild($i([['type', 'checkbox'], ['id', 'faketroop_' + (xi)], ['value', '1']]));
-						aImg = $img([['src', gIc["u" + (xi + TB3O.U[7] - 1)]]]);
-						if (TB3O.T35 != false) $at(aImg, [['class', "unit u" + (xi + TB3O.U[7] - 1)]]);
-						aCell.appendChild(aImg);
-						aCell.appendChild(document.createTextNode("  "));
-					};
-				};
-			};
-		};
-		return aCell;
-	};
-
-	function showLastAttack() {
-		if (TB3O.O[51] != '1') return;
-		var aF = $xf("//form[@name='snd']");
-		if (!aF) return;
-		
-		var bOK = $xf("//*[@id='btn_ok' and @name='s1']");
-		if (bOK) bOK.addEventListener('click', saveLastAttack, false);
-		
-		var cstla = getGMcookieV2('stla');
-		if (cstla && cstla[actV.vID]) {
-			var stla = cstla[actV.vID];
-			var bsh = false;
-			for (var xi = 2; xi < stla.length - 2; xi++) {if (stla[xi] != 0) bsh = true;};
-			if (bsh == true) {
-				//create the last send attack table for this village
-				var aTb = $t([['id', 'stla']]);
-				var aRow = $r();
-				aRow.appendChild($c('<img class="unit u' + (TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh1']]));
-				aRow.appendChild($c(stla[2]));
-				aRow.appendChild($c('<img class="unit u' + (3 + TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh']]));
-				aRow.appendChild($c(stla[5]));
-				aRow.appendChild($c('<img class="unit u' + (6 + TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh']]));
-				aRow.appendChild($c(stla[8]));
-				aRow.appendChild($c('<img class="unit u' + (8 + TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh']]));
-				aRow.appendChild($c(stla[10]));
-				var bRow = $r();
-				bRow.appendChild($c('<img class="unit u' + (1 + TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh1']]));
-				bRow.appendChild($c(stla[3]));
-				bRow.appendChild($c('<img class="unit u' + (4 + TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh']]));
-				bRow.appendChild($c(stla[6]));
-				bRow.appendChild($c('<img class="unit u' + (7 + TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh']]));
-				bRow.appendChild($c(stla[9]));
-				bRow.appendChild($c('<img class="unit u' + (9 + TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh']]));
-				bRow.appendChild($c(stla[11]));
-				var cRow = $r();
-				cRow.appendChild($c('<img class="unit u' + (2 + TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh1']]));
-				cRow.appendChild($c(stla[4]));
-				cRow.appendChild($c('<img class="unit u' + (5 + TB3O.U[7]) + '" src="' + xGIF + '">', [['class', 'stlahh']]));
-				cRow.appendChild($c(stla[7]));
-				cRow.appendChild($c('', [['colspan', '2']]));
-				if (stla.length > 14) {cRow.appendChild($c('<img class="unit uhero" src="' + xGIF + '">', [['class', 'stlahh']])); cRow.appendChild($c(stla[12]));} else {cRow.appendChild($c('', [['class', 'stlahh']])); cRow.appendChild($c(''));};
-				
-				var eRow = $r();
-				eRow.appendChild($c(T('RESEND'), [['class', 'stlahh1'], ['colspan', '2']]));
-				var aL = $a('<img src="' + image["bOK"] + '" title="' + T('YES') + '" alt="' + T('YES') + '">', [['href', jsVoid]]);
-				aL.addEventListener("click", setLastAttack, false);
-				var sC = $c("", [['class', 'stlac'], ['colspan', '3'], ['style', 'width:100px;']]);
-				sC.appendChild(aL);
-				eRow.appendChild(sC);
-				var fRow = $r();
-				eRow.appendChild($c(T('DEL'), [['class', 'stlahh2'], ['colspan', '2']]));
-				aDel = $a(gIc["del"], [['href', jsVoid]]);
-				aDel.addEventListener("click", hideLastAttackSend, false);
-				var dC = $c("", [['class', 'stlac']]);
-				dC.appendChild(aDel);
-				eRow.appendChild(dC);
-				aTb.appendChild(aRow);
-				aTb.appendChild(bRow);
-				aTb.appendChild(cRow);
-				if (TB3O.O[52] == '1') {
-					var dRow = $r();
-					dRow.appendChild($c('<img src="' + image["vmkls"] + '">', [['class', 'stlahh1']]));
-					dRow.appendChild($c("(" + stla[0] + "|" + stla[1] + ")", [['class', 'stlac'], ['colspan', '4']]));
-					dRow.appendChild($c(stla[stla.length - 1], [['class', 'stlac'], ['colspan', '3']]));
-					aTb.appendChild(dRow);
-				};
-				aTb.appendChild(eRow);
-				//aTb.appendChild(fRow);
-				var aP = $e("P", "");
-				aP.appendChild(aTb);
-				var ln = $g("troops");
-				insertAfter(ln, aP);
-			};
-		};
-		
-		function setLastAttack() {
-			var tx;
-			for (var i = 2; i < stla.length - 2; i++) {tx = $xf("//form[@name='snd']//*[@name='t" + (i - 1) + "']"); if (stla[i] != 0 && tx.className != 'text disabled') tx.value = stla[i]; else tx.value = '';};
-			updateTroopsPower();
-			if (TB3O.O[52] == '1') {$xf("//form[@name='snd']//*[@name='x']").value = stla[0]; $xf("//form[@name='snd']//*[@name='y']").value = stla[1];};
-			var rbc = $xf("//form//input[@name='c' and @value='" + stla[stla.length - 2] + "']");
-			if (rbc) rbc.checked = true;
-		};
-		
-		function hideLastAttackSend() {for (var xi = 2; xi < stla.length; xi++) {stla[xi] = 0;}; setGMcookieV2("stla", stla, actV.vID); $g('stla').style.display = 'none';};
-		
-		function saveLastAttack() {
-			var aT = $xf("//form[@name='snd']//table//input[starts-with (@name, 't')]", 'l');
-			var stla = new Array();
-			stla[0] = $xf("//form[@name='snd']//*[@name='x']").value;
-			stla[1] = $xf("//form[@name='snd']//*[@name='y']").value;
-			for (var i = 0; i < aT.snapshotLength; i++) {stla[i + 2] = 0; stla[1 + parseInt(aT.snapshotItem(i).name.replace("t", ""))] = (aT.snapshotItem(i).value != '' ? parseInt(aT.snapshotItem(i).value) : 0);};
-			var rbl = $xf("//form//input[@name='c']", 'l');
-			for (var i = 0; i < rbl.snapshotLength; i++) {if (rbl.snapshotItem(i).checked == true) {stla[stla.length] = rbl.snapshotItem(i).value; stla[stla.length] = rbl.snapshotItem(i).parentNode.textContent;};};
-			setGMcookieV2('stla', stla, actV.vID);
-		};
-	};
-	
-	function updateTroopsPower() {
-		totals = [["troopsattpower", "att_all", 5, 0], ["troopsdefipower", "def_i", 6, 0], ["troopsdefcpower", "def_c", 7, 0], ["troopscapacity", "capacity", 4, 0], ["troopscropconsumption", "img5", 9, 0]];
-		for (var i = 1; i < 11; i++) {
-			tInput = $g("t" + i);
-			if (tInput) {
-				/*
-				if (TB3O.T35 == false) tImg = tInput.parentNode.previousSibling.firstChild; else tImg = tInput.parentNode.childNodes[1];
-				*/
-				if (TB3O.T35 == false) {
-					tImg = tInput.parentNode.previousSibling.firstChild;
-				} else {
-					tImg = tInput.parentNode.childNodes[1];
-					if (!tImg || tImg.nodeType == 3) {
-						tImg =$xf(".//preceding-sibling::img", false, tInput);
-					}
-				}
-				//
-				tType = getTroopIndexTitleFromImg(tImg)[0];
-				if (tInput.value != "") {intTinput = parseInt(tInput.value); for (var j = 0; j < 5; j++) {totals[j][3] += intTinput * uc[tType][totals[j][2]];};};
-			};
-		};
-		for (var j = 0; j < 5; j++) {
-			cX = $g(totals[j][0]);
-			if (cX) {
-				strX = " *";
-				switch (j) {
-					case 3: iP = gIc["capacity"]; strX = ""; break;
-					case 4: iP = gIc["r5"]; strX = ""; break;
-					default: iP = gIc[totals[j][1]]; break;
-				};
-				cX.innerHTML = iP + strX + " " + $ls(totals[j][3]);
-			};
-		};
-		return;
-	};
-
-	//someweirdnobody (initial), Nux (selectScout & selectFake), ms99 (final), Acr111 (change)
-	function selectAllTroops() {
-		var iF = $xf("//input[@name='t1' and not (@type='hidden')]");
-		if (iF == null) return;
-		var tI;
-		var tL;
-		for (var i = 1; i < 12; i++) {
-			tI = $xf("//input[@name='t" + i + "']");
-			if (tI) {
-				$at(tI, [['id', 't' + i]]);
-				tI.addEventListener('keyup', updateTroopsPower, false);
-				tI.addEventListener('change', updateTroopsPower, false);
-				/*
-				if (TB3O.T35 == false) {tL = tI.parentNode.nextSibling.firstChild;} else {tL = tI.parentNode.childNodes[5]; if (!tL) tL = tI.parentNode.childNodes[5].childNodes[0];};
-				*/
-				if (TB3O.T35 == false) {
-					tL = tI.parentNode.nextSibling.firstChild;
-				} else {
-					tL = tI.parentNode.childNodes[5]; 
-					if (!tL) tL = tI.parentNode.childNodes[5].childNodes[0];
-					if (!tL || tL.nodeType == 3) {
-						tL =$xf(".//following-sibling::a[@onclick]", false, tI);
-					}
-				};
-				//
-				if (tL) {xxx = tL.textContent.replace("(", "").replace(")", ""); if (xxx != '0') {$at(tL, [['id', 'troopsav_' + i]]); tL.addEventListener('click', addUpdateTroopsPower(i, tL), false);};};
-			};
-		};
-
-		//original position
-		header = $xf("//div[@id='" + ID_MID2 + "']//h1");
-		//move the table as suggested by Acr111
-		//var header = $xf("//td[@width='33%']");
-		arrSelect = [[T('SELECTALLTROOPS'), getAllTroops], [T('SELECTSCOUT'), getScout], [T('SELECTFAKE'), getFakeUnitV2]];
-		aTb = $t([["class", "tb3tbnb"], ['style', 'width:auto;']]);
-		//change the style of the table as suggested by Acr111
-		//aTb.setAttribute("style", "position:relative; left:-20px; z-index: 100; border: 1px solid #00C000; font-size:11px;");
-		for (var i = 0; i < 3; i++) {
-			aRow = $r([['class', 'tb3rnb']]);
-			aCell = $c("", [['class', 'tb3cnb'], ['style', 'text-align:' + docDir[0] + '; font-size:8pt;']]);
-			//change as suggested by Acr111
-			//if (i == 0) aCell.setAttribute("colspan", "3");
-			aLink = $a(arrSelect[i][0], [['href', jsVoid]]);
-			aLink.addEventListener("click", arrSelect[i][1], true);
-			aCell.appendChild(aLink);
-			aRow.appendChild(aCell);
-			if (i == 0) {bCell = $c("", [['colspan', '2']]); aRow.appendChild(bCell);};
-			if (i == 1){
-				//insert no of fakes cell
-				bCell = $c("");
-				scoutInput = $i([['type', 'text'], ['id', 'selectscoutnumber'], ['style', 'width:30px; font-size:8pt']]);
-				if (isNaN(parseInt(TB3O.O[50]))) scoutInput.value = 3; else scoutInput.value = parseInt(TB3O.O[50]);
-				bCell.appendChild(scoutInput);
-				aRow.appendChild(bCell);
-				//insert save option to change the setup option directly from the Rally point -> Send troops page
-				//cCell = $c("&nbsp;<input type='checkbox' id='savescoutnumber' value='1'></input>&nbsp;" + T('SAVE'));
-				//aRow.appendChild(cCell);
-			};
-			if (i == 2) {
-				//allow selection of fake unit
-				aCell = selectFakeTroopsCell();
-				if (aCell != null) {aCell.setAttribute('colspan', '2'); aRow.appendChild(aCell);};
-			};
-			aTb.appendChild(aRow);
-		};
-
-		insertAfter(header, aTb);
-
-		troopTable = $g("troops");
-		if (!troopTable) troopTable = $xf("//table[@class='troops'] | //table[@class='dashed'] | //table[@class='f10']");
-		
-		//fix for unusual icons appearing under the list of villages - fr3nchlover
-		tags7 = $xf("//div[@id='" + ID_MID2 + "']//td[@class='s7']");
-		if ((TB3O.T35 == false && troopTable != null && !tags7) || (TB3O.T35 == true && troopTable != null)) {
-			//"clear all" button
-			aRow = $r();
-			delCell = $c("", [['colspan', '12'], ['style', 'text-align:center']]);
-			clAllLink = $a("<img src='" + image["bDel"] + "' title='" + T('MTCL') + "' alt='" + T('MTCL') + "'>");
-			clAllLink.href = jsVoid;
-			clAllLink.addEventListener("click", clearAllTroops, false);
-			delCell.appendChild(clAllLink);
-			aRow.appendChild(delCell);
-			troopTable.appendChild(aRow);
-
-			//additional table as requested by users
-			if (TB3O.T35 == false) parX = $xf("//table[@class='p1']"); else parX = troopTable;
-			if (parX) {
-				attdefTable = $t([['class', 'tb3tb']]);
-				hRow = $r([['class', 'tb3r']]);
-				hCell = $c(T('STAT') + " (* = " + T('MIN') + ")", [['colspan', '4'], ['style', 'font-weight:bold;'], ['class', 'tb3ch']]);
-				hRow.appendChild(hCell);
-				attdefTable.appendChild(hRow);
-
-				//total attack, def_i and def_c power for the selected troops
-				bRow = $r([['style', 'text-align:' + docDir[0] + ';']]);
-
-				aCell = $c(gIc["att_all"] + " *", [['id', "troopsattpower"], ['style', 'width:33%;']]);
-				bCell = $c(gIc["def_i"] + " *", [['id', "troopsdefipower"], ['colspan', "2"], ['style', 'width:33%;']]);
-				cCell = $c(gIc["def_c"] + " *", [['id', "troopsdefcpower"], ['style', 'width:34%;']]);
-
-				bRow.appendChild(aCell);
-				bRow.appendChild(bCell);
-				bRow.appendChild(cCell);
-				attdefTable.appendChild(bRow);
-				dRow = $r();
-
-				dRow.appendChild($c(gIc["capacity"], [['id', 'troopscapacity'], ['style', 'text-align:' + docDir[0] + '; width:50%;'], ['colspan', "2"]]));//total capacity
-				dRow.appendChild($c(gIc["r5"], [['id', 'troopscropconsumption'], ['style', 'text-align:' + docDir[0] + '; width:50%;'], ['colspan', "2"]]));//crop consumption
-				attdefTable.appendChild(dRow);
-
-				aDiv = $d("");
-				aDiv.appendChild($e("P", ""));
-				aDiv.appendChild(attdefTable);
-				insertAfter(parX, aDiv);
-			};
-		};
-
-		function addUpdateTroopsPower(i, troopLink) {
-			return function() {var aNo = parseInt(troopLink.textContent.replace("(", "").replace(")", "")); troopInput = $g("t" + i); if (troopInput) {troopInput.value = aNo; updateTroopsPower();};};
-		};
-
-		function clearAllTroops() {for (var i = 1; i < 12; i++) {var troopInput = $g("t" + i); if (troopInput) troopInput.value = '';}; updateTroopsPower(); return;};
-		function getTroopInputFields() {return $xf("//form[@name='snd']//table//input[(@type='text' or @type='Text') and not (@name='x') and not (@name='y')] | //table[@class='p1']//table[@class='f10']//input[@type='Text' or @type='text']", 'l');};
-		function getTroopInputMaxFields() {return $xf("//form[@name='snd']//table//a | //table[@class='p1']//table[@class='f10']//a", 'l');};
-
-		function getAllTroops() {
-			nodeRes = getTroopInputFields();
-			//clear all the input fields
-			for (var i = 0; i < nodeRes.snapshotLength; i++) {nodeRes.snapshotItem(i).value = ""; };
-			troopsForm = document.forms.namedItem("snd");
-			nodes = getTroopInputMaxFields();
-			if (nodes.snapshotLength > 1) {
-				for (var i = 0; i < nodes.snapshotLength; i++) {
-					node = nodes.snapshotItem (i);
-					if (node.getAttribute("onClick")) {
-						node.getAttribute("onClick").search(/document\.snd\.(.*)\.value=(.*); return false;/);
-						inputName = RegExp.$1;
-						troopValue = RegExp.$2;
-						troopInput = troopsForm.elements.namedItem(inputName);
-						troopInput.value = troopValue;
-					};
-				};
-				updateTroopsPower();
-			} else alert(T('NOTROOPS'));
-		};
-
-		function getScout() {
-			var indCol = (TB3O.U[1] == "Gauls" ? 't3' : 't4');
-			var nodeRes = getTroopInputFields();
-
-			//clear all the input fields
-			for (var i = 0; i < nodeRes.snapshotLength; i++) { nodeRes.snapshotItem(i).value = ""; };
-
-			//set the attack:raid as action
-			rbAction = $xf("//input[@value='4' and @name='c']");
-			if (rbAction) rbAction.checked = true;
-
-			troopsForm = document.forms.namedItem("snd");
-			maxScout = $xf("//a[contains(@onclick, '" + indCol + "')]");
-			if (maxScout) {
-				maxScout.getAttribute("onClick").search(/document\.snd\.(.*)\.value=(.*); return false;/);
-				inputName = RegExp.$1;
-				if (inputName != 't9' && inputName != 't10') {
-					scoutInput = troopsForm.elements.namedItem(inputName);
-					maxNoOfScouts = parseInt(maxScout.textContent.replace("(", "").replace(")", ""));
-					iNoOfScouts = $g('selectscoutnumber');
-					if (iNoOfScouts) wNoOfScouts = parseInt(iNoOfScouts.value); else wNoOfScouts = 3;
-					if (wNoOfScouts > maxNoOfScouts) wNoOfScouts = maxNoOfScouts;
-					scoutInput.value = wNoOfScouts;
-					if (scoutInput.value != "" && parseInt(scoutInput.value) > 0) {TB3O.O[50] = parseInt(scoutInput.value); setGMcookieV2('TB3Setup', TB3O.O, "SETUP");};
-					updateTroopsPower();
-				};
-			} else alert(T('NOTROOP2SCOUT'));
-		};
-
-		function getFakeUnitV2() {
-			nodeRes = getTroopInputFields();
-			//remove previously selected units
-			for (var i = 0; i < nodeRes.snapshotLength; i++) {nodeRes.snapshotItem(i).value = "";};
-			//set the attack:normal as action
-			rbA = $xf("//input[@value='3' and @name='c']");
-			if (rbA) rbA.checked = true;
-			nodeUnits = getTroopInputMaxFields();
-			if (nodeUnits.snapshotLength > 1) {
-				chk = false;
-				for (var xi = 1; xi < 9; xi++) {
-					faketroopselected = $g("faketroop_" + xi);
-					if (faketroopselected && faketroopselected.checked) {
-						avFake = $g('troopsav_' + xi);
-						if (avFake) {
-							//there are units available from selected fake troop type
-							aInput = $g("t" + xi);
-							if (aInput) {aInput.value = 1; chk = true;};
-						};
-					};
-				};
-				if (chk == false) {
-					//no troops for fake selected or nothing availabe => use default
-					tTroop = 2;
-					avFake = $g('troopsav_2');
-					if (!avFake) {avFake = $g('troopsav_1'); tTroop = 1;};
-					if (avFake) {aInput = $g("t" + tTroop); if (aInput) {aInput.value = 1; chk = true;};};
-				};
-				if (chk == false) alert(T('NOSCOUT2FAKE')); else updateTroopsPower();
-			} else alert(T('NOTROOPS'));
-		};
-	};
-
 	function getTroopsAttDefInfoTable(tNTroops, bMap, bMin) {
 		if (!tNTroops) return '';
 		tNinfo = [0, 0, 0, 0];
@@ -10441,7 +9592,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 						if (TB3O.T35 == false) imgHTML = "<img src=" + aRow.childNodes[0].firstChild.src + ">";
 						iHTML += "<tr><td style='text-align:" + docDir[0] + ";'>" + imgHTML + "</td><td style='text-align:" + docDir[1] + ";'>" + aRow.cells[1].textContent + "</td></tr>";
 					};
-					tNo = parseInt(aRow.cells[1].textContent);
+					tNo = parseInt10(aRow.cells[1].textContent);
 					tNinfo[0] += tNo * uc[index][5];
 					tNinfo[1] += tNo * uc[index][6];
 					tNinfo[2] += tNo * uc[index][7];
@@ -10569,7 +9720,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 			if (imgID) {
 				//a cell or village
 				fieldTypeC = imgID.getAttribute("class");
-				if (!fieldTypeC) fieldType = imgID.getAttribute("alt"); else fieldType = parseInt(fieldTypeC.replace("f", ""));
+				if (!fieldTypeC) fieldType = imgID.getAttribute("alt"); else fieldType = parseInt10(fieldTypeC.replace("f", ""));
 				fieldtype = showCellInfo(mev.pos + 1, fieldType);
 				if (crtPos) showFieldInfoInTooltip(crtPos, fieldtype);
 			} else {
@@ -10685,8 +9836,8 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 		xLevel = "";
 		notgata = true;
 		for (xi = hHeader.length; xi > 0; xi--) {if (hHeader.charAt(xi) != " " && notgata) xLevel = hHeader.charAt(xi) + xLevel; else notgata = false;};
-		hLevel = parseInt(xLevel);
-		hPercent = parseInt(hoT.rows[hoT.rows.length - 1].cells[1].textContent);
+		hLevel = parseInt10(xLevel);
+		hPercent = parseInt10(hoT.rows[hoT.rows.length - 1].cells[1].textContent);
 		crtExp = (hLevel + 1) * 100;
 		crtLevelExp = ((crtExp) / 2) * hLevel;
 		nextLevelExp = crtLevelExp + crtExp;
@@ -10736,11 +9887,11 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 
 	//fill in the NPC Merchant fields
 	function fillinNPCfields(aURL) {
-		var sumRes = parseInt(document.getElementById('org4').innerHTML);
-		var rm1 = parseInt(getQueryParameters(aURL, 'r1'));
-		var rm2 = parseInt(getQueryParameters(aURL, 'r2'));
-		var rm3 = parseInt(getQueryParameters(aURL, 'r3'));
-		var rm4 = parseInt(getQueryParameters(aURL, 'r4'));
+		var sumRes = parseInt10(document.getElementById('org4').innerHTML);
+		var rm1 = parseInt10(getQueryParameters(aURL, 'r1'));
+		var rm2 = parseInt10(getQueryParameters(aURL, 'r2'));
+		var rm3 = parseInt10(getQueryParameters(aURL, 'r3'));
+		var rm4 = parseInt10(getQueryParameters(aURL, 'r4'));
 		rm1_0 = rm1; rm2_0 = rm2; rm3_0 = rm3; rm4_0 = rm4;
 		while(rm1_0 + rm2_0 + rm3_0 + rm4_0 + rm1 + rm2 + rm3 + rm4 < sumRes )  {
 			rm1_0 += rm1;
@@ -10769,7 +9920,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 			var inputs = new Array();
 			for (var i = 0; i < xp.snapshotLength; i++) {
 				var f = xp.snapshotItem(i).value;
-				inputs.push(f.length == 0 || isNaN(f) ? 0 : parseInt(f));
+				inputs.push(f.length == 0 || isNaN(f) ? 0 : parseInt10(f));
 			};
 			return inputs;
 		} else return;
@@ -10882,7 +10033,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 				for (var j = 0; j < 4; j++) {
 					PpMt = prodPerHour[j] / 60;
 					mUntilNPC = (dtEstimated.getTime() - dtNow.getTime()) / 1000 / 60;
-					resAtNPCtime = parseInt(crtResUnits[j]) + (mUntilNPC * PpMt);
+					resAtNPCtime = parseInt10(crtResUnits[j]) + (mUntilNPC * PpMt);
 					deficitUntilNPC = needRes[j] - resAtNPCtime;
 					if (deficitUntilNPC <= 0) continue;
 					if (PpMt <= 0) {time_saved = null; break;};
@@ -10941,12 +10092,12 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 			resInfo = bootyCell;
 			for (var xi = 0; xi < bootyCell.childNodes.length; xi++) {aChild = bootyCell.childNodes[xi]; if (aChild.className == "goods" || aChild.className == "res") resInfo = aChild;};
 			aqBooty = resInfo.textContent.split("|");
-			if (aqBooty.length > 1) {for (var i = 0; i < 4; i++) {retValue[i] = parseInt(aqBooty[i].replace(" ", "").replace(" ", "")); retValue[4] += retValue[i];};};
+			if (aqBooty.length > 1) {for (var i = 0; i < 4; i++) {retValue[i] = parseInt10(aqBooty[i].replace(" ", "").replace(" ", "")); retValue[4] += retValue[i];};};
 			bootyCell.innerHTML = getBootyCellInfo(retValue);
 		};
 		return retValue;
 	};
-
+	
 	function tableTotalVillageTroopsV3() {
 		if (actV.vID != "") {
 			//new search function
@@ -11037,8 +10188,8 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 					if (aTb.rows[0].cells[0].textContent.indexOf(actV.vName) != -1) {
 						for (var j = 1; j < allTroopCells.length; j++) {
 							iHTML = rowTrUnits.cells[j].innerHTML;
-							intTroops = parseInt(allTroopCells[j].innerHTML);
-							if (iHTML == "") rowTrUnits.cells[j].innerHTML = intTroops; else rowTrUnits.cells[j].innerHTML = parseInt(iHTML) + intTroops;
+							intTroops = parseInt10(allTroopCells[j].innerHTML);
+							if (iHTML == "") rowTrUnits.cells[j].innerHTML = intTroops; else rowTrUnits.cells[j].innerHTML = parseInt10(iHTML) + intTroops;
 						};
 					} else {ntCc = 1;};
 					booty = getBootyFromTable(aTb);
@@ -11054,7 +10205,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 							tImg = rowTrIcons.cells[j].getElementsByTagName("IMG");
 							if (tImg[0]) {
 								tType = getTroopIndexTitleFromImg(tImg[0])[0];
-								arrTT[j - 1] = parseInt(rowTrUnits.cells[j].textContent);
+								arrTT[j - 1] = parseInt10(rowTrUnits.cells[j].textContent);
 								ccCoef = 1;
 								if (hdtLevel > 9 && tType == 4) ccCoef = 0.5;
 								if (hdtLevel > 14 && tType == 5) ccCoef = 0.667;
@@ -11127,7 +10278,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 	};
 
 	function getDistance(sx1, sy1, sx2, sy2) {
-		var x1 = parseInt(sx1); var y1 = parseInt(sy1); var x2 = parseInt(sx2); var y2 = parseInt(sy2);
+		var x1 = parseInt10(sx1); var y1 = parseInt10(sy1); var x2 = parseInt10(sx2); var y2 = parseInt10(sy2);
 		dX = Math.min(Math.abs(x2 - x1), Math.abs(801 - Math.abs(x2 - x1)));
 		dY = Math.min(Math.abs(y2 - y1), Math.abs(801 - Math.abs(y2 - y1)));
 		dist = Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2));
@@ -11165,88 +10316,6 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 	function diplayElements(aType) {uTb = $g('upgTable'); mTb = $g('mapTable'); ttTb = $g('trooptimetable'); if (uTb) uTb.style.display = aType; if (mTb) mTb.style.display = aType;if (ttTb) ttTb.style.display = aType;};
 	//---
 
-	function allyCalculation() {
-		if (crtPage.match(/allianz.php\?aid/)) {
-			allyTable = $xf("//div[@id='" + ID_MID2 + "']//table | //div[@id='" + ID_MID2 + "']//table[@class='tbg']");
-			if (allyTable) {
-				iHTML = allyTable.rows[0].cells[0].innerHTML;
-				if (TB3O.M35 == 2) {
-					tbd = $xf("//td[@class='details']//table");
-					if (tbd) allyName = tbd.rows[0].cells[1].textContent;
-				} else allyName = allyTable.rows[3].cells[1].textContent;
-
-				iHTML2 = iHTML.replace(allyName, "");
-				allyTable.rows[0].cells[0].innerHTML = iHTML + " " + "<a href='" + crtPage + "'>" + allyName + "</a>";
-			};
-		};
-
-		aTb = $g("member");
-		if (!aTb) {a = $xf("//div[@id='" + ID_MID2 + "']//table[@class='tbg']//td[@width='6%']"); if (a) aTb = a.parentNode.parentNode;};
-		if (aTb) {
-			totP = 0;
-			totV = 0;
-			totalBullets = [[0, ""], [0, ""], [0, ""], [0, ""], [0, ""]]; //blue, green, yellow, red, grey
-			boolMyAlly = true;
-			for (var i = 1; i < aTb.rows.length; i++) {
-				totP += parseInt(aTb.rows[i].cells[2].textContent);
-				totV += parseInt(aTb.rows[i].cells[3].textContent);
-				if (boolMyAlly) {
-					if (aTb.rows[i].cells[4]) {
-						imgBullet = aTb.rows[i].cells[4].firstChild;
-						if (imgBullet.src.indexOf("x.gif") == -1) {
-							xf = basename(imgBullet.src).replace("b", "").replace(".gif", "");
-							j = parseInt(xf);
-							totalBullets[j - 1][0] += 1;
-							totalBullets[j - 1][1] = imgBullet.title;
-						} else if (imgBullet.className.match(/online/)) {
-							aClass = imgBullet.className;
-							imgBullet.className.search(/(\d)/);
-							j = RegExp.$1;
-							totalBullets[j - 1][0] += 1;
-							totalBullets[j - 1][1] = imgBullet.title;
-						};
-					} else boolMyAlly = false;
-				};
-			};
-			popPerPlayer = Math.round(totP/(aTb.rows.length - 1));
-			boolIsMyAlly = aTb.rows[1].cells.length == 5;
-
-			trT = $r([['class', 'tb3r']]);
-			trT.appendChild($c(T('TOTAL'), [['class', 'tb3chnb'], ["colspan", "2"]]));
-			trT.appendChild($c(totP, [['class', 'tb3chnb'], ['style', 'text-align:center']]));
-			trT.appendChild($c(totV, [['class', 'tb3chnb'], ['style', 'text-align:center']]));
-			if (boolIsMyAlly) trT.appendChild($c("", [['class', 'tb3ch']]));
-			aTb.appendChild(trT);
-
-			//average population per member of aliance
-			trAv = $r([['class', 'tb3r']]);
-			trAv.appendChild($c(T('AVPPP'), [['class', 'tb3chnb'], ["colspan", "2"]]));
-			trAv.appendChild($c(popPerPlayer, [['class', 'tb3chnb'], ["colspan", "2"], ['style', 'text-align:center']]));
-			if (boolIsMyAlly) trAv.appendChild($c("", [['class', 'tb3chnb']]));
-			aTb.appendChild(trAv);
-
-			//average population per village
-			trAv = $r([['class', 'tb3r']]);
-			trAv.appendChild($c(T('AVPPV'), [['class', 'tb3chnb'], ["colspan", "2"]]));
-			trAv.appendChild($c(Math.round(totP/totV), [['class', 'tb3chnb'], ["colspan", "2"], ['style', 'text-align:center']]));
-			if (boolIsMyAlly) trAv.appendChild($c("", [['class', 'tb3chnb']]));
-			aTb.appendChild(trAv);
-
-			//number of bullets by type
-			if (boolMyAlly) {
-				rowBullets = $r([['class', 'tb3r']]);
-				cellBullets = $c("", [['class', 'tb3chnb'], ['colspan', '5'], ['style', 'text-align:center']]);
-				cBiHTML = "";
-				addSpacer = " | ";
-				for (var j = 0; j < 5; j++) {if (totalBullets[j][0] > 0) cBiHTML += "<img class='online" + (j + 1) + "' src='" + gIc["b" + (j+1)] + "' title='" + totalBullets[j][1] + "' alt='" + totalBullets[j][1] + "'> = &nbsp;" + totalBullets[j][0] + addSpacer + " ";};
-				cellBullets.innerHTML = cBiHTML.substring(0, cBiHTML.length - 3);
-				rowBullets.appendChild(cellBullets);
-				aTb.appendChild(rowBullets);
-			};
-			totalBullets = null;
-		};
-	};
-
 	function adjustTtT() {
 		var aTb = $xf("//table[@class='build_details']");
 		if (aTb) {
@@ -11272,10 +10341,10 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 				var aInf = titTb.rows[xi].cells[0];
 				var aImg = aInf.getElementsByTagName("IMG")[0];
 				var aX = getTroopIndexTitleFromImg(aImg);
-				var intNo = parseInt(aInf.textContent.replace(/\n/g, ""));
+				var intNo = parseInt10(aInf.textContent.replace(/\n/g, ""));
 				gata = -1;
 				for (var yi = 0; yi < arrTiT.length; yi++) {if (arrTiT[yi].tType == aX[0]) gata = yi;};
-				if (gata > -1) arrTiT[gata].intNo += intNo; else {var aTiT = new yTiT(parseInt(aX[0]), parseInt(intNo), aX[1]); arrTiT[arrTiT.length] = aTiT;};
+				if (gata > -1) arrTiT[gata].intNo += intNo; else {var aTiT = new yTiT(parseInt10(aX[0]), parseInt10(intNo), aX[1]); arrTiT[arrTiT.length] = aTiT;};
 			};
 			var TotCropCons = 0;
 			var imgName;
@@ -11324,12 +10393,12 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 		var aTb = $t([['class', 'rNt'], ['style', 'width:' + pW + '%;']]);
 
 		for (var i = 0; i < 4; i++){
-			restante = parseInt(need[i]) - crtResUnits[i];
+			restante = parseInt10(need[i]) - crtResUnits[i];
 			var sfz = restante > 100000 ? 'font-size:6pt;' : '';
 			if (restante > 0) {
 				tiempo = -1;
 				if (prodPerHour[i] != 0) tiempo = Math.round(restante / (prodPerHour[i] / 3600));
-				if (tiempo < 0 || capacity[i] - parseInt(need[i]) < 0) {
+				if (tiempo < 0 || capacity[i] - parseInt10(need[i]) < 0) {
 					maxTime = 'Infinity';
 					aCell = $c(gIc["r" + (i + 1)], [['class', 'center']]);
 					bCell = $c(' ' + restante + ' ', [['id', 'timeout' + i], ['style', sfz]]);
@@ -11375,7 +10444,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 				uthen = new Array(4);//obtained until the max time
 				//residue row
 				residue = new Array(4);//obtained until the max time
-				for (var i = 0; i < 4; i++) {uthen[i] = crtResUnits[i] + Math.round(maxTime*prodPerHour[i]/3600); residue[i] = uthen[i] - parseInt(need[i]);};
+				for (var i = 0; i < 4; i++) {uthen[i] = crtResUnits[i] + Math.round(maxTime*prodPerHour[i]/3600); residue[i] = uthen[i] - parseInt10(need[i]);};
 				uiHTML = createCRrows(T('RESOURCES') + " " + txtDate, uthen);
 				riHTML = createCRrows(T('RESIDUE') + txtDate, residue);
 				aTb.innerHTML += uiHTML;
@@ -11429,7 +10498,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 		var sT = 0;
 		var gHTML = '';
 		for (var i = 0; i < arrInputs.snapshotLength; i++) {
-			var vTtT = parseInt(arrInputs.snapshotItem(i).value);
+			var vTtT = parseInt10(arrInputs.snapshotItem(i).value);
 			if (isNaN(vTtT)) vTtT = 0;
 			if (!isNaN(vTtT)) {
 				var bTb = $t([['class', 'tb3tbnb']]);
@@ -11447,7 +10516,7 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 				bTb.appendChild(xaRow);
 				bTb.appendChild(xbRow);
 				xCell.appendChild(bTb);
-				sT += parseInt(vTtT);
+				sT += parseInt10(vTtT);
 
 				imgName = 'class="unit u' + arrTtT[i].tType + '" src="' + xGIF + '"';
 				if (TB3O.T35 == false) imgName = "src='" + gIc["u" + arrTtT[i].tType] + "'";
@@ -11499,388 +10568,6 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 		if (dCell) dCell.appendChild(tTb);
 	};
 
-	function addXYinMsg(iHTML) {
-		var arXY = iHTML.match(/\((-?\d+)\s*[\|\,\s\/]\s*(-?\d+)\)/g);
-		if (arXY) {
-			for (var j = 0; j < arXY.length; j++) {
-				var xy = arXY[j].replace(" ", "").replace(",", "|").replace(";", "|").replace("/", "|").replace("\\", "|");
-				if (xy.indexOf("(") == 0 && xy.indexOf(")") != -1  && xy.indexOf("|") != -1) {
-					xy = xy.replace("(", "").replace(")", "");
-					var xy = xy.split("|");
-					var idVillage = xy2id(xy[0], xy[1]);
-					var villageLink = "<a href='karte.php?z=" + idVillage + "'>" + "( " + xy[0] + "|" + xy[1] + " )" + "</a>" +
-					"&nbsp;<a href='a2b.php?z=" + idVillage + "'>" + gIc[getRPDefAction()] + "</a>" +
-					"&nbsp;<a href='build.php?z=" + idVillage + "&gid=17'>" + gIc["r41"] + "</a>";
-					iHTML = iHTML.replace(arXY[j], villageLink);
-				};
-			};
-		};
-		return iHTML;
-	};
-
-	function convertCoordsInMessagesToLinks() {
-		try
-		{
-			var cM = $xf("//td[@background] | //div[@class='underline']");
-			if (!cM) cM = $g('message');
-			if (cM) cM.innerHTML = addXYinMsg(cM.innerHTML);			
-		}
-		catch (e){};
-		try
-		{
-			var myNode = document.getElementsByTagName('div');
-			var myre = new RegExp('\\b' + 'message' + '\\b');
-			for(var i=0,j=myNode.length; i<j; i++) {
-				if(myre.test(myNode[i].className)) {
-					myNode[i].innerHTML = addXYinMsg(myNode[i].innerHTML);
-					break;
-				}
-			}
-		}
-		catch (e){};
-	};
-
-	function addSelectAllCheckbox(intRows, mrTable) {
-		//check for the "s10" element to avoid double checkbox
-		if (!$g("s10")) {
-			//selectAll
-			var sAC = mrTable.rows[intRows - 1].cells[0];
-			var sACS = sAC.getAttribute("colspan");
-			if (sACS) {
-				if (sACS == "2") {
-					$at(sAC, [['colspan', '1']]);
-					sAC.removeAttribute('class');
-					if (TB3O.T35 == false) {bCell = $c(sAC.innerHTML, [['style', 'text-align:' + docDir[0] + ';']]);} else {bCell = $e("TH", sAC.innerHTML); $at(bCell, [['class', 'buttons']]);};
-					insertAfter(sAC, bCell);
-				};
-			};
-			sAC.innerHTML = '<input id="s10" name="s10" onclick="Allmsg(this.form);" style="vertical-align:bottom;" type="checkbox">';
-			//now append the archive button if necessary
-			if (!TB3O.plAc) {
-				var bRow = mrTable.rows[intRows - 1].cells[1];
-				if (bRow) {
-					var bRiHTML = bRow.innerHTML;
-					if (TB3O.T35 == false) {
-						if (bRiHTML.toUpperCase().indexOf("ARCHIVE") == -1) bRow.innerHTML += '<input class="std" type="submit" name="archive" value="' + T('ARCHIVE') + '"/></input>';
-					} else {
-						if (bRiHTML.toUpperCase().indexOf("BTN_ARCHIV") == -1) bRow.innerHTML += '&nbsp;&nbsp;<input id="btn_archiv" class="dynamic_img" type="image" src="' + xGIF + '" alt="' + T('ARCHIVE') + '" name="archive" value="' + T('ARCHIVE') + '"/></input>';
-					};
-				};
-			};
-			sAC = null; sACS = null; bRow = null; bRiHTML = null;
-		};
-	};
-
-	function createDelRepTable(arA) {
-		//cSt = 'text-align:center;';
-		var delTb = $t([['id', 'delreptable']]);
-		var iMax = (arA.length > 5 ? 5 : arA.length);
-		var tRow = $r([['class', 'rh']]);
-		var tCell = $c(T('MTCL'), [['class', 'cc'], ['colspan', iMax]]);
-		tRow.appendChild(tCell);
-		var bRow = $r([['class', 'rh']]);
-		var cRow = $r();
-		var bTitle = null;
-		for (var i = 0; i < iMax; i++) {
-			bTitle = arA[i].firstChild.nodeValue;
-			bCell = $c(bTitle, [['class', 'cc']]);
-			bRow.appendChild(bCell);
-			cLink = $a("", [['href', jsVoid]]);
-			cLink.appendChild($img([['src', image["bDel"]], ['title', T('DEL') + " " + bTitle]]));
-			cLink.addEventListener('click', delete10Reports(i, arA), false);
-			cCell = $c("");
-			cCell.appendChild(cLink);
-			cRow.appendChild(cCell);
-		};
-		delTb.appendChild(tRow);
-		delTb.appendChild(bRow);
-		delTb.appendChild(cRow);
-		iMax = null; tRow = null;; tCell = null; bRow = null; cRow = null; bTitle = null;
-		return delTb;
-	};
-
-	function searchRepTable()  {
-		var sdvs = $e("P", T("FINDREP") + " : ");
-		var cLink2 = $a(gIc["iReport iReport2"]+"&nbsp;", [['href', jsVoid],['title',T("IREPORT2")]]);
-		var cLink3 = $a(gIc["iReport iReport3"]+"&nbsp;", [['href', jsVoid],['title',T("IREPORT3")]]);
-		var cLink4 = $a(gIc["iReport iReport7"]+"&nbsp;", [['href', jsVoid],['title',T("IREPORT7")]]);
-		var cLink5 = $a(gIc["iReport iReport5"]+"&nbsp;", [['href', jsVoid],['title',T("IREPORT5")]]);
-		var cLink6 = $a(gIc["iReport iReport6"]+"&nbsp;", [['href', jsVoid],['title',T("IREPORT6")]]);
-		var cLink7 = $a("ALL&nbsp;", [['href', jsVoid],['title',T("ALL")]]);
-		
-		cLink2.addEventListener('click', searchReports("iReport iReport2"), false);
-		cLink3.addEventListener('click', searchReports("iReport iReport3"), false);
-		cLink4.addEventListener('click', searchReports("iReport iReport7"), false);
-		cLink5.addEventListener('click', searchReports("iReport iReport5"), false);
-		cLink6.addEventListener('click', searchReports("iReport iReport6"), false);
-		cLink7.addEventListener('click', searchReports(T("ALL")), false);
-
-		sdvs.appendChild(cLink2);
-		sdvs.appendChild(cLink3);
-		sdvs.appendChild(cLink4);
-		sdvs.appendChild(cLink5);
-		sdvs.appendChild(cLink6);
-		sdvs.appendChild(cLink7);
-		return sdvs;
-	};
-	
-	function searchReports(ser)	{
-		return function() {
-			var urlRep  = addQueryParameter("/berichte.php?t=3",'s','0');
-			//alert(ser);
-			//setGMcookie("reportsPageToSearch", urlRep, false);
-			setGMcookie("reportsTOSearch", ser, false);
-			location.href = urlRep;
-			return false;
-		};
-	};
-
-
-	function delete10Reports(i, arA) {
-		return function() {
-			setGMcookie("reportsPageToDelete", arA[i].href, false);
-			setGMcookie("reportsPageToReturnTo", crtPage, false);
-			setGMcookie("reportsDeleteAll", "1", false);
-			location.href = arA[i].href;
-		};
-	};
-
-	function MessageOptions(){
-		if (crtPage.indexOf("nachrichten.php") != -1) {
-			genLink = "nachrichten.php?s=";
-			archLink = ' | <a href="nachrichten.php?t=3">' + T('ARCHIVE') + '</a>';
-			//code provided by rtellezi for enabling sending message by pressing the CTRL+ENTER keys.
-			//modified by ms99 to apply only to the "igm" textarea
-			if (document.evaluate) {arrInp = $xf("//textarea[@id='igm']", 'l'); for (var i = 0; i < arrInp.snapshotLength; i++) {tx = arrInp.snapshotItem(i); tx.addEventListener("keydown", sendMessage, false);};};
-		} else if (crtPage.indexOf("berichte.php") != -1) {
-			genLink = "berichte.php?s=";
-			archLink = ' | <a href="berichte.php?t=5">' + T('ARCHIVE') + '</a>';
-		};
-		if ($g("adressbuch") || $g("adbook")) return;
-		topMenu = $xf("//p[@class='txt_menue']");
-		if (!topMenu) topMenu = $g('textmenu');
-		if (document.evaluate) {
-			arrInp = $xf("//textarea[@id='igm']", 'l');
-			for (var i = 0; i < arrInp.snapshotLength; i++) {tx = arrInp.snapshotItem(i); tx.addEventListener("keydown", sendMessage, false);};
-			navLinks = $xf("//div[@id='" + ID_MID2 + "']//a[contains(@href, 'berichte.php?s=')] | //div[@id='" + ID_MID2 + "']//a[contains(@href, 'nachrichten.php?s=')]", 'l');
-			if (navLinks.snapshotLength > 0) document.addEventListener("keydown", navToPage, false);
-		};
-		//add the Archive option to the menu if PLUS not available and if the Archive link is not already present (added by other scripts)
-		if (!TB3O.plAc) {
-			if (topMenu) {
-				tMiHTML = topMenu.innerHTML.split("|");
-				bAddArchL = false;
-				if (genLink.indexOf("nachrichten.php") != -1 && tMiHTML.length < 4) bAddArchL = true;
-				if (genLink.indexOf("berichte.php") != -1 && tMiHTML.length < 6) bAddArchL = true;
-				if (bAddArchL == true) topMenu.innerHTML += archLink;
-			};
-		};
-		if (crtPage.indexOf("berichte.php") != -1 && crtPage.indexOf("&id=") == -1 && topMenu) {
-			var arrMLinks = $xf("//p[@class='txt_menue']//a | //div[@id='textmenu']//a", 'l');
-			if (TB3O.O[61] == '1') {
-				var aLinks = new Array();
-				for (var i = 0; i < arrMLinks.snapshotLength; i++) {aLinks[i] = arrMLinks.snapshotItem(i);};
-				var delTb = createDelRepTable(aLinks);
-				var lastDiv = $g(ID_MID2);
-				if (lastDiv) {var newPar = $e("P", ""); insertAfter(lastDiv.lastChild, searchRepTable()); insertAfter(lastDiv.lastChild, newPar); newPar.appendChild(delTb);};
-			};
-		};
-		if (crtPage.indexOf("?newdid=") != -1 && crtPage.indexOf("&id=") != -1) return;
-		//general variables needed for this function
-		var mrTable;
-		mrTable = $g("overview");
-		if (!mrTable) {mrTable = $xf("//table[@class='reports std'] | //table[@class='tbg']"); mrTable.id = "overview";};
-		addSelectAllCheckbox(mrTable.rows.length, mrTable);
-		deleteReports();
-		searchingReports();
-		//get the number of pages to preload from server
-		intMRP = parseInt(TB3O.O[59]) + 1;
-		if (intMRP > 5) intMRP = 4;
-		var pageNo1 = crtPage.indexOf("?s=");
-		var intPage = 0;
-		if (pageNo1 != -1) {var pageNoS1 = crtPage.substring(pageNo1 + 3); intPage = Math.round(parseInt(pageNoS1) / 10);};
-		if (intMRP > 1) {
-			for (var i = 1; i < intMRP; i++) {setTimeout(createMrPreloadFunc(i + intPage), getRndTime(i * 498));};
-			var X2 = (intMRP + intPage) * 10;
-			var X1 = (intPage - intMRP) * 10;
-			var addLink = (crtPage.indexOf("t=") != -1 ? "&" + crtPage.substr(crtPage.indexOf("t="),3) : "");
-			var tdbfLinks = mrTable.rows[mrTable.rows.length - 1].cells[2];
-			if (tdbfLinks) {
-				//var aSpan;
-				if (X1 < 0) {var aSpan = $e("SPAN", "«");$at(aSpan, [['class', 'c'], ["style", "font-weight:bold;"]]);} else var aSpan = $a("« ", [['style', 'font-weigth:bold'], ['href', genLink + X1 + addLink]]);
-				var fwLink = $a("»&nbsp;", [['style', 'font-weight:bold'], ['href', genLink + X2 + addLink]]);
-				tdbfLinks.innerHTML = "";
-				tdbfLinks.appendChild(aSpan);
-				tdbfLinks.appendChild(fwLink);
-			};
-			aSpan = null;
-		};
-		//code provided by rtellezi for sending message by pressing CTRL+ENTER
-		//modified by ms99 to work only on the form action='nachrichten.php' and form name='msg'
-		function sendMessage(event) {if (event.keyCode == 13 && event.ctrlKey) {var mF = $xf("//form[@name='msg']"); if (mF) mF.submit();}; return;};
-
-		function navToPage(event) {
-			var evCode = event.keyCode;
-			if (evCode == 37) {
-				for (var i = 0; i < navLinks.snapshotLength; i++) {if (navLinks.snapshotItem(i).textContent == "«") location.href = navLinks.snapshotItem(i).href; break;};
-			} else if (evCode == 39) {
-				for (var i = 0; i < navLinks.snapshotLength; i++) {if (navLinks.snapshotItem(i).textContent == "»") location.href = navLinks.snapshotItem(i).href; break;};
-			};
-			evCode = null;
-			return;
-		};
-
-		function createMrPreloadFunc(page) {var aX = (crtPage.indexOf("t=") != -1 ? "&" + crtPage.substr(crtPage.indexOf("t="), 3) : ""); return function() {ajaxRequest(genLink + (page * 10) + aX, "GET", null, processMrPage, dummy);};};
-
-		function processMrPage(ajaxResp) {
-			var ad = ajaxNDV2(ajaxResp);
-			var aTb = $xf("//table[@id='overview'] | //table[@class='reports std'] | //table[@class='tbg']", 'f', ad);
-			if (aTb) {
-				var maxR = aTb.rows.length;
-				var mrTb = $g("overview");
-				var mrFoot = mrTb.tFoot;
-				if (!mrFoot) {var lastRow = mrTb.rows[mrTb.rows.length - 1]; removeElement(lastRow);};
-				if (maxR > 3) {
-					xBody = mrTb.tBodies[0];
-					var oFrg = null;
-					if (xBody) oFrg = document.createDocumentFragment();
-					for (var xi = 1; xi < maxR - 1; xi++) {
-						var aRow = aTb.rows[xi];
-						var xRow = $r();
-						var noC = aRow.cells.length;
-						if (noC > 1) {
-							for (var yi = 0; yi < noC; yi++) {
-								var xCell = $c(aRow.cells[yi].innerHTML);
-								if (TB3O.T35 == true) xCell.className = aRow.cells[yi].className;
-								var iHTML = xCell.innerHTML;
-								if (iHTML.indexOf("spieler.php") != -1) {
-									var aNode = xCell.childNodes[0];
-									xCell.className = 'topic';
-									if (aNode.href.search(/spieler.php\?uid=(\d+$)/) > 0) {uid = RegExp.$1; insertUserLinks(aNode, uid, aNode.textContent);};
-								};
-								if (TB3O.O[60] == "1" && (iHTML.indexOf("nachrichten.php?id=") != -1 || iHTML.indexOf("berichte.php?id=") != -1)) insertMsgRptPopupLink(xCell.childNodes[0]);
-								if (yi == 1) {
-									$at(xCell, [['style', 'text-align:' + docDir[0] + ';']]);
-									if (TB3O.TB35 == false) $at(xCell, [['class', 's7']]);
-								};
-								xRow.appendChild(xCell);
-							};
-							if (oFrg) oFrg.appendChild(xRow); else mrTb.appendChild(xRow);
-						};
-					};
-					if (oFrg) xBody.appendChild(oFrg);
-				};
-				if (!mrFoot) mrTb.appendChild(lastRow);
-			};
-		};
-	};
-
-	function deleteReports() {
-		var bDR = getGMcookie("reportsDeleteAll", false);
-		if (bDR != '1') return;
-		if (getGMcookie("reportsPageToDelete", false) == '') return;
-		if (crtPage.indexOf("berichte.php") != -1) {
-			pauseScript(500);
-			allCB = $xf("//input[@type='checkbox' and not (@id)]", 'l');
-			btnSa = document.getElementsByName("s10");
-			bDel = document.getElementsByName("del");
-			if (!bDel) bDel = $g("btn_delete");
-			if (allCB.snapshotLength > 0 && btnSa && bDel) {
-				//now delete the reports without checking the correct address of the reports page
-				btnSa[0].click();
-				pauseScript(500);
-				bDel[0].click();
-			} else {
-				setGMcookie("reportsDeleteAll", "0", false);
-				setGMcookie("reportsPageToDelete", '', false);
-			};
-		} else {
-			setGMcookie("reportsDeleteAll", "0", false);
-			setGMcookie("reportsPageToDelete", '', false);
-		};
-	};
-
-	function searchingReports()	{
-		var bSR = getGMcookie("reportsTOSearch", false);
-		if (bSR == '')	return;
-		if (bSR == 'false') return;
-		
-		if (crtPage.indexOf("berichte.php") != -1) {
-			pauseScript(200);
-			var tbO = document.getElementById("overview");
-			tbR = tbO.getElementsByTagName('img');
-			
-			if (bSR == T("ALL"))	{
-				var tbRrex1 = new RegExp("\\biReport iReport2\\b");
-				for(var i = 0;i< tbR.length; i++)	{
-					if( tbRrex1.test(tbR[i].className))	{
-						setGMcookie("reportsTOSearch", '', false);
-						return;
-					};
-				};
-				
-				var tbRrex2 = new RegExp("\\biReport iReport3\\b");
-				for(var i = 0;i< tbR.length; i++)	{
-					if( tbRrex2.test(tbR[i].className))	{
-						setGMcookie("reportsTOSearch", '', false);
-						return;
-					};
-				};
-				
-				
-				var tbRrex3 = new RegExp("\\biReport iReport7\\b");
-				for(var i = 0;i< tbR.length; i++)	{
-					if( tbRrex3.test(tbR[i].className))	{
-						setGMcookie("reportsTOSearch", '', false);
-						return;
-					};
-				};
-
-				var tbRrex4 = new RegExp("\\biReport iReport5\\b");
-				for(var i = 0;i< tbR.length; i++)	{
-					if( tbRrex4.test(tbR[i].className))	{
-						setGMcookie("reportsTOSearch", '', false);
-						return;
-					};
-				};
-				
-				var tbRrex5 = new RegExp("\\biReport iReport6\\b");
-				for(var i = 0;i< tbR.length; i++)	{
-					if( tbRrex5.test(tbR[i].className))	{
-						setGMcookie("reportsTOSearch", '', false);
-						return;
-					};
-				};
-
-			}else{
-				var tbRrex = new RegExp('\\b' + bSR + '\\b');
-				for(var i = 0;i< tbR.length; i++)	{
-					if( tbRrex.test(tbR[i].className))	{
-						setGMcookie("reportsTOSearch", '', false);
-						return;
-					};
-				};
-			};
-
-			bSR = getGMcookie("reportsTOSearch", false);
-			//alert(bSR);
-			if(bSR != '' && !bSR != 'false')	{
-				//alert('ddd');
-				var s = parseInt(getQueryParameters(crtPage, 's'));
-				//alert(s);
-				var tbA = tbO.getElementsByTagName('a');
-				for(var i = 0; i< tbA.length; i++)	{
-					var ss = getQueryParameters(tbA[i].href, 's');
-					if(ss && parseInt(ss) > s)	{
-						var urlRep  = addQueryParameter("/berichte.php?t=3",'s',ss);
-						window.location = urlRep;
-					};
-				};
-			};
-
-		};
-	};
-
 	function fillinwarsim() {
 		if (TB3O.O[55] != '1') return;
 		var aTb = $xf("//table[@id='attacker'] | //table[@class='fill_in']");
@@ -11922,12 +10609,12 @@ if ( !t['103'] ) { t['103'] = t['26']; }
 		var dx = 0;
 		var dy = 0;
 		while (e.offsetParent){
-			dx += e.offsetLeft + (e.currentStyle?(parseInt(e.currentStyle.borderLeftWidth)).NaN0():0);
-			dy += e.offsetTop  + (e.currentStyle?(parseInt(e.currentStyle.borderTopWidth)).NaN0():0);
+			dx += e.offsetLeft + (e.currentStyle?(parseInt10(e.currentStyle.borderLeftWidth)).NaN0():0);
+			dy += e.offsetTop  + (e.currentStyle?(parseInt10(e.currentStyle.borderTopWidth)).NaN0():0);
 			e = e.offsetParent;
 		};
-		dx += e.offsetLeft + (e.currentStyle?(parseInt(e.currentStyle.borderLeftWidth)).NaN0():0);
-		dy  += e.offsetTop  + (e.currentStyle?(parseInt(e.currentStyle.borderTopWidth)).NaN0():0);
+		dx += e.offsetLeft + (e.currentStyle?(parseInt10(e.currentStyle.borderLeftWidth)).NaN0():0);
+		dy  += e.offsetTop  + (e.currentStyle?(parseInt10(e.currentStyle.borderTopWidth)).NaN0():0);
 		return {x:dx, y:dy};
 	};
 
@@ -12014,7 +10701,8 @@ function setTravianStyles()
    "div#mr_tooltip  div#content {padding-left:0px; padding-right:0px; padding-top:1px; min-height:0px;}" +
    "div#mr_tooltip  div#content form {padding-left:5px; padding-right:5px; padding-top:10px;}" +
 
-   "div#build.gid16 table#raidList td.rep {white-space:normal;}" +
+//   "div#build.gid16 table#raidList td.rep {white-space:normal;}" +
+   ((TB3O.O[60] === "1") ? "div.map table#raidFavs td.rep, div#build.gid16 table#raidList td.rep { width: 24%; white-space:normal;}" : "") +
 
    "div#build.gid17 table#target_select {width:50%; float:" + docDir[1] + "; margin-top:-65px;}" +
    "div#build.gid17 table#target_select td.vil input.text {width:90px;}" +
@@ -12022,7 +10710,15 @@ function setTravianStyles()
    "table.tbMerchantsCount {background-color:#F3F3F3; border-collapse:collapse; border:0px none transparent; border-radius:5px; -moz-border-radius:5px; margin-bottom:7px; width:auto;}" +
    ".mer {vertical-align:middle;background-color:transparent; padding:3px; }" +
    ".mer * {vertical-align:middle;}" +
-   ".mer input {margin-top:2px;}" +
+//   ".mer input {margin-top:2px;}" +
+
+   "div.a2b table#troops td {padding-" + docDir[1] + ":0px;}" +
+
+   "td.aligned_coords a.tbInject .cox," +
+   "td.aligned_coords a.tbInject .coy {width: 42px;}" +
+   "#villages td.aligned_coords {width: 92px;}" +
+
+   "div#build.gid37 table#distribution thead th a {color: #71D000;}" +
 
    "h1 {z-index:300; padding-top:16px;}"
 
@@ -12056,406 +10752,446 @@ function setTravianStyles()
 function setTBStyles()
 {
    
-   var acss = "";
+   var acss = '';
 
    //TBeyond specific style declarations
    acss +=
-   "div.CNBT {font-family:Arial, Helvetica, Verdana, sans-serif; font-size:9pt; font-weight:bold; color:" + TB3O.CNc[0] + ";line-height:15px;text-align:center;" + 
-            "border:1px solid black; -moz-border-radius:2em; width:21px; height:18px; padding-top:3px;}" +
+   'table.tb3tb	{width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:' + TB3O.DFc[1] + '; padding:2px; margin:1px;}' +
+   'table.tb3tb tr, table.tb3tb td {border:1px solid silver;}' +
+
+   'table.tb3tbnb	{border-collapse:collapse; border:0px none white; font-size:8pt; text-align:center; padding:2px; margin:1px; background-color:' + TB3O.DFc[1] + ';}' +
+   'table.tb3tbnb tr, table.tb3tbnb td, table.tb3tbnb td.tb3cnb {border:0px none white;}' +
+   'tr.tb3rh		{background-color:#ECECEC; text-align:center; border:1px solid silver;}' +
+   'tr.tb3rhb		{background-color:#ECECEC; text-align:center; border:1px solid silver; font-weight:bold;}' +
+   'tr.tb3rhnb		{background-color:#ECECEC; text-align:center;}' +
+   'tr.tb3r 		{border-collapse:collapse; border:1px solid silver; text-align:center;}' +
+   'tr.tb3rnb		{border-collapse:collapse; border:0px none white; text-align:center; white-space:nowrap;}' +
+   'td.tb3chbb		{border:1px solid silver; background-color:#ECECEC; padding:2px; font-weight:bold; font-size:10pt;}' +
+   'td.tb3chb		{border:1px solid silver; background-color:#ECECEC; padding:2px; font-weight:bold;}' +
+   'td.tb3ch		{border:1px solid silver; background-color:#ECECEC; padding:2px; text-align:center;}' +
+   'td.tb3chnb		{border:0px none white; background-color:#ECECEC; padding:2px; text-align:center;}' +
+   'td.tb3c		{border:1px solid silver; background-color:transparent; padding:2px; border-collapse:collapse;}' +
+   'td.tb3cnb		{border:0px none transparent; background-color:transparent; text-align:center; padding:2px;}' +
+   'td.tb3cbt		{border-top:1px solid silver; font-size:8pt; color:#000000; text-align:center;}' +
+   'td.tb3name          {text-align:' + docDir[0] +';}' +
+
+   'div.CNBT {font-family:Arial, Helvetica, Verdana, sans-serif; font-size:9pt; font-weight:bold; color:' + TB3O.CNc[0] + ';line-height:15px;text-align:center;' + 
+            'border:1px solid black; -moz-border-radius:2em; width:21px; height:18px; padding-top:3px;}' +
 
 
-   "div#tbver {z-index:2000; position:absolute; " + docDir[0] + ":200px; top:0px; width:450px; direction:ltr;}" + 
-   "div#tbver a {font-size:8pt; font-weight:bold; color:" + switcher(TB3O.nLayoutType,0,"#00FF00",1,"#008000") + ";}" +
+   'div#tbver {z-index:2000; position:absolute; ' + docDir[0] + ':200px; top:0px; width:450px; direction:ltr;}' + 
+   'div#tbver a {font-size:8pt; font-weight:bold; color:' + switcher(TB3O.nLayoutType,0,'#00FF00',1,'#008000') + ';}' +
 
 
 
-   "table.tbUpgTable {width:682px; table-layout: fixed; border-collapse:collapse; border:1px solid silver; background-color:" + TB3O.DFc[1] + "; font-size:8pt; padding:2px; text-align:" + docDir[0] + "; empty-cells:show; line-height:16px;}" +
-   "table.tbUpgTable table {background-color:transparent; border-collapse:collapse; border:0px none transparent; font-size:8pt; padding:2px; margin:1px; text-align:" + docDir[1] + "; vertical-align:top;}" +
-   "table.tbUpgTable tr {background-color:transparent; border-collapse:collapse; border:0px none transparent; font-size:8pt; padding:2px; margin:1px; text-align:" + docDir[1] + "; vertical-align:top;}" +
-   "table.tbUpgTable td {background-color:transparent; border:0px none transparent; font-size:8pt; text-align:" + docDir[1] + "; padding:2px; vertical-align:top;}" +
-   "table.tbUpgTable td.center {text-align:center; vertical-align:middle;}" +
-   "table.tbUpgTable td.tb3uthc {background-color:#ECECEC; border:1px solid silver; vertical-align:middle; font-weight:normal; text-align:center; width:25%; height:18px;}" +
-   "table.tbUpgTable td.tb3utbc {background-color:transparent; border:1px solid silver; margin:0px; text-align:center; vertical-align:top; width:25%; height:18px;}" +
-   "table.tbUpgTable a {font-size:8pt; font-weight:bold;}" +
-   "table.tbUpgTable div.tbImgCnt {text-align:" + docDir[0] + ";}" +
-   "table.tbUpgTable div.CNBT {position:relative; top:-31px;" + docDir[0] + ":9px; z-index:100;}" +
-   "table.tbUpgTable a < div {width:0%;}" +
+   'table.tbUpgTable {width:682px; table-layout: fixed; border-collapse:collapse; border:1px solid silver; background-color:' + TB3O.DFc[1] + '; font-size:8pt; padding:2px; text-align:' + docDir[0] + '; empty-cells:show; line-height:16px;}' +
+   'table.tbUpgTable table {background-color:transparent; border-collapse:collapse; border:0px none transparent; font-size:8pt; padding:2px; margin:1px; text-align:' + docDir[1] + '; vertical-align:top;}' +
+   'table.tbUpgTable tr {background-color:transparent; border-collapse:collapse; border:0px none transparent; font-size:8pt; padding:2px; margin:1px; text-align:' + docDir[1] + '; vertical-align:top;}' +
+   'table.tbUpgTable td {background-color:transparent; border:0px none transparent; font-size:8pt; text-align:' + docDir[1] + '; padding:2px; vertical-align:top;}' +
+   'table.tbUpgTable td.center {text-align:center; vertical-align:middle;}' +
+   'table.tbUpgTable td.tb3uthc {background-color:#ECECEC; border:1px solid silver; vertical-align:middle; font-weight:normal; text-align:center; width:25%; height:18px;}' +
+   'table.tbUpgTable td.tb3utbc {background-color:transparent; border:1px solid silver; margin:0px; text-align:center; vertical-align:top; width:25%; height:18px;}' +
+   'table.tbUpgTable a {font-size:8pt; font-weight:bold;}' +
+   'table.tbUpgTable div.tbImgCnt {text-align:' + docDir[0] + ';}' +
+   'table.tbUpgTable div.CNBT {position:relative; top:-31px;' + docDir[0] + ':9px; z-index:100;}' +
+   'table.tbUpgTable a < div {width:0%;}' +
    
 
-   "div#resupgTT table#tb_resupg," +
-   "div#bupgTT   table#tb_bldupg {margin-top:1px;}" +
+   'div#resupgTT table#tb_resupg,' +
+   'div#bupgTT   table#tb_bldupg {margin-top:1px;}' +
 
 
-   "div#resDiv {position:absolute; z-index:26;}" +
-   "div#resDiv div.CNBT {position:absolute; cursor:pointer; z-index:26;}" +
+   'div#resDiv {position:absolute; z-index:26;}' +
+   'div#resDiv div.CNBT {position:absolute; cursor:pointer; z-index:26;}' +
 
 
-   "table.rNt {background-color:transparent; border-collapse:collapse; border:0px none transparent; padding:2px; vertical-align:top;}" +
-   "table.tbUpgTable table.rNt {margin:1px;}" +
-   "table.rNt * {font-size:8pt !important; text-align:" + docDir[1] + " !important;}" +
-   "table.rNt .tbMany * {font-size:6pt !important;}" +
-   "table.rNt tr, table.rNt th, table.rNt td {background-color:transparent; padding:2px; vertical-align:top;}" +
-   "table.rNt tr {border-collapse:collapse; border:0px none transparent; margin:1px;}" +
-   "table.rNt th {border-top:1px solid silver;}" +
-   "table.tbUpgTable table.rNt tr:first-child th {border-top:0px;}" +
-   "table.rNt td {border:0px none transparent;}" +
-   "table.rNt td.center {text-align:center !important; vertical-align:middle;}" +
-   "table.rNt .tbCC {text-align:center !important; color:red;}" +
-   "table.rNt .tbCP {text-align:center !important; color:blue;}" +
-   "table.rNt .tbCapReached {color:red; text-decoration: blink;}" +
+   'table.rNt {background-color:transparent; border-collapse:collapse; border:0px none transparent; padding:2px; vertical-align:top;}' +
+   'table.tbUpgTable table.rNt {margin:1px;}' +
+   'table.rNt * {font-size:8pt !important; text-align:' + docDir[1] + ' !important;}' +
+   'table.rNt .tbMany * {font-size:6pt !important;}' +
+   'table.rNt tr, table.rNt th, table.rNt td {background-color:transparent; padding:2px; vertical-align:top;}' +
+   'table.rNt tr {border-collapse:collapse; border:0px none transparent; margin:1px;}' +
+   'table.rNt th {border-top:1px solid silver;}' +
+   'table.tbUpgTable table.rNt tr:first-child th {border-top:0px;}' +
+   'table.rNt td {border:0px none transparent;}' +
+   'table.rNt td.center {text-align:center !important; vertical-align:middle;}' +
+   'table.rNt .tbCC, table.rNt .tbCP {text-align:' + docDir[0] + ' !important;}' +
+   'table.rNt .tbCC *, table.rNt .tbCP * {vertical-align:middle;}' +
+   'table.rNt .tbCC {color:red;}' +
+   'table.rNt .tbCP {color:blue;}' +
+   'table.rNt .tbCapReached {color:red; text-decoration: blink;}' +
 
-   ".tbInject table.rNt {width:30%;}" +
+   '.tbInject table.rNt {width:30%;}' +
 
-   "table#mapTable {width:682px; border-collapse:collapse; border:1px solid silver; background-color:" + TB3O.DFc[1] + "; font-size:8pt; margin:0px; padding:0px; text-align:center; empty-cells:show; line-height:16px;}" +
-   "table#mapTable thead td {border:1px solid silver; background-color:#ECECEC; font-size:9pt; font-weight:bold; text-align:center; padding:1px; cursor:default; vertical-align:middle;}" +
-   "table#mapTable thead td.tb3mthcp {cursor:pointer;}" +
-   "table#mapTable td {border:1px solid silver; background-color:transparent; padding:1px; margin:0px; font-size:8pt; font-weight:normal; text-align:center; vertical-align:middle;}" +
-   "table#mapTable td.tb3mtcu {font-weight:bold; color:blue;}" +
-   "table#mapTable td.tb3mtcp {padding-" + docDir[1] + ":10px; color:black; text-align:" + docDir[1] + ";}" +
+   'table#mapTable {width:682px; border-collapse:collapse; border:1px solid silver; background-color:' + TB3O.DFc[1] + '; font-size:8pt; margin:0px; padding:0px; text-align:center; empty-cells:show; line-height:16px;}' +
+   'table#mapTable thead td {border:1px solid silver; background-color:#ECECEC; font-size:9pt; font-weight:bold; text-align:center; padding:1px; cursor:default; vertical-align:middle;}' +
+   'table#mapTable thead td.tb3mthcp {cursor:pointer;}' +
+   'table#mapTable td {border:1px solid silver; background-color:transparent; padding:1px; margin:0px; font-size:8pt; font-weight:normal; text-align:center; vertical-align:middle;}' +
+   'table#mapTable td.tb3mtcu {font-weight:bold; color:blue;}' +
+   'table#mapTable td.tb3mtcp {padding-' + docDir[1] + ':10px; color:black; text-align:' + docDir[1] + ';}' +
 
-   "div#updDiv {position:absolute; top:200px; " + docDir[0] + ":120px; display:block; padding:1px; z-index:50; clear:both; border:2px solid #C0C0C0; background-color:black; color:yellow;}" +
+   'div#updDiv {position:absolute; top:200px; ' + docDir[0] + ':120px; display:block; padding:1px; z-index:50; clear:both; border:2px solid #C0C0C0; background-color:black; color:yellow;}' +
 
-   "table#userbookmarks {border-collapse:collapse; border:0px none transparent; background-color:" + TB3O.DFc[1] + "; line-height:16px;}" +
-   "table#userbookmarks tr {text-align:" + docDir[0] + "; vertical-align:middle; padding:0 0 0 2px; margin:0px; white-space:nowrap; border-collapse:collapse; border:0px none transparent;}" +	
-   "table#userbookmarks td {border:0px none transparent; background-color:" + TB3O.DFc[1] + "; text-align:" + docDir[0] + "; font-size:13px; font-weight:normal; color:black; padding:2px; vertical-align:middle;}" +
-   "table#userbookmarks td.noact {width:10px;}" +
-   "table#userbookmarks td.act {width:10px; color:#FF8000;}" +
-   "table#userbookmarks img {cursor:pointer;}" +
-   "table#userbookmarks span {padding:0 0 0 4px;}" +
+   'table#userbookmarks {border-collapse:collapse; border:0px none transparent; background-color:' + TB3O.DFc[1] + '; line-height:16px;}' +
+   'table#userbookmarks tr {text-align:' + docDir[0] + '; vertical-align:middle; padding:0 0 0 2px; margin:0px; white-space:nowrap; border-collapse:collapse; border:0px none transparent;}' +	
+   'table#userbookmarks td {border:0px none transparent; background-color:' + TB3O.DFc[1] + '; text-align:' + docDir[0] + '; font-size:13px; font-weight:normal; color:black; padding:2px; vertical-align:middle;}' +
+   'table#userbookmarks td.noact {width:10px;}' +
+   'table#userbookmarks td.act {width:10px; color:#FF8000;}' +
+   'table#userbookmarks img {cursor:pointer;}' +
+   'table#userbookmarks span {padding:0 0 0 4px;}' +
 
-   "table#mkls {width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:" + TB3O.DFc[1] + "; padding:2px; margin:1px; line-height:18px;}" +
-   "table#mkls tr {background-color:transparent;}" +
-   "table#mkls td {background-color:transparent; border:1px solid silver; font-weight:normal; font-size:8pt; color:black; text-align:" + docDir[1] + "; vertical-align:middle; padding:2px 3px 2px 3px; white-space:nowrap;}" +
-   "table#mkls td.mklshh {background-color:#ECECEC; text-align:center; width:16%;}" +
-   "table#mkls td.mklsc {text-align:center;}" +
+   'table#mkls {width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:' + TB3O.DFc[1] + '; padding:2px; margin:1px; line-height:18px;}' +
+   'table#mkls tr {background-color:transparent;}' +
+   'table#mkls td {background-color:transparent; border:1px solid silver; font-weight:normal; font-size:8pt; color:black; text-align:' + docDir[1] + '; vertical-align:middle; padding:2px 3px 2px 3px; white-space:nowrap;}' +
+   'table#mkls td.mklshh {background-color:#ECECEC; text-align:center; width:16%;}' +
+   'table#mkls td.mklsc {text-align:center;}' +
 
-   "table#br_table, table#br_table tr {background-color:transparent; border:1px solid #C2C2C2; text-align:center; padding:0px; margin:0px; border-collapse:collapse; width:100%;}" +
-   "table#br_table td {background-color: transparent; border:1px solid #C2C2C2; font-size:8pt; text-align:" + docDir[1] + "; padding:2px 7px 2px 2px; margin:0px;}" +
-   "table#br_table td.tb3cbrh1 {background-color:#F3F3F3; font-size:10pt; font-weight:bold; color:#000000; text-align:center;}" +
-   "table#br_table td.tb3cbrh2 {background-color:#F3F3F3; font-size:10pt; font-weight:bold; color:#FF8000; text-align:center;}" +
-   "table#br_table td.tb3cbrh3 {background-color:#F3F3F3; font-size:10pt; font-weight:bold; color:#71D000; text-align:center;}" +
-   "table#br_table td.tb3cbrc {text-align:center;}" +
-   "table#br_table td.tb3cbrb {font-weight:bold;}" +
-   "table#br_table td.tb3cbrr {color:red;}" +
-   "table#br_table td.tb3cbrg {color:darkgreen;}" +
-   "table#br_table td.tb3cbrbr {font-weight:bold; color:red;}" +
-   "table#br_table td.tb3cbrbg {font-weight:bold; color:darkgreen;}" +
+   'table#br_table, table#br_table tr {background-color:transparent; border:1px solid #C2C2C2; text-align:center; padding:0px; margin:0px; border-collapse:collapse; width:100%;}' +
+   'table#br_table td {background-color: transparent; border:1px solid #C2C2C2; font-size:8pt; text-align:' + docDir[1] + '; padding:2px 7px 2px 2px; margin:0px;}' +
+   'table#br_table td.tb3cbrh1 {background-color:#F3F3F3; font-size:10pt; font-weight:bold; color:#000000; text-align:center;}' +
+   'table#br_table td.tb3cbrh2 {background-color:#F3F3F3; font-size:10pt; font-weight:bold; color:#FF8000; text-align:center;}' +
+   'table#br_table td.tb3cbrh3 {background-color:#F3F3F3; font-size:10pt; font-weight:bold; color:#71D000; text-align:center;}' +
+   'table#br_table td.tb3cbrc {text-align:center;}' +
+   'table#br_table td.tb3cbrb {font-weight:bold;}' +
+   'table#br_table td.tb3cbrr {color:red;}' +
+   'table#br_table td.tb3cbrg {color:darkgreen;}' +
+   'table#br_table td.tb3cbrbr {font-weight:bold; color:red;}' +
+   'table#br_table td.tb3cbrbg {font-weight:bold; color:darkgreen;}' +
 
-   "table#mhtt {border-collapse:collapse; border:0px none transparent; padding:2px; margin:1px;" + 
-               "font-weight:normal; font-size:8pt; text-align:" + docDir[1] + ";  background-color:transparent; empty-cells:show; line-height:16px; white-space:nowrap;}" +
-   "table#mhtt tr {border:0px none transparent;}" +
-   "table#mhtt td {background-color:transparent; border:0px none transparent; font-weight:normal; font-size:8pt; text-align:" + docDir[1] + "; color:black; padding:2px 7px 2px 0px; margin:0px; vertical-align:middle;}" +
-   "table#mhtt td.mCol {color:blue;}" +
-   "table#mhtt td.center {text-align:center;}" +
-   "table#mhtt td.ld {text-align:" + docDir[0] + "; padding-left:2px;}" +
-   "table#mhtt td.dec {text-align:center; font-size:10pt; font-weight:bold; color:green; border-bottom:1px solid grey;}" +
+   'table#mhtt {border-collapse:collapse; border:0px none transparent; padding:2px; margin:1px;' + 
+               'font-weight:normal; font-size:8pt; text-align:' + docDir[1] + ';  background-color:transparent; empty-cells:show; line-height:16px; white-space:nowrap;}' +
+   'table#mhtt tr {border:0px none transparent;}' +
+   'table#mhtt td {background-color:transparent; border:0px none transparent; font-weight:normal; font-size:8pt; text-align:' + docDir[1] + '; color:black; padding:2px 7px 2px 0px; margin:0px; vertical-align:middle;}' +
+   'table#mhtt td.mCol {color:blue;}' +
+   'table#mhtt td.center {text-align:center;}' +
+   'table#mhtt td.ld {text-align:' + docDir[0] + '; padding-left:2px;}' +
+   'table#mhtt td.dec {text-align:center; font-size:10pt; font-weight:bold; color:green; border-bottom:1px solid grey;}' +
 
-   "table.tbDistInfo {border-collapse:collapse; empty-cells:show; white-space:nowrap;}" + 
-   "table.tbDistInfo * {vertical-align:middle;}" + 
-   "table.tbDistInfo," +
-   "table.tbDistInfo tr," +
-   "table.tbDistInfo td {border:0px none transparent;background-color:transparent;text-align:" + docDir[1] + ";}" +
-   "table.tbDistInfo td {padding:2px;}" +
-   "table.tbDistInfo td.tbMerc {color:blue;}" +
-   "table.tbDistInfo td.tbDist {color:blue;}" +
-   "table.tbDistInfo td.tbCenter {text-align:center; padding: 2px 0px;}" +
-   "table.tbDistInfo td.tbTravelT img {padding-" + docDir[1] + ":7px;}" +
-   "table.tbDistInfo td.tbArrivalT {padding-" + docDir[0] + ":7px;}" +
-   "table.tbDistInfo td.tbIco {text-align:" + docDir[0] + "; padding-" + docDir[0] + ":2px; padding-" + docDir[1] + ":10px;}" +
-   "table.tbDistInfo td.tbTitle {font-size:10pt !important; font-weight:bold; color:green; border-bottom:1px solid grey;}" +
+   'table.tbDistInfo {border-collapse:collapse; empty-cells:show; white-space:nowrap;}' + 
+   'table.tbDistInfo * {vertical-align:middle;}' + 
+   'table.tbDistInfo,' +
+   'table.tbDistInfo tr,' +
+   'table.tbDistInfo td {border:0px none transparent;background-color:transparent;text-align:' + docDir[1] + ';}' +
+   'table.tbDistInfo td {padding:2px;}' +
+   'table.tbDistInfo td.tbMerc {color:blue;}' +
+   'table.tbDistInfo td.tbDist {color:blue;}' +
+   'table.tbDistInfo td.tbCenter {text-align:center; padding: 2px 0px;}' +
+   'table.tbDistInfo td.tbTravelT img {padding-' + docDir[1] + ':7px;}' +
+   'table.tbDistInfo td.tbArrivalT {padding-' + docDir[0] + ':7px;}' +
+   'table.tbDistInfo td.tbIco {text-align:' + docDir[0] + '; padding-' + docDir[0] + ':2px; padding-' + docDir[1] + ':10px;}' +
+   'table.tbDistInfo td.tbTitle {font-size:10pt !important; font-weight:bold; color:green; border-bottom:1px solid grey;}' +
 
-   "div#tb_mercdest table.tbDistInfo td { font-size:11px; }" +
+   'div#tb_mercdest table.tbDistInfo td { font-size:11px; }' +
 
-   "table#tb_distTT.tbDistInfo { padding:2px; margin:1px; font-weight:normal; font-size:8pt; line-height:16px; }" +
-   "table#tb_distTT.tbDistInfo td {margin:0px; font-size:8pt;}" +
+   'table#tb_distTT.tbDistInfo { padding:2px; margin:1px; font-weight:normal; font-size:8pt; line-height:16px; }' +
+   'table#tb_distTT.tbDistInfo td {margin:0px; font-size:8pt;}' +
 
-   "table#mhtt.tbAttDefInfo thead th {font-weight:bold; text-align:center; font-size:8pt; background-color:transparent; background-image:none; }" +
-   "table#mhtt.tbAttDefInfo td.tbIco {text-align:" + docDir[0] + ";width:40px;}" +
-   "table#mhtt.tbAttDefInfo td.tbVal {text-align:" + docDir[1] + ";}" +
-   "table#mhtt.tbAttDefInfo tfoot td {text-align:" + docDir[0] + "; font-size:8pt;}" +
-
-   "table.tbAttDefInfo2 span {padding-" + docDir[0] + ":1em;}" +
+   'table#mhtt.tbAttDefInfo thead th {font-weight:bold; text-align:center; font-size:8pt; background-color:transparent; background-image:none; }' +
+   'table#mhtt.tbAttDefInfo td.tbIco {text-align:' + docDir[0] + ';width:40px;}' +
+   'table#mhtt.tbAttDefInfo td.tbVal {text-align:' + docDir[1] + ';}' +
+   'table#mhtt.tbAttDefInfo tfoot td {text-align:' + docDir[0] + '; font-size:8pt;}' +
 
    // !important rules required for non floating resource bar
-   "table.tbResBar    {border-collapse:collapse; border:1px solid silver; background-color:" + TB3O.DFc[1] + 
-                      "; width:auto; margin:0px;  white-space:nowrap;}" +
-   "table.tbResBar *  {vertical-align:middle !important; line-height:13px !important; font-weight:normal; font-size:8pt !important;}" +
-   "table.tbResBar tr {border-collapse:collapse; border:0px none transparent; padding:0px !important;}" +
-   "table.tbResBar td {border:1px solid silver; padding:2px !important;}" +
-   "table.tbResBar tr.tb3pph {border-top:2px solid silver; border-bottom:2px solid silver; background-color:#ECECEC;}" +
-   "table.tbResBar td.tb3c {text-align: center !important; background-color:" + TB3O.DFc[1] + "; margin:1px; width:auto; }" +
-   "table.tbResBar td.tb3c span  {text-align: right !important;}" +
-   "table.tbResBar tr.tb3pph td.tb3c, table.tbResBar tr.tb3pph td.tb3ctotv {background-color:#ECECEC;}" +
-   "table.tbResBar td.lr       {background-color:transparent;text-align:" + docDir[1] + " !important; padding:0px !important;}" +
-   "table.tbResBar td.tb3ttf   {text-align:" + docDir[1] + " !important;padding:0px 1px !important;font-size:7pt !important;}" +
-   "table.tbResBar td.tb3ttf.tbInfinity {font-size:12pt !important; text-align:center !important;}" +
-   "table.tbResBar td.tb3cvn   {text-align:center !important; font-weight:bold; color:blue; background-color:#E9EEFC;}" +
-   "table.tbResBar td.tb3chtot {text-align:center !important; font-weight:bold; border-" + docDir[0] + ":2px solid silver; background-color:#FFFFC0; }" +
-   "table.tbResBar td.tb3ctot  {text-align:" + docDir[1] + " !important;border-" + docDir[0] + ":2px solid silver; background-color:#FFFFC0; }" +
-   "table.tbResBar td.tb3ctotv {text-align:" + docDir[1] + " !important;}" +
-   "table.tbResBar td.tb3cresbar {border:1px solid silver;background-color:transparent; padding:0px !important; width:100px;}" +
-   "div#resbarTT table#tb_resbar {margin-top:1px;}" +
+   'table.tbResBar    {border-collapse:collapse; border:1px solid silver; background-color:' + TB3O.DFc[1] + 
+                      '; width:auto; margin:0px;  white-space:nowrap;}' +
+   'table.tbResBar *  {vertical-align:middle !important; line-height:13px !important; font-weight:normal; font-size:8pt !important;}' +
+   'table.tbResBar tr {border-collapse:collapse; border:0px none transparent; padding:0px !important;}' +
+   'table.tbResBar td {border:1px solid silver; padding:2px !important;}' +
+   'table.tbResBar tr.tb3pph {border-top:2px solid silver; border-bottom:2px solid silver; background-color:#ECECEC;}' +
+   'table.tbResBar td.tb3c {text-align: center !important; background-color:' + TB3O.DFc[1] + '; margin:1px; width:auto; }' +
+   'table.tbResBar td.tb3c span  {text-align: right !important;}' +
+   'table.tbResBar tr.tb3pph td.tb3c, table.tbResBar tr.tb3pph td.tb3ctotv {background-color:#ECECEC;}' +
+   'table.tbResBar td.lr       {background-color:transparent;text-align:' + docDir[1] + ' !important; padding:0px !important;}' +
+   'table.tbResBar td.tb3ttf   {text-align:' + docDir[1] + ' !important;padding:0px 1px !important;font-size:7pt !important;}' +
+   'table.tbResBar td.tb3ttf.tbInfinity {font-size:12pt !important; text-align:center !important;}' +
+   'table.tbResBar td.tb3cvn   {text-align:center !important; font-weight:bold; color:blue; background-color:#E9EEFC;}' +
+   'table.tbResBar td.tb3chtot {text-align:center !important; font-weight:bold; border-' + docDir[0] + ':2px solid silver; background-color:#FFFFC0; }' +
+   'table.tbResBar td.tb3ctot  {text-align:' + docDir[1] + ' !important;border-' + docDir[0] + ':2px solid silver; background-color:#FFFFC0; }' +
+   'table.tbResBar td.tb3ctotv {text-align:' + docDir[1] + ' !important;}' +
+   'table.tbResBar td.tb3cresbar {border:1px solid silver;background-color:transparent; padding:0px !important; width:100px;}' +
+   'div#resbarTT table#tb_resbar {margin-top:1px;}' +
 
-   "table.rbrtb {border-collapse:collapse; border:0px none transparent; float:left; height:17px; width:100px; background-color:" + TB3O.DFc[1] + ";}" +
-   "table.rbrtb tr.rbrtbr," + 
-   "table.rbrtb td {border-collapse:collapse !important; border:0px none transparent !important; padding:0px !important;}" +
+   'table.rbrtb {border-collapse:collapse; border:0px none transparent; float:left; height:17px; width:100px; background-color:' + TB3O.DFc[1] + ';}' +
+   'table.rbrtb tr.rbrtbr,' + 
+   'table.rbrtb td {border-collapse:collapse !important; border:0px none transparent !important; padding:0px !important;}' +
 
-   "table#vl2table {border-collapse:collapse; border:0 none transparent; background-color:" + TB3O.DFc[1] + "; line-height:13px; font-size:10pt; text-align:center; padding:2px; margin:0px; white-space:nowrap; vertical-align:middle;}" +
-   "table#vl2table tr td {border:0 none transparent; background-color:transparent; text-align:" + docDir[0] + "; padding:2px; margin:0px; font-weight:normal; font-size:10pt;}" +
-   "table#vl2table td.av {color:#FF8000;}" +
-   "table#vl2table td.coord {font-size:8pt;direction:ltr;}" +
-   "table#vl2table td.tb3sep {border-top: 2px inset gray;}" +
+   'table#vl2table {border-collapse:collapse; border:0 none transparent; background-color:' + TB3O.DFc[1] + '; line-height:13px; font-size:10pt; text-align:center; padding:2px; margin:0px; white-space:nowrap; vertical-align:middle;}' +
+   'table#vl2table tr td {border:0 none transparent; background-color:transparent; text-align:' + docDir[0] + '; padding:2px; margin:0px; font-weight:normal; font-size:10pt;}' +
+   'table#vl2table td.av {color:#FF8000;}' +
+   'table#vl2table td.coord {font-size:8pt;direction:ltr;}' +
+   'table#vl2table td.tb3sep {border-top: 2px inset gray;}' +
 
-   "form#searchform   {padding:10px; border:1px solid #C0C0C0;}" + 
-   "form#searchform * {font-size:8pt; margin:2px;}" + 
-   "form#searchform select#searchtype {padding:0px;}" + 
-   "div#searchbarTT form#searchform {margin-top:18px;}" +
+   'form#searchform   {padding:10px; border:1px solid #C0C0C0;}' + 
+   'form#searchform * {font-size:8pt; margin:2px;}' + 
+   'form#searchform select#searchtype {padding:0px;}' + 
+   'div#searchbarTT form#searchform {margin-top:18px;}' +
 
-   "div.fldiv {position:absolute; display:block; padding:1px; z-index:50; clear:both; border:1px solid #C0C0C0; background-color:" + TB3O.DFc[1] + "; z-index:1000;}" +
-   "div.dragdiv {text-align:center; font-weight:bold; height:18px; float:" + docDir[0] + "; cursor: pointer; border-bottom:1px solid #C0C0C0; background-color:#ECECEC; z-index:1000; vertical-align:middle;}" +
-   "div.mmdiv {height:18px; float:" + docDir[0] + "; cursor: pointer; border-bottom:1px solid #C0C0C0; background-color:" + TB3O.DFc[1] + "; width:25px;}" +
-   "div.closediv {height:18px; float:" + docDir[0] + "; cursor: pointer; border-bottom:1px solid #C0C0C0; background-color:" + TB3O.DFc[1] + "; width:25px;}" +
+   'div.fldiv {position:absolute; display:block; padding:1px; z-index:50; clear:both; border:1px solid #C0C0C0; background-color:' + TB3O.DFc[1] + '; z-index:1000;}' +
+   'div.dragdiv {text-align:center; font-weight:bold; height:18px; float:' + docDir[0] + '; cursor: pointer; border-bottom:1px solid #C0C0C0; background-color:#ECECEC; z-index:1000; vertical-align:middle;}' +
+   'div.mmdiv {height:18px; float:' + docDir[0] + '; cursor: pointer; border-bottom:1px solid #C0C0C0; background-color:' + TB3O.DFc[1] + '; width:25px;}' +
+   'div.closediv {height:18px; float:' + docDir[0] + '; cursor: pointer; border-bottom:1px solid #C0C0C0; background-color:' + TB3O.DFc[1] + '; width:25px;}' +
 
-   "p.delacc {position:absolute; display:block; padding:4px; z-index:2; border:1px solid #00C000; background-color:#FEFFE3; width:130px; text-align:center; " + docDir[1] + ":0px; top:0px;}" +
-   "p.delacc span {color:orange;}" +
+   'p.delacc {position:absolute; display:block; padding:4px; z-index:2; border:1px solid #00C000; background-color:#FEFFE3; width:130px; text-align:center; ' + docDir[1] + ':0px; top:0px;}' +
+   'p.delacc span {color:orange;}' +
 
-   "table#noteblock {border-collapse:collapse; border:0px none white; text-align:center; padding:2px; margin:1px; background-color:" + TB3O.DFc[1] + ";}" +
-   "table#noteblock tr {background-color:transparent; border:0px none transparent;}" +
-   "table#noteblock td {border:0px none transparent; background-color:transparent; text-align:center; padding:2px;}" +
-   "#noteblockcontent {border:1px solid silver; padding:0px 2px 0px 2px; overflow:auto; font-size:10pt; white-space:nowrap;}" +
+   'table#noteblock {border-collapse:collapse; border:0px none white; text-align:center; padding:2px; margin:1px; background-color:' + TB3O.DFc[1] + ';}' +
+   'table#noteblock tr {background-color:transparent; border:0px none transparent;}' +
+   'table#noteblock td {border:0px none transparent; background-color:transparent; text-align:center; padding:2px;}' +
+   '#noteblockcontent {border:1px solid silver; padding:0px 2px 0px 2px; overflow:auto; font-size:10pt; white-space:nowrap;}' +
 
-   "table#delreptable {width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:" + TB3O.DFc[1] + "; padding:2px; margin:1px;}" +
-   "table#delreptable tr {border:1px solid silver; text-align:center;}" +
-   "table#delreptable tr.rh {background-color:#ECECEC; text-align:center; border:1px solid silver;}" +
-   "table#delreptable td {border:1px solid silver; padding:2px;}" +
-   "table#delreptable td.cc {font-weight:bold; font-size:10pt;}" +
-
-   "table#stla {width:100%; border-collapse:collapse; border:1px solid silver; font-weight:normal; font-size:8pt; color:black; text-align:center; background-color:" + TB3O.DFc[1] + "; padding:1px; margin:1px; line-height:18px;}" +
-   "table#stla tr {background-color:transparent;}" +
-   "table#stla td {border:1px solid silver; font-size:8pt; text-align:" + docDir[1] + "; vertical-align:middle; padding:1px 2px 1px 2px; white-space:nowrap;}" +
-   "table#stla td.stlahh {background-color:#ECECEC; text-align:center; width:5%;}" +
-   "table#stla td.stlahh1 {background-color:#ECECEC; text-align:center; width:10%;}" +
-   "table#stla td.stlahh2 {background-color:#ECECEC; text-align:center;}" +
-   "table#stla td.stlac {background-color:transparent; text-align:center;}" +
-
-   "table#sell td.soffall {background-color:#D0F0F0;}" +
+   'table#sell td.soffall {background-color:#D0F0F0;}' +
 
    // sell offers
-   "table#soff {width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:" + TB3O.DFc[1] + "; line-height:18px;}" +
-   "table#soff tr         {background-color:transparent;}" +
-   "table#soff tr.soffall {background-color:#D0F0F0;}" +
-   "table#soff tr.soffall td {background-color:#D0F0F0;}" +
-   "table#soff td         {border:1px solid silver; text-align:" + docDir[1] + "; vertical-align:middle; padding:2px 3px 2px 1px; white-space:nowrap;}" +
-   "table#soff td.soffhh  {background-color:#ECECEC; color:black; text-align:center; width:16%;}" +
-   "table#soff td.val     {color:black; text-align:left;}" +
-   "table#soff td.soffc   {color:black; text-align:center;}" +
+   'table#soff {width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:' + TB3O.DFc[1] + '; line-height:18px;}' +
+   'table#soff tr         {background-color:transparent;}' +
+   'table#soff tr.soffall {background-color:#D0F0F0;}' +
+   'table#soff tr.soffall td {background-color:#D0F0F0;}' +
+   'table#soff td         {border:1px solid silver; text-align:' + docDir[1] + '; vertical-align:middle; padding:2px 3px 2px 1px; white-space:nowrap;}' +
+   'table#soff td.soffhh  {background-color:#ECECEC; color:black; text-align:center; width:16%;}' +
+   'table#soff td.val     {color:black; text-align:left;}' +
+   'table#soff td.soffc   {color:black; text-align:center;}' +
 
-   "input#soff, input#soffG {margin-top:3px;" + (docDir[0] == 'right' ? "margin-right:0px" : "margin-right:3px") + "; margin-bottom:3px;" + (docDir[0] == 'right' ? "margin-left:3px" : "margin-left:0px") + "; padding:0px;}" +
+   'input#soff, input#soffG {margin-top:3px;' + (docDir[0] === 'right' ? 'margin-right:0px' : 'margin-right:3px') + '; margin-bottom:3px;' + (docDir[0] === 'right' ? 'margin-left:3px' : 'margin-left:0px') + '; padding:0px;}' +
 
    // market send form
-   "#tb_usetraders {width: 20px;}" +
-   "form td.tbInject {text-align:center;}" +
-   "form td.tbInject, form td.tbInject * {vertical-align:middle !important;}" +
-   "form td.tbUseThem {padding:0px !important;}" +
-   "form td.tbTool    {padding-top:0px !important; padding-bottom:0px !important;}" +
-   "form td.tbInject a.tbQCarry {font-size:8pt;white-space:nowrap;}" +
-   "form td.tbInject a.tbMCap   {border-bottom:1px dotted;}" +
+   '#tb_usetraders {width: 20px;}' +
+   'form td.tbInject {text-align:center;}' +
+   'form td.tbInject, form td.tbInject * {vertical-align:middle !important;}' +
+   'form td.tbUseThem {padding:0px !important;}' +
+   'form td.tbTool    {padding-top:0px !important; padding-bottom:0px !important;}' +
+   'form td.tbInject a.tbQCarry {font-size:8pt;white-space:nowrap;}' +
+   'form td.tbInject a.tbMCap   {border-bottom:1px dotted;}' +
 
    // market send (modify arrival tables)
-   "table.tbIncomingMerc td.tbArrivalT {font-size:8pt;}" +
-   "table.tbIncomingMerc td.tbArrivalRes {padding:0px !important;}" +
-   "table.tbIncomingMerc td.tbArrivalRes table {border-collapse:collapse; border-color:silver; height:100%;}" +
-   "table.tbIncomingMerc td.tbArrivalRes table td {border-color:silver; width:20%;}" +
-   "table.tbIncomingMerc td.tbOver," +
-   "table.tbIncomingMerc td.tbUnder {padding-" + docDir[0] + ":27px; padding-top:2px; padding-bottom:2px; font-size:8pt;}" +
-   "td.tbOver," +
-   "td.tbUnder {font-weight:bold; color:white;}" +
-   "td.tbOver  {background-color:darkgreen;}" +
-   "td.tbUnder {background-color:red;}" +
-   "table.tbIncomingMerc td.tbCapReached {color:red; text-decoration: blink;}" +
+   'table.tbIncomingMerc td.tbArrivalT {font-size:8pt;}' +
+   'table.tbIncomingMerc td.tbArrivalRes {padding:0px !important;}' +
+   'table.tbIncomingMerc td.tbArrivalRes table {border-collapse:collapse; border-color:silver; height:100%;}' +
+   'table.tbIncomingMerc td.tbArrivalRes table td {border-color:silver; width:20%;}' +
+   'table.tbIncomingMerc td.tbOver,' +
+   'table.tbIncomingMerc td.tbUnder {padding-' + docDir[0] + ':27px; padding-top:2px; padding-bottom:2px; font-size:8pt;}' +
+   'td.tbOver,' +
+   'td.tbUnder {font-weight:bold; color:white;}' +
+   'td.tbOver  {background-color:darkgreen;}' +
+   'td.tbUnder {background-color:red;}' +
+   'table.tbIncomingMerc td.tbCapReached {color:red; text-decoration: blink;}' +
 
    // market send (cumulative arrivals table)
-   "table#tb_arrm  {line-height:16px; border-collapse:collapse; border:1px solid silver; margin-bottom:15px;}" +
-   "table#tb_arrm th," +
-   "table#tb_arrm td {border:1px solid silver; font-size:9pt; text-align:center; padding:2px;}" +
-   "table#tb_arrm td.cbgx {font-size:10pt; font-weight:bold;}" +
-   "table#tb_arrm th {background-color:#F3F3F3; font-weight:bold;}" +
-   "table#tb_arrm td.tbTotal {font-weight:bold;}" +
-   "table#tb_arrm .tbTimeout.tbOver.tbSoon," +
-   "table#tb_arrm .tbTimeout.tbUnder.tbSoon {color:white; text-decoration: blink;}" +
-   "table#tb_arrm .tbTimeout.tbOver.tbDecrease," +
-   "table#tb_arrm .tbTimeout.tbUnder.tbDecrease {color:white;}" +
-   "table#tb_arrm .tbTimeout.tbOver.tbCapReached," +
-   "table#tb_arrm .tbTimeout.tbUnder.tbCapReached {color:yellow;}" +
+   'table#tb_arrm  {line-height:16px; border-collapse:collapse; border:1px solid silver; margin-bottom:15px;}' +
+   'table#tb_arrm th,' +
+   'table#tb_arrm td {border:1px solid silver; font-size:9pt; text-align:center; padding:2px;}' +
+   'table#tb_arrm td.cbgx {font-size:10pt; font-weight:bold;}' +
+   'table#tb_arrm th {background-color:#F3F3F3; font-weight:bold;}' +
+   'table#tb_arrm td.tbTotal {font-weight:bold;}' +
+   'table#tb_arrm .tbTimeout.tbOver.tbSoon,' +
+   'table#tb_arrm .tbTimeout.tbUnder.tbSoon {color:white; text-decoration: blink;}' +
+   'table#tb_arrm .tbTimeout.tbOver.tbDecrease,' +
+   'table#tb_arrm .tbTimeout.tbUnder.tbDecrease {color:white;}' +
+   'table#tb_arrm .tbTimeout.tbOver.tbCapReached,' +
+   'table#tb_arrm .tbTimeout.tbUnder.tbCapReached {color:yellow;}' +
 
-   "table#TB3S	{width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:" + TB3O.DFc[1] + "; padding:2px; margin:1px;}" +
-   "table#TB3S tr.srh {background-color:#ECECEC; text-align:center; border:1px solid silver;}" +
-   "table#TB3S td {border:1px solid silver; background-color:transparent; padding:2px; border-collapse:collapse; text-align:" + docDir[0] + "; font-size:8pt;}" +
-   "table#TB3S td.srst {background-color:#ECECEC; text-align:" + docDir[0] + "; font-size:9pt; font-weight:bold; color:darkblue;}" +
-   "table#TB3S td.s1 {background-color:#ECECEC; text-align:center; width:70%; font-weight:bold;}" +
-   "table#TB3S td.s2 {background-color:#ECECEC; text-align:center; width:20%;}" +
-   "table#TB3S select, table#TB3S input {font-size:8pt;}" +
-   "table#TB3S span {font-size:8pt; font-weight: bold;}" +
-   "table#TB3S td.s3 {background-color:#ECECEC; text-align:center; width:10%;}" +
-   "table#TB3S img {cursor:pointer;}" +
+   'table#TB3S	{width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:' + TB3O.DFc[1] + '; padding:2px; margin:1px;}' +
+   'table#TB3S tr.srh {background-color:#ECECEC; text-align:center; border:1px solid silver;}' +
+   'table#TB3S td {border:1px solid silver; background-color:transparent; padding:2px; border-collapse:collapse; text-align:' + docDir[0] + '; font-size:8pt;}' +
+   'table#TB3S td.srst {background-color:#ECECEC; text-align:' + docDir[0] + '; font-size:9pt; font-weight:bold; color:darkblue;}' +
+   'table#TB3S td.s1 {background-color:#ECECEC; text-align:center; width:70%; font-weight:bold;}' +
+   'table#TB3S td.s2 {background-color:#ECECEC; text-align:center; width:20%;}' +
+   'table#TB3S select, table#TB3S input {font-size:8pt;}' +
+   'table#TB3S span {font-size:8pt; font-weight: bold;}' +
+   'table#TB3S td.s3 {background-color:#ECECEC; text-align:center; width:10%;}' +
+   'table#TB3S img {cursor:pointer;}' +
 
-   "table#cptable {width:100%; border-collapse:collapse; border:1px solid silver; padding:2px; margin:1px;}" +
-   "table#cptable * {text-align:center !important;  font-size:8pt !important;}" +
-   "table#cptable tr, table#cptable td {border-collapse:collapse; border:1px solid silver; padding:2px; }" +
-   "table#cptable thead td {background-color:#ECECEC; font-weight:bold;}" +
-   "table#cptable td.CG {background-color:#C8FFC8;}" +
-   "table#cptable td.CR {background-color:#FFE1E1;}" +
+   'table#cptable {width:100%; border-collapse:collapse; border:1px solid silver; padding:2px; margin:1px;}' +
+   'table#cptable * {text-align:center !important;  font-size:8pt !important;}' +
+   'table#cptable tr, table#cptable td {border-collapse:collapse; border:1px solid silver; padding:2px; }' +
+   'table#cptable thead td {background-color:#ECECEC; font-weight:bold;}' +
+   'table#cptable td.CG {background-color:#C8FFC8;}' +
+   'table#cptable td.CR {background-color:#FFE1E1;}' +
 
-   "table#mbuyf {width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:" + TB3O.DFc[1] + "; padding:2px; margin:1px;}" +
-   "table#mbuyf tr {border-collapse:collapse; border:1px solid silver; text-align:center;}" +
-   "table#mbuyf td {border:1px solid silver; background-color:transparent; padding:2px; border-collapse:collapse;}" +
-   "table#mbuyf td.sf {background-color:#FFE4B5;}" +
+   'table#mbuyf {width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:' + TB3O.DFc[1] + '; padding:2px; margin:1px;}' +
+   'table#mbuyf tr {border-collapse:collapse; border:1px solid silver; text-align:center;}' +
+   'table#mbuyf td {border:1px solid silver; background-color:transparent; padding:2px; border-collapse:collapse;}' +
+   'table#mbuyf td.sf {background-color:#FFE4B5;}' +
 
-   "table.allvtroops, table.allvtroops tr td {border-collapse:collapse; border:1px solid silver; text-align:center; padding:2px;}" +
-   "table.allvtroops tr th {border-collapse:collapse; border:1px solid silver; text-align:" + docDir[0] + "; padding:2px 7px; width:20%;}" +
+   'table.allvtroops, table.allvtroops tr td {border-collapse:collapse; border:1px solid silver; text-align:center; padding:2px;}' +
+   'table.allvtroops tr th {border-collapse:collapse; border:1px solid silver; text-align:' + docDir[0] + '; padding:2px 7px; width:20%;}' +
 
-   // dismiss table
-   "table.troop_details a.tbTool {text-align:center;}" +
-   "table.troop_details tr.tbInject a {font-size:8pt;}" +
-   "table.troop_details tr.tbInject a.tbMany {font-size:6pt;}" +
-   "table.tbAttDefInfo2 + table.tbAttDefInfo2 {margin-top:15px;}" +
+   'table.tbAttDefInfo2 {margin:0px;}' +
+   'table.tbAttDefInfo2 span {padding-' + docDir[0] + ':1em;}' +
+   'table.tbAttDefInfo2 td  {padding:2px 7px;}' +
+   'table.tbAttDefInfo2 td * {vertical-align:middle;}' +
 
-   "table#dorf3table    {width:100%; border-collapse:collapse; border:1px solid silver; text-align:center; font-size:10pt; background-color:" + TB3O.DFc[1] + "; padding:2px; margin:0px; }" +
-   "table#dorf3table tr {margin:1px;}" +
-   "table#dorf3table td {border:1px solid silver;}" +
-   "table#dorf3table tr.tb3sep 	{border-top: 2px inset gray;}" +
-   "table#dorf3table th *    {vertical-align: middle; color:black;}" +
-   "table#dorf3table td.tb3name {width:150px; text-align:" + docDir[0] +";}" +
-   "table#dorf3table.tb3d3_5 td.tb3cnb  {font-size:8pt; color:black; text-align:center;}" +
-   "table#dorf3table.tb3d3_5 td.tb3none {color:lightgrey;}" +
-   "table#dorf3table td.tbInfinity {font-size:14pt;}" +
-   "table#dorf3table td.tbEmpty {height:2px;}" +
-   "table#dorf3table tr.tbTotal td {font-weight:bold;}" +
-   "table#dorf3table tr.tbTotal td.tbTitle {text-align:center;}" +
+   // send troops menu
+   'table.tbSendTroopsMenu {width:auto;}' +
+   'table.tbSendTroopsMenu td {text-align:' + docDir[0] + '; font-size:8pt;}' +
+   'table.tbSendTroopsMenu td * {vertical-align:middle;}' +
+   'table.tbSendTroopsMenu span.none {font-weight: bold;}' +
+   'input#tb_selectscoutnumber {width:30px;}' + 
+   'input[id^="tb_faketroop"] {margin-' + docDir[1] + ':10px;}' +
 
-   "tr#aRselecttraintroops {border-collapse:collapse; background-color:" + TB3O.DFc[1] + ";}" +
-   "tr#aRselecttraintroops td {border:0px none transparent; background-color:transparent; text-align:center; padding:0px 2px 0px 7px;}" +
+   // send troops stat
+   'table#tb_sendtroopstat {margin-top:15px;}' +
+
+   // last attack table
+   'table#stla {width:100%; border-collapse:collapse; border:1px solid silver; font-weight:normal; font-size:8pt; color:black; text-align:center; background-color:' + TB3O.DFc[1] + '; padding:0px; margin:0px; line-height:18px;}' +
+   'table#stla {margin-top:15px;}' +
+   'table#stla tr {background-color:transparent;}' +
+   'table#stla td {border:1px solid silver; font-size:8pt; text-align:' + docDir[1] + '; vertical-align:middle; padding:1px 2px 1px 2px; white-space:nowrap;}' +
+   'table#stla td.stlahh {background-color:#ECECEC; text-align:center; width:5%;}' +
+   'table#stla td.stlahh1 {background-color:#ECECEC; text-align:center; width:10%;}' +
+   'table#stla td.stlahh2 {background-color:#ECECEC; text-align:center;}' +
+   'table#stla td.stlac {background-color:transparent; text-align:center;}' +
+
+
+   // dismiss troops table
+   'table.troop_details a.tbTool {text-align:center;}' +
+   'table.troop_details .tbUpDown {float:' + docDir[1] + ';margin-' + docDir[0] + ':2px;}' +
+   'table.troop_details tr.tbInject td {padding-top:2px; padding-bottom:2px;}' +
+   'table.troop_details tr.tbInject a {font-size:8pt;vertical-align:middle;}' +
+   'table.troop_details tr.tbInject a.tbMany {font-size:6pt;}' +
+   'table.tbAttDefInfo2 + table.tbAttDefInfo2 {margin-top:15px; }' +
+   'table#tb_dismisstroopsdist {width:50%; }' + 
+
+   'table#dorf3table    {width:100%; border-collapse:collapse; border:1px solid silver; text-align:center; font-size:10pt; background-color:' + TB3O.DFc[1] + '; padding:2px; margin:0px; }' +
+   'table#dorf3table tr {margin:1px;}' +
+   'table#dorf3table td {border:1px solid silver;}' +
+   'table#dorf3table tr.tb3sep 	{border-top: 2px inset gray;}' +
+   'table#dorf3table th *    {vertical-align: middle; color:black;}' +
+   'table#dorf3table td.tb3name {width:150px; text-align:' + docDir[0] +';}' +
+   'table#dorf3table.tb3d3_5 td.tb3cnb  {font-size:8pt; color:black; text-align:center;}' +
+   'table#dorf3table.tb3d3_5 td.tb3none {color:lightgrey;}' +
+   'table#dorf3table td.tbInfinity {font-size:14pt;}' +
+   'table#dorf3table td.tbEmpty {height:2px;}' +
+   'table#dorf3table tr.tbTotal td {font-weight:bold;}' +
+   'table#dorf3table tr.tbTotal td.tbTitle {text-align:center;}' +
+
+   'tr#aRselecttraintroops {border-collapse:collapse; background-color:' + TB3O.DFc[1] + ';}' +
+   'tr#aRselecttraintroops td {border:0px none transparent; background-color:transparent; text-align:center; padding:0px 2px 0px 7px;}' +
+
+   // search reports
+   '#tb_searchreports {margin-top:14px;}' + 
+   '#tb_searchreports * {vertical-align:middle;}' +
+   '#tb_searchreports img {padding-left:2px; padding-right:2px}' +
+
+   // delete reports
+   'table#tb_delreptable {width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:' + TB3O.DFc[1] + '; padding:2px; margin:14px 0px 0px 0px;}' +
+   'table#tb_delreptable tr {border:1px solid silver; text-align:center;}' +
+   'table#tb_delreptable tr.rh {background-color:#ECECEC; text-align:center; border:1px solid silver;}' +
+   'table#tb_delreptable td {border:1px solid silver; padding:2px;}' +
+   'table#tb_delreptable td.cc {font-weight:bold; font-size:10pt; text-align:center;}' +
 
    // Troop Info tooltip
-   "table#tb_TITT    {border-collapse:collapse; border:1px solid silver; margin:0px;}" +
-   "table#tb_TITT th {text-align:center; font-size:8pt; font-weight:bold;}\n" +
-   "table#tb_TITT td {padding: 2px; font-size: 8pt; text-align:" + docDir[1] + "}\n" +
-   "table#tb_TITT td.ico {text-align:" + docDir[0] + ";}\n" +
-   "table#tb_TITT td.tb3r1 {border-bottom:1px silver solid;}\n" +
-   "table#tb_TITT td.tb3c1," +
-   "table#tb_TITT td.tb3c2 {border-" + docDir[1] + ":1px silver solid;}\n" +
+   'table#tb_TITT    {border-collapse:collapse; border:1px solid silver; margin:0px;}' +
+   'table#tb_TITT th {text-align:center; font-size:8pt; font-weight:bold;}\n' +
+   'table#tb_TITT td {padding: 2px; font-size: 8pt; text-align:' + docDir[1] + '}\n' +
+   'table#tb_TITT td.ico {text-align:' + docDir[0] + ';}\n' +
+   'table#tb_TITT td.tb3r1 {border-bottom:1px silver solid;}\n' +
+   'table#tb_TITT td.tb3c1,' +
+   'table#tb_TITT td.tb3c2 {border-' + docDir[1] + ':1px silver solid;}\n' +
 
    // Village bulding info tooltip
-   "table#tb_BiPTM    {width:100px; border-collapse:collapse; border:1px solid silver; margin:0px; background-color:" + TB3O.DFc[1] + ";}" +
-   "table#tb_BiPTM tr {border:0px none transparent;}" +
-   "table#tb_BiPTM td {border:1px solid silver; font-size:8pt; padding:4px;}" +
+   'table#tb_BiPTM    {width:100px; border-collapse:collapse; border:1px solid silver; margin:0px; background-color:' + TB3O.DFc[1] + ';}' +
+   'table#tb_BiPTM tr {border:0px none transparent;}' +
+   'table#tb_BiPTM td {border:1px solid silver; font-size:8pt; padding:4px;}' +
 
-   //"table#bttable	{width:100%; height:129px; text-align:left; border-collapse:collapse; background-color:transparent;}" +
+   //'table#bttable	{width:100%; height:129px; text-align:left; border-collapse:collapse; background-color:transparent;}' +
 
-   "tr.cbgx td, td.cbgx {background-color:#FFFFC0; border-collapse:collapse; border:1px solid silver; padding:2px; text-align:center;}" +
+   'tr.cbgx td, td.cbgx {background-color:#FFFFC0; border-collapse:collapse; border:1px solid silver; padding:2px; text-align:center;}' +
 
-   "a.tbTool img {margin:0px !important;}" +
-   "div.tbToolbar {display:inline;}" +
+   'a.tbTool img {margin:0px !important;}' +
+   'div.tbToolbar {display:inline;}' +
 
-   ".tbUdDown {position:relative; float:" + docDir[1] + "; width:8px; height:17px;}" +
-   ".tbUdDown img {position:absolute; cursor:pointer; left:0px;}" +
-   ".tbUdDown img.tbUp   {top:0px;}" +
-   ".tbUdDown img.tbDown {top:9px;}" +
+   '.tbUpDown {height:17px; width:8px; position:relative; display:inline;}' +
+   '.tbUpDown img {position:absolute !important; cursor:pointer; ' + docDir[0] + ':0px !important; margin:0px !important; padding: 0px !important;}' +
+   '.tbUpDown img.tbiUp   {top:0px !important;}' +
+   '.tbUpDown img.tbiDown {top:9px !important;}' +
+
+   '.tbUpDown.tbBuiltin {width:9px;}' +
+   '.tbUpDown.tbBuiltin img {border-color:#71D000; border-width:1px; border-' + docDir[0] + '-style:solid;}' +
+   '.tbUpDown.tbBuiltin img.tbiDown {top:8px !important; border-top-style:solid;}' +
    	
-   "div#tb_tooltip {position:absolute; display:none; padding:2px; z-index:9000; border:1px solid #00C000; background-color:#FFFFCC; -moz-border-radius:5px;}" +
+   'div#tb_tooltip {position:absolute; display:none; padding:2px; z-index:9000; border:1px solid #00C000; background-color:#FFFFCC; -moz-border-radius:5px;}' +
 
-   "div.npc-general {margin:3px 0 0; font-size:7pt; float:none;} " +
-   "span.npc-red {color:#DD0000;} " +
-   "span.npc-green {color:#009900;}" +
+   'div.npc-general {margin:3px 0 0; font-size:7pt; float:none;} ' +
+   'span.npc-red {color:#DD0000;} ' +
+   'span.npc-green {color:#009900;}' +
 
-   "table.tb3tb	{width:100%; border-collapse:collapse; border:1px solid silver; font-size:8pt; text-align:center; background-color:" + TB3O.DFc[1] + "; padding:2px; margin:1px;}" +
-   "table.tb3tb tr, table.tb3tb td {border:1px solid silver;}" +
+   'td.desc, td.desc div, td.desc span {font-size:8pt;}' +
 
-   "table.tb3tbnb	{border-collapse:collapse; border:0px none white; font-size:8pt; text-align:center; padding:2px; margin:1px; background-color:" + TB3O.DFc[1] + ";}" +
-   "table.tb3tbnb tr, table.tb3tbnb td, table.tb3tbnb td.tb3cnb {border:0px none white;}" +
-   "tr.tb3rh		{background-color:#ECECEC; text-align:center; border:1px solid silver;}" +
-   "tr.tb3rhb		{background-color:#ECECEC; text-align:center; border:1px solid silver; font-weight:bold;}" +
-   "tr.tb3rhnb		{background-color:#ECECEC; text-align:center;}" +
-   "tr.tb3r 		{border-collapse:collapse; border:1px solid silver; text-align:center;}" +
-   "tr.tb3rnb		{border-collapse:collapse; border:0px none white; text-align:center; white-space:nowrap;}" +
-   "td.tb3chbb		{border:1px solid silver; background-color:#ECECEC; padding:2px; font-weight:bold; font-size:10pt;}" +
-   "td.tb3chb		{border:1px solid silver; background-color:#ECECEC; padding:2px; font-weight:bold;}" +
-   "td.tb3ch		{border:1px solid silver; background-color:#ECECEC; padding:2px; text-align:center;}" +
-   "td.tb3chnb		{border:0px none white; background-color:#ECECEC; padding:2px; text-align:center;}" +
-   "td.tb3c		{border:1px solid silver; background-color:transparent; padding:2px; border-collapse:collapse;}" +
-   "td.tb3cnb		{border:0px none transparent; background-color:transparent; text-align:center; padding:2px;}" +
-   "td.tb3cbt		{border-top:1px solid silver; font-size:8pt; color:#000000; text-align:center;}" +
-   "td.tb3name          {text-align:" + docDir[0] +";}" +
-
-   "td.desc, td.desc div, td.desc span {font-size:8pt;}" +
-
-   "a.tbInject img {display:inline; border:0px none white; }" +
-   "a.tbInject.tbExtStat img {margin:0px 2px -2px 3px;}" +
-   "a.tbInject.tbExtMap img {margin:0px 2px -1px 3px;}" +
-   "a.tbInject.tbMail img {margin:3px 0px 1px 3px;}" +
-   "a.tbInject.tbAttDef img {vertical-align: middle;}" +
-   "a.tbInject.tbRes img {vertical-align: middle;}" +
-   "a.tbInject.tbMsgPop {line-height: inherit; height: inherit; position:relative; float:" + docDir[1] + "; margin:0px !important;}" +
+   'a.tbInject img {display:inline; border:0px none white; }' +
+   'a.tbInject.tbExtStat img {margin:0px 2px -2px 3px;}' +
+   'a.tbInject.tbExtMap img {margin:0px 2px -1px 3px;}' +
+   'a.tbInject.tbMail img {margin:3px 0px 1px 3px;}' +
+   'a.tbInject.tbAttDef img {vertical-align: middle;}' +
+   'a.tbInject.tbRes img {vertical-align: middle;}' +
+   'a.tbInject.tbMsgPop {line-height: inherit; height: inherit; position:relative; float:' + docDir[1] + '; margin:0px !important;}' +
+   '.message a.tbInject.tbMsgPop {position: static; float:none; padding:3px;}' +
    
    
 
-   ".tbTimeout {color:darkgreen;}" +
-   ".tbTimeout.tbDecrease {color:red;}" +
-   ".tbTimeout.tbSoon     {color:red;}" +
-   ".tbTimeout.tbCapReached {color:red; text-decoration: blink;}" +
+   '.tbTimeout {color:darkgreen;}' +
+   '.tbTimeout.tbDecrease {color:red;}' +
+   '.tbTimeout.tbSoon     {color:red;}' +
+   '.tbTimeout.tbCapReached {color:red; text-decoration: blink;}' +
 
-   "td.ratio_l  {font-size:8pt; background-color:#FFE1E1; color:red;}" +
-   "td.ratio    {font-size:8pt;}" +
-   "td.ratio_g  {font-size:8pt; background-color:#C8FFC8; color:darkgreen;}" +
+   '.tbSelected * {background-color:#ECECEC !important;}' +
 
-   ".tbUpg   {background-color:" + TB3O.CNc[1] + " !important;}" + 
-   ".tbMax   {background-color:" + TB3O.CNc[2] + " !important;}" + 
-   ".tbNoRes {background-color:" + TB3O.CNc[3] + " !important;}" + 
-   ".tbNPCUpg{background-color:" + TB3O.CNc[4] + " !important;}" + 
-   ".tbNoCap {background-color:" + TB3O.CNc[5] + " !important;}" +
-   (( TB3O.O[45] === '1' ) ?  ".tbUpgNow {text-decoration: blink !important;}" : "")
+   'td.ratio_l  {font-size:8pt; background-color:#FFE1E1; color:red;}' +
+   'td.ratio    {font-size:8pt;}' +
+   'td.ratio_g  {font-size:8pt; background-color:#C8FFC8; color:darkgreen;}' +
+
+   '.tbMany  {font-size:6pt;}' +
+
+   '.tbUpg   {background-color:' + TB3O.CNc[1] + ' !important;}' + 
+   '.tbMax   {background-color:' + TB3O.CNc[2] + ' !important;}' + 
+   '.tbNoRes {background-color:' + TB3O.CNc[3] + ' !important;}' + 
+   '.tbNPCUpg{background-color:' + TB3O.CNc[4] + ' !important;}' + 
+   '.tbNoCap {background-color:' + TB3O.CNc[5] + ' !important;}' +
+   (( TB3O.O[45] === '1' ) ?  '.tbUpgNow {text-decoration: blink !important;}' : '') +
+   //icons styles
+   'img.tbiCP {width:18px; height:12px; background-image: url(' + image['cp'] + ');}'
+
    ;
 
    
-   acss += ".reslevel {position:absolute; z-index:1; width:17px; height:12px;}" +
-   ".rf1 {left: 93px; top:27px;}" +
-   ".rf2 {left: 156px; top:26px;}" +
-   ".rf3 {left: 216px; top:41px;}" +
-   ".rf4 {left: 38px; top:59px;}" +
-   ".rf5 {left: 130px; top:67px;}" +
-   ".rf6 {left: 195px; top:87px;}" +
-   ".rf7 {left: 253px; top:81px;}" +
-   ".rf8 {left: 23px; top:111px;}" +
-   ".rf9 {left: 74px; top:104px;}" +
-   ".rf10 {left: 205px; top:136px;}" +
-   ".rf11 {left: 260px; top:139px;}" +
-   ".rf12 {left: 33px; top:165px;}" +
-   ".rf13 {left: 84px; top:158px;}" +
-   ".rf14 {left: 151px; top:178px;}" +
-   ".rf15 {left: 230px; top:192px;}" +
-   ".rf16 {left: 79px; top:211px;}" +
-   ".rf17 {left: 132px; top:223px;}" +
-   ".rf18 {left: 182px; top:227px;}"
+   acss += '.reslevel {position:absolute; z-index:1; width:17px; height:12px;}' +
+   '.rf1 {left: 93px; top:27px;}' +
+   '.rf2 {left: 156px; top:26px;}' +
+   '.rf3 {left: 216px; top:41px;}' +
+   '.rf4 {left: 38px; top:59px;}' +
+   '.rf5 {left: 130px; top:67px;}' +
+   '.rf6 {left: 195px; top:87px;}' +
+   '.rf7 {left: 253px; top:81px;}' +
+   '.rf8 {left: 23px; top:111px;}' +
+   '.rf9 {left: 74px; top:104px;}' +
+   '.rf10 {left: 205px; top:136px;}' +
+   '.rf11 {left: 260px; top:139px;}' +
+   '.rf12 {left: 33px; top:165px;}' +
+   '.rf13 {left: 84px; top:158px;}' +
+   '.rf14 {left: 151px; top:178px;}' +
+   '.rf15 {left: 230px; top:192px;}' +
+   '.rf16 {left: 79px; top:211px;}' +
+   '.rf17 {left: 132px; top:223px;}' +
+   '.rf18 {left: 182px; top:227px;}'
    ;
    
 
    //big icons styles
    acss += 
-   ".tb3BI img   {width:70px; height:" + (( TB3O.T35 ) ? "67" : "100") + "px;}" +
-   ".tb3BI       {float:" + docDir[0] + ";background-repeat:no-repeat;}" +
+   '.tb3BI img   {width:70px; height:' + (( TB3O.T35 ) ? '67' : '100') + 'px;}' +
+   '.tb3BI       {float:' + docDir[0] + ';background-repeat:no-repeat;}' +
    
-   ".tb3BI:hover {background-position:bottom;}" +
-   "#n7       {background-image: url(" + image["militargs"] + ");}" +
-   "#n7:hover {background-image: url(" + image["militar"] + ");}" +
-   "#n8       {background-image: url(" + image["alliancegs"] + ");}" +
-   "#n8:hover {background-image: url(" + image["alliance"] + ");}" +
-   "#n9       {background-image: url(" + image["setup"] + ");position:relative;}" +
-   "#n10      {background-image: url(" + image["militar2gs"] + ");}" +
-   "#n10:hover{background-image: url(" + image["militar2"] + ");}" +
-   "#n11      {background-image: url(" + image["miscgs"] + ");}" +
-   "#n11:hover{background-image: url(" + image["misc"] + ");}" +
-   "#n12      {background-image: url(" + image["mercadogs"] + ");}" +
-   "#n12:hover{background-image: url(" + image["mercado"] + ");}" 
+   '.tb3BI:hover {background-position:bottom;}' +
+   '#n7       {background-image: url(' + image['militargs'] + ');}' +
+   '#n7:hover {background-image: url(' + image['militar'] + ');}' +
+   '#n8       {background-image: url(' + image['alliancegs'] + ');}' +
+   '#n8:hover {background-image: url(' + image['alliance'] + ');}' +
+   '#n9       {background-image: url(' + image['setup'] + ');position:relative;}' +
+   '#n10      {background-image: url(' + image['militar2gs'] + ');}' +
+   '#n10:hover{background-image: url(' + image['militar2'] + ');}' +
+   '#n11      {background-image: url(' + image['miscgs'] + ');}' +
+   '#n11:hover{background-image: url(' + image['misc'] + ');}' +
+   '#n12      {background-image: url(' + image['mercadogs'] + ');}' +
+   '#n12:hover{background-image: url(' + image['mercado'] + ');}' 
    ;
 
    GM_addStyle(acss);
@@ -12464,14 +11200,17 @@ function setTBStyles()
    //Modified by Lux
    //------------------------------------------
    var cssSetup =	
-   ".MsgPageOff {visibility:hidden; display:none; position:absolute; top:-100px; left:-100px;}" +
-   ".OuterMsgPageOn {position:absolute; top:0px; left:0px; visibility:visible; width:150%; height:100%; background-color:#000000; z-index:1998; opacity:0.75;}" +
-   //".divCloseMsgPageOn {position: absolute; left:73.5%; top:0.2%; visibility:visible; opacity:1; z-index:2000;}" +
-   ".InnerMsgPageOn {position: absolute; left:25%; top:2.8%; visibility:visible; opacity:1; z-index:1999;}";
+   '.MsgPageOff {visibility:hidden; display:none; position:absolute; top:-100px; left:-100px;}' +
+   '.OuterMsgPageOn {position:absolute; top:0px; left:0px; visibility:visible; width:150%; height:100%; background-color:#000000; z-index:1998; opacity:0.75;}' +
+   //'.divCloseMsgPageOn {position: absolute; left:73.5%; top:0.2%; visibility:visible; opacity:1; z-index:2000;}' +
+   '.InnerMsgPageOn {position: absolute; left:25%; top:2.8%; visibility:visible; opacity:1; z-index:1999;}';
    GM_addStyle(cssSetup);
 
    
 }
+
+//////////////////////////////////////////////////////////////////////
+function parseInt10(str) { return parseInt(str,10); }
 
 /////////////////////////////////////////////////////////////////////
 //Compute the seconds for a given human time
@@ -12588,6 +11327,19 @@ function switcher(v/*, case1, expr1, ..., caseN, exprN[, exprDefault]*/)
       if ( v == arguments[i] ) { return arguments[i+1]; }
    }
    if ( arguments.length%2 === 0 ) { return arguments[arguments.length-1]; }
+}
+
+/////////////////////////////////////////////////////////////////////
+// return true if v is equal some of test1 - testN values
+// or false no match is founded
+function isSomeOf(v/*, test1, ..., testN*/)
+{
+   var i;
+   for ( i = 1; i < arguments.length; ++i )
+   {
+      if ( v === arguments[i] ) { return true; }
+   }
+   return false;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -12777,15 +11529,54 @@ function isIntValid(v)
 }
 
 //////////////////////////////////////////////////////////////////////
-function parseIntWithPrefix(prefix,str)
+// return a first number from a 'str' using regexp 're', NaN if number is absent
+function scanIntRE(str, re)
 {
    var v = Number.NaN;
-   if ( str.search("(?:\\s+|^)" + prefix + "(\\d+)") !== -1 )
+   if ( str.search(re) !== -1 )
    {
-      v = parseInt(RegExp.$1);
+      v = parseInt10(RegExp.$1);
    }
    return v;
 }
+
+//////////////////////////////////////////////////////////////////////
+// return a first number from an arbitrary string 'str', NaN if number is absent
+function scanIntAny(str)
+{
+   return scanIntRE(str, /(\d+)/);
+}
+
+//////////////////////////////////////////////////////////////////////
+function scanIntWithoutLetter(str)
+{
+   return scanIntRE(str, /^\W*(\d+)/);
+}
+
+//////////////////////////////////////////////////////////////////////
+// return a number from a string 'str'. Number must started with 'prefix'.
+// NaN if number is absent
+function scanIntWithPrefix(prefix, str)
+{
+   return scanIntRE(str, "(?:\\s+|^)" + prefix + "(\\d+)");
+}
+
+//////////////////////////////////////////////////////////////////////
+function __getDOMNode(node)
+{
+   if ( typeof node === "string" )
+   {
+      node = document.createTextNode(node);
+   }
+   return node;
+}
+
+//////////////////////////////////////////////////////////////////////
+function __isLikeToArray(o)
+{
+   return ( o instanceof Array || (typeof o === "object" && o.length));
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // Add the children element(s) to the node
@@ -12793,11 +11584,11 @@ function parseIntWithPrefix(prefix,str)
 //   1)   addChildren(parent, "data")  - add text node to parent
 //   2)   addChildren(parent, node)    - add node to parent
 //   3)   addChildren(parent, [node, [node1,node2], "data"])
-function addChildren(node,children)
+function addChildren(node, children)
 {
    if ( children )
    {
-      if (children instanceof Array)
+      if ( __isLikeToArray(children) )
       { 
          var i;
          for ( i = 0; i < children.length; i++ )
@@ -12805,13 +11596,9 @@ function addChildren(node,children)
             addChildren(node, children[i]);
          }
       }
-      else if (typeof children === "string")
-      {
-         node.appendChild(document.createTextNode(children));
-      }
       else 
       {
-         node.appendChild(children); 
+         node.appendChild(__getDOMNode(children)); 
       }
    }
 }
@@ -12834,12 +11621,30 @@ function removeElement(node)
 }
 
 //////////////////////////////////////////////////////////////////////
-//replace the "oldnode" element with "newnode"
+//replace the "oldnode" element with "newnode" or with array of nodes
 function replaceElement(oldnode, newnode)
 {
-   if ( oldnode && oldnode.parentNode ) 
+   if ( oldnode ) 
    {
-      oldnode.parentNode.replaceChild(newnode,oldnode);
+      var parent = oldnode.parentNode;
+      if ( parent )
+      {
+         if ( __isLikeToArray(newnode) )
+         {
+            var i;
+            var next = oldnode.nextSibling;
+
+            parent.removeChild(oldnode);
+            for ( i = 0; i < newnode.length; i++ )
+            { 
+               parent.insertBefore(__getDOMNode(newnode[i]), next);
+            }
+         }
+         else
+         {
+            parent.replaceChild(newnode,oldnode);
+         }
+      }
    }
 }
 
@@ -12851,6 +11656,13 @@ function moveElement(node, dest)
    removeElement(node);
    dest.appendChild(node);
 } 
+
+//////////////////////////////////////////////////////////////////////
+//insert a referenceNode before a specified node
+function insertBefore(node, referenceNode) 
+{
+   node.parentNode.insertBefore(referenceNode, node);
+}
 
 //////////////////////////////////////////////////////////////////////
 //insert a referenceNode after a specified node
@@ -12867,12 +11679,42 @@ function insertFirst(parent, node)
 }
 
 //////////////////////////////////////////////////////////////////////
+//insert a node as the last child node of parent
+function insertLast(parent, node) 
+{
+   parent.insertBefore(node, null);
+}
+
+//////////////////////////////////////////////////////////////////////
+function hasAncestor(node, ancestor)
+{
+   return (node.compareDocumentPosition(ancestor) & 0x08 /*Node.DOCUMENT_POSITION_CONTAINS*/ ) !== 0;
+}
+
+//////////////////////////////////////////////////////////////////////
 // returns tagName for a node, always in upper case
 function TAG(node) 
 {
    var tag = node.tagName;
    return tag ? tag.toUpperCase() : tag;
 }
+
+//////////////////////////////////////////////////////////////////////
+function getTextContent(node, sep)
+{
+   var i;
+   var str = "";
+   var texts = $xf(".//text()", 'l', node);
+   if ( sep === undefined ) { sep = " "; }
+   for ( i = 0; i < texts.snapshotLength; ++i )
+   {
+      if ( i > 0 ) { str += sep; }
+      str +=  texts.snapshotItem(i).nodeValue;
+   }
+
+   return str;
+}
+
 
 
 //////////////////////////////////////////////////////////////////////
@@ -12920,36 +11762,65 @@ function $xf(xpath, xpt, startnode, aDoc)
 //   call syntax:
 //   1)   $at(node)
 //   2)   $at(node, [])
-//   3)   $at(node, [[name1,value1],...,[nameN,valueN]])
+//   3)   $at(node, [name,value])
+//   4)   $at(node, [[name1,value1],...,[nameN,valueN]])
+// It's also possible add events listeners uses syntax  $at(node, [type, listener, useCapture]) and so on.
+
 function $at(aElem, attributes)
 {
+   function processAttribute(aElem, name, value)
+   {
+      if ( value !== null && value !== undefined && value !== "" )
+      {
+         aElem.setAttribute(name, value);
+         if ( name.toUpperCase() === 'TITLE' ) 
+         {
+            aElem.setAttribute('alt', value);
+         }
+      }
+      else
+      {
+         aElem.removeAttribute(name);
+      }
+   }
+
+   function processEventListener(aElem, type, listener, useCapture)
+   {
+      aElem.addEventListener(type, listener, useCapture);
+   }
+
    if ( attributes )
    {
       var xi;
       for ( xi = 0; xi < attributes.length; xi++ )
       {
          var attribute = attributes[xi];
-         if ( attribute instanceof Array && attribute.length >= 2 )
+         if ( attribute instanceof Array )
          {
-            var name = attribute[0];
-            var value = attribute[1];
-            if ( value !== null && value !== undefined && value !== "" )
+            if ( attribute.length === 2 )
             {
-               aElem.setAttribute(name, value);
-               if ( name.toUpperCase() === 'TITLE' ) 
-               {
-                  aElem.setAttribute('alt', value);
-               }
+               processAttribute(aElem, attribute[0], attribute[1]);
             }
-            else
+            else if ( attribute.length === 3 )
             {
-               aElem.removeAttribute(name);
+               processEventListener(aElem, attribute[0], attribute[1], attribute[2]);
             }
+         }
+         else if ( xi === 0 ) // called as $at(node, [name,value])
+         {
+            if ( attributes.length === 2 )
+            {
+               processAttribute(aElem, attribute, attributes[1]);
+            }
+            else if ( attribute.length === 3 )
+            {
+               processEventListener(aElem, attribute, attributes[1], attributes[2]);
+            }
+            break;
          }
       }
    }
-} //Acr111-addAttributes
-
+}
 
 //////////////////////////////////////////////////////////////////////
 // Create a new element of the DOM
@@ -13056,6 +11927,15 @@ function $lnk(att, content)
 }
 
 //////////////////////////////////////////////////////////////////////
+function $action(att, content, onClick)
+{
+   var aLink = $lnk(att, content);
+   aLink.href = jsVoid;
+   aLink.addEventListener("click", onClick, false);
+   return aLink;
+}
+
+//////////////////////////////////////////////////////////////////////
 function $i(att)
 {
    var aInput = document.createElement("input");
@@ -13091,7 +11971,7 @@ function getClasses(str)
 //////////////////////////////////////////////////////////////////////
 // check class of element ex. ex must be valid
 //
-function hasClass(ex,cls)
+function hasClass(ex, cls)
 {
    var classes,i;
    if ( cls ) 
@@ -13104,6 +11984,38 @@ function hasClass(ex,cls)
             if (classes[i] === cls )
             {
                return true;
+            }
+         }
+      }
+   }
+   return false;
+}
+
+//////////////////////////////////////////////////////////////////////
+// check presence one of classes of element ex. ex must be valid
+//   call syntax:
+//   1)   hasAnyClass(ex, "cls")
+//   2)   hasAnyClass(ex, "cls1 cls2 ... clsN")
+//   3)   hasAnyClass(ex, ["cls1", "cls2", ..., clsN])
+function hasAnyClass(ex, cls)
+{
+   if ( cls ) 
+   {
+      if ( ex.className )
+      {
+         var i, j;
+         var classes = getClasses(ex.className);
+         var checked_classes = getClasses(cls);
+         var bFound = false;
+
+         for ( i = 0; i < classes.length; ++i )
+         {
+            for ( j = 0; j < checked_classes.length; ++j )
+            {
+               if ( classes[i] === checked_classes[j] )
+               {
+                  return true;
+               }
             }
          }
       }
@@ -13134,9 +12046,9 @@ function addClass(ex,cls)
 //////////////////////////////////////////////////////////////////////
 //delete class(es) from element ex. ex must be valid
 //   call syntax:
-//   1)   delClass(node,"cls")
-//   2)   delClass(node,"cls1 cls2 ... clsN")
-//   3)   delClass(node,["cls1", "cls2", ..., clsN])
+//   1)   delClass(ex, "cls")
+//   2)   delClass(ex, "cls1 cls2 ... clsN")
+//   3)   delClass(ex, ["cls1", "cls2", ..., clsN])
 function delClass(ex,cls)
 {
    if ( cls ) 
@@ -13151,7 +12063,6 @@ function delClass(ex,cls)
          for ( i = 0; i < classes.length; ++i )
          {
             for ( j = 0; j < checked_classes.length; ++j )
-
             {
                if ( classes[i] === checked_classes[j] )
                {
@@ -13196,13 +12107,14 @@ function ifClass(ex, cond, cls)
 //////////////////////////////////////////////////////////////////////
 function getX(element)
 {
+   var e;
    var x = 0;
-   for (var e = element; e; e = e.offsetParent) 
+   for ( e = element; e; e = e.offsetParent ) 
    {
       x += e.offsetLeft; 
    }
 
-   for (e = element.parentNode; e && e != document.body; e = e.parentNode)
+   for ( e = element.parentNode; e && e !== document.body; e = e.parentNode )
    {
       x -= e.scrollLeft;
    }
@@ -13213,13 +12125,14 @@ function getX(element)
 //////////////////////////////////////////////////////////////////////
 function getY(element)
 {
+   var e;
    var y = 0;
-   for (var e = element; e; e = e.offsetParent) 
+   for ( e = element; e; e = e.offsetParent ) 
    {
       y += e.offsetTop; 
    }
 
-   for (e = element.parentNode; e && e != document.body; e = e.parentNode)
+   for ( e = element.parentNode; e && e !== document.body; e = e.parentNode )
    {
       y -= e.scrollTop;
    }
@@ -13500,9 +12413,9 @@ persistence.getVillageSpecificNS = function()
 };
 
 //////////////////////////////////////////////////////////////////////
-function loadPersistentUserObject(aName, defValue) 
+function loadPersistentUserObject(aName, defValue/*opt*/) 
 {
-   return persistence.loadObject(persistence.getUserSpecificNS(), aName);
+   return persistence.loadObject(persistence.getUserSpecificNS(), aName, defValue);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -13512,9 +12425,9 @@ function savePersistentUserObject(aName, aValue, aKey /*opt*/)
 }
 
 //////////////////////////////////////////////////////////////////////
-function loadPersistentVillageObject(aName, defValue) 
+function loadPersistentVillageObject(aName, defValue/*opt*/) 
 {
-   return persistence.loadObject(persistence.getVillageSpecificNS(), aName);
+   return persistence.loadObject(persistence.getVillageSpecificNS(), aName, defValue);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -13580,15 +12493,24 @@ T.saveLocaleString = function(name,str)
 //////////////////////////////////////////////////////////////////////
 T.loadLocalization = function()
 {
-   var colLoc = persistence.loadObject(arAvLang[TB3O.O[0]], "i18n");
-   var name;
-
-   for ( name in colLoc ) 
+   function applyCollection(colLoc)
    {
-      if ( t[name] === undefined ) 
+      var name;
+      for ( name in colLoc ) 
       {
-         t[name] = colLoc[name];
+         if ( t[name] === undefined ) 
+         {
+            t[name] = colLoc[name];
+         }
       }
+   }
+
+   applyCollection(persistence.loadObject(arAvLang[TB3O.O[0]], "i18n"));
+
+   if ( arAvLang[TB3O.O[0]] !== TB3O.lng )
+   {
+      // fallback to server language
+      applyCollection(persistence.loadObject(TB3O.lng, "i18n"));
    }
 };
 
@@ -13702,14 +12624,14 @@ function getTroopIndexTitleFromImg(tImg)
    
    if ( tImg.src.match(/img\/un\/u\/(\d+)\.gif/) ) 
    {
-      tIndex = parseInt(RegExp.$1);
+      tIndex = parseInt10(RegExp.$1);
    }
    else
    {
       var imgCN = tImg.className;
       if ( imgCN && imgCN.indexOf("unit") !== -1 && imgCN.search(/u(\d+)/) !== -1 )
       {
-         tIndex = parseInt(RegExp.$1);
+         tIndex = parseInt10(RegExp.$1);
       }
    }
 
@@ -13720,6 +12642,12 @@ function getTroopIndexTitleFromImg(tImg)
 function getRaceFromTroopIndex(ti)
 {
    return avRace[Math.floor(ti/10)];
+}
+
+/////////////////////////////////////////////////////////////////////
+function getScoutTroopIndex(race)
+{
+   return switcher(race, 'Romans',4, 'Teutons',14, 'Gauls',23, 0);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -14091,7 +13019,7 @@ function getRaceFromBarracks()
          //race recognition - first image in table of troops
          if ( ajaxResp.responseText.search(/unit u(\d+)/) !== -1 ) 
          {
-            var xV = parseInt(RegExp.$1);
+            var xV = parseInt10(RegExp.$1);
             if ( !isNaN(xV) ) { setRace(xV); }
          }
          
@@ -14358,12 +13286,11 @@ function uiCreateResAndTimeTable(BA, resourcesInfo,
       switch ( y )
       {
          case 'cp':
-            titleNode = $txt(T('CPPERDAY'));
+            titleNode = I("cp");
             strClass = "tbCP";
             break;
          case 'cc':
             titleNode = I("r5");
-            addClass(titleNode,'center');
             strClass = "tbCC";
             break;
       }
@@ -14374,7 +13301,7 @@ function uiCreateResAndTimeTable(BA, resourcesInfo,
             $td([['class', strClass], ['colspan', '3']],
             [
                titleNode,
-               ": " + x[0] + " " + (docDir[0] == 'right' ? '\u2190' : '\u2192') + " " + x[1] + (delta > 0 ? " (+" + delta + ")" : "")
+               $span(": " + x[0] + " " + (docDir[0] == 'right' ? '\u2190' : '\u2192') + " " + x[1] + (delta > 0 ? " (+" + delta + ")" : ""))
             ])));
    }
 
@@ -14613,7 +13540,7 @@ function createTroopImage(iTT)
 // Try to correct
 function uiUpdateGameLayout()
 {
-   var width,offset,dmid,aNode,elem;
+   var width, offset, dmid, aNode, elem;
    var min_width, navi_width = 155, content_width = 552; 
 
    if ( TB3O.nLayoutType === 1 ) 
@@ -14621,7 +13548,7 @@ function uiUpdateGameLayout()
       // 1) Upd sideinfo width accordingly village list width
       if ( TB3O.VillagesList )
       {
-         width = TB3O.VillagesList.vTable.clientWidth + TB3O.VillagesList.vTable.offsetLeft;
+         width = TB3O.VillagesList.vTable.offsetWidth;
          TB3O.VillagesList.dSideInfo.style.width = width + 'px';
       }
 
@@ -14680,9 +13607,9 @@ function uiUpdateGameLayout()
 function $df(dWidth, posX, posY, strTitle, sCookieN, divID, boolShowMinMax, content)
 {
    var wCMM = 25;
-   var iPx = parseInt(posX);
+   var iPx = parseInt10(posX);
    if (iPx < -dWidth/2) iPx = -dWidth/2;
-   var iPy = parseInt(posY);
+   var iPy = parseInt10(posY);
    if (iPy < -dWidth/2) iPy = -dWidth/2;
 
    if (boolShowMinMax === true) wCMM *= 2;
@@ -14786,7 +13713,7 @@ function adjustFloatDiv(theTB, xmin, idDrag)
 
    if ( xmin < theTB.offsetWidth ) { xmin = theTB.offsetWidth; }
 
-   if ( parseInt(theTB.parentNode.style.width) !== xmin )
+   if ( parseInt10(theTB.parentNode.style.width) !== xmin )
    {
       
       theTB.parentNode.style.width = xmin + 'px';
@@ -14803,7 +13730,7 @@ function adjustFloatDiv(theTB, xmin, idDrag)
    return;
 }
 //////////////////////////////////////////////////////////////////////
-function uiCreateTool(imgTag, tooltip, onClick /*opt*/)
+function uiCreateTool(imgTag, tooltip/*opt*/, onClick/*opt*/)
 {
    var tool = $lnk([['class','tbTool'],['href', jsVoid]]);
    var attr = null;
@@ -14908,6 +13835,41 @@ function onTooltip_Update(e)
    }
 }
 
+function getDistance(x1, y1, x2, y2)
+{
+   xDis = Math.abs(x1 - x2);
+   yDis = Math.abs(y1 - y2);
+   xPy = xDis * xDis;
+   yPy = yDis * yDis;
+   totalDis = Math.sqrt(xPy + yPy);
+   floatedDis = Math.round(100 * totalDis) / 100;
+   return floatedDis;
+}
+
+function existsCloserVillage(origin, dest, cluster)
+{
+   startingDistance = getDistance(origin[0], origin[1], dest[0], dest[1]);
+
+   for (nums in document.getElementsByTagName('div'))
+   {
+      cell = document.getElementsByTagName('div')[nums];
+      if (cell.className == 'cox')
+      {
+         xCo = document.getElementsByTagName('div')[nums].innerHTML.substring(1);
+         yCo = document.getElementsByTagName('div')[nums * 1 + 2].innerHTML.substring(0, document.getElementsByTagName('div')[nums * 1 + 2].innerHTML.length - 1);
+         vilRoot = document.getElementsByTagName('div')[nums - 1];
+         vil = vilRoot.innerHTML.substring(vilRoot.innerHTML.indexOf('>'), vilRoot.length)
+         vil = vil.substring(1, vil.indexOf('<'))
+         if (getDistance(xCo, yCo, dest[0], dest[1]) < (startingDistance - cluster))
+         {
+            info = Array(xCo, yCo, vil);
+            return info;
+         }
+      }
+   }
+
+   return false;
+}
 
 //////////////////////////////////////////////////////////////////////
 function uiTooltip_Display(tooltip,bShow) 
@@ -14924,6 +13886,12 @@ function uiTooltip_Display(tooltip,bShow)
 
    if (document.location.toString().indexOf('berichte.php?') > 0 && document.getElementsByTagName('span')[10].innerHTML.indexOf('(') < 0)
    {
+      // Configurable Options
+      $troopSpeed = 7;		// You must manually include the effect of the Tournament Square.
+      $troopCanCarry = 60;
+      $clusterRadius = 2; 	// Set this option if you cluster. It will ignore villages within X tiles of the active village when determining the closest.
+      // End Options - Do not modify below this line.
+
       $landedTime = document.getElementsByTagName('span')[9].innerHTML.substring(3).split(":");
       $landedTime[0] -= 0;
       $landedTime[1] -= 0;
@@ -14934,10 +13902,11 @@ function uiTooltip_Display(tooltip,bShow)
       $calcMins = $calcDate.getMinutes() - $landedTime[1];
       $calcCoords = document.getElementById("tb_distTT").innerHTML.substring(document.getElementById("tb_distTT").innerHTML.indexOf("(") + 1, document.getElementById("tb_distTT").innerHTML.indexOf(")")).split("|")
       $startingCoords = document.title.toString().substring(document.title.toString().indexOf('(') + 1, document.title.toString().indexOf(')')).split('|');
-      $calcDist = Math.round(100 * Math.sqrt((Math.abs($startingCoords[0] - $calcCoords[0]) * Math.abs($startingCoords[0] - $calcCoords[0])) + (Math.abs($startingCoords[1] - $calcCoords[1]) * Math.abs($startingCoords[1] - $calcCoords[1])))) / 100
-      $calcMins += ($calcDist / 7 * 60) + ($calcHours * 60)
+      $calcDist = getDistance($startingCoords[0], $startingCoords[1], $calcCoords[0], $calcCoords[1]);
+      $calcMins += ($calcDist / $troopSpeed * 60) + ($calcHours * 60)
 
-      $wrongVillage = (($calcDist / 7 * 60) > (60 * 6)) ? true : false;
+      $closestVillage = existsCloserVillage($startingCoords, $calcCoords, $clusterRadius);
+      $wrongVillage = ($closestVillage === false) ? false : true;
 
       $calcedDiff = Math.round($calcMins / 60 * 100) / 100
     
@@ -14960,8 +13929,8 @@ function uiTooltip_Display(tooltip,bShow)
       $numRes25 = ($calcedDiff < 10) ? Math.ceil($calcedDiff * 70) : Math.ceil((($calcedDiff * 30) + 400));
       $numRes50 = ($calcedDiff < 10) ? Math.ceil($calcedDiff * 100) : Math.ceil((($calcedDiff * 20) + 800));
 
-      $numTroops25 = Math.ceil($numRes25 / 60);
-      $numTroops50 = Math.ceil($numRes50 / 60);
+      $numTroops25 = Math.ceil($numRes25 / $troopCanCarry);
+      $numTroops50 = Math.ceil($numRes50 / $troopCanCarry);
 
       if (($calcWheat -2 > $calcClay - 0 && $calcIron - 2 > $calcClay - 0) || ($calcWheat - 2 > $calcIron - 0 && $calcClay - 2 > $calcIron - 0) || ($calcWheat - 2 > $calcClay - 0 && $calcWood - 2 > $calcClay - 0))
       {
@@ -14979,7 +13948,7 @@ function uiTooltip_Display(tooltip,bShow)
          $wasMaxed = 1;
       }
 
-      document.getElementsByTagName('span')[10].innerHTML += ': ' + (($wrongVillage) ? '<strike>' : '') + $calcedDiff + ' h = <b><font' + (($wasMaxed == 1) ? ' style="color: red">' : '>') + $display + '</font></b> (' + $display1 + '/' + ($display * 60) + ')' + (($wrongVillage) ? '</strike>' : '');
+      document.getElementsByTagName('span')[10].innerHTML += ': ' + (($wrongVillage) ? '<strike>' : '') + $calcedDiff + ' h = <b><font' + (($wasMaxed == 1) ? ' style="color: red">' : '>') + $display + '</font></b> (' + $display1 + '/' + ($display * 60) + ')' + (($wrongVillage) ? '</strike>&nbsp;&nbsp<font style="color: red; font-size-adjust: 0.4; font-weight: normal">(' + $closestVillage[2] + ')</font>' : '');
 
    }
 }
@@ -15035,7 +14004,7 @@ function uiAddTooltip(node,contentGenerator)
 	};
 
 //////////////////////////////////////////////////////////////////////
-function uiCreateUpDownControl(buddy, minValue, maxValue)
+function uiCreateUpDownControl(buddy)
 {
    //-------------------------------------------------------------
    function onClick(delta, buddy)
@@ -15055,13 +14024,66 @@ function uiCreateUpDownControl(buddy, minValue, maxValue)
    }
 
    //-------------------------------------------------------------
-   var up = I("arrow_up8",[['title','+1'],['class','tbUp']]);
-   var down = I("arrow_down8",[['title','-1'],['class','tbDown']]);
+   function onMouseWheel(e)
+   {
+      var movement = e.detail / -3;
+      onClick(movement, buddy);
+      e.stopPropagation();
+      e.preventDefault();
+      return false;
+   }
 
-   var ctrl = $div([['class','tbUdDown']], [up,down]);
+   //-------------------------------------------------------------
+   function onBuddyFocused(e)
+   {
+      window.addEventListener('DOMMouseScroll', onMouseWheel, false);
+      document.addEventListener('mousewheel', onMouseWheel, false);
+   }
+
+   //-------------------------------------------------------------
+   function onBuddyBlur(e)
+   {
+      window.removeEventListener('DOMMouseScroll', onMouseWheel, false);
+      document.removeEventListener('mousewheel', onMouseWheel, false);
+   }
+
+   //-------------------------------------------------------------
+   var up = I("arrow_up8",[['title','+1'],['class','tbiUp']]);
+   var down = I("arrow_down8",[['title','-1'],['class','tbiDown']]);
+
+   var ctrl = $div([['class','tbUpDown']], [up,down]);
+
+   buddy.addEventListener('focus', onBuddyFocused, false);
+   buddy.addEventListener('blur', onBuddyBlur, false);
 
    up.addEventListener('click', bind(onClick,[+1,buddy]), false);
    down.addEventListener('click', bind(onClick,[-1,buddy]), false);
+
+   return ctrl;
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiAddBuiltinUpDownControl(buddy)
+{
+   var ctrl = uiCreateUpDownControl(buddy);
+   ctrl.className += " tbBuiltin";
+   insertAfter(buddy,ctrl);
+
+   var styles = window.getComputedStyle(buddy,null);
+   ctrl.style.lineHeight = styles.lineHeight;
+   ctrl.style.verticalAlign = styles.verticalAlign;
+   buddy.style['padding' + DOMdocDir[1]] = (parseInt10(styles['padding' + DOMdocDir[1]]) + 9) + 'px';
+   ctrl.style[docDir[0]] = (-9 - parseInt10(styles['border' + DOMdocDir[1] + 'Width']) - parseInt10(styles['margin' + DOMdocDir[1]])) + 'px';
+   
+   if ( styles.verticalAlign === 'baseline' ) 
+   {
+      ctrl.style.top = '-13px';
+   }
+   else
+   {
+      ctrl.style.top = '-9px';
+   }
+
 
    return ctrl;
 }
@@ -15393,11 +14415,11 @@ function getResourcesInfo2(aDoc)
       {
          //available resource units
          resIppH = aX.textContent.split("/");
-         resourcesInfo.Res[i] = parseInt(resIppH[0]);
+         resourcesInfo.Res[i] = parseInt10(resIppH[0]);
          //capacity of warehouse/granary
-         resourcesInfo.Cap[i] = parseInt(resIppH[1]);
+         resourcesInfo.Cap[i] = parseInt10(resIppH[1]);
          //production/h for this resource
-         resourcesInfo.EPpH[i] = parseInt(aX.title);
+         resourcesInfo.EPpH[i] = parseInt10(aX.title);
          resourcesInfo.PpH[i] = resourcesInfo.EPpH[i];
 
          if (i === 3)
@@ -15416,7 +14438,7 @@ function getResourcesInfo2(aDoc)
             }
             arrCcTxt = ccCell.textContent.split("/");
             //real total crop production of this village
-            resourcesInfo.PpH[3] = parseInt(arrCcTxt[1]);
+            resourcesInfo.PpH[3] = parseInt10(arrCcTxt[1]);
 
             resourcesInfo.dUpd = getServerTime(aDoc);
          }
@@ -15444,12 +14466,12 @@ function getResourceInfo()
       {
          //available resource units
          resIppH = aX.textContent.split("/");
-         crtResUnits[i] = parseInt(resIppH[0]);
+         crtResUnits[i] = parseInt10(resIppH[0]);
          crtResUnits[4] += crtResUnits[i];
          //capacity of warehouse/granary
-         capacity[i] = parseInt(resIppH[1]);
+         capacity[i] = parseInt10(resIppH[1]);
          //production/h for this resource
-         prodPerHour[i] = parseInt(aX.title);
+         prodPerHour[i] = parseInt10(aX.title);
          //sum of production/h for this village (crop = effective production)
          prodPerHour[5] += prodPerHour[i];
          if (i > 0 && TB3O.T35 == false) intImg = 1;
@@ -15481,8 +14503,8 @@ function getResourceInfo()
             }
             arrCcTxt = ccCell.textContent.split("/");
             //real total crop production of this village
-            prodPerHour[4] = parseInt(arrCcTxt[1]);
-            prodPerHour[6] = parseInt(arrCcTxt[0]);
+            prodPerHour[4] = parseInt10(arrCcTxt[1]);
+            prodPerHour[6] = parseInt10(arrCcTxt[0]);
             try
             {
                //text for "crop consumption"
@@ -15889,6 +14911,26 @@ function getResInfoTotals()
    return tPpH;
 }
 
+//////////////////////////////////////////////////////////////////////
+// parse string like    r1|r2|r3|r4
+function getResourcesFromString(str)
+{
+   var Res = [0,0,0,0];
+   var bResValid = false;
+
+   if ( str.search(/(\d+)[ \u00A0|]+(\d+)[ \u00A0|]+(\d+)[ \u00A0|]+(\d+)/) !== -1 )
+   {
+      var inRes = [RegExp.$1,RegExp.$2,RegExp.$3,RegExp.$4];
+      var ri;
+      bResValid = true;
+      for ( ri = 0; ri < 4; ri++ )
+      {
+         Res[ri] = parseInt10(inRes[ri]);
+         if ( !isFinite(Res[ri]) ) { bResValid = false; break; }
+      }
+   }
+   return bResValid ? Res : null;
+}
 
 //////////////////////////////////////////////////////////////////////
 function uiSetTimeSpan(e, secs, options)
@@ -15944,7 +14986,7 @@ function uiSetFillPercent(e, resourcesInfo, ri)
 //////////////////////////////////////////////////////////////////////
 function uiSetEffectiveCropPpH(e,val,bUseLocale)
 {
-   var cpph = parseInt(val);
+   var cpph = parseInt10(val);
    var strCpph = bUseLocale ? $ls(cpph) : cpph.toString();
    var cpphColor = "black";
 
@@ -15965,8 +15007,8 @@ function uiSetEffectiveCropPpH(e,val,bUseLocale)
 //by Acr111 (adapted by ms99)
 function getColorForResourceBar(p)
 {
-   return (p < 90 ? "rgb(" + parseInt(p / 90 * 255) + "," + (100 + p) + ",0)" : 
-                    "rgb(255," + parseInt((100 - p) / (100 - 90) * 170) + ",0)");
+   return (p < 90 ? "rgb(" + parseInt10(p / 90 * 255) + "," + (100 + p) + ",0)" : 
+                    "rgb(255," + parseInt10((100 - p) / (100 - 90) * 170) + ",0)");
 } 
 /////////////////////////////////////////////////////////////////////
 function adaptDataToGameVersion()
@@ -16035,11 +15077,13 @@ function adaptDataToGameVersion()
       gIc["att1"] = '<img class="att1" src="' + xGIF + '">';
       gIc["att2"] = '<img class="att2" src="' + xGIF + '">';
       gIc["del"] = '<img class="del" src="' + xGIF + '" title="' + T('DEL') + '" alt="' + T('DEL') + '">';
-      gIc["iReport iReport2"] = '<img class="iReport iReport2" src="' + xGIF + '">';
-      gIc["iReport iReport3"] = '<img class="iReport iReport3" src="' + xGIF + '">';
-      gIc["iReport iReport5"] = '<img class="iReport iReport5" src="' + xGIF + '">';
-      gIc["iReport iReport6"] = '<img class="iReport iReport6" src="' + xGIF + '">';
-      gIc["iReport iReport7"] = '<img class="iReport iReport7" src="' + xGIF + '">';
+
+      iC["iReport2"] = [['class','iReport iReport2'], ['src',xGIF]];
+      iC["iReport3"] = [['class','iReport iReport3'], ['src',xGIF]];
+      iC["iReport5"] = [['class','iReport iReport5'], ['src',xGIF]];
+      iC["iReport6"] = [['class','iReport iReport6'], ['src',xGIF]];
+      iC["iReport7"] = [['class','iReport iReport7'], ['src',xGIF]];
+      iC["iReport17"]= [['class','iReport iReport17'],['src',xGIF]];
 
       //big icons
       image["alliance"] = image["alliance35"];
@@ -16064,6 +15108,7 @@ function adaptDataToGameVersion()
          gIc["u" + i] = xGIF;
          iC["u" + i] = [['class','unit u' + i], ['src',xGIF]];
       }
+      iC["uhero"] = [['class','unit uhero'], ['src',xGIF]];
 
       if ( TB3O.O[3] === '1' )
       {
@@ -16073,6 +15118,8 @@ function adaptDataToGameVersion()
    }
 
    gIc["merchant"] = '<img src="' + image["merchant"] + '">';
+
+   iC["cp"] = [['class','tbiCP'], ['title',T('CPPERDAY')], ['src',xGIF]];
 
    iC["arrow_up8"] = [['src',image["aup"]],['width','8px']];
    iC["arrow_down8"] = [['src',image["adn"]],['width','8px']];
@@ -16143,13 +15190,13 @@ function getGeneralData()
          var ltime = $g('ltime');
          if ( ltime && ltime.offsetTop > 100 ) { TB3O.nLayoutType = 1; }
       }
-      TB3O.iLayoutMinWidth = parseInt(window.getComputedStyle($g(ID_MID),null).getPropertyValue("min-width"));
+      TB3O.iLayoutMinWidth = parseInt10(window.getComputedStyle($g(ID_MID),null).getPropertyValue("min-width"));
 
       getLanguageAndPlusStatus();
 
       TB3O.UserID = getPlayerId(document);
       if ( !TB3O.UserID ) { break; }
-      ;
+      
 
       spLnk = 'spieler.php?uid=' + TB3O.UserID;
 
@@ -16188,7 +15235,7 @@ function getGeneralData()
       getwsSName();
 
       //set the script language
-      TB3O.O[0] = parseInt(TB3O.O[0]);
+      TB3O.O[0] = parseInt10(TB3O.O[0]);
 
       if ( !isFinite(TB3O.O[0]) || TB3O.O[0] <= 0 || TB3O.O[0] >= arAvLang.length )
       {
@@ -16210,27 +15257,18 @@ function getGeneralData()
          TB3O.O[0] = ( iLx ) ? iLx : iLx_en;
       }
 
-      switchLanguage();
+      ;
+
+      switchLanguage(arAvLang[TB3O.O[0]]);
+      repairLanguage();
       T.loadLocalization();
 
       adaptDataToGameVersion();
 
-      //stop "Delete all" reports if the user changed the page
-      //TODO: stop also if user click other tab on page
-      if (getGMcookie("reportsDeleteAll", false) == '1')
+      if ( crtUrl.path !== "/berichte.php" )
       {
-         if (crtPage.indexOf('berichte.php') == -1)
-         {
-            setGMcookie("reportsDeleteAll", "0", false);
-            setGMcookie("reportsPageToDelete", '', false);
-         }
-      }
-      if (getGMcookie("reportsTOSearch", false) != '')
-      {
-         if (crtPage.indexOf('berichte.php') == -1)
-         {
-            setGMcookie("reportsTOSearch", '', false);
-         }
+         clearReportDeletingState();
+         clearReportSearchingState();
       }
 
       bResult = true; 
@@ -16327,7 +15365,7 @@ function getRequiredRes(td)
    var necRes = 0;
    for (var xi = 0; xi < 4; xi++)
    {
-      arX[xi] = parseInt(arC[xi]);
+      arX[xi] = parseInt10(arC[xi]);
       necRes += arX[xi];
    }
    if (td.id.indexOf("NPCTT_") != -1)
@@ -16349,7 +15387,7 @@ function getRequiredRes(td)
 
 
 //////////////////////////////////////////////////////////////////////
-// returns menu as object { active:idx, items:[[txt1,href1],...,[txtN,hrefN]] }
+// returns menu as object {menu:menuNode, active:idx, items:[[txt1,href1],...,[txtN,hrefN]] }
 function searchAndParseTabMenu(aDoc)
 {
    var menuItems = [];
@@ -16372,9 +15410,10 @@ function searchAndParseTabMenu(aDoc)
 
    
 
-   return ( menuItems.length > 0 )  ? {"active":iActive, "items":menuItems} : null;
+   return ( menuItems.length > 0 )  ? {"menu":textMenu, "active":iActive, "items":menuItems} : null;
 }
 
+function searchAndParseSubMenu(aDoc) { return searchAndParseTabMenu(aDoc); }
 //////////////////////////////////////////////////////////////////////
 function getOuterBuildings(aDoc,b,vType)
 {
@@ -16407,7 +15446,7 @@ function getOuterBuildings(aDoc,b,vType)
             var aLvl = imgLvl.className.split(" ")[2].replace("level", ""); 
             if ( aLvl )
             {
-               crtLevel = parseInt(aLvl);
+               crtLevel = parseInt10(aLvl);
             }
          }
       }
@@ -16417,7 +15456,7 @@ function getOuterBuildings(aDoc,b,vType)
          if ( imgLvl )
          {
             imgLvl.src.search(/\/s(\d+).gif$/);
-            crtLevel = parseInt(RegExp.$1);
+            crtLevel = parseInt10(RegExp.$1);
          }
       }
 
@@ -16462,7 +15501,6 @@ function getInnerBuildings(aDoc, buildingsInfo)
                if ( classes.length > 1) { bImg[bImg.length] = classes[classes.length - 1] + ".gif"; }
             }
          }
-
          else
          {
             bImg[bImg.length] = aXP.snapshotItem(i).nodeValue;
@@ -16506,7 +15544,7 @@ function getInnerBuildings(aDoc, buildingsInfo)
          var crtLevel = -1;
          if ( titleParts.length > 1 )
          {
-            crtLevel = parseInt(titleParts[titleParts.length - 1]);
+            crtLevel = parseInt10(titleParts[titleParts.length - 1]);
             if ( isNaN(crtLevel) ) { crtLevel = -1; }
             titleParts.pop();
             titleParts.pop();
@@ -16516,7 +15554,7 @@ function getInnerBuildings(aDoc, buildingsInfo)
          var gid = -1;
          var arrGid = bImg[i].split("/");
          var imgGid = arrGid[arrGid.length - 1].split(".");
-         if ( imgGid[0].search(/(\d+)/) !== -1 ) { gid = parseInt(RegExp.$1); }
+         if ( imgGid[0].search(/(\d+)/) !== -1 ) { gid = parseInt10(RegExp.$1); }
 
 
          var imgClass = "";
@@ -16574,7 +15612,7 @@ function getStatisticsMenu(aDoc)
          arS[0] = tM.snapshotItem(i).title;
          aLnk = tM.snapshotItem(i).href;
          arS[1] = aLnk.substring(aLnk.lastIndexOf("/"));
-         im = parseInt(arS[1].split("=")[1]);
+         im = parseInt10(arS[1].split("=")[1]);
          setGMcookieV2('statistics', arS, im);
       }
    }
@@ -16588,7 +15626,7 @@ function getStatisticsMenu(aDoc)
          aLnk = tM.snapshotItem(xi).href;
          arS[1] = aLnk.substring(aLnk.lastIndexOf("/"));
          aX = arS[1].split("=");
-         im = (aX.length > 1 ? parseInt(aX[1]) : 1);
+         im = (aX.length > 1 ? parseInt10(aX[1]) : 1);
          setGMcookieV2('statistics', arS, im);
       }
    }
@@ -16724,7 +15762,6 @@ function uiModifyBigIconsBar()
          addChildren(biBar,
             $e("div",[['id','n7'],['class','tb3BI']],[
                $e("img", [['usemap','#militar'], ['src',xGIF]]),
-
                $e("map", [['name','militar']],[
                   $rect(strMapCbib[0],'build.php?gid=16&j&k',T('RAP')),
                   $rect(strMapCbib[1], bksLnk,               T('BARRACKS')),
@@ -16837,7 +15874,7 @@ function uiCreateIntMapLink(mapId, txt, options /*opt*/)
       cls = "tbInject";
    }
 
-   var aLink = $lnk([['class',cls],['href','karte.php?d=' + mapId]],txt);
+   var aLink = $lnk([['class',cls],['href','karte.php?z=' + mapId]],txt);
 
    if ( !options.disable_tip )
    {
@@ -16852,6 +15889,13 @@ function uiCreateIntMapLinkXY(x,y, txt, options /*opt*/)
 {
    return uiCreateIntMapLink(xy2id(x,y), txt, options);
 }
+
+//////////////////////////////////////////////////////////////////////
+function uiCreateIntMapLinkXY2(x,y)
+{
+   return uiCreateIntMapLinkXY(x, y,"(" + x + "|" + y + ")", {disable_expansion:true});
+}
+
 //////////////////////////////////////////////////////////////////////
 function normalizeLangCode(lng) 
 { 
@@ -17147,7 +16191,6 @@ function getUrlFlashmap(site, strType, id)
    return url;
 } 
 */
-
 //////////////////////////////////////////////////////////////////////
 //menu on the left side
 function leftMenuLinks()
@@ -17191,7 +16234,7 @@ function leftMenuLinks()
       }
    }
 
-   var warsimIndex = parseInt(TB3O.O[10]);
+   var warsimIndex = parseInt10(TB3O.O[10]);
    if ( warsimIndex >= warsimLinks.length ) { warsimIndex = 0; }
 
    aL = 
@@ -17207,10 +16250,10 @@ function leftMenuLinks()
    {
       var uiLang  = normalizeLangCode(arAvLang[TB3O.O[0]]);
 
-      var repIndex = parseInt(TB3O.O[11]);
+      var repIndex = parseInt10(TB3O.O[11]);
       if ( repIndex >= repSites.length ) { repIndex = 0; }
 
-      var mapIndex = parseInt(TB3O.O[29]);
+      var mapIndex = parseInt10(TB3O.O[29]);
       if ( mapIndex >= mapAnalysers.length ) { mapIndex = 0; }
 
       var menuS3L = 
@@ -17223,6 +16266,7 @@ function leftMenuLinks()
          [T('TRAVIANDOPE'), "http://www.traviandope.com",  "_blank", T('TRAVIANDOPE.TT')],
          [T('TOOLBOX'),     "http://www.traviantoolbox.com/index.php?lang=" + uiLang, "_blank",T('TOOLBOX.TT')],
          [T('CRYTOOLS'),    "http://cry.travianteam.com/serverinfo.php?&lng=" + uiLang + "&s=" + wsSName, "_blank", T('CRYTOOLS.TT')],
+         
          //['Travian Utility', "http://travianutility.netsons.org/index_en.php", "_blank"],
          [mapAnalysers[mapIndex][0], mapAnalysers[mapIndex][2](mapAnalysers[mapIndex][1],"server"), "_blank", T('29.TT') + " (" + mapAnalysers[mapIndex][1] + ")", "smap"]
       ];
@@ -17268,11 +16312,80 @@ function leftMenuLinks()
 
    
 }
+//////////////////////////////////////////////////////////////////////
+function insertMsgRptPopupLink(aNode)
+{
+   var unreadMarkContainer = null;
+   var aBt = uiCreateTool("imgo", T("REPTT"), onClick);
+   $at(aBt, [['class','tbInject tbMsgPop']]);
+   insertAfter(aNode, aBt);
+
+   function onClick(e)
+   {
+      if ( isSomeOf(TB3O.pageSelector, "message_list", "report_list") )
+      {
+         var mrTable = searchMsgRptTable();
+         if ( mrTable && hasAncestor(aNode, mrTable) )
+         {
+            uiRemoveMsgRptHighlight(mrTable);
+            uiSetMsgRptHighlight(aNode);
+
+            // remove (new) text
+            unreadMarkContainer = aNode.parentNode;
+         }
+      }
+      ajaxLoadDocument(aNode.href, uiCreateMsgRptPopup);
+   }
+
+   function uiCreateMsgRptPopup(aDoc)
+   {
+      
+      var msgNode = $g(ID_MID2, aDoc, aDoc);
+      if ( msgNode )
+      {
+         var unnecessaryNodes = $xf("./*[not(@id='report_surround' or local-name()='form')]", 'l', msgNode, aDoc );
+
+         var i;
+         for ( i = 0; i < unnecessaryNodes.snapshotLength; i++ )
+         {
+            unnecessaryNodes.snapshotItem(i).style.display = "none";
+         }
+
+         // remove (new) text
+         if ( unreadMarkContainer )
+         {
+            var tCol = $xf("./text()", 'l', unreadMarkContainer); 
+            for ( i = 0; i < tCol.snapshotLength; i++ )
+            {
+               removeElement(tCol.snapshotItem(i));
+            }
+         }
+
+         document.adoptNode(msgNode);
+         removeElement($g("mr_tooltip"));
+         var dW = 502; 
+         if ( msgNode.className !== "reports")
+         { 
+            dW = 450;
+            msgNode.style.width = "auto";
+         }
+         var dxy = TB3O.O[104].split("|");
+         $df(dW, dxy[0], dxy[1], '', '', "mr_tooltip", false, msgNode);
+
+         //process message
+         uiModifyMessage(true);
+         uiModifyReport(true);
+         uiModifyLinks(msgNode);
+         if ( TB3O.O[53] === "1" ) { uiAddTroopInfoTooltips(msgNode); }
+      }
+      
+   }
+}
 /////////////////////////////////////////////////////////////////////
 function createStatLink(strType, aX, textURL)
 {
    var aLnk = null;
-   var wsIndex = parseInt(TB3O.O[27]);
+   var wsIndex = parseInt10(TB3O.O[27]);
    if ( wsIndex < 0 || wsIndex >= wsAnalysers.length ) { wsIndex = 0; }
 
    var ahws = wsAnalysers[wsIndex][2](wsAnalysers[wsIndex][1],strType,aX);
@@ -17295,7 +16408,7 @@ function createStatLink(strType, aX, textURL)
 function createMapLink(strType, aX, strName)
 {
    var aLnk = null;
-   var mapIndex = parseInt(TB3O.O[29]);
+   var mapIndex = parseInt10(TB3O.O[29]);
 
    if ( mapIndex < 0 || mapIndex >= mapAnalysers.length ) { mapIndex = 0; }
 
@@ -17388,14 +16501,22 @@ function insertAttSendResLinks(strType, aNode, mapId)
 /////////////////////////////////////////////////////////////////////
 // add player & ally links - IGM, World Analyser, Map Analyser
 // modify links in 'parent' node
-function uiModifyLinks(parent, argAddAttSendResLinks, argAddCoordAndDistTT)
+// options {
+//    add_send_troops, 
+//    add_send_res, 
+//    add_center_map,
+//    add_coord_dist_tip
+// }
+function uiModifyLinks(parent, options)
 {
    var aL = [], aLink, i, url;
    var mapId, id;
-   var bAddAttSendResLinks = (argAddAttSendResLinks === undefined) ?  ( TB3O.O[99] === '1' ) : !!argAddAttSendResLinks;
-   var bAddCoordAndDistTT  = (argAddCoordAndDistTT  === undefined) ?  ( TB3O.O[54] === '1' ) : !!argAddCoordAndDistTT;
    var villageInfo = TB3O.ActiveVillageInfo;
    var villageMapId = xy2id(villageInfo.x,villageInfo.y);
+   if ( !options ) { options = {}; }
+   var bAddAttSendResLinks = (options.add_send_troops === undefined) ?  ( TB3O.O[99] === '1' ) : !!options.add_send_troops;
+   var bAddCoordAndDistTT  = (options.add_coord_dist_tip === undefined) ?  ( TB3O.O[54] === '1' ) : !!options.add_coord_dist_tip;
+   var bAddCenterMapLinks  = !!options.add_center_map;
 
    
    if ( parent )
@@ -17425,7 +16546,7 @@ function uiModifyLinks(parent, argAddAttSendResLinks, argAddCoordAndDistTT)
             {
                if ( "uid" in url.queryKey ) 
                {
-                  var id = parseInt(url.queryKey.uid);
+                  var id = parseInt10(url.queryKey.uid);
                   if ( !isNaN(id) )
                   {
                      insertUserLinks(aLink, id, aLink.textContent);
@@ -17451,7 +16572,7 @@ function uiModifyLinks(parent, argAddAttSendResLinks, argAddCoordAndDistTT)
             }
             else
             {
-               addLinksAndTips(aLink, url.queryKey.d, bAddAttSendResLinks, bAddCoordAndDistTT);
+               addLinksAndTips(aLink, url.queryKey.d || url.queryKey.z , bAddAttSendResLinks, bAddCoordAndDistTT);
             }
          }
          
@@ -17459,19 +16580,19 @@ function uiModifyLinks(parent, argAddAttSendResLinks, argAddCoordAndDistTT)
          else if ( url.path === "/a2b.php" ) 
          {
             mapId = url.queryKey.z;
-            if ( mapId && mapId != villageMapId )
+            if ( mapId > 0 && mapId != villageMapId )
             {
                if ( bAddAttSendResLinks ) 
                {
                   insertAttSendResLinks("res", aLink, mapId);
                }
+               insertCenterMapLinks(aLink, mapId);
 
                //add a tooltip including distance and troop times
                // TODO: display a2b specific tip
                if ( bAddCoordAndDistTT )
                {
                   uiAddTooltipForIntMapLink(aLink, mapId);
-
                }
             }
          }
@@ -17488,14 +16609,25 @@ function uiModifyLinks(parent, argAddAttSendResLinks, argAddCoordAndDistTT)
    }
    
 
+   function insertCenterMapLinks(aNode, mapId)
+   {
+      if ( bAddCenterMapLinks )
+      {
+         insertAfter(aNode,$lnk([['href', 'karte.php?z=' + mapId],['class','tbInject tbMap']],
+                               ["\u00A0", I("centermap",[['title', T('CENTERMAP')]])]));
+      }
+   }
+
    function addLinksAndTips(aLink, mapId, bAddAttSendResLinks, bAddCoordAndDistTT)
    {
-      if ( mapId && mapId != villageMapId )
+      if ( mapId > 0 && mapId != villageMapId )
       {
          if ( bAddAttSendResLinks ) 
          {
             insertAttSendResLinks("all", aLink, mapId);
          }
+
+         insertCenterMapLinks(aLink, mapId);
 
          //add a tooltip including distance and troop times
          if ( bAddCoordAndDistTT )
@@ -17504,6 +16636,7 @@ function uiModifyLinks(parent, argAddAttSendResLinks, argAddCoordAndDistTT)
          }
       }
    }
+
 }
 //////////////////////////////////////////////////////////////////////
 function getTBOptionsDefaults()
@@ -17775,7 +16908,7 @@ function TB3Setup()
    //---
    setupTb = $t([['id', 'TB3S']]);
    tRow = $r([["class", 'srh']]);
-   topCell = $c(T('TB3SL') + " - " + TB3O.versionText(), [['class', 's1']]);
+   topCell = $c(T('TB3SL',TB3O.shN) + " - " + TB3O.versionText(), [['class', 's1']]);
    //save button
    sCell = $c("", [['class', 's2']]);
    sImg = $img([['src', image["bSave"]], ['title', T('SAVE')]]);
@@ -17840,7 +16973,7 @@ function TB3Setup()
                pS = $e('SELECT');
                for (var xi = 0; xi < aTBS[i][3].length; xi++) pS.options[xi] = new Option(aTBS[i][3][xi], xi, false, false);
                pS.selected = sVal;
-               pS.value = parseInt(sVal);
+               pS.value = parseInt10(sVal);
                break;
             case "SP":
                pS = $e('SPAN');
@@ -17857,7 +16990,7 @@ function TB3Setup()
 
    //create the "Save" row
    saveRow = $r([['class', 'srh']]);
-   bCell = $c(T('TB3SL') + " - " + TB3O.versionText(), [['class', 's1']]);
+   bCell = $c(T('TB3SL',TB3O.shN) + " - " + TB3O.versionText(), [['class', 's1']]);
    sCell2 = $c("", [['class', 's2']]);
    sImg2 = sImg.cloneNode(true);
    sImg2.addEventListener("click", TB3SetupSave, false);
@@ -17891,7 +17024,7 @@ function TB3Setup()
       for (var i = 0; i < aS.length; i++)
       {
          crtValue = aS[i].value;
-         aName = parseInt(aS[i].name);
+         aName = parseInt10(aS[i].name);
          if (!isNaN(aName)) TB3O.O[aName] = crtValue;
          else
          {
@@ -17904,7 +17037,7 @@ function TB3Setup()
       {
          crtValue = aS[i].value;
          if (aS[i].type == 'checkbox') crtValue = (aS[i].checked == true ? '1' : '0');
-         aName = parseInt(aS[i].name);
+         aName = parseInt10(aS[i].name);
          if (!isNaN(aName)) TB3O.O[aName] = crtValue;
          else
          {
@@ -17946,17 +17079,31 @@ function updScript()
          {
             if ( result.responseText.match(/@version\s+([\d.]+)/) ) 
             {
-               var nv = RegExp.$1;
-               // TODO: check version for each part independently
-               if (nv == TB3O.version)
+               var newVersion = RegExp.$1;
+               var nv = newVersion.split('.');
+               var iv = TB3O.version.split('.');
+               var compareResult = 0;
+               var i;
+               // check version for each part independently
+               for ( i = 0; i < iv.length && i < nv.length; ++i )
+               {
+                  if ( parseInt10(nv[i]) < parseInt10(iv[i]) ) { compareResult = -1; break; }
+                  else if ( parseInt10(nv[i]) > parseInt10(iv[i]) ) { compareResult = 1; break; }
+               }
+               if ( compareResult === 0 )
+               {
+                  compareResult = nv.length - iv.length;
+               }
+
+               if ( compareResult === 0 )
                {
                   alert(T('NONEWVER') + ' (v' + TB3O.version + ') !');
                }
-               else if (nv < TB3O.version)
+               else if ( compareResult < 0 )
                {
                   alert(T('BVER') + ' (v' + TB3O.version + ') ?!');
                }
-               else if (window.confirm(T('NVERAV') + ' (v ' + nv + ')!\n\n' + T('UPDSCR') + '\n')) 
+               else if (window.confirm(T('NVERAV') + ' (v ' + newVersion + ')!\n\n' + T('UPDSCR') + '\n')) 
                {
                   window.location.href = TB3O.url;
                }
@@ -18007,7 +17154,7 @@ function xBiP(aName, txtLvl, lvl, tEnd)
 {
    this.name = trimBlanks(aName);
    this.txtLvl = trimBlanks(txtLvl);
-   this.lvl = parseInt(lvl);
+   this.lvl = parseInt10(lvl);
    this.endTime = tEnd;
    return this;
 }
@@ -18222,18 +17369,18 @@ function getTroopMovements(aDoc)
                if (aRow.cells[4])
                {
                   strTime = aRow.cells[4].getElementsByTagName("SPAN")[0].textContent;
-                  intNo = parseInt(aRow.cells[1].textContent.replace("»", "").replace("«", ""));
+                  intNo = parseInt10(aRow.cells[1].textContent.replace("»", "").replace("«", ""));
                }
                else
                {
                   if (aRow.cells[1].getElementsByTagName("SPAN").length === 2)
                   {
-                     intNo = parseInt(aRow.cells[1].getElementsByTagName("SPAN")[0].textContent);
+                     intNo = parseInt10(aRow.cells[1].getElementsByTagName("SPAN")[0].textContent);
                      strTime = aRow.cells[1].getElementsByTagName("SPAN")[1].textContent;
                   }
                   else
                   {
-                     intNo = parseInt(aRow.cells[1].getElementsByTagName("SPAN")[0].textContent);
+                     intNo = parseInt10(aRow.cells[1].getElementsByTagName("SPAN")[0].textContent);
                      if (aRow.nextSibling) 
                      {
                         strTime = aRow.nextSibling.cells[1].getElementsByTagName("SPAN")[0].textContent;
@@ -18383,7 +17530,6 @@ function uiCreateTroopInfoTooltip(tInfo)
 
    aTb.id = "tb_TITT";
 
-
    if (tInfo[1] !== "")
    {
       aRow1 = $r();
@@ -18412,6 +17558,7 @@ function uiCreateTroopInfoTooltip(tInfo)
       tSpeed = uc[tInfo[0]][8] * TB3O.nTroopSpeedFactor[TB3O.nServerType];
    }
    aRow3.appendChild($c("<img src='" + image[imgSpeed] + "'>", [['class', 'ico tb3r2']]));
+
    aRow3.appendChild($c(tSpeed, [['class', 'tb3r2 tb3c1']]));
    //can carry
    aRow3.appendChild($c(gIc["capacity"], [['class', 'ico tb3r2']]));
@@ -18443,13 +17590,29 @@ function getTroopsInfo(tNTroops)
          if ( images.length > 0  )
          {
             var index = getTroopIndexTitleFromImg(images[0])[0];
-            var count = parseInt(aRow.cells[1].textContent);
+            var count = parseInt10(aRow.cells[1].textContent);
             troopsInfo.push([index,count]);
          }
       }
    }
    return troopsInfo.length > 0 ? troopsInfo : null;
 }
+
+//////////////////////////////////////////////////////////////////////
+function getTroopNoByIndex(troopsInfo, index)
+{
+   var troopNo;
+   for ( troopNo = 0; troopNo < troopsInfo.length; ++troopNo )
+   {
+      if ( troopsInfo[troopNo][0] === index )
+      {
+         return troopNo;
+      }
+   }
+
+   return undefined;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // troops statistics
@@ -18460,16 +17623,19 @@ function calcTroopsTotals(troopsInfo)
    for ( i = 0; i < troopsInfo.length; i++ )
    {
       var index = troopsInfo[i][0];
-      if ( isIntValid(index) )
+      var count = troopsInfo[i][1];
+      if ( count > 0 )
       {
-         var count = troopsInfo[i][1];
-         if ( count > 0 )
+         if ( isIntValid(index) )
          {
             for ( j = 0; j <= 9; ++ j ) 
             {
                if ( j === 8 ) // speed
                {
-                  if ( uc[index][8] < tNinfo[8] ) { tNinfo[8] = uc[index][8]; }
+                  if ( uc[index][8] * TB3O.nTroopSpeedFactor[TB3O.nServerType] < tNinfo[8] ) 
+                  { 
+                     tNinfo[8] = uc[index][8] * TB3O.nTroopSpeedFactor[TB3O.nServerType]; 
+                  }
                }
                else
                {
@@ -18477,10 +17643,11 @@ function calcTroopsTotals(troopsInfo)
                }
             }
          }
-      }
-      else 
-      {
-         tNinfo[3] += 6; //hero
+         else 
+         {
+            
+            tNinfo[9] += 6; //hero
+         }
       }
    }
 
@@ -18645,7 +17812,7 @@ function uiCreateTroopsMerchantsDistTable(tableId, srcMapId, destMapId, options)
    //-------------------------------------------------------------
    function uiCreateCoords(XY)
    {
-      return uiCreateIntMapLinkXY(XY[0],XY[1],"(" + XY[0] + "|" + XY[1] + ")",{disable_expansion:true});
+      return uiCreateIntMapLinkXY2(XY[0],XY[1]);
    }
 
    var aTb = null;
@@ -18776,70 +17943,1268 @@ function uiAddTooltipForIntMapLink(aLink,mapId)
 }
 
 //////////////////////////////////////////////////////////////////////
-function insertMsgRptPopupLink(aNode)
+function searchMsgRptTable(aDoc)
 {
-   var aBt = uiCreateTool("imgo", T("REPTT"), onClick);
-   $at(aBt, [['class','tbInject tbMsgPop']]);
-   insertAfter(aNode, aBt);
-
-   function onClick(e)
+   var mrTable = null;
+   mrTable = $g("overview", aDoc);
+   if ( !mrTable )
    {
-      ajaxLoadDocument(aNode.href, uiCreateMsgRptPopup);
+      mrTable = $xf("//table[@class='reports std'] | //table[@class='tbg']", 'f', aDoc, aDoc);
+      if ( mrTable ) { mrTable.id = "overview"; }
    }
+   
+   return mrTable;
+}
 
-   function uiCreateMsgRptPopup(aDoc)
+//////////////////////////////////////////////////////////////////////
+function searchMsgBody(aDoc)
+{
+   return $xf("//div[@id='" + ID_MID2 + "']//div[contains(@class,'message')]", 'f', aDoc, aDoc);
+}
+
+//////////////////////////////////////////////////////////////////////
+function searchRptBody() 
+{
+   var oT = $xf("//table[@class='tbg'] | //table[@class='std reports_read'] | //table[@class='reports std']"); 
+   if ( !oT ) oT = $g("report_surround"); 
+   
+   return oT;
+}
+
+//////////////////////////////////////////////////////////////////////
+// add the Archive option to the menu if PLUS not available 
+// and if the Archive link is not already present (added by other scripts)
+function uiAddArchiveMenuItem(topMenu)
+{
+   if ( !TB3O.plAc )
    {
-      
-      var msgNode = $g(ID_MID2, aDoc, aDoc);
-      if ( msgNode )
+      var archLink;
+      var maxItems;
+      if ( crtUrl.path === "/nachrichten.php" )
       {
-         var unnecessaryNodes = $xf("./*[not(@id='report_surround' or local-name()='form')]", 'l', msgNode, aDoc );
-
-         var i;
-         for ( i = 0; i < unnecessaryNodes.snapshotLength; i++ )
-         {
-            unnecessaryNodes.snapshotItem(i).style.display = "none";
-         }
-
-         document.adoptNode(msgNode);
-         removeElement($g("mr_tooltip"));
-         var dW = 502; 
-         if ( msgNode.className !== "reports")
-         { 
-            dW = 450;
-            msgNode.style.width = "auto";
-         }
-         var dxy = TB3O.O[104].split("|");
-         tt = $df(dW, dxy[0], dxy[1], '', '', "mr_tooltip", false, msgNode);
-
-         //process message
-         convertCoordsInMessagesToLinks();
-         /*
-          var aCs = $xf("//td[@background] | //div[@class='underline'] | //div[@id='message']", 'r');
-          if (aCs.snapshotLength > 0) 
-          {
-          for (var i = 0; i < aCs.snapshotLength; i++) 
-          {
-          var aC = aCs.snapshotItem(i); 
-          aC.innerHTML = addXYinMsg(aC.innerHTML);
-          };//add coords in message if needed
-          } 
-          else 
-          */
-         {
-            battleReportV2();
-            uiModifyLinks(msgNode);
-            if ( TB3O.O[53] === "1" ) { uiAddTroopInfoTooltips(msgNode); }
-         }
+         archLink = ' | <a href="nachrichten.php?t=3">' + T('ARCHIVE') + '</a>';
+         maxItems = 4;
       }
-      
+      else if ( crtUrl.path === "/berichte.php" )
+      {
+         archLink = ' | <a href="berichte.php?t=5">' + T('ARCHIVE') + '</a>';
+         maxItems = 6;
+      }
+
+      var tMiHTML = topMenu.innerHTML.split("|");
+      if ( tMiHTML.length < maxItems ) { topMenu.innerHTML += archLink; }
    }
 }
+
+//////////////////////////////////////////////////////////////////////
+function uiAddArchiveButton(mrTable)
+{
+   //now append the archive button if necessary
+   if ( !TB3O.plAc )
+   {
+      var bRow = mrTable.rows[mrTable.rows.length - 1].cells[1];
+      if (bRow)
+      {
+         var bRiHTML = bRow.innerHTML;
+         if ( !TB3O.T35 )
+         {
+            if (bRiHTML.toUpperCase().indexOf("ARCHIVE") === -1) { bRow.innerHTML += '<input class="std" type="submit" name="archive" value="' + T('ARCHIVE') + '"/></input>'; }
+         }
+         else
+         {
+            if (bRiHTML.toUpperCase().indexOf("BTN_ARCHIV") === -1) { bRow.innerHTML += '&nbsp;&nbsp;<input id="btn_archiv" class="dynamic_img" type="image" src="' + xGIF + '" alt="' + T('ARCHIVE') + '" name="archive" value="' + T('ARCHIVE') + '"/></input>'; }
+         }
+      }
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiSelectAllMsgRpt(mrTable)
+{
+   var btnSa = document.getElementsByName("s10");
+   if ( btnSa )
+   {
+      btnSa[0].click();
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiAddSelectAllCheckbox(mrTable)
+{
+   //check for the "s10" element to avoid double checkbox
+   if ( !$g("s10") )
+   {
+      //selectAll
+      var sAC = mrTable.rows[mrTable.rows.length - 1].cells[0];
+      var sACS = sAC.getAttribute("colspan");
+      if (sACS)
+      {
+         if ( sACS === "2" )
+         {
+            var bCell;
+            $at(sAC, [['colspan', '1']]);
+            sAC.removeAttribute('class');
+            if ( !TB3O.T35 )
+            {
+               bCell = $c(sAC.innerHTML, [['style', 'text-align:' + docDir[0] + ';']]);
+            }
+            else
+            {
+               bCell = $e("TH", sAC.innerHTML);
+               $at(bCell, [['class', 'buttons']]);
+            }
+            insertAfter(sAC, bCell);
+         }
+      }
+      sAC.innerHTML = '<input id="s10" name="s10" onclick="Allmsg(this.form);" style="vertical-align:bottom;" type="checkbox">';
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
+// Add features:
+// - navigate between pages with CTRL + <- and CTRL + ->
+function uiAddKeyboardNavigation()
+{
+   var navLinks;
+
+   function navToPage(mark)
+   {
+      var i;
+      for (i = 0; i < navLinks.snapshotLength; i++)
+      {
+         if ( navLinks.snapshotItem(i).textContent === mark ) 
+         {
+            location.href = navLinks.snapshotItem(i).href;
+            break;
+         }
+      }
+   }
+
+   function onKeyDown(event)
+   {
+      var evCode = event.keyCode;
+      if ( evCode === 37 )
+      {
+         navToPage("«");
+      }
+      else if (evCode === 39)
+      {
+         navToPage("»");
+      }
+   }
+
+   navLinks = $xf("//div[@id='" + ID_MID2 + "']//a[contains(@href, 'berichte.php?s=')] | //div[@id='" + ID_MID2 + "']//a[contains(@href, 'nachrichten.php?s=')]", 'l');
+   if ( navLinks.snapshotLength > 0 ) { document.addEventListener("keydown", onKeyDown, false); }
+}
+
+//////////////////////////////////////////////////////////////////////
+function navigateNextRptPage()
+{
+   var s = 0;
+   if ( crtUrl.queryKey.s ) { s = parseInt10(crtUrl.queryKey.s); }
+
+   var navLinks = $xf("//div[@id='" + ID_MID2 + "']//a[contains(@href, 'berichte.php?s=')]", 'l');
+   var i;
+   for (i = 0; i < navLinks.snapshotLength; i++)
+   {
+      var url = parseUri(navLinks.snapshotItem(i).href);
+      if ( url.queryKey.s && parseInt10(url.queryKey.s) > s) 
+      {
+         location.href = navLinks.snapshotItem(i).href;
+         return true;
+      }
+   }
+   return false;
+}
+
+function battleReportV2(origT, aFrom)
+{
+   var tx = $xf("//table[@class='std reports_read']//table[@class='std'] | //table[@class='tbg']//table[@class='tbg']", 'l');
+   if (tx.snapshotLength < 2) { tx = $xf("//table[@class='std reports_read']//table[@class='tbg']", 'l'); }
+   if (tx.snapshotLength < 2) { tx = $xf("//table[starts-with(@id, 'attacker') or starts-with(@class, 'defender')]", 'l'); }
+   if (tx.snapshotLength < 2) return false;
+
+   if ( aFrom === "orig" )
+   {
+      var p1, p2;
+      var neworigT = origT.cloneNode(true);
+      var divlmid2 = origT.parentNode;
+      divlmid2.removeChild(origT);
+      divlmid2.appendChild(p2 = $e("p") );
+      divlmid2.appendChild(p1 = $e("p",origT));
+      //add a paragraph, a table with a text and a checkbox
+      var input = $i([['type', 'checkbox'], ['id', 'tb_battlereport']]);
+      input.addEventListener("click", function ()
+      {
+         shoBR(p1, neworigT, origT);
+      }, false);
+
+      var ptable = $t([['style', 'background-color:' + TB3O.DFc[1] + '; width:auto;']]);
+      var aRow = $r([['class', 'tb3rnb']]);
+      var aCell = $c(T('SOREP') + ":", [['class', 'tb3cnb'], ['style', 'text-align:' + docDir[0] + ';']]);
+      aRow.appendChild(aCell);
+      var bCell = $c("", [['class', 'tb3cnb'], ['style', 'text-align:' + docDir[0] + ';']]);
+      bCell.appendChild(input);
+      aRow.appendChild(bCell);
+      ptable.appendChild(aRow);
+      p2.appendChild(ptable);
+   }
+
+   //get the total booty info (PLUS accounts)
+   var gBooty = $xf("//div[@class='carry']");
+   var bgBooty = null;
+   if (gBooty) bgBooty = gBooty.cloneNode(true);
+
+   //get the total booty
+   var booty = 0;
+   var labelReward = gIc["capacity"];
+   var imgRes = new Array;
+   for (var i = 0; i < 4; i++)
+   {
+      imgRes[i] = gIc["r" + (i + 1)];
+   }
+   var stBooty = [0, 0, 0, 0];
+
+   if (TB3O.T35 == false)
+   {
+      var aX = $xf("//tr[@class='cbg1'] | //table[@class='tbg']//tr", 'l');
+      if (aX.snapshotLength >= 3)
+      {
+         var intToProcess = -1;
+         for (var i = 0; i < aX.snapshotLength; i++)
+         {
+            if (aX.snapshotItem(i).childNodes.length == 4) intToProcess = i;
+         }
+         if (intToProcess > -1)
+         {
+            var b = aX.snapshotItem(intToProcess).childNodes[3];
+         }
+         else
+         {
+            var b = aX.snapshotItem(1).childNodes[1];
+            if (b.innerHTML.indexOf('class="res"') == -1) b = aX.snapshotItem(2).childNodes[1];
+         }
+         if (b.childNodes.length == 8)
+         {
+            var qBooty = new Array();
+            var infoBooty = '';
+            for (var i = 0; i < 4; i++)
+            {
+               qBooty[i] = parseInt10(b.childNodes[i * 2 + 1].nodeValue);
+               infoBooty += imgRes[i];
+               infoBooty += qBooty[i];
+               infoBooty += (i < 3 ? ' + ' : ' = ');
+               stBooty[i] = qBooty[i];
+            }
+            booty = arrayToInt(qBooty);
+            infoBooty += booty;
+            b.innerHTML = infoBooty;
+            if (bgBooty != null) b.appendChild(bgBooty);
+         }
+      }
+   }
+   else
+   {
+      var aX = tx.snapshotItem(0);
+      var infoBooty = '';
+      //var b1Table = aX.snapshotItem(0).parentNode;
+      var b1Table = aX;
+      if (!b1Table.rows[4]) return false;
+      var xi = 4;
+      var gata = false;
+      while (xi < b1Table.rows.length && !gata)
+      {
+         var bootyCell = b1Table.rows[xi].cells[1];
+         if (bootyCell.textContent.indexOf("|") != -1) gata = true;
+         xi += 1;
+      }
+      if (gata)
+      {
+         var resInfo = bootyCell;
+         for (var xi = 0; xi < bootyCell.childNodes.length; xi++)
+         {
+            var aChild = bootyCell.childNodes[xi];
+            if (aChild.className == "goods" || aChild.className == "res") resInfo = aChild;
+         }
+         var aqBooty = resInfo.textContent.split("|");
+         if (aqBooty.length > 1)
+         {
+            var qBooty = new Array();
+            for (var i = 0; i < 4; i++)
+            {
+               qBooty[i] = parseInt10(aqBooty[i].replace(" ", "").replace(" ", ""));
+               infoBooty += imgRes[i];
+               infoBooty += qBooty[i];
+               if (i < 3) infoBooty += ' + ';
+               else infoBooty += ' = ';
+               stBooty[i] = qBooty[i];
+            }
+            booty = arrayToInt(qBooty);
+            infoBooty += booty;
+            bootyCell.innerHTML = infoBooty;
+            if (bgBooty != null) bootyCell.appendChild(bgBooty);
+         }
+      }
+   }
+
+   var arrLoss = new Array();
+   var arrCarry = new Array();
+   //there are more tables for the attack (1 = attacker, 1 = attacked and x = reinforcements)
+   //tadPower => 0 = attack power; 1 = def_i power; 2 = def_c power; 3 = total loss; 4 = loss res 1; 5 = loss res 2; 6 = loss res 3; 7 = loss ress 4; 8 = crop consumption of killed troops; 9 = hero no.; 10 = crop consumption of initial troops
+   var tadPower = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
+   var atkLabelCell;
+   var defLabelCell;
+   var brCell = tx.snapshotItem(0).parentNode;
+
+   for (var g = 0; g < tx.snapshotLength; g++)
+   {
+      arrCarry[g] = 0;
+      tTable = tx.snapshotItem(g);
+      attdefPower = [0, 0, 0];
+      intNoOfCells = tTable.rows[1].cells.length - 1;
+      if (intNoOfCells == 11)
+      {
+         //corrected by JOPS
+         if (g == 0) tadPower[0][9] += 1;
+         else tadPower[1][9] += parseInt10(tTable.rows[2].cells[11].textContent);
+      }
+      if (g == 0) atkLabelCell = tTable.rows[0].cells[0].textContent;
+      else defLabelCell = tTable.rows[0].cells[0].textContent;
+      for (var j = 1; j < 11; j++)
+      {
+         tImg = tTable.rows[1].cells[j].getElementsByTagName('img')[0];
+         tInd = getTroopIndexTitleFromImg(tImg)[0];
+         tNo = parseInt10(tTable.rows[2].cells[j].textContent);
+         tNoLost = 0;
+         if (tTable.rows[3]) tNoLost = parseInt10(tTable.rows[3].cells[j].textContent);
+         if (!isNaN(tNo))
+         {
+            if (g == 0)
+            {
+               attdefPower[0] += uc[tInd][5] * tNo;
+               tadPower[0][0] += uc[tInd][5] * tNo;
+               tadPower[0][1] += uc[tInd][6] * tNo;
+               tadPower[0][2] += uc[tInd][7] * tNo;
+               tadPower[0][8] += uc[tInd][9] * tNoLost;
+               tadPower[0][10] += uc[tInd][9] * tNo;
+            }
+            else
+            {
+               attdefPower[0] += uc[tInd][5] * tNo;
+               attdefPower[1] += uc[tInd][6] * tNo;
+               attdefPower[2] += uc[tInd][7] * tNo;
+               tadPower[1][0] += uc[tInd][5] * tNo;
+               tadPower[1][1] += uc[tInd][6] * tNo;
+               tadPower[1][2] += uc[tInd][7] * tNo;
+               tadPower[1][8] += uc[tInd][9] * tNoLost;
+               tadPower[1][10] += uc[tInd][9] * tNo;
+            }
+         }
+         u = uc[tInd];
+         p = tTable.rows[3] ? tTable.rows[3].cells[j].innerHTML : 0;
+         ptu = arrayByN(u, p);
+         arrLoss[g] = arrayAdd(arrLoss[g], ptu.slice(0, 4));
+         arrCarry[g] += (tTable.rows[2] ? tTable.rows[2].cells[j].innerHTML - p : 0) * u[4];
+      }
+      //add the attack/def power to the row[1].cells[0]
+      var attdefCell = tTable.rows[1].cells[0];
+      if (g == 0)
+      {
+         //the attacking power
+         $at(attdefCell, [['style', 'font-size:8pt; color:#FF8000; text-align:center;']]);
+         attdefCell.innerHTML = $ls(attdefPower[0]) + " " + gIc["att_all"];
+      }
+      else
+      {
+         //the defense power of the defender (per table)
+         $at(attdefCell, [['style', 'font-size:8pt; color:green; text-align:center;']]);
+         attdefCell.innerHTML = $ls(attdefPower[1]) + " " + gIc["def_i"] + "<br>" + $ls(attdefPower[2]) + " " + gIc["def_c"];
+      }
+
+      //add the loss row to the att/def table
+      var iHTML = '';
+      for (var i = 0; i < 4; i++)
+      {
+         iHTML += imgRes[i];
+         iHTML += arrLoss[g][i];
+         if (i < 3) iHTML += ' + ';
+         else iHTML += ' = ';
+         if (g == 0) tadPower[0][4 + i] += arrLoss[g][i];
+         else tadPower[1][4 + i] += arrLoss[g][i];
+      }
+      var lossTotal = arrayToInt(arrLoss[g]);
+      if (g == 0) tadPower[0][3] += lossTotal;
+      else tadPower[1][3] += lossTotal;
+      if (lossTotal > 0) iHTML += " <b><font color='red'>" + lossTotal + "</font></b>";
+      else iHTML += lossTotal;
+      var informe = $c(iHTML, [['colspan', intNoOfCells]]);
+      var aRow = $r();
+      aRow.appendChild($c(T('LOSS'), [['style', 'text-align:left;']]));
+      aRow.appendChild(informe);
+      tTable.appendChild(aRow);
+
+      //For the attacker we'll compute the profit and efficiency of the attack
+      if (g == 0)
+      {
+         //Profit compared to lossTotal
+         var profit = 0;
+         if (arrCarry[g] == 0)
+         {
+            booty = 0;
+            for (var i = 0; i < 4; i++)
+            {
+               stBooty[i] = 0;
+            }
+         }
+         else
+         {
+            profit = ((booty - lossTotal) * 100 / booty).toFixed(2);
+         }
+         if (booty == 0) if (lossTotal == 0) profit = 0;
+         else profit = -100;
+         var bCell = $c(profit + "%", [['colspan', intNoOfCells]]);
+         var pRow = $r();
+         pRow.appendChild($c(T('PROFIT'), [['style', 'text-align:left;']]));
+         pRow.appendChild(bCell);
+         tTable.appendChild(pRow);
+
+         //Efficiency -> the entire booty compared to how much the attacker can carry back (considering only the troops that survived)
+         var efficiency = 100 - ((arrCarry[g] - booty) * 100 / arrCarry[g]);
+         if (arrCarry[g] == 0) efficiency = 0;
+         var bCell = $c(efficiency.toFixed(2) + "% (" + booty + "/" + arrCarry[g] + ")", [['colspan', intNoOfCells]]);
+         var eRow = $r();
+         eRow.appendChild($c(T('EFICIENCIA'), [['style', 'text-align:left;']]));
+         eRow.appendChild(bCell);
+         tTable.appendChild(eRow);
+      }
+   }
+
+   //add a simple statistics table
+   var sTable = $t([['id', 'br_table']]);
+   //add the title row
+   var sTitleRow = $r();
+   sTitleRow.appendChild($c(T('STAT'), [['class', 'tb3cbrh1']]));
+   sTitleRow.appendChild($c(atkLabelCell, [['class', 'tb3cbrh2']]));
+   sTitleRow.appendChild($c(defLabelCell, [['class', 'tb3cbrh3']]));
+   sTable.appendChild(sTitleRow);
+   //attack power row
+   var atkRow = $r();
+   atkRow.appendChild($c(gIc["att_all"], [['class', 'tb3cbrc']]));
+   atkRow.appendChild($c($ls(tadPower[0][0])));
+   atkRow.appendChild($c($ls(tadPower[1][0])));
+   sTable.appendChild(atkRow);
+   //def power rows
+   var defiRow = $r();
+   defiRow.appendChild($c(gIc["def_i"], [['class', 'tb3cbrc']]));
+   defiRow.appendChild($c($ls(tadPower[0][1])));
+   defiRow.appendChild($c($ls(tadPower[1][1])));
+   sTable.appendChild(defiRow);
+   var defcRow = $r();
+   defcRow.appendChild($c(gIc["def_c"], [['class', 'tb3cbrc']]));
+   defcRow.appendChild($c($ls(tadPower[0][2])));
+   defcRow.appendChild($c($ls(tadPower[1][2])));
+   sTable.appendChild(defcRow);
+   //reward row (for the attacker only)
+   var rewATotal = $c($ls(booty) + (TB3O.O[64] == '1' ? " " + T('TOTAL') : ''), [['class', 'tb3cbrbg']]);
+   var rewRow1 = $r();
+   var intDetailRowSpan = 1 + parseInt10(TB3O.O[64]);
+   var rewLabelCell = $c(labelReward, [['class', 'tb3cbrc'], ['rowspan', intDetailRowSpan]]);
+   rewRow1.appendChild(rewLabelCell);
+   if (TB3O.O[64] == '1')
+   {
+      var rewA = '';
+      for (var i = 1; i < 5; i++)
+      {
+         rewA += $ls(stBooty[i - 1]) + " " + imgRes[i - 1] + "<br>";
+      }
+      rewADetail = $c(rewA, [['class', 'tb3cbrg']]);
+      rewRow1.appendChild(rewADetail);
+   }
+   else rewRow1.appendChild(rewATotal);
+   rewRow1.appendChild($c('-', [['class', 'tb3cbrb'], ['rowspan', intDetailRowSpan]]));
+   sTable.appendChild(rewRow1);
+   if (TB3O.O[64] == '1')
+   {
+      var rewRow2 = $r();
+      rewRow2.appendChild($c($ls(booty) + " " + T('TOTAL'), [['class', 'tb3cbrbg']]));
+      sTable.appendChild(rewRow2);
+   }
+   //loss row
+   var strLossATotal = $ls(tadPower[0][3]) + (TB3O.O[64] == '1' ? " " + T('TOTAL') : '');
+   var lossATotal = $c(strLossATotal, [['class', 'tb3cbrb']]);
+   if (tadPower[0][3] > 0) $at(lossATotal, [['class', 'tb3cbrbr']]);
+   var strLossDTotal = $ls(tadPower[1][3] + booty) + (TB3O.O[64] == '1' ? " " + T('TOTAL') : '');
+   lossDTotal = $c(strLossDTotal, [['class', 'tb3cbrb']]);
+   if (tadPower[1][3] + booty > 0) $at(lossDTotal, [['class', 'tb3cbrbr']]);
+   var lossRow1 = $r();
+   lossRow1.appendChild($c(T('LOSS'), [['class', 'tb3cbrc'], ['rowspan', intDetailRowSpan]]));
+   if (TB3O.O[64] == '1')
+   {
+      var iLossA = '';
+      var iLossD = '';
+      for (var i = 1; i < 5; i++)
+      {
+         iLossA += $ls(tadPower[0][i + 3]) + " " + imgRes[i - 1] + "<br>";
+         iLossD += $ls(tadPower[1][i + 3] + stBooty[i - 1]) + " " + imgRes[i - 1] + "<br>";
+      }
+      var lossADetail = $c(iLossA);
+      if (tadPower[0][3] > 0) $at(lossADetail, [['class', 'tb3cbrr']]);
+      lossRow1.appendChild(lossADetail);
+      var lossDDetail = $c(iLossD);
+      if (tadPower[1][3] + booty > 0) $at(lossDDetail, [['class', 'tb3cbrr']]);
+      lossRow1.appendChild(lossDDetail);
+   }
+   else
+   {
+      lossRow1.appendChild(lossATotal);
+      lossRow1.appendChild(lossDTotal);
+   }
+   sTable.appendChild(lossRow1);
+   if (TB3O.O[64] == '1')
+   {
+      var lossRow2 = $r();
+      lossRow2.appendChild(lossATotal);
+      lossRow2.appendChild(lossDTotal);
+      sTable.appendChild(lossRow2);
+   }
+   //crop consumption of initial troops
+   var ccRow = $r();
+   ccRow.appendChild($c(gIc["r5"], [['class', 'tb3cbrc']]));
+   ccRow.appendChild($c(tadPower[0][10] + " (-" + tadPower[0][8] + ")"));
+   ccRow.appendChild($c(tadPower[1][10] + " (-" + tadPower[1][8] + ")"));
+   sTable.appendChild(ccRow);
+   //hero row
+   var heroRow = $r();
+   heroRow.appendChild($c(gIc["hero"], [['class', 'tb3cbrc']]));
+   var accA = (tadPower[0][9] > 0 ? tadPower[1][8] : 0);
+   var accD = (tadPower[1][9] > 0 ? Math.floor(tadPower[0][8] / tadPower[1][9]) : 0);
+   heroRow.appendChild($c(accA, [['class', 'tb3cbrb']]));
+   heroRow.appendChild($c(accD, [['class', 'tb3cbrb']]));
+   sTable.appendChild(heroRow);
+   //simple paragraph
+   brCell.appendChild($e("P"));
+   brCell.appendChild(sTable);
+
+   return true;
+
+   function shoBR(aP, nT, oT)
+   {
+      var iC = $g("tb_battlereport");
+      if ( iC )
+      {
+         if ( iC.checked )
+         {
+            aP.removeChild(oT);
+            aP.appendChild(nT);
+         }
+         else
+         {
+            aP.removeChild(nT);
+            aP.appendChild(oT);
+         }
+      }
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiModifyMsgBody(msg)
+{
+   //-----------------------------------------------------------------
+   function replaceTextByRE(txtNode, re, freplace)
+   {
+      var str = txtNode.nodeValue;
+      var prevLastIndex = 0;
+      var children = [];
+      var result;
+
+      while ( (result = re.exec(str)) !== null ) 
+      {
+         if ( result.index > prevLastIndex )
+         {
+            children.push(str.substring(prevLastIndex,result.index));
+         }
+         prevLastIndex = re.lastIndex;
+         var replacement = freplace(result[0]);
+         if ( replacement )
+         {
+            children.push(replacement);
+         }
+         else
+
+         {
+            children.push(str.substring(result.index,re.lastIndex));
+         }
+
+      }
+      var tail = str.substring(prevLastIndex);
+      if ( tail ) { children.push(tail); }
+
+      replaceElement(txtNode, children);
+   }
+
+   //-----------------------------------------------------------------
+   function replaceCoordsWithLink(txt)
+   {
+      var aLink = null;
+      var txy = txt.replace(" ", "").replace(/[,;\/\\]/, "|");
+      if ( txy.indexOf("(") === 0 && txy.indexOf(")") !== -1 && txy.indexOf("|") !== -1 )
+      {
+         var xy = txy.replace("(", "").replace(")", "").split("|");
+         aLink = uiCreateIntMapLinkXY(xy[0], xy[1], "(" + trimBlanks(xy[0]) + "|" + trimBlanks(xy[1]) + ")", {disable_tip:true});
+      }
+      return aLink;
+   }
+
+   //-----------------------------------------------------------------
+   function replaceURLWithLink(txt)
+   {
+     return $lnk([['class','tbInject'],['href',txt],['target','_blank']],txt);
+   }
+
+   //-----------------------------------------------------------------
+   function processMessageText(msg, re, freplace)
+   {
+      var texts = $xf(".//text()", 'l', msg);
+      var i;
+      for ( i = 0; i < texts.snapshotLength; ++i )
+      {
+         var txtNode = texts.snapshotItem(i);
+         if ( TAG(txtNode.parentNode) !== "A" ) 
+         {
+            replaceTextByRE(txtNode, re, freplace);
+         }
+      }
+   }
+
+   var reCoords = /\(\s*(-?\d+)\s*[\|\,\s\/\\]\s*(-?\d+)\s*\)/g;
+   processMessageText(msg, reCoords, replaceCoordsWithLink);
+
+   var reURL = /\w+:\/\/[\w-]+([.][\w-]+)+(\/\S*)?/g;
+   processMessageText(msg, reURL, replaceURLWithLink);
+}
+
+//////////////////////////////////////////////////////////////////////
+function getMsgRptHighlight(mrTable)
+{
+   return $xf(".//tr[contains(@class,'tbSelected')]");
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiRemoveMsgRptHighlight(mrTable)
+{
+   var i;
+   for( i = 0; i < mrTable.rows.length; ++i )
+   {
+     delClass(mrTable.rows[i],"tbSelected");
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiSetMsgRptHighlight(aNode)
+{
+   var tr = $xf(".//ancestor::tr[1]", 'f', aNode);
+   if ( tr ) { addClass(tr,"tbSelected"); }
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// stop "Delete all" reports if the user changed the page
+function clearReportDeletingState()
+{
+   var options = loadPersistentUserObject("reports_delete");
+
+   if ( options.deleteAll )
+   {
+      savePersistentUserObject("reports_delete", {});
+   }  	
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiCreateDelRepTable(menu)
+{
+   function delete10Reports(i, href)
+   {
+      savePersistentUserObject("reports_delete", {pageToDelete:href, pageToReturn: crtUrl.source, deleteAll: true, activeTab: i, tabToReturn: menu.active });
+      location.href = href;
+   }
+
+   var menuItems = menu.items;
+   var iMax = (menuItems.length > 5 ? 5 : menuItems.length);
+
+   var bRow, cRow, i;
+   var delTb = $t(['id', 'tb_delreptable'],
+               [
+                  $e("thead", null, $th(['colspan', iMax], T('DEL'))),
+                  bRow = $r([['class', 'rh']]),
+                  cRow = $r()
+               ]);
+
+   for ( i = 0; i < iMax; i++ )
+   {
+      var bTitle = menuItems[i][0];
+      bRow.appendChild($td(['class', 'cc'], bTitle));
+      cRow.appendChild($td(['class', 'cc'],
+                          uiCreateTool("bDel", T('DEL') + " " + bTitle, bind(delete10Reports,[i,menuItems[i][1]]))));
+   }
+   return delTb;
+}
+
+//////////////////////////////////////////////////////////////////////
+function isMsgRptListEmpty(mrTable)
+{
+   return !$xf(".//input[@type='checkbox' and not (@id)]", 'f', mrTable)
+}
+
+//////////////////////////////////////////////////////////////////////
+function deleteReports(activeTab, mrTable)
+{
+   
+   var options = loadPersistentUserObject("reports_delete");
+
+   if ( options.deleteAll )
+   {
+      if ( activeTab === options.activeTab )
+      {
+         pauseScript(TB3O.Timeouts.reports_delete);
+         var bDel = $g("btn_delete");
+
+         if ( !isMsgRptListEmpty(mrTable) && bDel )
+         {
+            uiSelectAllMsgRpt(mrTable)
+            pauseScript(TB3O.Timeouts.reports_delete);
+            bDel.click();
+         }
+         else
+         {
+            savePersistentUserObject("reports_delete", {});
+            if ( activeTab !== options.tabToReturn )
+            {
+               location.href = options.pageToReturn;
+            }
+         }
+      }
+      else { savePersistentUserObject("reports_delete", {}); }
+   }
+   
+}
+
+//////////////////////////////////////////////////////////////////////
+function clearReportSearchingState()
+{
+   var options = loadPersistentUserObject("reports_search");
+
+   if ( options.searchType )
+   {
+      savePersistentUserObject("reports_search", {});
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiCreateSearchRepTable(activeTab, mrTable)
+{
+   //-----------------------------------------------------------------
+   function onSearchReports(tab, ser)
+   {
+      savePersistentUserObject("reports_search", {searchType:ser, activeTab: tab});
+
+      var highlight = getMsgRptHighlight(mrTable);
+      if ( highlight && activeTab === tab )
+      {
+         uiRemoveMsgRptHighlight(mrTable);
+         searchReports(tab, mrTable, highlight);
+      }
+      else
+      {
+         var href = "/berichte.php";
+         if ( tab > 0 ) { href += "?t=" + tab; }
+         location.href = href;
+      }
+   }
+
+   //-----------------------------------------------------------------
+   var sdvs = $div(['id', 'tb_searchreports'], 
+   [   
+      $span(T("FINDREP") + " : "),
+      uiCreateTool("iReport2", T("IREPORT2"), bind(onSearchReports,[3,"iReport2"])),
+      uiCreateTool("iReport3", T("IREPORT3"), bind(onSearchReports,[3,"iReport3"])),
+      uiCreateTool("iReport7", T("IREPORT7"), bind(onSearchReports,[3,"iReport7"])),
+      uiCreateTool("iReport5", T("IREPORT5"), bind(onSearchReports,[3,"iReport5"])),
+      uiCreateTool("iReport6", T("IREPORT6"), bind(onSearchReports,[3,"iReport6"])),
+      uiCreateTool("iReport17",T("IREPORT17"),bind(onSearchReports,[4,"iReport17"])),
+      $lnk([['href', jsVoid], ['title', T("ALL")], 
+            ['click', bind(onSearchReports,[0,"iReport2 iReport3 iReport5 iReport6 iReport7 iReport17"]), false]], 
+           T("ALL"))
+   ]);
+
+   return sdvs;
+}	
+
+//////////////////////////////////////////////////////////////////////
+function searchReports(activeTab, mrTable, highlight)
+{
+   
+   var options = loadPersistentUserObject("reports_search");
+
+   if ( options.searchType )
+   {
+      if ( activeTab === options.activeTab )
+      {
+         var tbR = mrTable.getElementsByTagName('img');
+         var i = 0;
+         var bFounded = false;
+
+         if ( highlight )
+         {
+            for ( i = 0; i < tbR.length; i++ ) 
+            {
+               if ( hasAncestor(tbR[i], highlight) ) { break; }
+            }
+            ++i;
+         }
+
+         for ( ; i < tbR.length; i++ )
+         {
+            if ( hasAnyClass(tbR[i], options.searchType) )
+            {
+               bFounded = true;
+               savePersistentUserObject("reports_search", {});
+               uiSetMsgRptHighlight(tbR[i]);
+               break;
+            }
+         }
+
+         if ( !bFounded )
+         {
+            pauseScript(TB3O.Timeouts.reports_search);
+            if ( !navigateNextRptPage() )
+            {
+               savePersistentUserObject("reports_search", {});
+            }
+         }
+      }
+      else
+      {
+         savePersistentUserObject("reports_search", {});
+      }
+   }
+   
+}
+
+//////////////////////////////////////////////////////////////////////
+function MsgRptPreload(mrTable, intMRP)
+{
+   var pageNo = ( crtUrl.queryKey.s === undefined ) ? 0 : parseInt10(crtUrl.queryKey.s);
+
+   for (var i = 1; i < intMRP; i++)
+   {
+      setTimeout(createMrPreloadFunc(pageNo + i * 10), getRndTime(i * 498));
+   }
+   var X2 = pageNo + intMRP * 10;
+   var X1 = pageNo - intMRP * 10;
+   var tdbfLinks = mrTable.rows[mrTable.rows.length - 1].cells[2];
+   if ( tdbfLinks )
+   {
+      var bkLink;
+      if (X1 < 0)
+      {
+         bkLink = $e("SPAN", [['class', 'c'],["style", "font-weight:bold;"]], "«");
+      }
+      else 
+      {
+         bkLink = $lnk([['style', 'font-weigth:bold'],
+                       ['href', addQueryParameter(crtUrl.source, "s", X1)]], "« ");
+      }
+      var fwLink = $lnk([['style', 'font-weight:bold'],
+                         ['href', addQueryParameter(crtUrl.source, "s", X2)]],"»&nbsp;");
+      removeChildren(tdbfLinks);
+      tdbfLinks.appendChild(bkLink);
+      tdbfLinks.appendChild(fwLink);
+   }
+
+
+   function createMrPreloadFunc(s)
+   {
+      return function ()
+      {
+         ajaxLoadDocument(addQueryParameter(crtUrl.source, "s", s), processMrPage);
+      }
+   }
+
+   // TODO: add messages in correct order (AJAX answers commonly not ordered)
+   function processMrPage(xhr_doc)
+   {
+      var aTb = searchMsgRptTable(xhr_doc);
+      if (aTb)
+      {
+         var maxR = aTb.rows.length;
+         var mrFoot = mrTable.tFoot;
+         var lastRow = null;
+         if ( !mrFoot )
+         {
+            lastRow = mrTable.rows[mrTable.rows.length - 1];
+            removeElement(lastRow);
+         }
+
+         if ( !isMsgRptListEmpty(mrTable) )
+         {
+            var xBody = mrTable.tBodies[0];
+            var oFrg = null;
+            if ( xBody ) oFrg = document.createDocumentFragment();
+            for (var xi = 1; xi < maxR - 1; xi++)
+            {
+               var aRow = aTb.rows[xi];
+               var xRow = $r();
+               var noC = aRow.cells.length;
+               if (noC > 1)
+               {
+                  for (var yi = 0; yi < noC; yi++)
+                  {
+                     var xCell = aRow.cells[yi].cloneNode(true);
+                     document.adoptNode(xCell);
+                     uiModifyLinks(xCell);
+                     xRow.appendChild(xCell);
+                  }
+                  if (oFrg) oFrg.appendChild(xRow);
+                  else mrTable.appendChild(xRow);
+               }
+            }
+            if (oFrg) xBody.appendChild(oFrg);
+         }
+         if ( lastRow ) { mrTable.appendChild(lastRow); }
+      }
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
+function MessageListOptions()
+{
+   //general variables needed for this function
+   var mrTable = searchMsgRptTable();
+   var tabMenu = searchAndParseSubMenu();
+
+   if ( tabMenu && mrTable )
+   {
+      uiAddSelectAllCheckbox(mrTable);
+      uiAddArchiveMenuItem(tabMenu.menu);
+      uiAddArchiveButton(mrTable);
+
+      if ( TB3O.pageSelector === "report_list" )
+      {
+         if ( TB3O.O[61] === "1")
+         {
+            var content = $g(ID_MID2);
+            var searchTb = uiCreateSearchRepTable(tabMenu.active, mrTable);
+            if ( searchTb )
+            {
+               insertLast(content, searchTb);
+            }
+
+            var delTb = uiCreateDelRepTable(tabMenu);
+            if ( delTb )
+            {
+               insertLast(content, delTb);
+            }
+         }
+         deleteReports(tabMenu.active, mrTable);
+         searchReports(tabMenu.active, mrTable);
+      }
+
+      //get the number of pages to preload from server
+      var intMRP = parseInt10(TB3O.O[59]) + 1;
+      if ( intMRP > 5 ) { intMRP = 5; }
+   
+      if ( intMRP > 1 )
+      {
+         MsgRptPreload(mrTable, intMRP);
+      }
+   }
+}
+
+
+//////////////////////////////////////////////////////////////////////
+function uiModifyMsgRptList()
+{
+   
+   uiAddKeyboardNavigation();
+   MessageListOptions();
+   
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiModifyMsgRptMenu()
+{
+   var tabMenu = searchAndParseTabMenu();
+   if ( tabMenu )
+   {
+      uiAddArchiveMenuItem(tabMenu.menu);
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiModifyMessage(bPopup)
+{
+   
+
+   var msgBody = searchMsgBody();
+   if ( msgBody )
+   {
+      uiModifyMsgBody(msgBody);
+   }
+
+   
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiModifyMsgView()
+{
+   
+
+   uiModifyMsgRptMenu();
+   uiModifyMessage();
+
+   
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiModifyTradeReport(rptBody, bPopup)
+{
+   var resCell = $xf(".//*[@id='trade']/tbody/tr/td", 'f', rptBody);
+   if ( resCell )
+   {
+      var Res = getResourcesFromString(getTextContent(resCell));
+      if ( Res )
+      {
+         insertAfter(resCell.lastChild, 
+            $span([['class', 'tbInject']],[
+               " = ", I("r0"), " ",
+               $e("b", $ls(totalResources(Res)))
+            ])); 
+      }
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiModifyReport(bPopup)
+{
+   
+   var rptBody = searchRptBody();
+   if ( rptBody )
+   {
+      if ( TB3O.O[63] === "1" ) 
+      {
+         battleReportV2(rptBody, bPopup ? "":"orig");
+      }
+      uiModifyTradeReport(rptBody, bPopup);
+   }
+   
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiModifyRptView()
+{
+   
+
+   uiModifyMsgRptMenu();
+   uiModifyReport();
+
+   
+}
+
+//////////////////////////////////////////////////////////////////////
+// Add features:
+// - sending message by pressing CTRL+ENTER
+function uiModifyMsgPost()
+{
+   
+   function sendMessage(event)
+   {
+      if ( event.keyCode === 13 && event.ctrlKey )
+      {
+         var mF = $xf("//form[@name='msg' or @action='nachrichten.php']");
+         if ( mF ) { mF.submit(); }
+      }
+   }
+
+   uiModifyMsgRptMenu();
+
+   //code provided by rtellezi for enabling sending message by pressing the CTRL+ENTER keys.
+   var msgNode = $g("message");
+   if ( msgNode )
+   {
+      msgNode.addEventListener("keydown", sendMessage, false);
+   }
+   
+}
+/////////////////////////////////////////////////////////////////////
+function searchAllianceProfileTable()
+{
+   return $g("profile");
+}
+
+/////////////////////////////////////////////////////////////////////
+function uiModifyAllianceProfileName(aProfile)
+{
+   var allyName = "";
+   if (TB3O.M35 == 2)
+   {
+      var tbd = $xf("//td[@class='details']//table");
+      if ( tbd ) { allyName = tbd.rows[0].cells[1].textContent; }
+   }
+   else 
+   {
+      allyName = aProfile.rows[3].cells[1].textContent;
+   }
+
+   aProfile.rows[0].cells[0].innerHTML = aProfile.rows[0].cells[0].innerHTML + " <a href='" + crtPage + "'>" + allyName + "</a>";
+}
+
+/////////////////////////////////////////////////////////////////////
+function allyCalculation()
+{
+   var aTb = $g("member");
+   if ( !aTb )
+   {
+      var a = $xf("//div[@id='" + ID_MID2 + "']//table[@class='tbg']//td[@width='6%']");
+      if ( a ) { aTb = a.parentNode.parentNode; }
+   }
+
+   if ( aTb )
+   {
+      var totP = 0;
+      var totV = 0;
+      var totalBullets = [[0, ""], [0, ""], [0, ""], [0, ""], [0, ""]]; //blue, green, yellow, red, grey
+      var boolIsMyAlly = true;
+
+      for (var i = 1; i < aTb.rows.length; i++)
+      {
+         var cells = aTb.rows[i].cells;
+         var uLink = $nth_tag(cells[1],"a",0);
+         if ( uLink )
+         {
+            var uid = parseUri(uLink.href).queryKey.uid;
+            if ( TB3O.UserID == uid )
+            {
+               addClass(aTb.rows[i],"hl");
+            }
+         }
+
+         totP += parseInt10(cells[2].textContent);
+         totV += parseInt10(cells[3].textContent);
+
+         if ( boolIsMyAlly )
+         {
+            if ( cells[4] )
+            {
+               var imgBullet = cells[4].firstChild;
+               if (imgBullet.src.indexOf("x.gif") == -1)
+               {
+                  var xf = basename(imgBullet.src).replace("b", "").replace(".gif", "");
+                  var j = parseInt10(xf);
+                  totalBullets[j - 1][0] += 1;
+                  totalBullets[j - 1][1] = imgBullet.title;
+               }
+               else if (imgBullet.className.match(/online/))
+               {
+                  var aClass = imgBullet.className;
+                  imgBullet.className.search(/(\d)/);
+                  var j = RegExp.$1;
+                  totalBullets[j - 1][0] += 1;
+                  totalBullets[j - 1][1] = imgBullet.title;
+               }
+            }
+            else 
+            {
+               boolIsMyAlly = false;
+            }
+         }
+      }
+      var popPerPlayer = Math.round(totP / (aTb.rows.length - 1));
+
+      // total member of aliance
+      var trT = $r([['class', 'tb3r']]);
+      trT.appendChild($td([['class', 'tb3chnb'], ["colspan", "2"]], T('TOTAL')));
+      trT.appendChild($td([['class', 'tb3chnb'], ['style', 'text-align:center']], totP));
+      trT.appendChild($td([['class', 'tb3chnb'], ['style', 'text-align:center']], totV));
+      if ( boolIsMyAlly ) { trT.appendChild($td([['class', 'tb3chnb']])); }
+      aTb.appendChild(trT);
+
+      //average population per member of aliance
+      var trAv = $r([['class', 'tb3r']]);
+      trAv.appendChild($td([['class', 'tb3chnb'], ["colspan", "2"]], T('AVPPP')));
+      trAv.appendChild($td([['class', 'tb3chnb'], ["colspan", "2"], ['style', 'text-align:center']], popPerPlayer));
+      if ( boolIsMyAlly ) { trAv.appendChild($td([['class', 'tb3chnb']])); }
+      aTb.appendChild(trAv);
+
+      //average population per village
+      trAv = $r([['class', 'tb3r']]);
+      trAv.appendChild($td([['class', 'tb3chnb'], ["colspan", "2"]], T('AVPPV')));
+      trAv.appendChild($td([['class', 'tb3chnb'], ["colspan", "2"], ['style', 'text-align:center']], Math.round(totP / totV)));
+      if (boolIsMyAlly) { trAv.appendChild($td([['class', 'tb3chnb']])); }
+      aTb.appendChild(trAv);
+
+      //number of bullets by type
+      if ( boolIsMyAlly )
+      {
+         var rowBullets = $r([['class', 'tb3r']]);
+         var cellBullets = $td([['class', 'tb3chnb'], ['colspan', '5'], ['style', 'text-align:center']]);
+         var cBiHTML = "";
+         var addSpacer = " | ";
+         for (var j = 0; j < 5; j++)
+         {
+            if (totalBullets[j][0] > 0) 
+            {
+              cBiHTML += "<img class='online" + (j + 1) + "' src='" + gIc["b" + (j + 1)] + "' title='" + totalBullets[j][1] + "' alt='" + totalBullets[j][1] + "'> = &nbsp;" + totalBullets[j][0] + addSpacer + " ";
+            }
+         }
+         cellBullets.innerHTML = cBiHTML.substring(0, cBiHTML.length - 3);
+         rowBullets.appendChild(cellBullets);
+         aTb.appendChild(rowBullets);
+      }
+   }
+}
+
+/////////////////////////////////////////////////////////////////////
+function uiModifyAllianceProfile()
+{
+   
+
+   var aProfile = searchAllianceProfileTable();
+   if ( aProfile )
+   {
+      uiModifyAllianceProfileName(aProfile);
+
+      var desc = $xf(".//td[contains(@class,'desc1')]", 'f', aProfile);
+      if ( desc ) { uiModifyMsgBody(desc); }
+
+      desc = $xf(".//td[contains(@class,'desc2')]", 'f', aProfile);
+      if ( desc ) { uiModifyMsgBody(desc); }
+
+      allyCalculation();
+   }
+
+   
+}
+
+
+/////////////////////////////////////////////////////////////////////
+function uiModifyAllianceForum()
+{
+   
+
+   var i;
+   var posts = $xf("//table[@id='posts']//div[contains(@class,'text')]", 'l');
+   for ( i = 0; i < posts.snapshotLength; i++ )
+   {
+      uiModifyMsgBody(posts.snapshotItem(i));
+   }
+
+   
+}
+
 //////////////////////////////////////////////////////////////////////
 function savePlayerInfo()
 {
    setGMcookieV2('UserInfo', TB3O.U, 'UsI');
-
 }
 
 
@@ -18912,7 +19277,7 @@ function loadPlayerInfo()
       ajaxLoadDocument(spLnk, 
          function (xhr_doc)
          {
-            getCommonProfileInfo(xhr_doc);
+            getCommonPlayerProfileInfo(xhr_doc);
             if ( TB3O.U[5] === '' ) { getCapitalIdFromDorf3(); } 
          }
       );
@@ -19008,7 +19373,7 @@ function setRaceLocalName(name)
 }
 
 /////////////////////////////////////////////////////////////////////
-function getCommonProfileInfo(aDoc)
+function getCommonPlayerProfileInfo(aDoc)
 {
    
    setCapitalInfo(searchCapitalSpan(aDoc));
@@ -19019,7 +19384,13 @@ function getCommonProfileInfo(aDoc)
 }
 
 /////////////////////////////////////////////////////////////////////
-function getProfileVillagesTable(aDoc)
+function searchPlayerProfileTable()
+{
+   return $g("profile");
+}
+
+/////////////////////////////////////////////////////////////////////
+function searchPlayerProfileVillagesTable(aDoc)
 {
    var uTb;
    
@@ -19032,48 +19403,46 @@ function getProfileVillagesTable(aDoc)
 }
 
 /////////////////////////////////////////////////////////////////////
-function parseProfileVillagesTable(aTb,villagesTable)
+function parsePlayerProfileVillagesTable(uTb)
 {
-   var vPop = 0, totP = 0;
-   var i, vLnk, aLnk, cxy, vID;
-   for (i = 2; i < aTb.rows.length; i++)
+   var vPop = 0, totP = 0, villagesTable = [];
+   var i, vLnk, mapId, aRow;
+   for (i = 2; i < uTb.rows.length; i++)
    {
-      vPop = parseInt(aTb.rows[i].cells[1].innerHTML);
-      totP += vPop;
-      vLnk = aTb.rows[i].cells[0].getElementsByTagName("A")[0];
-      aLnk = vLnk.href.split("=");
-      cxy = id2xy(aLnk[1]);
-      vID = xy2id(cxy[0], cxy[1]);
-      if ( villagesTable )
+      aRow = uTb.rows[i];
+      vLnk = $nth_tag(aRow.cells[0], "a", 0);
+      if ( vLnk )
       {
-         villagesTable[vID] = vPop;
+         vPop = parseInt10(aRow.cells[1].textContent);
+         totP += vPop;
+         
+         mapId = parseInt10(parseUri(vLnk.href).queryKey.d);
+         villagesTable.push([mapId, vPop]);
       }
    }
-   return totP;
+   return {population: totP, table: villagesTable};
 }
 
 /////////////////////////////////////////////////////////////////////
 function getVillagesPopulation(aDoc)
 {
-   var villagesTable = {}, mapIdDict = {};
-   var mapId;
-
-   var uTb = getProfileVillagesTable(aDoc);
+   var uTb = searchPlayerProfileVillagesTable(aDoc);
    if ( uTb )
    {
-      parseProfileVillagesTable(uTb, villagesTable);
-      mapIdDict = getVillagesMapIdDict(TB3O.VillagesInfo);
+      var villagesTable = parsePlayerProfileVillagesTable(uTb).table;
+      var mapIdDict = getVillagesMapIdDict(TB3O.VillagesInfo);
 
-      for ( mapId in villagesTable )
+      for ( i = 0; i < villagesTable.length; ++i )
       {
-         TB3O.VillagesInfo[mapIdDict[mapId]].pop = villagesTable[mapId];
+         var mapId = villagesTable[i][0];
+         TB3O.VillagesInfo[mapIdDict[mapId]].pop = villagesTable[i][1];
       }
    }
 }
 
 /////////////////////////////////////////////////////////////////////
 // process only common information, villages list not processed yet
-function processProfile()
+function processPlayerProfile()
 {
    
 
@@ -19090,7 +19459,7 @@ function processProfile()
 
    if ( TB3O.pageSelector === "profile_my" )
    {
-      getCommonProfileInfo(document);
+      getCommonPlayerProfileInfo(document);
    }
 
    
@@ -19109,45 +19478,98 @@ function processMyProfile()
 }
 
 /////////////////////////////////////////////////////////////////////
-function uiCreatePlayerStatistics()
+function uiModifyPlayerProfileName(uProfile)
+{
+   var pName = getPlayerName();
+   uProfile.rows[0].cells[0].innerHTML = uProfile.rows[0].cells[0].innerHTML.replace(pName, "") + "<a href='" + crtPage + "'>" + pName + "</a>";
+}
+
+/////////////////////////////////////////////////////////////////////
+// convert coord to link to map
+function uiModifyPlayerProfileCoords(uTb, villages)
 {
    
-   var pName,pTb,uTb;
-   
-   pTb = $xf("//*[@id='profile'] | //div[@id='" + ID_MID2 + "']//table[@class='tbg']");
-   if ( pTb ) 
+   activeMapId = xy2id(TB3O.ActiveVillageInfo.x, TB3O.ActiveVillageInfo.y);
+
+   var villagesTable = villages.table;
+   var i;
+   for ( i = 0; i < villagesTable.length; i++ )
    {
-      pName = getPlayerName(document);
-      pTb.rows[0].cells[0].innerHTML = pTb.rows[0].cells[0].innerHTML.replace(pName, "") + "<a href='" + crtPage + "'>" + pName + "</a>";
+      var mapId = villagesTable[i][0];
+      var aCell = uTb.rows[i+2].cells[2];
+      if ( !$nth_tag(aCell, "a", 0) )
+      {
+         var aLink = $lnk([['class','tbInject'],['href','karte.php?z=' + mapId]], aCell.childNodes);
+         aCell.appendChild(aLink);
+         uiAddTooltipForIntMapLink(aLink, mapId);
+      }
+
+      if ( activeMapId == mapId )
+      {
+         addClass(uTb.rows[i+2],"hl");
+      }
+   }
+   
+}
+
+/////////////////////////////////////////////////////////////////////
+function uiAddPlayerStatistics(uTb, villages)
+{
+   
+
+   var totV = uTb.rows.length - 2;
+   var totP = villages.population;
+   var csp = uTb.rows[2].cells.length - 2;
+   //total row (population, villages)
+   var trT = $r([['class', 'tb3rnb']],[
+                 $td([['class', 'tb3chnb']], T('TOTAL')),
+                 $td([['class', 'tb3chnb'], ['style', 'text-align:center;']], totP),
+                 $td([['class', 'tb3chnb'], ['colspan', csp]])]);
+   uTb.appendChild(trT);
+
+   //average population per village
+   var trAv = $r([['class', 'tb3rnb']],[
+                 $td([['class', 'tb3chnb']],T('AVPPV')),
+                 $td([['class', 'tb3chnb'], ['style', 'text-align:center;']], Math.round(totP / totV)),
+                 $td([['class', 'tb3chnb'], ['colspan', csp]])]);
+   uTb.appendChild(trAv);
+
+   
+}
+
+/////////////////////////////////////////////////////////////////////
+function uiModifyPlayerProfile()
+{
+   
+
+   var uProfile = searchPlayerProfileTable();
+   if ( uProfile )
+   {
+      uiModifyPlayerProfileName(uProfile);
+
+      var desc = $xf(".//td[contains(@class,'desc1')]/div", 'f', uProfile);
+      if ( desc ) { uiModifyMsgBody(desc); }
+
+      desc = $xf(".//td[contains(@class,'desc2')]/div", 'f', uProfile);
+      if ( desc ) { uiModifyMsgBody(desc); }
    }
 
-   uTb = getProfileVillagesTable(document);
+   var uTb = searchPlayerProfileVillagesTable();
    if ( uTb )
    {
-      var totV = uTb.rows.length - 2;
-      var totP = parseProfileVillagesTable(uTb);
-      var csp = uTb.rows[2].cells.length - 2;
-      //total row (population, villages)
-      var trT = $r([['class', 'tb3rnb']]);
-      trT.appendChild($c(T('TOTAL'), [['class', 'tb3chnb']]));
-      trT.appendChild($c(totP, [['class', 'tb3chnb'], ['style', 'text-align:center;']]));
-      trT.appendChild($c("", [['class', 'tb3chnb'], ['colspan', csp]]));
-      uTb.appendChild(trT);
-      //average population per village
-      var trAv = $r([['class', 'tb3rnb']]);
-      trAv.appendChild($c(T('AVPPV'), [['class', 'tb3chnb']]));
-      trAv.appendChild($c(Math.round(totP / totV), [['class', 'tb3chnb'], ['style', 'text-align:center;']]));
-      trAv.appendChild($c("", [['class', 'tb3chnb'], ['colspan', csp]]));
-      uTb.appendChild(trAv);
-      //move the "(capital)" string to the same line as the name of the capital
-      var aSpan = searchCapitalSpan(document);
-      if ( aSpan )
-      {
-         aSpan.style.cssFloat = '';
-         aSpan.style.display = '';
-      } 
-
+      var villages = parsePlayerProfileVillagesTable(uTb);
+      uiAddPlayerStatistics(uTb, villages);
+      uiModifyPlayerProfileCoords(uTb, villages);
    }
+
+   //move the "(capital)" string to the same line as the name of the capital
+   var aSpan = searchCapitalSpan(document);
+   if ( aSpan )
+   {
+      aSpan.style.cssFloat = '';
+      aSpan.style.display = '';
+   } 
+
    
 }
 //////////////////////////////////////////////////////////////////////
@@ -19328,148 +19750,208 @@ function createMapInfoObjV2(area, pos)
 }
 	
 //////////////////////////////////////////////////////////////////////
-	// Map functions
-	function mapFunctions() {
-		aTimeOut = getRndTime(1800);
-		allArrows = $xf("//area[starts-with(@id, 'ma_n')]", 'l');
-		for (var xi = 0; xi < allArrows.snapshotLength; xi++) {if (TB3O.origMap == true) allArrows.snapshotItem(xi).addEventListener('click', reloadMapFunctions, false);};
+function reloadMapFunctions() {TB3O.origMap = false; mapFunctions();}
 
-		if (!$g("tb_tooltip")) uiTooltip_Create();
-		mapcontent = $g('map_content');
-		areas = $xf("//map//area[@shape='poly' and (@coords)]", 'l', mapcontent);
+//////////////////////////////////////////////////////////////////////
+// Map functions
+function mapFunctions()
+{
+   aTimeOut = getRndTime(1800);
+   allArrows = $xf("//area[starts-with(@id, 'ma_n')]", 'l');
+   for (var xi = 0; xi < allArrows.snapshotLength; xi++)
+   {
+      if (TB3O.origMap == true) allArrows.snapshotItem(xi).addEventListener('click', reloadMapFunctions, false);
+   }
 
-		//the village/player/oasis table needs a delay because maps are loaded via AJAX requests
-		setTimeout(genMapTable, aTimeOut);
-		//recompute the title of the browser because of clicking the arrows
-		setTimeout(getCrtLocation, aTimeOut);
-		addMapScanLink();
-		document.addEventListener("mousemove", onTooltip_Update, false);
-		installMapEventHandler();
+   if (!$g("tb_tooltip")) uiTooltip_Create();
+   mapcontent = $g('map_content');
+   areas = $xf("//map//area[@shape='poly' and (@coords)]", 'l', mapcontent);
 
-		function installMapEventHandler() {
-			for (var i = 1; i < 50; i++) {
-				var k1 = (i - 1) % 7;
-				var k2 = Math.floor((49 - i) / 7);
-				var area = $g("a_" + k1 + "_" + k2);
-				var mevobj = createMapInfoObjV2(area, i - 1);
-				if (TB3O.origMap == true) {area.addEventListener("mouseover", mevobj.mouseOverEvent, false); area.addEventListener("mouseout",  mevobj.mouseOutEvent, false);};
-			};
-		};
+   //the village/player/oasis table needs a delay because maps are loaded via AJAX requests
+   setTimeout(genMapTable, aTimeOut);
+   //recompute the title of the browser because of clicking the arrows
+   setTimeout(getCrtLocation, aTimeOut);
+   addMapScanLink();
+   document.addEventListener("mousemove", onTooltip_Update, false);
+   installMapEventHandler();
 
-		//the functions needed for the map
-		function mapScan() {
-			j = 0;
-			for (var i = 1; i < 50; i++) {
-				if ($g('map_info_' + i).innerHTML == '') {
-					k1 = (i - 1) % 7; k2 = Math.floor((49-i)/7);
-					if ($g("i_" + k1 + "_" + k2).src.match(/\/(d|t)\d*.gif$/)) {area = $g("a_" + k1 + "_" + k2); mevobj = createMapInfoObjV2(area, i-1); setTimeout(mevobj.scan, j * 600 + getRndTime(600)); j++;};
-				};
-			};
-		};
+   function installMapEventHandler()
+   {
+      for (var i = 1; i < 50; i++)
+      {
+         var k1 = (i - 1) % 7;
+         var k2 = Math.floor((49 - i) / 7);
+         var area = $g("a_" + k1 + "_" + k2);
+         var mevobj = createMapInfoObjV2(area, i - 1);
+         if (TB3O.origMap == true)
+         {
+            area.addEventListener("mouseover", mevobj.mouseOverEvent, false);
+            area.addEventListener("mouseout", mevobj.mouseOutEvent, false);
+         }
+      }
+   }
 
-		function addMapScanLink() {
-			removeElement($g('map_opts'));
-			if (TB3O.O[56] == '1' && TB3O.T35 == false) {
-				//create the "Scan the Map" link
-				b = $xf("//form[@method='post']").parentNode;
-				ctable = $t([["id", "map_opts"]]);
-				ctbody = $e("TBODY");
-				var aMS = $a(T('MAPSCAN'), [['id', 'mapscan'], ['href', jsVoid]]);
-				aMS.addEventListener("click", mapScan, false);
-				trc = $r();
-				tdc = $c("", [["colspan", '2']]);
-				tdc.appendChild(aMS);
-				trc.appendChild(tdc);
-				ctbody.appendChild(trc);
-				ctable.appendChild(ctbody);
-				b.appendChild(ctable);
-			};
-		};
+   //the functions needed for the map
 
-		//generate the table on the "karte.php" page
-		function genMapTable(){
-			if (areas.snapshotLength > 0 && TB3O.O[56] == '1') genMapCellInfoDivs();
-			//select the correct images and link titles for the reinf/attack icons
 
-			if (TB3O.O[58] != '1') return;
-			var dRPA = getRPDefAction();
-			removeElement($g('mapTableTT'));
-			var aTb = $t([['id', 'mapTable'], ['sortCol', -1]]);
-			var thead = $e("THEAD");
-			var tbody = $e("TBODY");
-			var aRow = $r();
-			var cL = ['PLAYER', '8', 'ALDEAS', 'POPULATION', 'COORDS', 'MAPTBACTS'];
-			var aTd;
-			for (var i = 0; i < cL.length; i++){
-				if (i < 4) {
-					aTd = $c(T(cL[i]) + " (<img src='" + image["adn"] + "' width='8px' style='cursor:pointer;'><img src='" + image["aup"] + "' width='8px' style='cursor:pointer'>)", [['title', T('CKSORT')], ['class', 'tb3mthcp']]);
-					switch(i){case 3: aTd.addEventListener("click", sortTable('mapTable', i, 'int'), false); break; default: aTd.addEventListener("click", sortTable('mapTable', i), false);};
-				} else aTd = $c(T(cL[i]));
-				aRow.appendChild(aTd);
-			};
-			thead.appendChild(aRow);
-			aTb.appendChild(thead);
-			var boolMapTable = false;
-			var anArea;
-			var aClass;
-			for (var i = 0; i < 7; i++) {
-				for (var j = 0; j < 7; j++) {
-					anArea = $g('a_' + i + '_' + j).wrappedJSObject;
-					var cInfo = anArea.details;
-					if (cInfo && cInfo.name) {
-						boolMapTable = true;
-						var iRow = $r();
-						var aName = cInfo.name;
-						var vID = xy2id(cInfo.x, cInfo.y);
-						aClass = '';
-						if (aName == TB3O.U[0]) aClass = 'tb3mtcu';
-						iRow.appendChild($c(aName, [['class', aClass]]));
-						iRow.appendChild($c(cInfo.ally));
-						if (TB3O.T35 == false) aHref = anArea.href; else aHref = "karte.php?" + cInfo.querystring;
-						iRow.appendChild($c('<a href="' + aHref + '">' + cInfo.dname + '</a>'));
-						iRow.appendChild($c(cInfo.ew, [['class', 'tb3mtcp']]));
-						iRow.appendChild($c('<a href="' + aHref + '">' + cInfo.x + " | " + cInfo.y + '</a>'));
-						iRow.appendChild($c('<a href="a2b.php?z=' + vID + '">' + gIc[dRPA] + '</a>' + '  ' + '<a href="build.php?z=' + vID + '&gid=17">' + gIc["r41"] + '</a>'));
-						tbody.appendChild(iRow);
-					};
-				};
-			};
-			aTb.appendChild(tbody);
-			if (boolMapTable == true) {
-				var dxy = TB3O.O[90].split("|");
-				var drUpg = $df(682, dxy[0], dxy[1], " ", 'mapTable', "mapTableTT", false, aTb);
-			};
-		};
+   function mapScan()
+   {
+      j = 0;
+      for (var i = 1; i < 50; i++)
+      {
+         if ($g('map_info_' + i).innerHTML == '')
+         {
+            k1 = (i - 1) % 7;
+            k2 = Math.floor((49 - i) / 7);
+            if ($g("i_" + k1 + "_" + k2).src.match(/\/(d|t)\d*.gif$/))
+            {
+               area = $g("a_" + k1 + "_" + k2);
+               mevobj = createMapInfoObjV2(area, i - 1);
+               setTimeout(mevobj.scan, j * 600 + getRndTime(600));
+               j++;
+            }
+         }
+      }
+   }
 
-		function genMapCellInfoDivs() {
-			var mapinfoX = $g("map_info");
-			if (mapinfoX) {
-				removeElement(mapinfoX);//remove the big DIV
-			} else {
-				for (var i = 1; i < 50; i++) {removeElement($g('map_info_' + i));};//remove all the small DIVs
-			};
-			if (TB3O.T35 == false) {var mapinfo = $d("", [['id', 'map_info']]);};
+   function addMapScanLink()
+   {
+      removeElement($g('map_opts'));
+      if (TB3O.O[56] == '1' && TB3O.T35 == false)
+      {
+         //create the "Scan the Map" link
+         b = $xf("//form[@method='post']").parentNode;
+         ctable = $t([["id", "map_opts"]]);
+         ctbody = $e("TBODY");
+         var aMS = $a(T('MAPSCAN'), [['id', 'mapscan'], ['href', jsVoid]]);
+         aMS.addEventListener("click", mapScan, false);
+         trc = $r();
+         tdc = $c("", [["colspan", '2']]);
+         tdc.appendChild(aMS);
+         trc.appendChild(tdc);
+         ctbody.appendChild(trc);
+         ctable.appendChild(ctbody);
+         b.appendChild(ctable);
+      }
+   }
 
-			for(var i = 1; i < 50; i++){
-				if (TB3O.T35 == false) {
-					var divsX = $d("", [['id', 'map_info_' + i], ['class', 'mt' + i], ['style', 'position:relative; left:31px; top:54px; z-index:90; border:1px solid #00C000; background-color:#FFFFCC; -moz-border-radius:10px;']]);
-					var divs = $d("", [['class', 'mt' + i], ['style', 'z-index:2;']]);
-					divs.appendChild(divsX);
-					mapinfo.appendChild(divs);
-				} else {
-					var divs = $d("", [['id', 'map_info_' + i], ['style', 'position:relative; height:1px; width:1px; ' + docDir[0] +':31px; top:45px; z-index:90; border:1px solid #00C000; background-color:#FFFFCC; -moz-border-radius:10px']]);
-					var k1 = (i - 1) % 7;
-					var k2 = Math.floor((49-i)/7);
-					var mapCell = $g("i_" + k1 + "_" + k2);
-					mapCell.appendChild(divs);
-				};
-			};
-			if (TB3O.T35 == false) {
-				var iniCell = $g("a_0_6");
-				if (iniCell) iniCell.parentNode.appendChild(mapinfo);
-			};
-		};
-	};
+   //generate the table on the "karte.php" page
+
+
+   function genMapTable()
+   {
+      if (areas.snapshotLength > 0 && TB3O.O[56] == '1') genMapCellInfoDivs();
+      //select the correct images and link titles for the reinf/attack icons
+      if (TB3O.O[58] != '1') return;
+      var dRPA = getRPDefAction();
+      removeElement($g('mapTableTT'));
+      var aTb = $t([['id', 'mapTable'], ['sortCol', -1]]);
+      var thead = $e("THEAD");
+      var tbody = $e("TBODY");
+      var aRow = $r();
+      var cL = ['PLAYER', '8', 'ALDEAS', 'POPULATION', 'COORDS', 'MAPTBACTS'];
+      var aTd;
+      for (var i = 0; i < cL.length; i++)
+      {
+         if (i < 4)
+         {
+            aTd = $c(T(cL[i]) + " (<img src='" + image["adn"] + "' width='8px' style='cursor:pointer;'><img src='" + image["aup"] + "' width='8px' style='cursor:pointer'>)", [['title', T('CKSORT')], ['class', 'tb3mthcp']]);
+            switch (i)
+            {
+            case 3:
+               aTd.addEventListener("click", sortTable('mapTable', i, 'int'), false);
+               break;
+            default:
+               aTd.addEventListener("click", sortTable('mapTable', i), false);
+            }
+         }
+         else aTd = $c(T(cL[i]));
+         aRow.appendChild(aTd);
+      }
+      thead.appendChild(aRow);
+      aTb.appendChild(thead);
+      var boolMapTable = false;
+      var anArea;
+      var aClass;
+      for (var i = 0; i < 7; i++)
+      {
+         for (var j = 0; j < 7; j++)
+         {
+            anArea = $g('a_' + i + '_' + j).wrappedJSObject;
+            var cInfo = anArea.details;
+            if (cInfo && cInfo.name)
+            {
+               boolMapTable = true;
+               var iRow = $r();
+               var aName = cInfo.name;
+               var vID = xy2id(cInfo.x, cInfo.y);
+               aClass = '';
+               if (aName == TB3O.U[0]) aClass = 'tb3mtcu';
+               iRow.appendChild($c(aName, [['class', aClass]]));
+               iRow.appendChild($c(cInfo.ally));
+               if (TB3O.T35 == false) aHref = anArea.href;
+               else aHref = "karte.php?" + cInfo.querystring;
+               iRow.appendChild($c('<a href="' + aHref + '">' + cInfo.dname + '</a>'));
+               iRow.appendChild($c(cInfo.ew, [['class', 'tb3mtcp']]));
+               iRow.appendChild($c('<a href="' + aHref + '">' + cInfo.x + " | " + cInfo.y + '</a>'));
+               iRow.appendChild($c('<a href="a2b.php?z=' + vID + '">' + gIc[dRPA] + '</a>' + '  ' + '<a href="build.php?z=' + vID + '&gid=17">' + gIc["r41"] + '</a>'));
+               tbody.appendChild(iRow);
+            }
+         }
+      }
+      aTb.appendChild(tbody);
+      if (boolMapTable == true)
+      {
+         var dxy = TB3O.O[90].split("|");
+         var drUpg = $df(682, dxy[0], dxy[1], " ", 'mapTable', "mapTableTT", false, aTb);
+      }
+   }
+
+   function genMapCellInfoDivs()
+   {
+      var mapinfoX = $g("map_info");
+      if (mapinfoX)
+      {
+         removeElement(mapinfoX); //remove the big DIV
+      }
+      else
+      {
+         for (var i = 1; i < 50; i++)
+         {
+            removeElement($g('map_info_' + i));
+         } //remove all the small DIVs
+      }
+      if (TB3O.T35 == false)
+      {
+         var mapinfo = $d("", [['id', 'map_info']]);
+      }
+
+      for (var i = 1; i < 50; i++)
+      {
+         if (TB3O.T35 == false)
+         {
+            var divsX = $d("", [['id', 'map_info_' + i], ['class', 'mt' + i], ['style', 'position:relative; left:31px; top:54px; z-index:90; border:1px solid #00C000; background-color:#FFFFCC; -moz-border-radius:10px;']]);
+            var divs = $d("", [['class', 'mt' + i], ['style', 'z-index:2;']]);
+            divs.appendChild(divsX);
+            mapinfo.appendChild(divs);
+         }
+         else
+         {
+            var divs = $d("", [['id', 'map_info_' + i], ['style', 'position:relative; height:1px; width:1px; ' + docDir[0] + ':31px; top:45px; z-index:90; border:1px solid #00C000; background-color:#FFFFCC; -moz-border-radius:10px']]);
+            var k1 = (i - 1) % 7;
+            var k2 = Math.floor((49 - i) / 7);
+            var mapCell = $g("i_" + k1 + "_" + k2);
+            mapCell.appendChild(divs);
+         }
+      }
+      if (TB3O.T35 == false)
+      {
+         var iniCell = $g("a_0_6");
+         if (iniCell) iniCell.parentNode.appendChild(mapinfo);
+      }
+   }
+}
+
 //Bookmarks on the right side
 function showUserBookmarks()
 {
@@ -19704,7 +20186,7 @@ function showUserBookmarks()
 		//add the noteblock if necessary
 		if (TB3O.O[22] != '1') return;
 		var aTb = createNoteBlock();
-		if (TB3O.O[23] != '1') {var parNB = $e("P"); parNB.appendChild(aTb); aTb = parNB;} else {var nbXY = TB3O.O[77].split("|"); var nbWidth = aTb.style.width; TB3O.nTANb = $df(parseInt(nbWidth), nbXY[0], nbXY[1], T('NBO'), 'noteblock', "noteblockTT", true);};
+		if (TB3O.O[23] != '1') {var parNB = $e("P"); parNB.appendChild(aTb); aTb = parNB;} else {var nbXY = TB3O.O[77].split("|"); var nbWidth = aTb.style.width; TB3O.nTANb = $df(parseInt10(nbWidth), nbXY[0], nbXY[1], T('NBO'), 'noteblock', "noteblockTT", true);};
 		TB3O.nTANb.appendChild(aTb);
 	};
 
@@ -19716,10 +20198,10 @@ function showUserBookmarks()
 		var nT = getGMcookie("notas", false);
 		if (nT == "false") nT = "";
 		//height
-		var nl = parseInt(TB3O.O[25]) > 0 && nT != '' ? 3 + nT.split("\n").length : 10;
+		var nl = parseInt10(TB3O.O[25]) > 0 && nT != '' ? 3 + nT.split("\n").length : 10;
 		if (nl > 30) nl = 30;
 		//width
-		var nboption = parseInt(TB3O.O[24]);
+		var nboption = parseInt10(TB3O.O[24]);
 		var dI = (nboption == 0 && screen.width >= 1200 || nboption == 2) ? [545, '60'] : [280, '30'];
 		var aTb = $t([['id', 'noteblock'], ['style', "width:" + dI[0] + "px;" + sDisp]]);
 		var tA = $e("TEXTAREA", nT);
@@ -20019,7 +20501,7 @@ function uiCreateSearchForm(sbc)
    {
       if ( sbc[id] )
       {
-         sel.add(new Option(sbc[id][0], id, false, (id === parseInt(TB3O.O[83]))),null);
+         sel.add(new Option(sbc[id][0], id, false, (id === parseInt10(TB3O.O[83]))),null);
       }
    }
 
@@ -20137,7 +20619,7 @@ function getCommonDorf1Info(villageId, aDoc)
          if ( rDiv.className )
          {  
             rDiv.className.search(/f(\d+)/); 
-            vType = parseInt(RegExp.$1);
+            vType = parseInt10(RegExp.$1);
          }
       }
       else
@@ -20146,7 +20628,7 @@ function getCommonDorf1Info(villageId, aDoc)
          if ( rDiv )
          {
             rDiv.id.search(/f(\d+)/);
-            vType = parseInt(RegExp.$1);
+            vType = parseInt10(RegExp.$1);
          }
       }
       vType = (isFinite(vType) && vType > 0 && vType <= 12) ? vType : undefined;
@@ -20365,8 +20847,8 @@ function uiCreateDorf2CenterNumbers(arrBA)
             var nState = (TB3O.O[44] === "1") ? arrBA[id][0] : 1;
             var aDIV = uiCreateCNDiv(crtLevel, nState, bInfo.uplvl > crtLevel );
             var xy = bInfo.xy.split(",");
-            aDIV.style.top = parseInt(xy[1]) + dy + 'px';
-            aDIV.style.left = parseInt(xy[0]) + 95 + 'px';
+            aDIV.style.top = parseInt10(xy[1]) + dy + 'px';
+            aDIV.style.left = parseInt10(xy[0]) + 95 + 'px';
 
             posDIV.appendChild(aDIV);
          }
@@ -20763,7 +21245,7 @@ function processDorf3_Tab2(origT)
 
          for ( j = 0; j < 4; ++j )
          {
-            v = parseInt(vRow[j+1].textContent.replace(/[., ]/,""));
+            v = parseInt10(vRow[j+1].textContent.replace(/[., ]/,""));
             resourcesInfo.Res[j] = v;
             if ( v > resourcesInfo.Cap[j] )
             {
@@ -20811,8 +21293,8 @@ function processDorf3_Tab3(origT)
 
                if ( r.length === 2 )
                {
-                  resourcesInfo.Res[j] = parseInt(r[0]);
-                  resourcesInfo.Cap[j] = parseInt(r[1]);
+                  resourcesInfo.Res[j] = parseInt10(r[0]);
+                  resourcesInfo.Cap[j] = parseInt10(r[1]);
                   resourcesInfo.dUpd = new Date(TB3O.serverTime.getTime());
                }
             }
@@ -20897,7 +21379,7 @@ function processDorf3()
 
    if ( crtUrl.queryKey.s )
    {
-      defaultTab = parseInt(crtUrl.queryKey.s);
+      defaultTab = parseInt10(crtUrl.queryKey.s);
    }
    TB3O.O[93] = defaultTab;
    saveTBOptions();
@@ -21239,9 +21721,9 @@ function createD3TbTotals(aTb, maxTD, tabNo)
    {
       merchants = TB3O.MerchantsInfo[villageId].split("/");
       posX = merchants[0].lastIndexOf(">");
-      totalMerchants[0] += parseInt(merchants[0].substring(posX + 1));
+      totalMerchants[0] += parseInt10(merchants[0].substring(posX + 1));
       posX = merchants[1].indexOf("<");
-      totalMerchants[1] += parseInt(merchants[1].substring(0, posX));
+      totalMerchants[1] += parseInt10(merchants[1].substring(0, posX));
    }
 
    for ( yi = 0; yi < maxTD; yi++ )
@@ -21684,7 +22166,6 @@ function fillD3TbTotals_Tab5(troopsCount)
          aCell.textContent = "-";
          addClass(aCell,"tb3none");
       }
-
    }
 }
 
@@ -22002,9 +22483,9 @@ function refreshD3Tb_Troops(tabNo, villageId, xhr_doc)
 				newdid = getNewdidFromLink(avLink.href);
 				aX = $xf('//a[@class="active_vl"]/../../td/table/tbody/tr/td', 'f', ad);
 				if (aX) {
-					X = parseInt(aX.innerHTML.replace("(", ""));
+					X = parseInt10(aX.innerHTML.replace("(", ""));
 					aY = $xf('//a[@class="active_vl"]/../../td/table/tbody/tr/td[3]', ad);
-					if (aY) {Y = parseInt(aY.innerHTML.replace(")", ""));vID = xy2id(X, Y);};
+					if (aY) {Y = parseInt10(aY.innerHTML.replace(")", ""));vID = xy2id(X, Y);};
 				};
 			} else {
 				if (TB3O.M35 == 2) {
@@ -22016,8 +22497,8 @@ function refreshD3Tb_Troops(tabNo, villageId, xhr_doc)
 						newdid = getNewdidFromLink(tr.cells[1].firstChild.href);
 					} else {
 						var tmpC = tr.cells[2].textContent.replace("(", "").replace(")", "").split("|");
-						vx = parseInt(tmpC[0]);
-						vy = parseInt(tmpC[1]);
+						vx = parseInt10(tmpC[0]);
+						vy = parseInt10(tmpC[1]);
 						newdid = getNewdidFromLink(tr.cells[1].firstChild.href);
 					};
 				} else if (TB3O.M35 == 1) {
@@ -22088,7 +22569,7 @@ function refreshD3Tb_Troops(tabNo, villageId, xhr_doc)
 		var newdid = getdorf3SelectedVinfo(ad)[1];
 		var lvl = 0;
 		var bTitle = $xf("//div[@id='" + ID_MID2 + "']//h1", 'f', ad);
-		if (bTitle) {var aLvl = bTitle.textContent.split(" "); for (i = 0; i < aLvl.length; i++) {if (!isNaN(parseInt(aLvl[i]))) lvl = parseInt(aLvl[i]);};};
+		if (bTitle) {var aLvl = bTitle.textContent.split(" "); for (i = 0; i < aLvl.length; i++) {if (!isNaN(parseInt10(aLvl[i]))) lvl = parseInt10(aLvl[i]);};};
 		var aCell = $xf("//td[@id='aldea" + newdid + "_4_3" + "']");
 		var showLvl = "Lvl " + lvl;
 		var partyTime = "";
@@ -22119,7 +22600,7 @@ function refreshD3Tb_Troops(tabNo, villageId, xhr_doc)
 					var aTb = allTables.snapshotItem(i);
 					if (aTb.nodeName == "P") break;
 					var allTroopCells = aTb.rows[2].cells;
-					aValue = toNumber(allTroopCells[9].innerHTML);
+					aValue = scanIntWithoutLetter(allTroopCells[9].innerHTML);
 					if (aValue != 0) {
 						//senators, chiefs, etc.
 						for (var xi = 1; xi < aValue + 1; xi++) {
@@ -22129,7 +22610,7 @@ function refreshD3Tb_Troops(tabNo, villageId, xhr_doc)
 							aCell.innerHTML += " ";
 						};
 					};
-					aValue = toNumber(allTroopCells[10].innerHTML);
+					aValue = scanIntWithoutLetter(allTroopCells[10].innerHTML);
 					if (aValue != 0) {
 						//settlers
 						for (var xi = 1; xi < aValue + 1; xi++) {
@@ -22152,7 +22633,7 @@ function refreshD3Tb_Troops(tabNo, villageId, xhr_doc)
 		var lvl = 0;
 		var maxSlots = 0;
 		var bTitle = $xf("//div[@id='" + ID_MID2 + "']//h1", 'f', ad);
-		if (bTitle) {var aLvl = bTitle.textContent.split(" "); lvl = parseInt(aLvl[aLvl.length - 1]);};
+		if (bTitle) {var aLvl = bTitle.textContent.split(" "); lvl = parseInt10(aLvl[aLvl.length - 1]);};
 		var cpbuilding = 0;
 		var ocSlots = 0;
 		if (lvl != 0) {var spBcookie = getGMcookieV2("specBuildings"); if (spBcookie && spBcookie[newdid]) cpbuilding = spBcookie[newdid][0];};
@@ -22180,7 +22661,7 @@ function refreshD3Tb_Troops(tabNo, villageId, xhr_doc)
 		var sumCell = $xf("//td[@id='aldea_s_4_5']");
 		if (sumCell) {
 			var sumCellValue = sumCell.innerHTML.replace(",", "").replace(".", "").replace(" ", "").replace("&nbsp;", "");
-			if (sumCellValue == "-") {sumCell.innerHTML = slots;} else {sumCell.innerHTML = (parseInt(sumCellValue.split("/")[0]) + ocSlots - parseInt(oldSlots[0])) + "/" + (parseInt(sumCellValue.split("/")[1]) + maxSlots - parseInt(oldSlots[1]));};
+			if (sumCellValue == "-") {sumCell.innerHTML = slots;} else {sumCell.innerHTML = (parseInt10(sumCellValue.split("/")[0]) + ocSlots - parseInt10(oldSlots[0])) + "/" + (parseInt10(sumCellValue.split("/")[1]) + maxSlots - parseInt10(oldSlots[1]));};
 		};
 
 		updD3Bullets(newdid, 2);
@@ -22190,11 +22671,11 @@ function refreshD3Tb_Troops(tabNo, villageId, xhr_doc)
 	function getMerchantsInformation() {
 		//get the current capacity of the merchants for this village
 		var mCc = getGMcookieV2("merchantscapacity");
-		if (mCc && mCc[actV.vID]) { TB3O.Mcap = parseInt(mCc[actV.vID]); }
+		if (mCc && mCc[actV.vID]) { TB3O.Mcap = parseInt10(mCc[actV.vID]); }
 		else { TB3O.Mcap = TB3O.ActiveVillageInfo.mCap; }
 		
-		t['MERCHANTS'] = getGMcookie("merchantsName", false);
-		if (t['MERCHANTS'] == "false") t['MERCHANTS'] = '';
+		//t['MERCHANTS'] = getGMcookie("merchantsName", false);
+		if (t['MERCHANTS'] === undefined ) t['MERCHANTS'] = '';
 		mCc = null;
 	};
 
@@ -22407,7 +22888,6 @@ function uiCreateLastMarketSendTable()
    function hideLastMarketSend(mkls)
    {
       return function ()
-
       {
          for (var xi = 0; xi < 4; xi++)
          {
@@ -22469,63 +22949,50 @@ function getMerchantsUnderwayGroup(MUInfo, villageInfo, aDoc, aGroupHeader, bInc
          var tdRes = aRows[2].cells[1].textContent;
          var xn = 1;
          var xPos = tdRes.indexOf("x");
-         if (xPos !== -1) { tdRes = tdRes.substring(xPos + 1); xn = 2; }
+         if ( xPos !== -1 ) { tdRes = tdRes.substring(xPos + 1); xn = 2; }
 
-         if ( tdRes.search(/(\d+)[ \u00A0|]*(\d+)[ \u00A0|]*(\d+)[ \u00A0|]*(\d+)/) !== -1 )
+         var Res = getResourcesFromString(tdRes);
+
+         if ( owner && point && timeSpan && Res )
          {
-            var inRes = [RegExp.$1,RegExp.$2,RegExp.$3,RegExp.$4];
-            var Res = [0,0,0,0];
+            var srcXY, destXY;
+            var bReturning = false;
 
-            var ri;
-            var bResValid = true;
-            for ( ri = 0; ri < 4; ri++ )
+            if ( !bIncoming )
             {
-               Res[ri] = parseInt(inRes[ri]);
-               if ( !isFinite(Res[ri]) ) { bResValid = false; }
+               var resNodes = aRows[2].cells[1].getElementsByTagName("span");
+               if ( resNodes.length >= 1 )
+               {
+                  bReturning = hasClass(resNodes[0],"none");
+               }
             }
 
-            if ( owner && point && timeSpan && bResValid )
+            if ( bIncoming || bReturning )
             {
-                var srcXY, destXY;
-                var bReturning = false;
-
-                if ( !bIncoming )
-                {
-                   var resNodes = aRows[2].cells[1].getElementsByTagName("span");
-                   if ( resNodes.length >= 1 )
-                   {
-                      bReturning = hasClass(resNodes[0],"none");
-                   }
-                }
-
-                if ( bIncoming || bReturning )
-                {
-                   srcXY  = id2xy(point);
-                   destXY = [villageInfo.x,villageInfo.y];
-                }
-                else
-                {
-                   srcXY  = [villageInfo.x,villageInfo.y];
-                   destXY = id2xy(point);
-                }
-                var mui = new MerchantUnderwayInfo(owner, srcXY, destXY, ttArrival, Res, xn);
-                
-
-                if ( bIncoming )
-                {
-                   MUInfo.i.push(mui);
-                }
-                else if ( bReturning )
-                {
-                   MUInfo.r.push(mui);
-                }
-                else 
-                {
-                   MUInfo.o.push(mui);
-                }
+               srcXY  = id2xy(point);
+               destXY = [villageInfo.x,villageInfo.y];
             }
-            
+            else
+            {
+               srcXY  = [villageInfo.x,villageInfo.y];
+               destXY = id2xy(point);
+            }
+            var mui = new MerchantUnderwayInfo(owner, srcXY, destXY, ttArrival, Res, xn);
+
+            if ( bIncoming )
+            {
+               MUInfo.i.push(mui);
+            }
+            else if ( bReturning )
+            {
+               MUInfo.r.push(mui);
+            }
+            else 
+            {
+               MUInfo.o.push(mui);
+            }
          }
+         
       }
    }
 }
@@ -22601,7 +23068,7 @@ function processMarketSend()
 
    if ( mCapNode )
    {
-      mCap = toNumber(mCapNode.textContent);
+      mCap = scanIntWithoutLetter(mCapNode.textContent);
       if ( isNaN(mCap) ) { mCap = 0; }
    }
    
@@ -22621,7 +23088,6 @@ function processMarketSend()
    TB3O.ActiveVillageInfo.mCap = mCap;
    
 
-
    // get merchants count
    processMarketSend.moC = searchMerchantsCountContainer();
    if ( processMarketSend.moC )
@@ -22629,8 +23095,8 @@ function processMarketSend()
       if ( processMarketSend.moC.textContent.search(/[ \u00A0]*(.+)[ \u00A0]+(\d+)[ \u00A0]*\/[ \u00A0]*(\d+)/) !== -1 )
       {
          T.saveLocaleString("MERCHANTS",RegExp.$1);
-         TB3O.MerchantsInfo.mAvail = parseInt(RegExp.$2);
-         TB3O.MerchantsInfo.mTotal = parseInt(RegExp.$3);
+         TB3O.MerchantsInfo.mAvail = parseInt10(RegExp.$2);
+         TB3O.MerchantsInfo.mTotal = parseInt10(RegExp.$3);
          
       }
    }
@@ -22669,7 +23135,7 @@ function uiModifyMarketSend()
    var rxI = [];
    var uiOptions = loadUIOptions();
    var aUTR = uiOptions.usethemres;
-   var aCell, aRow, aNode;
+   var aCell, aRow;
    var tdAttr = [['class','tbInject']];
    var i,ri,j;
 
@@ -22691,7 +23157,6 @@ function uiModifyMarketSend()
       aQcarry.sort(compareNumbers);
    }
 
-
    //for merchant routes - no of repeat actions
    var iRep = $xf("//*[@name='x2']");
    if ( iRep && TB3O.O[87] === "1" ) { iRep.value = TB3O.O[84]; }
@@ -22709,34 +23174,7 @@ function uiModifyMarketSend()
 
       if ( processMarketSend.moC )
       {
-         addChildren(processMarketSend.moC,[
-            $span("\u00A0|\u00A0\u00A0" + T('USE') + "\u00A0\u00A0"),
-            I("merchant"),
-            ":\u00A0",
-            $i([['id','tb_usetraders'],['type', 'text'], 
-                ['class','text'], ['accesskey','t'], ['maxlength','2'],['title', T('USETRADERS_TT')]]),
-            " \u00A0",
-            I("r0"),
-            ":\u00A0",
-            $i([['id','tb_useunires'],['type', 'text'], 
-                ['class','text'], ['accesskey','r'], ['maxlength','6'],['size','5'],['title', T('USEUNIRES_TT')]]),
-            "\u00A0",
-            uiCreateTool("pph", T('USEPPH_TT'), onClickUsePpH)
-         ]);
-         if ( TB3O.VillagesCount > 1 ) 
-         {
-            addChildren(processMarketSend.moC,[
-               "\u00A0",
-               uiCreateTool("pphall", T('USEPPHALL_TT'), onClickUsePpHAll)
-            ]);
-         }
-
-         aNode = $g('tb_usetraders');
-         aNode.addEventListener('keyup',  onChangeUseTraders, false);
-         aNode.addEventListener('change', onChangeUseTraders, false);
-         aNode = $g('tb_useunires');
-         aNode.addEventListener('keyup',  onChangeUseUniRes, false);
-         aNode.addEventListener('change', onChangeUseUniRes, false);
+         uiModifyMerchantsCountBar(processMarketSend.moC);
       }
 
       for ( ri = 0; ri < 4; ri++ )
@@ -22827,6 +23265,96 @@ function uiModifyMarketSend()
    }
 
    
+
+   //-------------------------------------------------------------
+   function uiModifyMerchantsCountBar(moC)
+   {
+      //----------------------------------------------------------
+      function onClickUsePpH()
+      {
+         var totPpH = totalResources(TB3O.ActiveVillageInfo.r.PpH);
+         $g("tb_useunires").value = totPpH;
+         setMaxTransport();
+      }
+
+      //----------------------------------------------------------
+      function onClickUsePpHAll()
+      {
+         var totPpHAll = totalResources(TB3O.ResInfoTotals.PpH);
+         $g("tb_useunires").value = totPpHAll;
+         setMaxTransport();
+      }
+
+      //----------------------------------------------------------
+      function onClearUniRes()
+      {
+         $g("tb_useunires").value = "";
+         setMaxTransport();
+      }
+
+      //----------------------------------------------------------
+      function onChangeUseTraders()
+      {
+         if ( this.value === "" ) 
+         {
+            mUse = mAvail;
+         }
+         else
+         {
+            mUse = Number(this.value);
+            if ( isNaN(mUse) || mUse <= 0 )
+            {
+               mUse = mAvail;
+               this.value = "";
+            }
+            else if ( mUse > mAvail )
+            {
+               mUse = mAvail;
+               this.value = mUse;
+            }
+         }
+         setMaxTransport();
+      }
+
+      //----------------------------------------------------------
+      function onClearTraders()
+      {
+         $g("tb_usetraders").value = "";
+         mUse = mAvail;
+         setMaxTransport();
+      }
+
+      //----------------------------------------------------------
+      var useTraders, useUniRes;
+      addChildren(moC,[
+         $span("\u00A0|\u00A0\u00A0" + T('USE') + "\u00A0\u00A0"),
+         uiCreateTool("merchant",T("DEL"),onClearTraders),
+         ":\u00A0",
+         useTraders = $i([['id','tb_usetraders'],['type', 'text'], 
+             ['class','text'], ['accesskey','t'], ['maxlength','2'],['title', T('USETRADERS_TT')]]),
+         " \u00A0",
+         uiCreateTool("r0",T("DEL"),onClearUniRes),
+         ":\u00A0",
+         useUniRes = $i([['id','tb_useunires'],['type', 'text'], 
+             ['class','text'], ['accesskey','r'], ['maxlength','6'],['size','5'],['title', T('USEUNIRES_TT')]]),
+         "\u00A0",
+         uiCreateTool("pph", T('USEPPH_TT'), onClickUsePpH)
+      ]);
+      if ( TB3O.VillagesCount > 1 ) 
+      {
+         addChildren(processMarketSend.moC,[
+            "\u00A0",
+            uiCreateTool("pphall", T('USEPPHALL_TT'), onClickUsePpHAll)
+         ]);
+      }
+
+      useTraders.addEventListener('keyup',  onChangeUseTraders, false);
+      useTraders.addEventListener('change', onChangeUseTraders, false);
+      uiAddBuiltinUpDownControl(useTraders);
+
+      useUniRes.addEventListener('keyup',  onChangeUseUniRes, false);
+      useUniRes.addEventListener('change', onChangeUseUniRes, false);
+   }
 
    //-------------------------------------------------------------
    // For each new quantity and resource create a new link with the associated request
@@ -22921,25 +23449,6 @@ function uiModifyMarketSend()
    }
 
    //-------------------------------------------------------------
-   function onChangeUseTraders()
-   {
-      if ( this.value === "" ) 
-      {
-         mUse = mAvail;
-      }
-      else
-      {
-         mUse = Number(this.value);
-         if ( isNaN(mUse) || mUse <= 0 || mUse > mAvail )
-         {
-            mUse = mAvail;
-            this.value = mUse;
-         }
-      }
-      setMaxTransport();
-   }
-
-   //-------------------------------------------------------------
    function onChangeUseUniRes()
    {
       if ( this.value !== "" ) 
@@ -22948,26 +23457,9 @@ function uiModifyMarketSend()
          if ( isNaN(resToUse) || resToUse <= 0 )
          {
             resToUse = mUse * mCap;
-
             this.value = resToUse;
          }
       }
-      setMaxTransport();
-   }
-
-   //-------------------------------------------------------------
-   function onClickUsePpH()
-   {
-      var totPpH = totalResources(TB3O.ActiveVillageInfo.r.PpH);
-      $g("tb_useunires").value = totPpH;
-      setMaxTransport();
-   }
-
-   //-------------------------------------------------------------
-   function onClickUsePpHAll()
-   {
-      var totPpHAll = totalResources(TB3O.ResInfoTotals.PpH);
-      $g("tb_useunires").value = totPpHAll;
       setMaxTransport();
    }
 
@@ -23000,23 +23492,7 @@ function uiModifyMarketSend()
 
       for ( i = 0; i < 4; ++i )
       {
-         var res = parseInt(rxI[i].value);
-         if ( isNaN(res) ) { res = 0; }
-         rxVal[i] = res;
-      }
-
-      return rxVal;
-   }
-
-   //-------------------------------------------------------------
-   function getCurrentTransports()
-   {
-      var i;
-      var rxVal = [0,0,0,0];
-
-      for ( i = 0; i < 4; ++i )
-      {
-         var res = parseInt(rxI[i].value);
+         var res = parseInt10(rxI[i].value);
          if ( isNaN(res) ) { res = 0; }
          rxVal[i] = res;
       }
@@ -23426,6 +23902,7 @@ function uiModifyMarketSend()
             );   
 
             var state = getCumulativeResourcesInfo(resourcesInfo, merchantUnderwayInfo.ttArrival, merchantUnderwayInfo.Res);
+
             var uthen = floorResources(cloneArray(resourcesInfo.Res)); 
             var ri;
             for ( ri = 0; ri < 4; ++ri )
@@ -23446,7 +23923,7 @@ function uiModifyMarketSend()
 
 function getRatioCell(aRow,iSell,iBuy)
 {
-   var ratio = parseInt(aRow.cells[iSell].textContent) / parseInt(aRow.cells[iBuy].textContent);
+   var ratio = parseInt10(aRow.cells[iSell].textContent) / parseInt10(aRow.cells[iBuy].textContent);
    var rC = $c(ratio.toFixed(2), [["class", ratio < 1.00 ? "ratio_l": ratio > 1.00 ? "ratio_g":"ratio"]]);
    return rC;
 };
@@ -23487,7 +23964,7 @@ function getBuyRatioCell(aRow)
 		if (aR.cells.length > 7) noC = [3, 6];
 		var aC = aR.cells[noC[0]];
 		var bC = aR.cells[noC[1]];
-		var quantity = parseInt(aC.textContent);
+		var quantity = parseInt10(aC.textContent);
 		aC.addEventListener('mouseover', showNeededMerchants, false);
 		aC.addEventListener("mouseout", onTooltip_Hide, false);
 		bC.addEventListener('mouseover', showNeededMerchants, false);
@@ -23497,7 +23974,7 @@ function getBuyRatioCell(aRow)
 			var tt = $g("tb_tooltip");
 			if (!tt) tt = uiTooltip_Create();
 			var mTot = (TB3O.Mcap != 0 ? Math.ceil(quantity / TB3O.Mcap) + " x " + gIc["merchant"] + ' (' + T('MERCHANTS') + ')' : 0);
-			var iW = parseInt(mTot) * TB3O.Mcap - quantity;
+			var iW = parseInt10(mTot) * TB3O.Mcap - quantity;
 			var aTb = $t([['class', 'tb3tbnb']]);
 			var aRow = $r([['class', 'tb3rnb']]);
 			aRow.appendChild($c(mTot, [['class', 'tb3cnb'], ['style', 'font-size:8pt; font-weight:bold; color:blue; text-align:' + docDir[0] + ';']]));
@@ -23542,10 +24019,10 @@ function getBuyRatioCell(aRow)
 		createFilterTable(orOffersTb);
 		if (TB3O.T35 == false) {var linkid = $xf('//td[@class="rowpic"]/a', 'f', orOffersTb).href.match('id=([0-9]*)&')[1];} else {var lastCell = orOffersTb.rows[orOffersTb.rows.length - 1].cells[0]; var linkid = lastCell.lastChild.href.match('id=([0-9]*)&')[1];};
 		//market preload
-		marketpreload = parseInt(TB3O.O[48]) + 1;
+		marketpreload = parseInt10(TB3O.O[48]) + 1;
 		var pageNo1 = crtPage.indexOf("&u=");
 		var intPage = 0;
-		if (pageNo1 != -1) {var pageNo2 = crtPage.indexOf("#h2"); var pageNoS1 = crtPage.substring(pageNo1 + 3, pageNo2); var intPage = Math.round(parseInt(pageNoS1) / 40);};
+		if (pageNo1 != -1) {var pageNo2 = crtPage.indexOf("#h2"); var pageNoS1 = crtPage.substring(pageNo1 + 3, pageNo2); var intPage = Math.round(parseInt10(pageNoS1) / 40);};
 		if (marketpreload > 1) {
 			for (var i = 1; i < marketpreload; i++) {setTimeout(createPreloadFunc(i + intPage), getRndTime(1302));};
 			var X2 = (marketpreload + intPage) * 40;
@@ -23590,27 +24067,27 @@ function getBuyRatioCell(aRow)
 					var rOf = RegExp.$1;
 					b.childNodes[error ? 4 : 2].firstChild.src.search(/\/(\d).gif$/);
 					var rSearch = RegExp.$1;
-					var qOf = parseInt(b.childNodes[error ? 2 : 1].textContent);
-					var qSearch = parseInt(b.childNodes[error ? 6 : 3].textContent);
+					var qOf = parseInt10(b.childNodes[error ? 2 : 1].textContent);
+					var qSearch = parseInt10(b.childNodes[error ? 6 : 3].textContent);
 					if (b.childNodes[error ? 11 : 6].className == 'c') isOfPos = false;
 					var trTime = toSeconds(b.childNodes[error ? 10 : 5].textContent);
 				} else {
 					if (b.cells[0].firstChild.className) {//M35 = 2;
 						var rOf = b.cells[0].firstChild.className.replace("r", "");
-						var qOf = parseInt(b.cells[1].textContent);
+						var qOf = parseInt10(b.cells[1].textContent);
 					} else {//M35 = 3;
 						var rOf = b.cells[0].getElementsByTagName("IMG")[0].className.replace("r", "");
-						var qOf = parseInt(b.cells[0].textContent);
+						var qOf = parseInt10(b.cells[0].textContent);
 					};
 					var isOfPos = false;
 					if (b.cells[2].firstChild.className) {//M35 = 2;
 						var rSearch = b.cells[2].firstChild.className.replace("r", "");
-						var qSearch = parseInt(b.cells[3].textContent);
+						var qSearch = parseInt10(b.cells[3].textContent);
 						if (b.cells[6].className == 'act') isOfPos = true;
 						var trTime = toSeconds(b.cells[5].textContent);
 					} else {//M35 = 3;
 						var rSearch = b.cells[1].getElementsByTagName("IMG")[0].className.replace("r", "");
-						var qSearch = parseInt(b.cells[1].textContent);
+						var qSearch = parseInt10(b.cells[1].textContent);
 						if (b.cells[4].className == 'act') isOfPos = true;
 						var trTime = toSeconds(b.cells[3].textContent);
 					};
@@ -23631,7 +24108,6 @@ function getBuyRatioCell(aRow)
 					} break;
 					case 4: switch(aOpt) {
 						case 1: if (trTime > (60*60)) setOfferFilter(b, "Tiempo"); else quitMarketFilter(b, "Tiempo", ["Ofrezco", "Busco", "Tipo", "Carencia"]); break;
-
 						case 2: if (trTime > (2*60*60)) setOfferFilter(b, "Tiempo"); else quitMarketFilter(b, "Tiempo", ["Ofrezco", "Busco", "Tipo", "Carencia"]); break;
 						case 3: if (trTime > (3*60*60)) setOfferFilter(b, "Tiempo"); else quitMarketFilter(b, "Tiempo", ["Ofrezco", "Busco", "Tipo", "Carencia"]); break;
 						case 4: quitMarketFilter(b, "Tiempo", ["Ofrezco", "Busco", "Tipo", "Carencia"]); break;
@@ -23792,7 +24268,7 @@ function marketSellMinMax()
       var parts = mHTML.match(/\S+/g);
       mhMH = parts[0];
 
-      avMerchants = parseInt(parts[1].split("/")[0]);
+      avMerchants = parseInt10(parts[1].split("/")[0]);
       if (mHTML.indexOf("(") == -1) 
          merchantsPar.innerHTML += " (" + TB3O.Mcap + " / " + gIc["merchant"] + ")";
    }
@@ -23807,12 +24283,12 @@ function marketSellMinMax()
 
    for (var i = 0; i < 4; i++)
    {
-      if (maxRes <= parseInt(crtResUnits[i]))
+      if (maxRes <= parseInt10(crtResUnits[i]))
       {
          maxRes = crtResUnits[i];
          idMax = i;
       }
-      if (minRes >= parseInt(crtResUnits[i]))
+      if (minRes >= parseInt10(crtResUnits[i]))
       {
          minRes = crtResUnits[i];
          idMin = i;
@@ -23830,7 +24306,7 @@ function marketSellMinMax()
 
    if ( !rxI1 || !rxI2 || !rxType1 || !rxType2 ) return;
 
-   if ( !(parseInt(rxI1.value) > 0 && parseInt(rxI2.value) > 0) ) // already has offer?
+   if ( !(parseInt10(rxI1.value) > 0 && parseInt10(rxI2.value) > 0) ) // already has offer?
    {
       rxType1.value = (idMax + 1).toString();
       rxType2.value = (idMin + 1).toString();
@@ -23852,14 +24328,14 @@ function marketSellMinMax()
    {
       var totalTransport = 0;
       var maxC = TB3O.Mcap;
-      var aR1 = parseInt(rxI1.value);
-      var aR2 = parseInt(rxI2.value);
+      var aR1 = parseInt10(rxI1.value);
+      var aR2 = parseInt10(rxI2.value);
 
       if ( aR1 > 0 )
       {
-         if ( crtResUnits[parseInt(rxType1.value) - 1] < aR1) 
+         if ( crtResUnits[parseInt10(rxType1.value) - 1] < aR1) 
          {
-            totalTransport = parseInt(crtResUnits[parseInt(rxType1.value) - 1]);
+            totalTransport = parseInt10(crtResUnits[parseInt10(rxType1.value) - 1]);
             rxI1.value = totalTransport;
          }
          else
@@ -24072,13 +24548,25 @@ function marketSell()
 
 
 //////////////////////////////////////////////////////////////////////
+function uiSetAttackType(act)
+{
+   if ( act )
+   {
+      var rbA = $xf("//input[@value='" + act + "' and @name='c']");
+      if ( rbA && !rbA.disabled ) 
+      {
+         rbA.checked = true;
+      }
+   }
+}
+
+//////////////////////////////////////////////////////////////////////
 // change to the default attack type on the "Rally Point -> Send Troops" page
 function uiModifyDefaultAttackType()
 {
-   var act, z, rbA;
+   var act, z;
    var villageInfo, villageId, mapId;
 
-   
    //2:Defend, 3:Attack, 4:Raid
    //OASIS - only attack:raid (fr3nchlover)
    if ( crtUrl.queryKey.o ) 
@@ -24087,12 +24575,12 @@ function uiModifyDefaultAttackType()
    }
    else
    {
-      act = parseInt(TB3O.O[49]) + 2;
+      act = parseInt10(TB3O.O[49]) + 2;
 
       //action = 2 if the destination is one of your own villages
       if ( crtUrl.queryKey.z )
       {
-         z = parseInt(crtUrl.queryKey.z);
+         z = parseInt10(crtUrl.queryKey.z);
          for ( villageId in TB3O.VillagesInfo )
          {
             villageInfo = TB3O.VillagesInfo[villageId];
@@ -24101,24 +24589,545 @@ function uiModifyDefaultAttackType()
             if ( z === mapId ) 
             {
                act = 2;
-
                break;
             }
          }
       }
    }
-
-   if ( act )
-   {
-      rbA = $xf("//input[@value='" + act + "' and @name='c']");
-      if ( rbA && !rbA.disabled ) 
-      {
-         rbA.checked = true;
-      }
-   }
-   
+   uiSetAttackType(act);
 }
 
+//////////////////////////////////////////////////////////////////////
+function searchRallyPointSendElems()
+{
+   var sendTable = $g("troops");
+   var sendContainer = null;
+   if ( sendTable )
+   {
+      sendContainer = sendTable.parentNode;
+   }
+   
+
+   return ( sendContainer ) ? [sendContainer,sendTable] : null;
+}
+
+//////////////////////////////////////////////////////////////////////
+function uiModifyRallyPointSend()
+{
+   
+
+   var availableTroops, sendTroops;
+   var statSendTable;
+
+   //-------------------------------------------------------------
+   function getAvailableTroopsInfo(sendTable)
+   {
+      var troopsInfo = [];
+      var i;
+      for ( i = 1; i < 12; ++i )
+      {
+         var aInput = $xf(".//input[@name='t" + i + "']",sendTable);
+         if (aInput)
+         {
+            aInput.id = 'tb_i' + i;
+            var aParent = aInput.parentNode;
+            var unitImg = $nth_tag(aParent,"img",0);
+            var index =  ( unitImg ) ? getTroopIndexTitleFromImg(unitImg)[0] : null;
+            if ( index && TB3O.U[1] === '' ) { setRace(index); }
+
+            var aLabel = $nth_tag(aParent,"a",0);
+            var count = 0;
+            if ( aLabel )
+            {
+               count = scanIntAny(aLabel.textContent);
+            }
+            troopsInfo.push([index,count]);
+         }
+      }
+      return troopsInfo;
+   }
+
+   //-------------------------------------------------------------
+   function uiRefreshStats()
+   {   
+      if ( statSendTable )
+      {
+         uiFillTroopsAttDefInfoTable2(statSendTable, sendTroops);
+      }
+   }
+
+   //-------------------------------------------------------------
+   function searchTroopsInput(troopNo)
+   {
+      return $g("tb_i" + (troopNo + 1));
+   }
+
+   //-------------------------------------------------------------
+   function updateTroop(troopNo, units)
+   {
+      sendTroops[troopNo][1] = units; 
+   }
+
+   //-------------------------------------------------------------
+   function foreachTroop(f)
+   {
+      var troopNo;
+      for ( troopNo = 0; troopNo < availableTroops.length; ++troopNo )
+      {
+         var count = availableTroops[troopNo][1];
+         if ( count > 0 )
+         {
+            f(troopNo);
+         }
+      }
+   }
+
+   //-------------------------------------------------------------
+   function uiSetTroop(troopNo, units)
+   {
+      var aInput = searchTroopsInput(troopNo);
+      if ( aInput )
+      {
+         aInput.value = ( units ) ? units : "";
+         updateTroop(troopNo, units);
+      }
+   }
+
+   //-------------------------------------------------------------
+   function _uiSetMaxTroop(troopNo)
+   {
+      uiSetTroop(troopNo, availableTroops[troopNo][1]);
+   }
+
+   //-------------------------------------------------------------
+   function uiSetMaxTroop(troopNo)
+   {
+      _uiSetMaxTroop(troopNo);
+      uiRefreshStats();
+   }
+
+   //-------------------------------------------------------------
+   function uiSetMaxAllTroops()
+   {
+      foreachTroop(_uiSetMaxTroop);
+      uiRefreshStats();
+   }
+
+   //-------------------------------------------------------------
+   function _uiSetZeroTroop(troopNo)
+   {
+      uiSetTroop(troopNo, 0);
+   }
+
+   //-------------------------------------------------------------
+   function uiSetZeroTroop(troopNo)
+   {
+      _uiSetZeroTroop(troopNo);
+      uiRefreshStats();
+   }
+
+   //-------------------------------------------------------------
+   function uiSetZeroAllTroops()
+   {
+      foreachTroop(_uiSetZeroTroop);
+      uiRefreshStats();
+   }
+
+   //-------------------------------------------------------------
+   function onChangeUnitsCount(troopNo)
+   {
+      var units = 0;
+      if ( this.value !== "" ) 
+      {
+         units = Number(this.value);
+         if ( isNaN(units) || units > availableTroops[troopNo][1] )
+         {
+            units = availableTroops[troopNo][1];
+         }
+         else if ( units < 0 )
+         {
+            units = 0;
+         }
+         this.value = units;
+      }
+      updateTroop(troopNo, units);
+      uiRefreshStats();
+   }
+
+   //-------------------------------------------------------------
+   function uiSetScout()
+   {
+      var troopNo = getTroopNoByIndex(availableTroops, getScoutTroopIndex(TB3O.U[1]));
+      var scoutsAvailable = availableTroops[troopNo][1];
+      var iNoOfScouts = $g('tb_selectscoutnumber');
+      var wNoOfScouts = (iNoOfScouts) ? parseInt10(iNoOfScouts.value) : 3;
+      if ( wNoOfScouts > 0 )
+      {
+         TB3O.O[50] = wNoOfScouts;
+         saveTBOptions();
+      }
+
+      if ( wNoOfScouts > scoutsAvailable ) { wNoOfScouts = scoutsAvailable; }
+
+      foreachTroop(_uiSetZeroTroop);
+      uiSetAttackType(4); //set the attack:raid as action
+      uiSetTroop(troopNo, wNoOfScouts);
+      uiRefreshStats();
+   }
+
+   //-------------------------------------------------------------
+   function uiSetFakeUnit()
+   {
+      foreachTroop(_uiSetZeroTroop);
+      uiSetAttackType(3); //set the attack:normal as action
+
+      var chk = false;
+      var troopNo;
+      for( troopNo = 0; troopNo < 8; ++troopNo )
+      {
+         var faketroopselected = $g("tb_faketroop" + troopNo);
+         if ( faketroopselected && faketroopselected.checked )
+         {
+            uiSetTroop(troopNo, 1);
+            chk = true;
+         }
+      }
+
+      if ( !chk )
+      {
+         //no troops for fake selected  => use default (most slow unit available)
+         var minSpeed = Infinity;
+         var slowTroopNo; 
+         var scoutTI = getScoutTroopIndex(TB3O.U[1]);
+         for( troopNo = 0; troopNo < 8; ++troopNo )
+         {
+            if ( availableTroops[troopNo][1] > 0 && availableTroops[troopNo][0] !== scoutTI )
+            {
+               var index = availableTroops[troopNo][0];
+               if ( index !== scoutTI && uc[index][8] < minSpeed ) 
+               {
+                  slowTroopNo = troopNo;
+                  minSpeed = uc[index][8];
+               }
+            }
+         }
+         uiSetTroop(slowTroopNo, 1); 
+      }
+      uiRefreshStats();
+   }
+
+   //-------------------------------------------------------------
+   function uiAddTopMenu(sendContainer)
+   {
+      //----------------------------------------------------------
+      function uiAddActionLink(aCell, bEnabled, label, actionFun)
+      {
+         if ( bEnabled > 0 )
+         {
+            aCell.appendChild($action(null, label, actionFun));
+         }
+         else
+         {
+            aCell.appendChild($span([['class', 'none']], label));
+         }
+      }
+
+      //----------------------------------------------------------
+      function uiAddSelectAllLink(aTb)
+      {
+         var aCell;
+         var troopNo, totalTroops = 0;
+         for ( troopNo = 0; troopNo < availableTroops.length; ++troopNo )
+         {
+            totalTroops += availableTroops[troopNo][1];
+         }
+
+         aTb.appendChild($r([['class', 'tb3rnb']],[aCell = $td([['class', 'tb3cnb']]),$td()]));
+         uiAddActionLink(aCell, totalTroops > 0, T('SELECTALLTROOPS'), uiSetMaxAllTroops);
+      }
+
+      //----------------------------------------------------------
+      function uiAddSelectScoutLink(aTb)
+      {
+         var aCell, bCell, aInput;
+         var scoutTI = getScoutTroopIndex(TB3O.U[1]);
+         var troopNo = getTroopNoByIndex(availableTroops, scoutTI);
+         var scoutsAvailable = ( troopNo === undefined ) ? 0 : availableTroops[troopNo][1];
+         var scouts = parseInt10(TB3O.O[50]);
+         if ( isNaN(scouts) ) { scouts = ( scoutsAvailable > 3 ) ? 3 : scoutsAvailable; }
+
+         aTb.appendChild($r([['class', 'tb3rnb']],[
+            aCell = $td([['class', 'tb3cnb']]), 
+            $td(null,[
+               I("u" + scoutTI),
+               "\u00A0",
+               aInput = $i([['class','text'], ['type','text'], ['id','tb_selectscoutnumber'], ['maxlength','6'], ['value',scouts]])
+            ])
+         ]));
+
+         uiAddBuiltinUpDownControl(aInput);
+         uiAddActionLink(aCell, scoutsAvailable > 0, T('SELECTSCOUT'), uiSetScout);
+      }
+
+      //----------------------------------------------------------
+      function uiAddSelectFakeLink(aTb)
+      {
+         var aCell;
+         var bCell = $td();
+         var scoutTI = getScoutTroopIndex(TB3O.U[1]);
+         var bHasTroops = false;
+         var troopNo;
+         for( troopNo = 0; troopNo < 8; ++troopNo )
+         {
+            if ( availableTroops[troopNo][1] > 0 && availableTroops[troopNo][0] !== scoutTI )
+            {
+               addChildren(bCell,[
+                  I("u" + availableTroops[troopNo][0]),
+                  $i([['type', 'checkbox'], ['id', 'tb_faketroop' + (troopNo)], ['value', '1']])
+               ]);
+               bHasTroops = true;
+            }
+         }
+
+         aTb.appendChild($r([['class', 'tb3rnb']],[aCell = $td([['class', 'tb3cnb']]),bCell]));
+         uiAddActionLink(aCell, bHasTroops, T('SELECTFAKE'), uiSetFakeUnit);
+      }
+
+      //----------------------------------------------------------
+      var aTb = $t([["class", "tb3tbnb tbSendTroopsMenu"]]);
+      insertBefore(sendContainer, aTb); // add to DOM very first for uiAddBuiltinUpDownControl
+      uiAddSelectAllLink(aTb);
+      uiAddSelectScoutLink(aTb);
+      uiAddSelectFakeLink(aTb);
+   }
+
+   //-------------------------------------------------------------
+   function uiModifySendTableTroop(troopNo)
+   {
+      var aInput = searchTroopsInput(troopNo);
+      aInput.addEventListener('keyup',  bind(onChangeUnitsCount,[troopNo]), false);
+      aInput.addEventListener('change', bind(onChangeUnitsCount,[troopNo]), false);
+      uiAddBuiltinUpDownControl(aInput);
+
+      var aParent = aInput.parentNode;
+      var unitImg = $nth_tag(aParent,"img",0);
+      unitImg.addEventListener('click', bind(uiSetZeroTroop,[troopNo]), false);
+      var aLink = $nth_tag(aParent,"a",0);
+      aLink.addEventListener('click', bind(uiSetMaxTroop,[troopNo]), false);
+      if ( availableTroops[troopNo][1] > 9999 ) { addClass(aLink,"tbMany"); }
+   }
+
+   //-------------------------------------------------------------
+   function uiModifySendTable(sendTable)
+   {
+      foreachTroop(uiModifySendTableTroop);
+      sendTable.appendChild($r($td([['colspan', '12'], ['style', 'text-align:center']],uiCreateTool("bDel", T('MTCL'), uiSetZeroAllTroops))));
+   }
+
+   //-------------------------------------------------------------
+   function uiAddLastAttackTable()
+   {
+      
+      var aF = $xf("//form[@name='snd']");
+      if ( aF )
+      {
+         var bOK = $xf("//*[@id='btn_ok' and @name='s1']");
+         if ( bOK ) { bOK.addEventListener('click', saveLastAttack, false); }
+
+         var cstla = loadPersistentUserObject('stla');
+         var stla = cstla[TB3O.ActiveVillageId];
+         if ( stla )
+         {
+            var bsh = false;
+            var xi;
+            for ( xi = 2; xi < stla.length - 2; xi++ )
+            {
+               if (stla[xi] !== 0) { bsh = true; }
+            }
+
+            if ( bsh )
+            {
+               //create the last send attack table for this village
+               var aTb = $t([['id', 'stla']]);
+               var aRow = $r(null,[
+                  $td([['class','stlahh1']],I('u' + (    TB3O.U[7]))),
+                  $td(stla[2]),
+                  $td([['class', 'stlahh']],I('u' + (3 + TB3O.U[7]))),
+                  $td(stla[5]),
+                  $td([['class', 'stlahh']],I('u' + (6 + TB3O.U[7]))),
+                  $td(stla[8]),
+                  $td([['class', 'stlahh']],I('u' + (8 + TB3O.U[7]))),
+                  $td(stla[10])
+               ]);
+
+               var bRow = $r(null,[
+                  $td([['class','stlahh1']], I('u' + (1 + TB3O.U[7]))),
+                  $td(stla[3]),
+                  $td([['class', 'stlahh']], I('u' + (4 + TB3O.U[7]))),
+                  $td(stla[6]),
+                  $td([['class', 'stlahh']], I('u' + (7 + TB3O.U[7]))),
+                  $td(stla[9]),
+                  $td([['class', 'stlahh']], I('u' + (9 + TB3O.U[7]))),
+                  $td(stla[11])
+               ]);
+
+               var cRow = $r(null,[
+                  $td([['class','stlahh1']], I('u' + (2 + TB3O.U[7]))),
+                  $td(stla[4]),
+                  $td([['class', 'stlahh']], I('u' + (5 + TB3O.U[7]))),
+                  $td(stla[7]),
+                  $td([['colspan', '2']])
+               ]);
+
+               if (stla.length > 14)
+               {
+                  cRow.appendChild($td([['class', 'stlahh']], I('uhero')));
+                  cRow.appendChild($td(stla[12]));
+               }
+               else
+               {
+                  cRow.appendChild($td([['class', 'stlahh']]));
+                  cRow.appendChild($td());
+               }
+
+               var dRow = null;
+               if ( TB3O.O[52] === "1" )
+               {
+                  dRow = $r(null,[
+                     $td([['class','stlahh1']],I("vmkls")),
+                     $td([['class',  'stlac'],['colspan', '4']], uiCreateIntMapLinkXY2(stla[0],stla[1])),
+                     $td([['class',  'stlac'],['colspan', '3']], stla[stla.length - 1])
+                  ]);
+               }
+
+               var eRow = $r(null,[
+                  $td([['class','stlahh1'], ['colspan', '2']], T("RESEND")),
+                  $td([['class','stlac'], ['colspan','3'], ['style','width:100px;']],
+                      uiCreateTool("bOK",T("YES"),setLastAttack)),
+                  $td([['class','stlahh2'], ['colspan','2']], T("DEL")),
+                  $td([['class', 'stlac']], 
+                      uiCreateTool("del",T("DEL"),hideLastAttackSend))
+               ]);
+
+               addChildren(aTb, [aRow,bRow,cRow,dRow,eRow]);
+               insertAfter($g("troops"), aTb);
+            }
+         }
+      }
+      
+
+      function setLastAttack()
+      {
+         var tx, i;
+
+         foreachTroop(_uiSetZeroTroop);
+
+         for ( i = 2; i < stla.length - 2; i++ )
+         {
+            var troopNo = i - 2;
+            var units = stla[i];
+            var availableUnits = availableTroops[troopNo][1];
+            if ( availableUnits > 0 )
+            {
+               if ( units > availableUnits ) { units = availableUnits; }
+               uiSetTroop(troopNo, units);
+            }
+         }
+
+         if (TB3O.O[52] === '1')
+         {
+            var xNode = $xf("//form[@name='snd']//*[@name='x']");
+            var yNode = $xf("//form[@name='snd']//*[@name='y']");
+
+            if ( xNode && yNode )
+            {
+               xNode.value = stla[0];
+               yNode.value = stla[1];
+
+               // force refresh stats
+               var e = document.createEvent("Events");
+               e.initEvent("change", true, false);
+               xNode.dispatchEvent(e);
+            }
+         }
+
+         uiSetAttackType(stla[stla.length - 2]);
+         uiRefreshStats();
+      }
+
+      function hideLastAttackSend()
+      {
+         var xi;
+         for (xi = 2; xi < stla.length; xi++)
+         {
+            stla[xi] = 0;
+         }
+         savePersistentUserObject('stla', stla, TB3O.ActiveVillageId);
+         $g('stla').style.display = 'none';
+      }
+
+      function saveLastAttack()
+      {
+         var stla = [];
+         stla[0] = $xf("//form[@name='snd']//*[@name='x']").value;
+         stla[1] = $xf("//form[@name='snd']//*[@name='y']").value;
+         var i;
+         for ( i = 0; i < sendTroops.length; ++i )
+         {
+            stla[i + 2] = sendTroops[i][1];
+         }
+
+         var rbl = $xf("//form//input[@name='c']", 'l');
+         for (i = 0; i < rbl.snapshotLength; i++)
+         {
+            if ( rbl.snapshotItem(i).checked == true )
+            {
+               stla[stla.length] = rbl.snapshotItem(i).value;
+               stla[stla.length] = rbl.snapshotItem(i).parentNode.textContent;
+            }
+         }
+
+         savePersistentUserObject('stla', stla, TB3O.ActiveVillageId);
+      }
+   }
+
+   //-------------------------------------------------------------
+   var elems = searchRallyPointSendElems();
+   if ( elems )
+   {
+      var sendContainer = elems[0];
+      var sendTable = elems[1];
+      
+      availableTroops = getAvailableTroopsInfo(sendTable);
+      sendTroops = cloneObject(availableTroops);
+      var i;
+      for ( i = 0; i < sendTroops.length; ++i )
+      {
+         sendTroops[i][1] = 0;
+      }
+
+      uiAddTopMenu(sendContainer);
+      uiModifySendTable(sendTable);
+
+      statSendTable = uiCreateTroopsAttDefInfoTable2(sendTroops, T("STAT"), true);
+      if ( statSendTable )
+      {
+         statSendTable.id = "tb_sendtroopstat";
+         insertAfter(sendTable, statSendTable);
+      }
+
+      if ( crtUrl.queryKey.c === undefined ) { uiModifyDefaultAttackType(); }
+
+      quickCity();
+
+      if ( TB3O.O[51] === "1") 
+      {
+         uiAddLastAttackTable();
+      }
+   }
+
+   
+}
 //////////////////////////////////////////////////////////////////////
 function searchRallyPointDismissElems()
 {
@@ -24145,9 +25154,8 @@ function uiModifyRallyPointDismiss()
    {
       var troopsInfo = [];
 
-      var aBody = dismissTable.tBodies[0];
-      var iCells = aBody.rows[0].cells;
-      var qCells = aBody.rows[1].cells;
+      var iCells = dismissTable.rows[1].cells;
+      var qCells = dismissTable.rows[2].cells;
       var len = iCells.length;
 
       var i;
@@ -24158,7 +25166,7 @@ function uiModifyRallyPointDismiss()
          if ( unitImg && aInput )
          {
             var index = getTroopIndexTitleFromImg(unitImg)[0];
-            var count = parseInt(aInput.value);
+            var count = parseInt10(aInput.value);
             troopsInfo.push([index,count]);
          }
          else
@@ -24183,78 +25191,93 @@ function uiModifyRallyPointDismiss()
    }
 
    //-------------------------------------------------------------
-   function searchTroopsInput(troopIndex)
+   function searchTroopsInput(troopNo)
    {
-      return $xf("//input[@name='t[" + (troopIndex+1) + "]']");
+      return $xf("//input[@name='t[" + (troopNo+1) + "]']");
    }
 
    //-------------------------------------------------------------
-   function updateTroop(troopIndex, units)
+   function updateTroop(troopNo, units)
    {
-      dismissTroops[troopIndex][1] = units; 
-      remainsTroops[troopIndex][1] = availableTroops[troopIndex][1] - units;
-      uiRefreshStats();
+      dismissTroops[troopNo][1] = units; 
+      remainsTroops[troopNo][1] = availableTroops[troopNo][1] - units;
    }
 
    //-------------------------------------------------------------
    function foreachTroop(f)
    {
-      var i;
-      for ( i = 0; i < availableTroops.length; ++i )
+      var troopNo;
+      for ( troopNo = 0; troopNo < availableTroops.length; ++troopNo )
       {
-         var index = availableTroops[i][0];
-         if ( isIntValid(index) )
+         var count = availableTroops[troopNo][1];
+         if ( count > 0 )
          {
-            f(i);
+            f(troopNo);
          }
       }
    }
 
    //-------------------------------------------------------------
-   function uiSetTroop(troopIndex, units)
+   function uiSetTroop(troopNo, units)
    {
-      var aInput = searchTroopsInput(troopIndex);
+      var aInput = searchTroopsInput(troopNo);
       if ( aInput )
       {
          aInput.value = ( units ) ? units : "";
-         updateTroop(troopIndex, units);
+         updateTroop(troopNo, units);
       }
    }
 
    //-------------------------------------------------------------
-   function uiSetMaxTroop(troopIndex)
+   function _uiSetMaxTroop(troopNo)
    {
-      uiSetTroop(troopIndex, availableTroops[troopIndex][1]);
+      uiSetTroop(troopNo, availableTroops[troopNo][1]);
+   }
+
+   //-------------------------------------------------------------
+   function uiSetMaxTroop(troopNo)
+   {
+      _uiSetMaxTroop(troopNo);
+      uiRefreshStats();
    }
 
    //-------------------------------------------------------------
    function uiSetMaxAllTroops()
    {
-      foreachTroop(uiSetMaxTroop);
+      foreachTroop(_uiSetMaxTroop);
+      uiRefreshStats();
    }
 
    //-------------------------------------------------------------
-   function uiSetZeroTroop(troopIndex)
+   function _uiSetZeroTroop(troopNo)
    {
-      uiSetTroop(troopIndex, 0);
+      uiSetTroop(troopNo, 0);
+   }
+
+   //-------------------------------------------------------------
+   function uiSetZeroTroop(troopNo)
+   {
+      _uiSetZeroTroop(troopNo);
+      uiRefreshStats();
    }
 
    //-------------------------------------------------------------
    function uiSetZeroAllTroops()
    {
-      foreachTroop(uiSetZeroTroop);
+      foreachTroop(_uiSetZeroTroop);
+      uiRefreshStats();
    }
 
    //-------------------------------------------------------------
-   function onChangeUnitsCount(troopIndex)
+   function onChangeUnitsCount(troopNo)
    {
       var units = 0;
       if ( this.value !== "" ) 
       {
          units = Number(this.value);
-         if ( isNaN(units) || units > availableTroops[troopIndex][1] )
+         if ( isNaN(units) || units > availableTroops[troopNo][1] )
          {
-            units = availableTroops[troopIndex][1];
+            units = availableTroops[troopNo][1];
          }
          else if ( units < 0 )
          {
@@ -24262,25 +25285,24 @@ function uiModifyRallyPointDismiss()
          }
          this.value = units;
       }
-      updateTroop(troopIndex, units);
+      updateTroop(troopNo, units);
+      uiRefreshStats();
    }
 
    //-------------------------------------------------------------
    function uiModifyDismissTable(dismissTable)
    {
-      var aLink;
-      var aBody = dismissTable.tBodies[0];
-      var iCells = aBody.rows[0].cells;
-      var qCells = aBody.rows[1].cells;
+      var iCells = dismissTable.rows[1].cells;
+      var qCells = dismissTable.rows[2].cells;
       var len = iCells.length;
 
       iCells[0].textContent = "";
       iCells[0].appendChild(uiCreateTool("del", T('MTCL'), uiSetZeroAllTroops));
       iCells[0].style.textAlign="center";
 
-      aLink = $lnk([['href', jsVoid]],"(" + T('ALL') + ")" );
-      aLink.addEventListener('click', uiSetMaxAllTroops, false);
-      var aRow = $r([['class','tbInject']],$td(aLink));
+      var aRow = $r([['class','tbInject']],
+                    $td(
+                       $action(null, "(" + T('ALL') + ")", uiSetMaxAllTroops)));
 
       var i;
       for ( i = 1; i < len; ++i )
@@ -24292,9 +25314,9 @@ function uiModifyRallyPointDismiss()
             aInput.addEventListener('keyup',  bind(onChangeUnitsCount,[i-1]), false);
             aInput.addEventListener('change', bind(onChangeUnitsCount,[i-1]), false);
 
-            aLink = $lnk([['href', jsVoid],['class',( aInput.value >= 10000 ) ? "tbMany" : ""]], "(" + aInput.value + ")");
-            aLink.addEventListener('click', bind(uiSetMaxTroop,[i-1]), false);
-            aCell.appendChild(aLink);
+            aCell.appendChild($action([['class',( aInput.value > 9999 ) ? "tbMany" : ""]], 
+                                       "(" + aInput.value + ")", 
+                                       bind(uiSetMaxTroop,[i-1])));
 
             var unitImg = $nth_tag(iCells[i],"img",0);
             unitImg.addEventListener('click', bind(uiSetZeroTroop,[i-1]), false);
@@ -24304,7 +25326,7 @@ function uiModifyRallyPointDismiss()
          }
          aRow.appendChild(aCell);
       }
-      aBody.appendChild(aRow);
+      insertAfter(dismissTable.rows[2],aRow);
    }
 
    //-------------------------------------------------------------
@@ -24323,7 +25345,7 @@ function uiModifyRallyPointDismiss()
                tRace = getRaceFromTroopIndex(getTroopIndexTitleFromImg(tImg)[0]);
             }
 
-            var aTb = uiCreateTroopsMerchantsDistTable(null, null, mapId,
+            var aTb = uiCreateTroopsMerchantsDistTable("tb_dismisstroopsdist", null, mapId,
                                                    { show_arrival_time:true, race:tRace,
                                                      show_coords:true, show_troops:true });
             if ( aTb ) 
@@ -24451,15 +25473,15 @@ function villages2cp(noVil)
 function uiCreateCulturePointsTable(titleCP, crtVil, crtTotalCP, prodTotalCP)
 {
    var cpTable = $t([['id', 'cptable']],
-                    $e("thead",[],
+                    $e("thead",null,
                     [
-                       $r([],
+                       $r(null,
                        [
                           $td([['rowspan', 2]], T('VILLAGE')),
                           $td([['colspan', 2]], titleCP),
                           $td([['colspan', 2]], I("clock"))
                        ]),
-                       $r([],
+                       $r(null,
                        [
                           $td([],T('TOTAL')),
                           $td([],T('YOUNEED')),
@@ -24528,16 +25550,12 @@ function uiModifyCultureTab()
    if ( idxItem >= 0 )
    {
       //CP for all villages
-      var prodTotalCP = toNumber(aX.snapshotItem(++idxItem).textContent);
-      if ( aX.snapshotLength === 6 )
-      {
-         // add hero CP production
-         prodTotalCP += toNumber(aX.snapshotItem(++idxItem).textContent);
-      }
+      var prodTotalCP = scanIntWithoutLetter(aX.snapshotItem(++idxItem).textContent);
+      
       //Current no of CP
-      var crtTotalCP = toNumber(aX.snapshotItem(++idxItem).textContent);
+      var crtTotalCP = scanIntWithoutLetter(aX.snapshotItem(++idxItem).textContent);
       //CP needed to create a new village
-      var pc_aldea_prox = toNumber(aX.snapshotItem(++idxItem).textContent);
+      var pc_aldea_prox = scanIntWithoutLetter(aX.snapshotItem(++idxItem).textContent);
       //No of current villages
       var crtVil = cp2villages(pc_aldea_prox);
 
@@ -24604,8 +25622,8 @@ function getVillageFromRow(vRow,zi)
          else if (vCell.nextSibling.className === "aligned_coords")
          {
             var tmpC = vCell.nextSibling.textContent.replace("(", "").replace(")", "").split("|");
-            tmpX = parseInt(tmpC[0]);
-            tmpY = parseInt(tmpC[1]);
+            tmpX = parseInt10(tmpC[0]);
+            tmpY = parseInt10(tmpC[1]);
          }
          else
          {
@@ -25122,7 +26140,7 @@ function uiModifyVillagesList()
 
       for ( villageId in TB3O.VillagesInfo ) 
       {
-         pos = parseInt(TB3O.VillagesInfo[villageId].posInListCur);
+         pos = parseInt10(TB3O.VillagesInfo[villageId].posInListCur);
 
          if ( !isNaN(pos) && mapPos2Id[pos] === undefined )
             mapPos2Id[pos] = villageId;
@@ -25264,7 +26282,6 @@ function uiModifyVillagesList()
          
          cell.parentNode.replaceChild($c(),cell);
       }
-
       return tI;
    }
 
@@ -25515,14 +26532,13 @@ function setTimers()
       for ( i = 0; i < resNodesList.length; ++i )
       {
          var aResNode = resNodesList.item(i);
-         var cap = parseInt(getTBAttribute(aResNode,"cap"));
+         var cap = parseInt10(getTBAttribute(aResNode,"cap"));
          var bCapReached = false;
-         var quantity = parseInt(aResNode.textContent);
+         var quantity = parseInt10(aResNode.textContent);
          var new_quantity = quantity - quantum;
 
          if ( !isNaN(cap) && cap > 0 )
          {
-
             if ( ( quantum < 0 && new_quantity >= cap ) ||
                  ( quantum > 0 && new_quantity <= cap ) ) 
             { 
@@ -25769,7 +26785,7 @@ function doPage()
       //===============================================================================
       if ( crtUrl.path === "/spieler.php" ) 
       {
-         processProfile();
+         processPlayerProfile();
       }
 
       if ( crtUrl.path !== "/nachrichten.php" )
@@ -25819,11 +26835,6 @@ function doPage()
 
 
       //Actions for specific pages
-      if ( crtUrl.path === "/allianz.php" ) 
-      {
-         allyCalculation();
-      }
-
       if (crtPage.match(/karte.php\?/) && crtPage.match(/d=/)) addTroopTimes();
       if (crtPage.match(/karte.php($|\?z=|\?(.+)&z=)/))
       {
@@ -25849,9 +26860,33 @@ function doPage()
          //Send/dismiss troops page
          TB3O.pageSelector = ( crtUrl.queryKey.d ) ? "rally_point_dismiss" : "rally_point_send";
       }
+      else if ( TB3O.pageSelector === "" && crtUrl.path === "/position_details.php") 
+      {
+         TB3O.pageSelector = "position_details";
+      }
+      else if ( TB3O.pageSelector === "" && crtUrl.path === "/berichte.php" ) 
+      {
+         TB3O.pageSelector = ( crtUrl.queryKey.id === undefined ) ? "report_list" : "report_view";
+      }
+      else if ( TB3O.pageSelector === "" && crtUrl.path === "/nachrichten.php" ) 
+      {
+         TB3O.pageSelector = ( crtUrl.queryKey.id !== undefined && crtUrl.queryKey.t === undefined ) ? "message_view" : "message_list";
+         if ( crtUrl.queryKey.t === "1" ) { TB3O.pageSelector = "message_post"; }
+      }
       else if ( TB3O.pageSelector === "profile_my" ) 
       {
          processMyProfile();
+      }
+      else if ( TB3O.pageSelector === "" && crtUrl.path === "/allianz.php" )
+      {
+         if ( !crtUrl.queryKey.s )
+         {
+            TB3O.pageSelector = "profile_alliance";
+         }
+         else if ( crtUrl.queryKey.s === "2" )
+         {
+            TB3O.pageSelector = "alliance_forum";
+         }
       }
       else if ( TB3O.pageSelector === "" && crtUrl.path === "/build.php" )
       {
@@ -25883,9 +26918,6 @@ function doPage()
          }
       }
 
-      if (crtPage.match(/nachrichten.php($|\?t=|\?s=|\?newdid=)/) || crtPage.match(/berichte.php($|\?t=|\?s=|\?newdid=)/)) MessageOptions();
-      if (crtPage.match(/nachrichten.php\?/)) convertCoordsInMessagesToLinks();
-      if (crtPage.match(/berichte.php\?/)) battleReportV2("orig");
       if (isPostNPC()) insertNPCHistoryLink();
 
       //===============================================================================
@@ -25970,31 +27002,41 @@ function doPage()
             uiModifyMarketSend(); 
             break;
 
+         case "report_list": 
+         case "message_list": 
+            uiModifyMsgRptList();
+            break;
+
+         case "report_view": 
+            uiModifyRptView();
+            break;
+
+         case "message_view": 
+            uiModifyMsgView();
+            break;
+
+         case "message_post": 
+            uiModifyMsgPost();
+            break;
+
          case "profile_my": 
          case "profile_other": 
-            uiCreatePlayerStatistics(); 
+            uiModifyPlayerProfile(); 
             break;
+
+         case "profile_alliance":    uiModifyAllianceProfile();   break;
+         case "alliance_forum":      uiModifyAllianceForum();   break;
 
          case "rally_point_overview":
             tableTotalVillageTroopsV3();
             incomeAttackingFillter();
             break;
 
-         case "rally_point_send": 
-            selectAllTroops(); 
-            quickCity();
-            if ( crtUrl.queryKey.c === undefined ) { uiModifyDefaultAttackType(); }
-            showLastAttack();
-            break;
-
-         case "rally_point_dismiss": 
-            if ( crtUrl.queryKey.newdid === undefined ||
-                 crtUrl.queryKey.newdid == TB3O.ActiveVillageId ) { uiModifyRallyPointDismiss(); }
-            break;
+         case "rally_point_send":    uiModifyRallyPointSend();    break;
+         case "rally_point_dismiss": uiModifyRallyPointDismiss(); break;
       }
 
       saveVillagesInfo(TB3O.VillagesInfo);
-
 
       // General actions continued
       if ( !crtPage.match(/\&t=1/) ) // except market buy
@@ -26011,13 +27053,15 @@ function doPage()
          else 
          {
             if ( TB3O.O[53] === "1" ) { uiAddTroopInfoTooltips(document); }
-            bAddAttSendResLinks = ( TB3O.O[99] === "1" );
-            bAddCoordAndDistTT =  ( TB3O.O[54] === "1" && (crtUrl.path === "/berichte.php" || 
-                                                                       crtUrl.path === "/spieler.php" ||
+            bAddAttSendResLinks = ( TB3O.O[99] === "1" && !(isSomeOf(crtUrl.path,"/karte.php","/karte2.php")||
+                                                                                isSomeOf(TB3O.pageSelector, "rally_point_club")));
+            bAddCoordAndDistTT =  ( TB3O.O[54] === "1" && (crtUrl.path === "/spieler.php" ||
                                                                        TB3O.pageSelector.indexOf("market_send") === 0 ||
-                                                                       TB3O.pageSelector === "rally_point_dismiss" ));
+                                                                       isSomeOf(TB3O.pageSelector, "rally_point_dismiss", "rally_point_club", "message_view", "report_view")));
          }
-         uiModifyLinks($g(ID_MID2),bAddAttSendResLinks,bAddCoordAndDistTT);
+         uiModifyLinks($g(ID_MID2),
+                       {add_send_troops:bAddAttSendResLinks, add_coord_dist_tip:bAddCoordAndDistTT,
+                        add_center_map:isSomeOf(TB3O.pageSelector, "rally_point_club")});
       }
 
       uiModifyLinks($g("llist")); 
