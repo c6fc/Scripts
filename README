@@ -14,7 +14,7 @@ Oases that have a closer village (outside of the cluster radius) are appended wi
 travian2_beyond_-_sse.user.js
 ----
 For Farming Oases.
-This script affects attack report pages. Once you hover over the defending Oasis (the 'Unoccupied Oasis' link), the attack details header will be populated with the number of ClubSwingers to send (Hardcoded carrying capacity is 60, and movement speed is 7) to clear the Oasis.
+This script affects attack report pages. Once you hover over the defending Oasis (the 'Unoccupied Oasis' link), the attack details header will be populated with the number of ClubSwingers to send (default carrying capacity is 60, and movement speed is 7, search '$troopSpeed' to modify these options) to clear the Oasis.
 
 This number takes into account the following:
 1) When the Oasis was hit (based on the current attack report)
@@ -22,5 +22,10 @@ This number takes into account the following:
 3) The type of Oasis it is (based on previous attack returns) This does not work properly on initial clears (1600 Resources taken) or 50% croppers.
 4) If the previous clear was 100% efficiency.
 
-The script calculates how many resources will be in the Oasis when your troops arrive. If it was not fully cleared by the previous raid, the number will be colored Red, as the script adds 20% more troops in an attempt to fully clear the Oasis.
+The script calculates how many resources will be in the Oasis when your troops arrive. If it was not fully cleared by the previous raid, the number will be colored Red, as the script adds 20% more troops in an attempt to fully clear the Oasis. If this Oasis is closer to another, non-cluster village, it will strikethrough the text, and display the village that is closer.
 
+gold_club_oasis_marker.js (Added 7/6/2011)
+----
+For Farming Oases.
+This is a GreaseMonkey-compatible revision of 'script.js'. It took some hackery, but at least it's automated now.
+NOTE: This Script relies on the travian2_beyond_-_sse.user.js script, and must be run AFTER it.
