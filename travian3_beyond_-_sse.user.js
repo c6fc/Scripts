@@ -3693,6 +3693,8 @@ t['VGL'] = "Λίστα χωριών";
 t['UPDATEPOP'] = "Ενημέρωσε τον πληθυσμό";
 t['EDIT'] = "Επεξεργασία";
 
+
+
 t['NPCO'] = "Επιλογές του NPC βοηθού";
 t['NEWVILLAGEAV'] = "Ημερομηνία/Ώρα";
 t['TIMEUNTIL'] = "Χρόνος να περιμένεις";
@@ -4028,6 +4030,7 @@ t['NEVER'] = "Ei koskaan";
 t['ALDEAS'] = "Kylä(t)";
 t['TIEMPO'] = "Aika";
 t['OFREZCO'] = "Tarjonnut minulle";
+
 t['BUSCO'] = "Pyytänyt minulta";
 t['TIPO'] = "Suhde";
 t['DISPONIBLE'] = "Vain saatavilla olevat";
@@ -11956,6 +11959,7 @@ function $div(att, content)
    return $e("div", att, content);
 }
 
+
 //////////////////////////////////////////////////////////////////////
 function $span(att, content)
 {
@@ -13846,9 +13850,50 @@ function getDistance(x1, y1, x2, y2)
    return floatedDis;
 }
 
+function getTSEffectMultiplier(origin)
+{
+   for (nums in document.getElementsByTagName('div'))
+   {
+      cell = document.getElementsByTagName('div')[nums];
+      if (cell.className == 'cox')
+      {
+         xCo = document.getElementsByTagName('div')[nums].innerHTML.substring(1);
+         yCo = document.getElementsByTagName('div')[nums * 1 + 2].innerHTML.substring(0, document.getElementsByTagName('div')[nums * 1 + 2].innerHTML.length - 1);
+         vilRoot = document.getElementsByTagName('div')[nums - 1];
+         vil = vilRoot.innerHTML.substring(vilRoot.innerHTML.indexOf('>'), vilRoot.length)
+         vil = vil.substring(1, vil.indexOf('<'))
+
+         if (xCo == origin[0] && yCo == origin[1])
+         {
+            tsEffectMultiplier = (vil.indexOf('+') > 0) ? 1 + (vil.substring(vil.indexOf('+') + 1) * 0.1) : 1;
+
+            return tsEffectMultiplier
+         }
+      }
+   }
+
+   return false;
+}
+
+function getDistanceTSEffect(distance, tsEffect)
+{
+   if (distance <= 30)
+   {
+      return distance;
+   }
+
+   tsEffectedDistance = distance - 30;
+   tsEffectedDistance *= (1 / tsEffect);
+   tsEffectedDistance += 30;
+
+   return tsEffectedDistance;   
+}
+
 function existsCloserVillage(origin, dest, cluster)
 {
-   startingDistance = getDistance(origin[0], origin[1], dest[0], dest[1]);
+   originTSEffect = getTSEffectMultiplier(origin);
+   startingDistance = getDistanceTSEffect(getDistance(origin[0], origin[1], dest[0], dest[1]), originTSEffect);
+   alert(startingDistance);
 
    for (nums in document.getElementsByTagName('div'))
    {
@@ -13860,7 +13905,11 @@ function existsCloserVillage(origin, dest, cluster)
          vilRoot = document.getElementsByTagName('div')[nums - 1];
          vil = vilRoot.innerHTML.substring(vilRoot.innerHTML.indexOf('>'), vilRoot.length)
          vil = vil.substring(1, vil.indexOf('<'))
-         if (getDistance(xCo, yCo, dest[0], dest[1]) < (startingDistance - cluster))
+
+         tsEffect = getTSEffectMultiplier(Array(xCo, yCo));
+         distanceToTarget = getDistanceTSEffect(getDistance(xCo, yCo, dest[0], dest[1]), tsEffect);
+
+         if (distanceToTarget < (startingDistance - cluster))
          {
             info = Array(xCo, yCo, vil);
             return info;
@@ -13887,7 +13936,7 @@ function uiTooltip_Display(tooltip,bShow)
    if (document.location.toString().indexOf('berichte.php?') > 0 && document.getElementsByTagName('span')[10].innerHTML.indexOf('(') < 0)
    {
       // Configurable Options
-      $troopSpeed = 7;		// You must manually include the effect of the Tournament Square.
+      $troopSpeed = 7;		// Do NOT include the effects of the TS. Add the TS Level for each village as ' +X' after your village name.
       $troopCanCarry = 60;
       $clusterRadius = 2; 	// Set this option if you cluster. It will ignore villages within X tiles of the active village when determining the closest.
       // End Options - Do not modify below this line.
@@ -13902,7 +13951,8 @@ function uiTooltip_Display(tooltip,bShow)
       $calcMins = $calcDate.getMinutes() - $landedTime[1];
       $calcCoords = document.getElementById("tb_distTT").innerHTML.substring(document.getElementById("tb_distTT").innerHTML.indexOf("(") + 1, document.getElementById("tb_distTT").innerHTML.indexOf(")")).split("|")
       $startingCoords = document.title.toString().substring(document.title.toString().indexOf('(') + 1, document.title.toString().indexOf(')')).split('|');
-      $calcDist = getDistance($startingCoords[0], $startingCoords[1], $calcCoords[0], $calcCoords[1]);
+
+      $calcDist = getDistanceTSEffect(getDistance($startingCoords[0], $startingCoords[1], $calcCoords[0], $calcCoords[1]), getTSEffectMultiplier($startingCoords));
       $calcMins += ($calcDist / $troopSpeed * 60) + ($calcHours * 60)
 
       $closestVillage = existsCloserVillage($startingCoords, $calcCoords, $clusterRadius);
@@ -17362,6 +17412,7 @@ function getTroopMovements(aDoc)
             {
                imgType = aImg[0].className;
                if (imgType === '') 
+
                {
                   imgType = aImg[0].src.substring(aImg.src.lastIndexOf("/") + 1);
                }
@@ -20169,6 +20220,7 @@ function showUserBookmarks()
          if (!ubLabel) ubLabel = tmpUb[0];
          if (!ubURL) ubURL = tmpUb[1];
          if (ubLabel != '' && ubURL != '' && (ubLabel != tmpUb[0] || ubURL != tmpUb[1]))
+
          {
             arrUbC[i] = ubLabel + "$" + ubURL;
             ubC = arrUbC.join("$$");
@@ -26015,6 +26067,7 @@ function uiModifyVillagesList()
       }
 
       // show res prod/h
+
       if ( TB3O.O[15] === "1" )
       {
          for ( xi = 1; xi < 4; xi++ )
@@ -27089,6 +27142,7 @@ function doPage()
 
        }, false);
    */
+
 
    
 })();

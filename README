@@ -1,6 +1,6 @@
 This is a stash for some Travian scripts I have either written or modified:
 
-script.js
+script.js (depricated)
 ----
 For Farming Oases.
 Use this script on the Gold Club raid tracker page. It's intended to be run from the FireBug console (not added as a script!), and it will mark all Occupied Oases that meet the following criteria:
@@ -15,6 +15,7 @@ travian2_beyond_-_sse.user.js
 ----
 For Farming Oases.
 This script affects attack report pages. Once you hover over the defending Oasis (the 'Unoccupied Oasis' link), the attack details header will be populated with the number of ClubSwingers to send (default carrying capacity is 60, and movement speed is 7, search '$troopSpeed' to modify these options) to clear the Oasis.
+(7/7/2011): Now includes the effect of the Tournament Square, as long as it's level is added to the Village name as ' +X'
 
 This number takes into account the following:
 1) When the Oasis was hit (based on the current attack report)
@@ -29,3 +30,4 @@ gold_club_oasis_marker.js (Added 7/6/2011)
 For Farming Oases.
 This is a GreaseMonkey-compatible revision of 'script.js'. It took some hackery, but at least it's automated now.
 NOTE: This Script relies on the travian2_beyond_-_sse.user.js script, and must be run AFTER it.
+(7/7/2011): Now includes the effect of the Tournament Square, as long as it's level is added to the Village name as ' +X'

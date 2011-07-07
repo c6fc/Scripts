@@ -16,9 +16,49 @@ function getDistance(x1, y1, x2, y2)
    return floatedDis;
 }
 
+function getTSEffectMultiplier(origin)
+{
+   for (nums in document.getElementsByTagName('div'))
+   {
+      cell = document.getElementsByTagName('div')[nums];
+      if (cell.className == 'cox')
+      {
+         xCo = document.getElementsByTagName('div')[nums].innerHTML.substring(1);
+         yCo = document.getElementsByTagName('div')[nums * 1 + 2].innerHTML.substring(0, document.getElementsByTagName('div')[nums * 1 + 2].innerHTML.length - 1);
+         vilRoot = document.getElementsByTagName('div')[nums - 1];
+         vil = vilRoot.innerHTML.substring(vilRoot.innerHTML.indexOf('>'), vilRoot.length)
+         vil = vil.substring(1, vil.indexOf('<'))
+
+         if (xCo == origin[0] && yCo == origin[1])
+         {
+            tsEffectMultiplier = (vil.indexOf('+') > 0) ? 1 + (vil.substring(vil.indexOf('+') + 1) * 0.1) : 1;
+
+            return tsEffectMultiplier
+         }
+      }
+   }
+
+   return false;
+}
+
+function getDistanceTSEffect(distance, tsEffect)
+{
+   if (distance <= 30)
+   {
+      return distance;
+   }
+
+   tsEffectedDistance = distance - 30;
+   tsEffectedDistance *= (1 / tsEffect);
+   tsEffectedDistance += 30;
+
+   return tsEffectedDistance;   
+}
+
 function existsCloserVillage(origin, dest, cluster)
 {
-   startingDistance = getDistance(origin[0], origin[1], dest[0], dest[1]);
+   originTSEffect = getTSEffectMultiplier(origin);
+   startingDistance = getDistanceTSEffect(getDistance(origin[0], origin[1], dest[0], dest[1]), originTSEffect);
 
    for (nums in document.getElementsByTagName('div'))
    {
@@ -30,7 +70,11 @@ function existsCloserVillage(origin, dest, cluster)
          vilRoot = document.getElementsByTagName('div')[nums - 1];
          vil = vilRoot.innerHTML.substring(vilRoot.innerHTML.indexOf('>'), vilRoot.length)
          vil = vil.substring(1, vil.indexOf('<'))
-         if (getDistance(xCo, yCo, dest[0], dest[1]) < (startingDistance - cluster))
+
+         tsEffect = getTSEffectMultiplier(Array(xCo, yCo));
+         distanceToTarget = getDistanceTSEffect(getDistance(xCo, yCo, dest[0], dest[1]), tsEffect);
+
+         if (distanceToTarget < (startingDistance - cluster))
          {
             info = Array(xCo, yCo, vil);
             return info;
