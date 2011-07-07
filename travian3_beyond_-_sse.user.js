@@ -3695,6 +3695,7 @@ t['EDIT'] = "Επεξεργασία";
 
 
 
+
 t['NPCO'] = "Επιλογές του NPC βοηθού";
 t['NEWVILLAGEAV'] = "Ημερομηνία/Ώρα";
 t['TIMEUNTIL'] = "Χρόνος να περιμένεις";
@@ -6739,6 +6740,7 @@ t['USETHEM1H'] = "Verdeel (1 uur productie)";
 t['OVERVIEW'] = "Overzicht";
 t['FORUM'] = "Forum";
 t['ATTACKS'] = "Aanvallen";
+
 t['NEWS'] = "Nieuws";
 t['ADDCRTPAGE'] = "Huidige pagina";
 t['SCRPURL'] = "TBeyond pagina";
@@ -13893,7 +13895,6 @@ function existsCloserVillage(origin, dest, cluster)
 {
    originTSEffect = getTSEffectMultiplier(origin);
    startingDistance = getDistanceTSEffect(getDistance(origin[0], origin[1], dest[0], dest[1]), originTSEffect);
-   alert(startingDistance);
 
    for (nums in document.getElementsByTagName('div'))
    {
@@ -15790,6 +15791,7 @@ function uiModifyBigIconsBar()
       {
          removeElement(aPlus);
       }
+
 
       if ( TB3O.O[4] === "1" )
       {
